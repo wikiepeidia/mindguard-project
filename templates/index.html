@@ -1,0 +1,76 @@
+
+{% extends "base.html" %}
+{% block content %}
+<div class="row align-items-center mb-4">
+  <div class="col-md-7">
+    <h1 class="display-5 fw-bold text-primary mb-3">MindGuard – Lá chắn nhận thức cho cộng đồng</h1>
+    <p class="lead">
+      Dự án cộng đồng giúp học sinh, sinh viên và người dân nhận diện lừa đảo, tránh bị thao túng tâm lý
+      thông qua chia sẻ kịch bản thực tế, bài test nhận thức chuyên nghiệp và chatbot tư vấn tức thời.
+    </p>
+    <ul class="list-unstyled mb-3 text-muted">
+      <li>🛡️ Cập nhật kịch bản lừa đảo thực tế từ người dân</li>
+      <li>🧠 Bộ bài test MindGuard 15 câu – phù hợp nhiều lứa tuổi</li>
+      <li>🤖 Chatbot MindGuard hỗ trợ 24/7 (mô phỏng AI/ML)</li>
+    </ul>
+    <div class="d-flex flex-wrap gap-2 mt-3">
+      <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg">Đăng ký thi MindGuard</a>
+      <a href="{{ url_for('report_scam') }}" class="btn btn-outline-primary btn-lg">Gửi kịch bản lừa đảo</a>
+    </div>
+  </div>
+  <div class="col-md-5 mt-4 mt-md-0">
+    <div class="card shadow-sm border-0 rounded-4 glass-card">
+      <div class="card-body">
+        <h5 class="card-title fw-bold mb-3">Nhịp đập cộng đồng</h5>
+        <p class="mb-1">Kịch bản lừa đảo được cộng đồng gửi lên: <strong>{{ stats.scam_count }}</strong></p>
+        <p class="mb-1">Số người đã đăng ký MindGuard: <strong>{{ stats.registration_count }}</strong></p>
+        <hr>
+        <p class="small mb-1">
+          🎯 Mục tiêu: Nâng cao miễn dịch nhận thức, giúp mỗi người trở thành <strong>“lá chắn MindGuard”</strong>
+          cho chính mình và người thân.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-md-4">
+    <div class="card h-100 shadow-sm border-0 rounded-4 feature-card">
+      <div class="card-body">
+        <div class="feature-icon mb-3">🛡️</div>
+        <h5 class="card-title fw-bold">Gửi kịch bản lừa đảo mới</h5>
+        <p class="card-text">
+          Người dân có thể ẩn danh gửi các tình huống lừa đảo đã gặp, giúp hệ thống AI/ML (giả lập) học và gợi ý biện pháp bảo vệ phù hợp.
+        </p>
+        <a href="{{ url_for('report_scam') }}" class="card-link">Chia sẻ trải nghiệm →</a>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card h-100 shadow-sm border-0 rounded-4 feature-card">
+      <div class="card-body">
+        <div class="feature-icon mb-3">🧠</div>
+        <h5 class="card-title fw-bold">Bài test nhận thức MindGuard</h5>
+        <p class="card-text">
+          Bộ câu hỏi 15 câu giúp bạn kiểm tra mức độ cảnh giác với lừa đảo & thao túng tâm lý,
+          đi kèm chứng nhận online khi đạt yêu cầu.
+        </p>
+        <a href="{{ url_for('quiz') }}" class="card-link">Làm thử ngay →</a>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card h-100 shadow-sm border-0 rounded-4 feature-card">
+      <div class="card-body">
+        <div class="feature-icon mb-3">🤖</div>
+        <h5 class="card-title fw-bold">Chatbot MindGuard</h5>
+        <p class="card-text">
+          Chatbot tư vấn cơ bản 24/7 giúp người dân bình tĩnh phân tích tình huống, nhắc lại các nguyên tắc an toàn khi gặp nghi ngờ.
+        </p>
+        <a href="{{ url_for('chatbot_page') }}" class="card-link">Trò chuyện với bot →</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

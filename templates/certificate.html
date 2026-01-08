@@ -1,0 +1,28 @@
+
+{% extends "base.html" %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div class="card shadow-sm border-0 rounded-4 certificate-card">
+      <div class="card-body text-center">
+        <p class="text-uppercase small text-muted mb-1">MindGuard Community Project</p>
+        <h2 class="fw-bold mb-3">Chứng nhận Hoàn thành Bài Test Nhận Thức MindGuard</h2>
+        <p class="lead mb-1">Trao tặng cho</p>
+        <h3 class="fw-bold text-primary mb-3">{{ name }}</h3>
+        <p class="mb-2">
+          Đã hoàn thành bài trắc nghiệm nhận thức về phòng chống lừa đảo & thao túng tâm lý<br>
+          với kết quả <strong>{{ score }}/{{ max_score }}</strong> điểm.
+        </p>
+        <p class="small text-muted mb-3">
+          Chứng nhận này mang tính chất ghi nhận nỗ lực học tập, không phải văn bằng/học vị chính quy.
+        </p>
+        <div class="d-flex justify-content-between mt-4 mb-3 small">
+          <div>Ngày cấp: {{ issue_date }}</div>
+          <div>Mã chứng nhận: <strong>{{ code }}</strong></div>
+        </div>
+        <button class="btn btn-outline-primary btn-sm mt-2" onclick="window.print()">In / lưu PDF</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

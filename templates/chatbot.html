@@ -1,0 +1,36 @@
+
+{% extends "base.html" %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div class="card shadow-sm border-0 rounded-4 chatbot-page-card">
+      <div class="card-body d-flex flex-column" style="height: 520px;">
+        <h3 class="fw-bold mb-3">Chatbot MindGuard (toàn màn hình)</h3>
+        <div class="chat-window flex-grow-1 mb-3 border rounded-3 p-3 bg-light overflow-auto">
+          {% if history %}
+            {% for msg in history %}
+              <div class="mb-2">
+                <div class="fw-semibold small {% if msg.sender == 'MindGuard Bot' %}text-primary{% else %}text-secondary{% endif %}">
+                  {{ msg.sender }}
+                </div>
+                <div class="px-3 py-2 rounded-3 chat-bubble {% if msg.sender == 'MindGuard Bot' %}bg-white{% else %}bg-primary text-white{% endif %}">
+                  {{ msg.text | nl2br }}
+                </div>
+              </div>
+            {% endfor %}
+          {% else %}
+            <p class="text-muted small">Hãy bắt đầu bằng cách mô tả tình huống khiến bạn nghi ngờ là lừa đảo hoặc thao túng tâm lý.</p>
+          {% endif %}
+        </div>
+        <form method="post" class="d-flex gap-2">
+          <input type="text" class="form-control" name="message" placeholder="Nhập câu hỏi hoặc tình huống của bạn...">
+          <button type="submit" class="btn btn-primary">Gửi</button>
+        </form>
+        <p class="small text-muted mt-2 mb-0">
+          Lưu ý: Chatbot MindGuard chỉ đưa ra gợi ý tham khảo, không thay thế tư vấn pháp lý hoặc hỗ trợ khẩn cấp.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

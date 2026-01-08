@@ -1,0 +1,99 @@
+
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h3 class="fw-bold mb-0">Bảng điều khiển Admin MindGuard</h3>
+  <div>
+    <a href="{{ url_for('admin_logout') }}" class="btn btn-outline-light btn-sm">Đăng xuất</a>
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-md-4">
+    <div class="card shadow-sm border-0 rounded-4 stat-card">
+      <div class="card-body">
+        <div class="text-muted small mb-1">Kịch bản lừa đảo</div>
+        <div class="h3 fw-bold">{{ scam_count }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card shadow-sm border-0 rounded-4 stat-card">
+      <div class="card-body">
+        <div class="text-muted small mb-1">Người đăng ký MindGuard</div>
+        <div class="h3 fw-bold">{{ registration_count }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card shadow-sm border-0 rounded-4 stat-card">
+      <div class="card-body">
+        <div class="text-muted small mb-1">Bài test đã thực hiện</div>
+        <div class="h3 fw-bold">{{ quiz_count }}</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-4">
+    <div class="card shadow-sm border-0 rounded-4">
+      <div class="card-body">
+        <h5 class="fw-bold mb-3">Kịch bản mới nhất</h5>
+        <div class="small scam-list">
+          {% for scam in latest_scams %}
+            <div class="mb-2 pb-2 border-bottom">
+              <div class="fw-semibold">{{ scam.title }}</div>
+              <div class="text-muted">
+                {{ scam.created_at.strftime("%d/%m/%Y %H:%M") }} • {{ scam.category or "Nhóm?" }}
+              </div>
+            </div>
+          {% else %}
+            <p class="text-muted small mb-0">Chưa có dữ liệu.</p>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="card shadow-sm border-0 rounded-4">
+      <div class="card-body">
+        <h5 class="fw-bold mb-3">Đăng ký gần đây</h5>
+        <div class="small scam-list">
+          {% for reg in latest_regs %}
+            <div class="mb-2 pb-2 border-bottom">
+              <div class="fw-semibold">{{ reg.name }}</div>
+              <div class="text-muted">
+                {{ reg.email }} • {{ reg.age_group or "N/A" }} • {{ reg.city or "N/A" }}
+              </div>
+            </div>
+          {% else %}
+            <p class="text-muted small mb-0">Chưa có dữ liệu.</p>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="card shadow-sm border-0 rounded-4">
+      <div class="card-body">
+        <h5 class="fw-bold mb-3">Kết quả bài test gần đây</h5>
+        <div class="small scam-list">
+          {% for r in latest_results %}
+            <div class="mb-2 pb-2 border-bottom">
+              <div class="fw-semibold">
+                {{ r.name }} – {{ r.score }}/{{ r.max_score }}
+              </div>
+              <div class="text-muted">
+                {{ r.created_at.strftime("%d/%m/%Y %H:%M") }} • Cert: {{ r.certificate_code or "Chưa đạt" }}
+              </div>
+            </div>
+          {% else %}
+            <p class="text-muted small mb-0">Chưa có dữ liệu.</p>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

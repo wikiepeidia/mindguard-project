@@ -7,26 +7,67 @@
     <title>MindGuard - Bảo vệ khỏi lừa đảo & thao túng</title>
     <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
   </head>
   <body class="bg-gradient">
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
       <div class="container">
-        <a class="navbar-brand fw-bold" href="{{ url_for('index') }}">MindGuard</a>
+        <a class="navbar-brand fw-bold" href="{{ url_for('main.index') }}">MindGuard</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
           <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
-          <ul class="navbar-nav ms-auto">
-            <li class="nav-item"><a class="nav-link" href="{{ url_for('report_scam') }}">Báo cáo kịch bản</a></li>
-            <li class="nav-item"><a class="nav-link" href="{{ url_for('register') }}">Đăng ký & Thi MindGuard</a></li>
-            <li class="nav-item"><a class="nav-link" href="{{ url_for('quiz') }}">Bài test</a></li>
-            <li class="nav-item"><a class="nav-link" href="{{ url_for('chatbot_page') }}">Chatbot</a></li>
+          <ul class="navbar-nav ms-auto align-items-center gap-2">
             <li class="nav-item">
-              <a class="nav-link small {% if session.get('is_admin') %}text-warning{% endif %}" href="{{ url_for('admin_login') }}">
-                Admin
+              <a class="nav-link custom-nav-link" href="{{ url_for('scammer.report_scammer') }}">
+                <i class="fas fa-bullhorn me-1"></i> Tố cáo
               </a>
             </li>
+            <li class="nav-item">
+              <a class="nav-link custom-nav-link" href="{{ url_for('main.leaderboard') }}">
+                <i class="fas fa-trophy me-1"></i> Bảng Vàng
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link custom-nav-link" href="{{ url_for('chatbot.chatbot_page') }}">
+                <i class="fas fa-robot me-1"></i> Trợ lý ảo
+              </a>
+            </li>
+
+            {% if session.get('registration_name') %}
+              <li class="nav-item">
+                <a class="nav-link custom-nav-link text-warning fw-bold" href="{{ url_for('quiz.quiz') }}">
+                  <i class="fas fa-clipboard-check me-1"></i> Bài test
+                </a>
+              </li>
+              <li class="nav-item dropdown ms-2">
+                <a class="nav-link dropdown-toggle bg-white text-primary rounded-pill px-3 py-1 fw-bold shadow-sm" href="#" role="button" data-bs-toggle="dropdown">
+                  Xin chào, {{ session['registration_name'] }}
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end">
+                  <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}">Đăng xuất</a></li>
+                </ul>
+              </li>
+            {% else %}
+              <li class="nav-item ms-2"><a class="btn btn-outline-light rounded-pill px-4" href="{{ url_for('auth.register') }}">Đăng ký</a></li>
+            {% endif %}
+            
+            {% if session.get('is_admin') %}
+              <li class="nav-item dropdown ms-2">
+                <a class="nav-link dropdown-toggle d-flex align-items-center py-0" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                  <img src="https://ui-avatars.com/api/?name=Admin&background=0d6efd&color=fff&size=32" alt="Admin" class="rounded-circle me-1 border border-white shadow-sm" width="32" height="32">
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 animate__animated animate__fadeIn" aria-labelledby="navbarDropdown">
+                  <li><h6 class="dropdown-header">Xin chào, Admin!</h6></li>
+                  <li><a class="dropdown-item" href="{{ url_for('admin.admin_dashboard') }}"><i class="fas fa-src me-2"></i>Bảng điều khiển</a></li>
+                  <li><a class="dropdown-item text-muted" href="#"><i class="fas fa-cog me-2"></i>Cài đặt (Sắp ra mắt)</a></li>
+                  <li><hr class="dropdown-divider"></li>
+                  <li><a class="dropdown-item text-danger" href="{{ url_for('admin.admin_logout') }}"><i class="fas fa-sign-out-alt me-2"></i>Đăng xuất</a></li>
+                </ul>
+              </li>
+            {% endif %}
           </ul>
         </div>
       </div>
@@ -57,14 +98,14 @@
 
     <!-- Chatbot widget -->
     <div id="chatbot-widget" class="chatbot-widget">
-      <button class="chatbot-fab" id="chatbotToggle" type="button" aria-label="MindGuard Chatbot">
-        🤖
+      <button class="chatbot-fab" id="chatbotToggle" type="button" aria-label="Trợ Lý Tố Cáo">
+        <i class="fas fa-comment-dots"></i>
       </button>
       <div class="chatbot-panel shadow-lg" id="chatbotPanel">
         <div class="chatbot-header d-flex justify-content-between align-items-center">
           <div>
-            <div class="fw-semibold">MindGuard Chatbot</div>
-            <div class="small text-muted">Hỏi nhanh về lừa đảo & thao túng</div>
+            <div class="fw-semibold"><i class="fas fa-robot me-1"></i> Trợ Lý Tố Cáo</div>
+            <div class="small text-white-50">Hỗ trợ trực tuyến 24/7</div>
           </div>
           <button type="button" class="btn-close btn-close-white" id="chatbotClose" aria-label="Đóng"></button>
         </div>
@@ -84,6 +125,8 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/chatbot_widget.js') }}"></script>
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block scripts %}{% endblock %}
   </body>
 </html>

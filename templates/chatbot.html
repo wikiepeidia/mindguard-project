@@ -19,7 +19,28 @@
               </div>
             {% endfor %}
           {% else %}
-            <p class="text-muted small">Hãy bắt đầu bằng cách mô tả tình huống khiến bạn nghi ngờ là lừa đảo hoặc thao túng tâm lý.</p>
+            <div class="text-center py-4">
+              <i class="fas fa-robot fa-3x text-primary mb-3"></i>
+              <h5 class="fw-bold text-dark">MindGuard Assistant</h5>
+              <p class="text-muted small mb-4">Chọn một chủ đề để bắt đầu ngay:</p>
+              
+              <div class="d-grid gap-2 col-lg-8 mx-auto">
+                <form method="post" style="display: contents;">
+                  <button name="message" value="Cách nhận biết lừa đảo tuyển dụng?" class="btn btn-outline-primary text-start p-3 rounded-3 shadow-sm hover-lift">
+                    <i class="fas fa-briefcase me-2"></i> Cách nhận biết lừa đảo tuyển dụng?
+                  </button>
+                  <button name="message" value="Kiểm tra độ tin cậy của website/SMS" class="btn btn-outline-success text-start p-3 rounded-3 shadow-sm hover-lift">
+                    <i class="fas fa-search-dollar me-2"></i> Kiểm tra tin nhắn/link lạ
+                  </button>
+                  <button name="message" value="Tôi đã bị lừa tiền, phải làm sao?" class="btn btn-outline-danger text-start p-3 rounded-3 shadow-sm hover-lift">
+                    <i class="fas fa-exclamation-triangle me-2"></i> Khẩn cấp: Tôi vừa bị lừa tiền!
+                  </button>
+                  <button name="message" value="Báo cáo số điện thoại lừa đảo" class="btn btn-outline-secondary text-start p-3 rounded-3 shadow-sm hover-lift">
+                    <i class="fas fa-phone-slash me-2"></i> Báo cáo số điện thoại spam
+                  </button>
+                </form>
+              </div>
+            </div>
           {% endif %}
         </div>
         <form method="post" class="d-flex gap-2">

@@ -14,8 +14,8 @@
       <li>🤖 Chatbot MindGuard hỗ trợ 24/7 (mô phỏng AI/ML)</li>
     </ul>
     <div class="d-flex flex-wrap gap-2 mt-3">
-      <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg">Đăng ký thi MindGuard</a>
-      <a href="{{ url_for('report_scam') }}" class="btn btn-outline-primary btn-lg">Gửi kịch bản lừa đảo</a>
+      <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg">Đăng ký thi MindGuard</a>
+      <a href="{{ url_for('scammer.report_scam') }}" class="btn btn-outline-primary btn-lg">Gửi kịch bản lừa đảo</a>
     </div>
   </div>
   <div class="col-md-5 mt-4 mt-md-0">
@@ -43,7 +43,7 @@
         <p class="card-text">
           Người dân có thể ẩn danh gửi các tình huống lừa đảo đã gặp, giúp hệ thống AI/ML (giả lập) học và gợi ý biện pháp bảo vệ phù hợp.
         </p>
-        <a href="{{ url_for('report_scam') }}" class="card-link">Chia sẻ trải nghiệm →</a>
+        <a href="{{ url_for('scammer.report_scam') }}" class="card-link">Chia sẻ trải nghiệm →</a>
       </div>
     </div>
   </div>
@@ -56,7 +56,7 @@
           Bộ câu hỏi 15 câu giúp bạn kiểm tra mức độ cảnh giác với lừa đảo & thao túng tâm lý,
           đi kèm chứng nhận online khi đạt yêu cầu.
         </p>
-        <a href="{{ url_for('quiz') }}" class="card-link">Làm thử ngay →</a>
+        <a href="{{ url_for('quiz.quiz') }}" class="card-link">Làm thử ngay →</a>
       </div>
     </div>
   </div>
@@ -68,7 +68,7 @@
         <p class="card-text">
           Chatbot tư vấn cơ bản 24/7 giúp người dân bình tĩnh phân tích tình huống, nhắc lại các nguyên tắc an toàn khi gặp nghi ngờ.
         </p>
-        <a href="{{ url_for('chatbot_page') }}" class="card-link">Trò chuyện với bot →</a>
+        <a href="{{ url_for('chatbot.chatbot_page') }}" class="card-link">Trò chuyện với bot →</a>
       </div>
     </div>
   </div>

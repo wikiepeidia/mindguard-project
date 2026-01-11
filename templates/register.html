@@ -4,40 +4,79 @@
 <div class="row justify-content-center">
   <div class="col-lg-7">
     <div class="card shadow-sm border-0 rounded-4 glass-card">
-      <div class="card-body">
-        <h3 class="fw-bold mb-3">Đăng ký tham gia bài test MindGuard</h3>
-        <p class="text-muted small mb-3">
-          Vui lòng sử dụng Gmail cá nhân để nhận thông tin về bài test, cập nhật tài liệu và các hoạt động cộng đồng MindGuard.
-        </p>
-        <form method="post">
-          <div class="mb-3">
-            <label class="form-label">Họ và tên *</label>
-            <input type="text" class="form-control" name="name" placeholder="Nguyễn Văn A">
+      <div class="card-body p-5">
+        <ul class="nav nav-pills mb-4 justify-content-center" id="pills-tab" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button class="nav-link active px-4" id="pills-register-tab" data-bs-toggle="pill" data-bs-target="#pills-register" type="button" role="tab" aria-selected="true">Đăng ký mới</button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link px-4" id="pills-login-tab" data-bs-toggle="pill" data-bs-target="#pills-login" type="button" role="tab" aria-selected="false">Đăng nhập</button>
+          </li>
+        </ul>
+
+        <div class="tab-content" id="pills-tabContent">
+          <!-- Register Form -->
+          <div class="tab-pane fade show active" id="pills-register" role="tabpanel">
+            <h3 class="fw-bold mb-3 text-center">Đăng ký tham gia bài test</h3>
+            <p class="text-muted small mb-4 text-center">
+              Vui lòng sử dụng Gmail cá nhân để lưu kết quả và nhận chứng chỉ MindGuard.
+            </p>
+            <form method="post">
+              <div class="mb-3">
+                <label class="form-label">Họ và tên *</label>
+                <input type="text" class="form-control" name="name" placeholder="Nguyễn Văn A" required>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Gmail cá nhân *</label>
+                <input type="email" class="form-control" name="email" placeholder="tenban@gmail.com" required>
+              </div>
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Nhóm tuổi</label>
+                  <select class="form-select" name="age_group">
+                    <option value="">-- Chọn --</option>
+                    <option>Dưới 18</option>
+                    <option>18 - 24</option>
+                    <option>25 - 35</option>
+                    <option>Trên 35</option>
+                  </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Tỉnh/Thành phố</label>
+                  <input type="text" class="form-control" name="city" placeholder="Ví dụ: Hải Phòng">
+                </div>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Nghề nghiệp / Vai trò</label>
+                <input type="text" class="form-control" name="occupation" placeholder="Học sinh, Sinh viên, ...">
+              </div>
+              <button type="submit" class="btn btn-primary w-100 py-2 fw-bold">Đăng ký & Vào làm bài test</button>
+            </form>
           </div>
-          <div class="mb-3">
-            <label class="form-label">Gmail cá nhân *</label>
-            <input type="email" class="form-control" name="email" placeholder="tenban@gmail.com">
+
+          <!-- Login Form -->
+          <div class="tab-pane fade" id="pills-login" role="tabpanel">
+            <h3 class="fw-bold mb-3 text-center">Đăng nhập</h3>
+            <p class="text-muted small mb-4 text-center">
+              Nhập email đã đăng ký để tiếp tục làm bài test hoặc xem lại kết quả.
+            </p>
+            <form method="post">
+              <div class="mb-4">
+                <label class="form-label">Gmail đã đăng ký *</label>
+                <input type="email" class="form-control" name="login_email" placeholder="tenban@gmail.com" required>
+              </div>
+              <button type="submit" class="btn btn-primary w-100 py-2 fw-bold">Tiếp tục</button>
+            </form>
+            
+            <hr class="my-4">
+            <div class="text-center">
+              <a href="{{ url_for('admin.admin_login') }}" class="text-decoration-none small text-muted">
+                <i class="fas fa-user-shield"></i> Đăng nhập Quản trị viên (Admin)
+              </a>
+            </div>
           </div>
-          <div class="mb-3">
-            <label class="form-label">Nhóm tuổi</label>
-            <select class="form-select" name="age_group">
-              <option value="">-- Chọn --</option>
-              <option>Dưới 18</option>
-              <option>18 - 24</option>
-              <option>25 - 35</option>
-              <option>Trên 35</option>
-            </select>
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Nghề nghiệp / Vai trò</label>
-            <input type="text" class="form-control" name="occupation" placeholder="Học sinh, Sinh viên, Giáo viên, Phụ huynh, ...">
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Tỉnh/Thành phố</label>
-            <input type="text" class="form-control" name="city" placeholder="Ví dụ: Hải Phòng">
-          </div>
-          <button type="submit" class="btn btn-primary">Đăng ký & Vào làm bài test</button>
-        </form>
+        </div>
+
       </div>
     </div>
   </div>

@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block title %}Bảng Truy Nã Scammer - MindGuard{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="text-center mb-5">
+        <h1 class="display-4"><i class="fas fa-trophy text-warning"></i> BẢNG VÀNG TRUY NÃ SCAMMER</h1>
+        <p class="lead">Top scammer được tố cáo nhiều nhất bởi cộng đồng</p>
+        <div class="alert alert-warning">
+            <strong>⚠️ Cảnh báo:</strong> Danh sách này chỉ mang tính chất tham khảo. Hãy luôn cảnh giác và xác minh thông tin.
+        </div>
+    </div>
+
+    {% if top_scammers %}
+    <div class="row">
+        {% for entry in top_scammers %}
+        <div class="col-md-12 mb-4">
+            <div class="card shadow-lg border-{{ 'danger' if entry.danger_level == 'critical' else 'warning' if entry.danger_level == 'high' else 'info' if entry.danger_level == 'medium' else 'secondary' }}">
+                <div class="card-header bg-{{ 'danger' if entry.danger_level == 'critical' else 'warning' if entry.danger_level == 'high' else 'info' if entry.danger_level == 'medium' else 'secondary' }} text-white">
+                    <div class="row align-items-center">
+                        <div class="col-md-1 text-center">
+                            {% if loop.index == 1 %}
+                                <h1 class="mb-0"><i class="fas fa-trophy text-warning"></i></h1>
+                            {% elif loop.index == 2 %}
+                                <h2 class="mb-0"><i class="fas fa-medal text-light"></i></h2>
+                            {% elif loop.index == 3 %}
+                                <h2 class="mb-0"><i class="fas fa-award text-warning"></i></h2>
+                            {% else %}
+                                <h3 class="mb-0">#{{ loop.index }}</h3>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-8">
+                            <h4 class="mb-0">
+                                <i class="fas fa-exclamation-triangle"></i> {{ entry.scammer.scam_type }}
+                            </h4>
+                            {% if entry.scammer.scammer_name %}
+                            <small>Biệt danh: {{ entry.scammer.scammer_name }}</small>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-3 text-end">
+                            <h3 class="mb-0">
+                                <span class="badge bg-light text-dark">
+                                    {{ entry.total_reports }} tố cáo
+                                </span>
+                            </h3>
+                            <small>
+                                <span class="badge bg-{{ 'danger' if entry.danger_level == 'critical' else 'warning' if entry.danger_level == 'high' else 'info' if entry.danger_level == 'medium' else 'secondary' }}">
+                                    {{ 'CỰC KỲ NGUY HIỂM' if entry.danger_level == 'critical' else 'NGUY HIỂM CAO' if entry.danger_level == 'high' else 'CẢNH GIÁC' if entry.danger_level == 'medium' else 'MỚI PHÁ HIỆN' }}
+                                </span>
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong><i class="fas fa-mobile-alt"></i> Kênh:</strong> {{ entry.scammer.platform or 'Không rõ' }}</p>
+                            <p><strong><i class="fas fa-calendar"></i> Lần tố cáo gần nhất:</strong> {{ entry.last_reported.strftime('%d/%m/%Y') }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong><i class="fas fa-chart-line"></i> Mức độ nguy hiểm:</strong> 
+                                {% if entry.danger_level == 'critical' %}
+                                    <span class="text-danger">★★★★★ (Cực kỳ nguy hiểm)</span>
+                                {% elif entry.danger_level == 'high' %}
+                                    <span class="text-warning">★★★★☆ (Nguy hiểm cao)</span>
+                                {% elif entry.danger_level == 'medium' %}
+                                    <span class="text-info">★★★☆☆ (Cần cảnh giác)</span>
+                                {% else %}
+                                    <span class="text-secondary">★★☆☆☆ (Mới phát hiện)</span>
+                                {% endif %}
+                            </p>
+                            <p><strong><i class="fas fa-users"></i> Số người bị hại:</strong> {{ entry.total_reports }} người</p>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-light">
+                        <strong><i class="fas fa-info-circle"></i> Mô tả:</strong><br>
+                        {{ entry.scammer.description[:200] }}{% if entry.scammer.description|length > 200 %}...{% endif %}
+                    </div>
+
+                    <div class="progress" style="height: 25px;">
+                        {% set progress = (entry.total_reports / 50 * 100)|int %}
+                        {% set progress = 100 if progress > 100 else progress %}
+                        <div class="progress-bar bg-{{ 'danger' if entry.danger_level == 'critical' else 'warning' if entry.danger_level == 'high' else 'info' if entry.danger_level == 'medium' else 'secondary' }}" 
+                             role="progressbar" style="width: {{ progress }}%">
+                            Nguy hiểm: {{ progress }}%
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-info text-center">
+        <h4>Chưa có scammer nào được tố cáo</h4>
+        <p>Hãy là người đầu tiên bảo vệ cộng đồng!</p>
+        <a href="{{ url_for('scammer.report_scammer') }}" class="btn btn-danger">
+            <i class="fas fa-exclamation-triangle"></i> Tố Cáo Ngay
+        </a>
+    </div>
+    {% endif %}
+
+    <div class="text-center mt-5 mb-4">
+        <a href="{{ url_for('scammer.report_scammer') }}" class="btn btn-danger btn-lg">
+            <i class="fas fa-plus-circle"></i> Thêm Tố Cáo Mới
+        </a>
+        <a href="{{ url_for('main.index') }}" class="btn btn-secondary btn-lg">
+            <i class="fas fa-home"></i> Trang Chủ
+        </a>
+    </div>
+
+    <!-- Statistics -->
+    <div class="row mt-5">
+        <div class="col-md-4">
+            <div class="card text-center shadow">
+                <div class="card-body">
+                    <h2 class="text-danger">{{ top_scammers|length }}</h2>
+                    <p>Scammer trong bảng vàng</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center shadow">
+                <div class="card-body">
+                    <h2 class="text-warning">{{ top_scammers|sum(attribute='total_reports') }}</h2>
+                    <p>Tổng tố cáo</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center shadow">
+                <div class="card-body">
+                    <h2 class="text-success">{{ (top_scammers|selectattr('danger_level', 'equalto', 'critical')|list|length) }}</h2>
+                    <p>Scammer cực kỳ nguy hiểm</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

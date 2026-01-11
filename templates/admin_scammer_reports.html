@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}Admin - Quản Lý Tố Cáo Scammer{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <h2><i class="fas fa-user-shield"></i> Quản Lý Tố Cáo Scammer</h2>
+    
+    <div class="mb-3">
+        <a href="{{ url_for('admin.scammer_reports', status='all') }}" class="btn btn-outline-primary {{ 'active' if status_filter == 'all' else '' }}">
+            Tất cả
+        </a>
+        <a href="{{ url_for('admin.scammer_reports', status='pending') }}" class="btn btn-outline-warning {{ 'active' if status_filter == 'pending' else '' }}">
+            Chờ duyệt
+        </a>
+        <a href="{{ url_for('admin.scammer_reports', status='approved') }}" class="btn btn-outline-success {{ 'active' if status_filter == 'approved' else '' }}">
+            Đã duyệt
+        </a>
+        <a href="{{ url_for('admin.scammer_reports', status='rejected') }}" class="btn btn-outline-danger {{ 'active' if status_filter == 'rejected' else '' }}">
+            Đã từ chối
+        </a>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Loại lừa đảo</th>
+                    <th>Kênh</th>
+                    <th>Số tố cáo</th>
+                    <th>Trạng thái</th>
+                    <th>Ngày tạo</th>
+                    <th>Hành động</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for report in reports %}
+                <tr>
+                    <td>{{ report.id }}</td>
+                    <td>{{ report.scam_type }}</td>
+                    <td>{{ report.platform }}</td>
+                    <td><span class="badge bg-info">{{ report.report_count }}</span></td>
+                    <td>
+                        {% if report.status == 'approved' %}
+                            <span class="badge bg-success">Đã duyệt</span>
+                        {% elif report.status == 'pending' %}
+                            <span class="badge bg-warning">Chờ duyệt</span>
+                        {% else %}
+                            <span class="badge bg-danger">Đã từ chối</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ report.created_at.strftime('%d/%m/%Y %H:%M') }}</td>
+                    <td>
+                        {% if report.status == 'pending' %}
+                            <form method="POST" action="{{ url_for('admin.approve_report', report_id=report.id) }}" style="display:inline;">
+                                <button type="submit" class="btn btn-sm btn-success">Duyệt</button>
+                            </form>
+                            <form method="POST" action="{{ url_for('admin.reject_report', report_id=report.id) }}" style="display:inline;">
+                                <button type="submit" class="btn btn-sm btn-danger">Từ chối</button>
+                            </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

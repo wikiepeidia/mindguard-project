@@ -9,7 +9,9 @@ main_bp = Blueprint('main', __name__)
 @main_bp.route("/")
 def index():
     """Homepage with stats."""
-    scam_count = ScamReport.query.count()
+    # Combine old reports and new reports for total count
+    scam_count = ScamReport.query.count() + ScammerReport.query.count()
+    
     registration_count = Registration.query.count()
     scammer_reports_count = ScammerReport.query.filter_by(status='approved').count()
     

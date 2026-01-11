@@ -35,11 +35,6 @@ def nl2br_filter(s):
         return Markup(str(escape(s)).replace('\n', '<br>'))
     return ""
 
-
-# Initialize Flask app
-app = Flask(__name__)
-app.config.from_object(Config)
-
 # Initialize database
 db.init_app(app)
 

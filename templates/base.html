@@ -10,6 +10,7 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block head_css %}{% endblock %}
   </head>
   <body class="bg-gradient">
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
@@ -21,24 +22,24 @@
         <div class="collapse navbar-collapse" id="navbarNav">
           <ul class="navbar-nav ms-auto align-items-center gap-2">
             <li class="nav-item">
-              <a class="nav-link custom-nav-link" href="{{ url_for('scammer.report_scammer') }}">
+              <a class="nav-link custom-nav-link {{ 'active' if request.endpoint == 'scammer.report_scammer' }}" href="{{ url_for('scammer.report_scammer') }}">
                 <i class="fas fa-bullhorn me-1"></i> Tố cáo
               </a>
             </li>
             <li class="nav-item">
-              <a class="nav-link custom-nav-link" href="{{ url_for('main.leaderboard') }}">
+              <a class="nav-link custom-nav-link {{ 'active' if request.endpoint == 'main.leaderboard' }}" href="{{ url_for('main.leaderboard') }}">
                 <i class="fas fa-trophy me-1"></i> Bảng Vàng
               </a>
             </li>
             <li class="nav-item">
-              <a class="nav-link custom-nav-link" href="{{ url_for('chatbot.chatbot_page') }}">
+              <a class="nav-link custom-nav-link {{ 'active' if request.endpoint == 'chatbot.chatbot_page' }}" href="{{ url_for('chatbot.chatbot_page') }}">
                 <i class="fas fa-robot me-1"></i> Trợ lý ảo
               </a>
             </li>
 
             {% if session.get('registration_name') %}
               <li class="nav-item">
-                <a class="nav-link custom-nav-link text-warning fw-bold" href="{{ url_for('quiz.quiz') }}">
+                <a class="nav-link custom-nav-link text-warning fw-bold {{ 'active' if request.endpoint == 'quiz.quiz' }}" href="{{ url_for('quiz.quiz') }}">
                   <i class="fas fa-clipboard-check me-1"></i> Bài test
                 </a>
               </li>
@@ -73,6 +74,7 @@
       </div>
     </nav>
 
+    {% block main_wrapper %}
     <main class="py-4">
       <div class="container">
         {% with messages = get_flashed_messages(with_categories=true) %}
@@ -89,6 +91,7 @@
         {% block content %}{% endblock %}
       </div>
     </main>
+    {% endblock %}
 
     <footer class="bg-white border-top py-3 mt-4">
       <div class="container text-center small text-muted">

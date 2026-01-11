@@ -127,41 +127,7 @@ def report_scammer():
     return render_template("report_scammer.html", scammers=recent_scammers)
 
 
-@scammer_bp.route("/old-report", methods=["GET", "POST"])
+@scammer_bp.route("/old-report")
 def report_scam():
-    """Old scam scenario reporting (keep for compatibility)."""
-    if request.method == "POST":
-        title = request.form.get("title")
-        category = request.form.get("category")
-        channel = request.form.get("channel")
-        description = request.form.get("description")
-        protection_tip = request.form.get("protection_tip")
-        consent = request.form.get("consent") == "on"
-
-        if not title or not description or not consent:
-            flash(
-                "Vui lòng điền đầy đủ thông tin bắt buộc và xác nhận chia sẻ kịch bản.",
-                "danger",
-            )
-            return redirect(url_for("scammer.report_scam"))
-
-        report = ScamReport(
-            title=title,
-            category=category,
-            channel=channel,
-            description=description,
-            protection_tip=protection_tip,
-        )
-        db.session.add(report)
-        db.session.commit()
-
-        flash(
-            "Cảm ơn bạn! Kịch bản lừa đảo của bạn đã được gửi cho MindGuard.",
-            "success",
-        )
-        return redirect(url_for("scammer.report_scam"))
-
-    recent_scams = (
-        ScamReport.query.order_by(ScamReport.created_at.desc()).limit(5).all()
-    )
-    return render_template("report_scam.html", scams=recent_scams)
+    """Redirect old report route to new report route."""
+    return redirect(url_for("scammer.report_scammer"))

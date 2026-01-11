@@ -25,6 +25,7 @@ class Registration(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(150), nullable=False)
     email = db.Column(db.String(150), nullable=False)
+    password_hash = db.Column(db.String(256))  # Added password hash
     age_group = db.Column(db.String(50))
     occupation = db.Column(db.String(100))
     city = db.Column(db.String(100))

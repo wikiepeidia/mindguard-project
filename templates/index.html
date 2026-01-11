@@ -15,7 +15,7 @@
     </ul>
     <div class="d-flex flex-wrap gap-2 mt-3">
       <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg">Đăng ký thi MindGuard</a>
-      <a href="{{ url_for('scammer.report_scam') }}" class="btn btn-outline-primary btn-lg">Gửi kịch bản lừa đảo</a>
+      <a href="{{ url_for('scammer.report_scammer') }}" class="btn btn-outline-primary btn-lg">Gửi tố cáo lừa đảo</a>
     </div>
   </div>
   <div class="col-md-5 mt-4 mt-md-0">
@@ -43,7 +43,7 @@
         <p class="card-text">
           Người dân có thể ẩn danh gửi các tình huống lừa đảo đã gặp, giúp hệ thống AI/ML (giả lập) học và gợi ý biện pháp bảo vệ phù hợp.
         </p>
-        <a href="{{ url_for('scammer.report_scam') }}" class="card-link">Chia sẻ trải nghiệm →</a>
+        <a href="{{ url_for('scammer.report_scammer') }}" class="card-link">Chia sẻ trải nghiệm →</a>
       </div>
     </div>
   </div>

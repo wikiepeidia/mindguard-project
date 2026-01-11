@@ -6,8 +6,16 @@ import secrets
 class Config:
     """Base configuration."""
     
+    # Define the base directory of the application
+    BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+    
     SECRET_KEY = os.environ.get("SECRET_KEY") or secrets.token_hex(32)
-    SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URI", "sqlite:///mindguard.db")
+    
+    # Configure SQLite database to be located in the 'database' folder
+    # We use an absolute path to ensure it works correctly regardless of where the app is run from
+    DB_PATH = os.path.join(BASE_DIR, 'database', 'mindguard_v2.db')
+    SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URI", f"sqlite:///{DB_PATH}")
+    
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
     # Admin credentials

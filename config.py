@@ -1,5 +1,19 @@
 """Configuration settings for MindGuard Flask application."""
 import os
+import json
+
+def load_local_env(filename):
+    """Utility to load keys from .env/filename.json"""
+    try:
+        path = os.path.join(os.path.dirname(__file__), '.env', filename)
+        if os.path.exists(path):
+            with open(path, 'r') as f:
+                return json.load(f)
+    except:
+        return {}
+    return {}
+
+cf_config = load_local_env('cloudflare.json')
 
 class Config:
     BASE_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -19,6 +33,10 @@ class Config:
         "meta-llama/llama-3.3-70b-instruct:free",
     ]
     
+    # Cloudflare Turnstile
+    CLOUDFLARE_SITE_KEY = os.environ.get("CLOUDFLARE_SITE_KEY") or cf_config.get("SITE_KEY")
+    CLOUDFLARE_SECRET_KEY = os.environ.get("CLOUDFLARE_SECRET_KEY") or cf_config.get("SECRET_KEY")
+
     # Cấu hình khác
     ADMIN_USERNAME = "admin"
     ADMIN_PASSWORD = "mindguard2025"

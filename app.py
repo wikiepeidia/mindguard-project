@@ -43,16 +43,29 @@ def admin_redirect():
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()
-        print("✅ Database tables checked/created.")
+        # print("✅ Database tables checked/created.") # Silenced for clean output
     
-    # In thông tin hệ thống ra màn hình Console
-    print("\n" + "="*50)
-    print("🚀 MINDGUARD SYSTEM IS RUNNING!")
-    print("="*50)
-    print("🏠 Trang chủ:  http://127.0.0.1:5000")
-    print("👮 Admin Panel: http://127.0.0.1:5000/admin")
-    print(f"   -> Tài khoản: {app.config['ADMIN_USERNAME']}@mindguard.com")
-    print(f"   -> Mật khẩu:  {app.config['ADMIN_PASSWORD']}")
-    print("="*50 + "\n")
+    # --- NGROK INTEGRATION ---
+    # CHỈ CHẠY Ở PROCESS GỐC (Tránh khởi động 2 lần khi reload)
+    import os
+    if os.environ.get("WERKZEUG_RUN_MAIN") != "true":
+        public_url_str = None
+        try:
+            from utils.ngrok_tunnel import start_ngrok
+            # start_ngrok now returns URL silently
+            public_url_str = start_ngrok(5000)
+        except ImportError:
+            pass 
+        except Exception:
+            pass 
+
+        # Minimal Output as requested - ONLY in main process
+        print("\n" + "="*50)
+        print("🚀 MINDGUARD STARTED")
+        print(f"🏠 Local: http://127.0.0.1:5000")
+        print(f"👮 Admin: http://127.0.0.1:5000/admin")
+        if public_url_str:
+            print(f"🌍 Public: {public_url_str}")
+        print("="*50 + "\n")
     
     app.run(debug=True)

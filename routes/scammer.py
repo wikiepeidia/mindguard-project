@@ -1,4 +1,4 @@
-import os, uuid
+import os, uuid, requests
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, current_app
 from werkzeug.utils import secure_filename
 from models import db, ScammerReport, ScammerLeaderboard
@@ -12,7 +12,23 @@ scammer_bp = Blueprint('scammer', __name__, url_prefix='/scammer')
 @login_required
 def report_scammer():
     if request.method == "POST":
-        # 1. Validate
+        # 1. Validate CAPTCHA (Cloudflare Turnstile)
+        cf_token = request.form.get('cf-turnstile-response')
+        cf_secret = Config.CLOUDFLARE_SECRET_KEY
+        
+        if cf_secret:
+            try:
+                verify_url = "https://challenges.cloudflare.com/turnstile/v0/siteverify"
+                validate_res = requests.post(verify_url, data={'secret': cf_secret, 'response': cf_token}, timeout=5)
+                if not validate_res.json().get('success'):
+                    flash("Xác thực bảo mật thất bại. Vui lòng thử lại.", "danger")
+                    return redirect(url_for("scammer.report_scammer"))
+            except Exception as e:
+                print(f"CAPTCHA Error: {e}")
+                # Optional: Fail open or closed? Here failing open for dev convenience might be ok, but closed is safer.
+                pass 
+
+        # 2. Validate Terms
         term_truth = request.form.get("term_truth")
         term_responsibility = request.form.get("term_responsibility")
         if not term_truth or not term_responsibility:
@@ -114,4 +130,4 @@ def report_scammer():
         
         return redirect(url_for("scammer.report_scammer"))
     
-    return render_template("report_scammer.html")
+    return render_template("report_scammer.html", site_key=Config.CLOUDFLARE_SITE_KEY)

@@ -1,0 +1,24 @@
+# Auto-detect text files and perform LF normalization
+* text=auto
+
+# Python sources
+*.py text diff=python
+*.pyw text diff=python
+
+# HTML/Templates
+*.html text
+*.css text
+*.js text
+
+# Database - CRITICAL for SQLite
+# Treat these as binary so Git doesn't corrupt them or try to diff them
+*.db binary
+*.sqlite binary
+*.sqlite3 binary
+
+# Graphics
+*.png binary
+*.jpg binary
+
+# Windows-specific scripts (if you have any)
+*.bat text eol=crlf

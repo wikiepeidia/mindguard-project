@@ -15,8 +15,25 @@ def login():
         return redirect(url_for("main.index"))
 
     from models import QuizResult
+    from config import Config
+    import requests
     
     if request.method == "POST":
+        # 1. Validate CAPTCHA
+        cf_token = request.form.get('cf-turnstile-response')
+        cf_secret = Config.CLOUDFLARE_SECRET_KEY
+        
+        # Only validate if secret key is present (production-like env)
+        if cf_secret:
+            try:
+                verify_url = "https://challenges.cloudflare.com/turnstile/v0/siteverify"
+                validate_res = requests.post(verify_url, data={'secret': cf_secret, 'response': cf_token}, timeout=5)
+                if not validate_res.json().get('success'):
+                    flash("Xác thực bảo mật thất bại. Vui lòng thử lại.", "danger")
+                    return render_template("login.html", site_key=Config.CLOUDFLARE_SITE_KEY)
+            except Exception:
+                pass # Fail open if API fails
+
         email = request.form.get("login_email")
         password = request.form.get("login_password")
         
@@ -53,7 +70,8 @@ def login():
         else:
             flash("Email chưa được đăng ký.", "warning")
             
-    return render_template("login.html")
+    from config import Config
+    return render_template("login.html", site_key=Config.CLOUDFLARE_SITE_KEY)
 
 
 @auth_bp.route("/register", methods=["GET", "POST"])
@@ -62,13 +80,24 @@ def register():
     if session.get("registration_email"):
         return redirect(url_for("main.index"))
 
-    if request.method == "GET":
-        num1 = random.randint(1, 10)
-        num2 = random.randint(1, 10)
-        session['captcha_answer'] = num1 + num2
-        session['captcha_question'] = f"{num1} + {num2} = ?"
-    
+    from config import Config
+    import requests
+
     if request.method == "POST":
+        # 1. Validate CAPTCHA
+        cf_token = request.form.get('cf-turnstile-response')
+        cf_secret = Config.CLOUDFLARE_SECRET_KEY
+        
+        if cf_secret:
+            try:
+                verify_url = "https://challenges.cloudflare.com/turnstile/v0/siteverify"
+                validate_res = requests.post(verify_url, data={'secret': cf_secret, 'response': cf_token}, timeout=5)
+                if not validate_res.json().get('success'):
+                    flash("Xác thực bảo mật thất bại. Vui lòng thử lại.", "danger")
+                    return render_template("register.html", site_key=Config.CLOUDFLARE_SITE_KEY)
+            except Exception:
+                pass
+
         name = request.form.get("name")
         email = request.form.get("email")
         password = request.form.get("password")
@@ -88,13 +117,6 @@ def register():
             flash("Email này đã được đăng ký. Vui lòng đăng nhập.", "warning")
             return redirect(url_for("auth.register"))
 
-        captcha_input = request.form.get("captcha")
-        captcha_answer = session.get("captcha_answer")
-        
-        if not captcha_input or str(captcha_input) != str(captcha_answer):
-             flash("Kết quả phép tính xác thực không đúng. Vui lòng thử lại.", "danger")
-             return redirect(url_for("auth.register"))
-
         session['pending_registration'] = {
             'name': name,
             'email': email,
@@ -105,9 +127,9 @@ def register():
         }
         
         flash("Mã OTP đã được gửi đến email của bạn. (Demo: 123456)", "info")
-        return redirect(url_for("auth.verify_otp"))
+        return redirect(url_for('auth.verify_otp'))
 
-    return render_template("register.html")
+    return render_template("register.html", site_key=Config.CLOUDFLARE_SITE_KEY)
 
 
 @auth_bp.route("/verify-otp", methods=["GET", "POST"])

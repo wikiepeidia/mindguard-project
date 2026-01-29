@@ -1,0 +1,18 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_mindguard)">
+<rect width="512" height="512" rx="120" fill="none"/>
+
+<path d="M256 42C189.6 53.8 129.4 69.2 78 88.6C72.8 90.6 69.4 95.4 69.2 100.8C67.6 155.4 71 239.4 103.4 316.2C134.4 389.6 187.8 446.4 249 476.8C253.4 479 258.6 479 263 476.8C324.2 446.4 377.6 389.6 408.6 316.2C441 239.4 444.4 155.4 442.8 100.8C442.6 95.4 439.2 90.6 434 88.6C382.6 69.2 322.4 53.8 256 42Z" fill="#0A50A1"/>
+
+<path d="M256 140V200M256 200L190 240M256 200L322 240M190 240V320M322 240V320M190 320L256 360M322 320L256 360M256 360V420M150 180L190 240M362 180L322 240" stroke="#40C4FF" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="256" cy="200" r="16" fill="#FFFFFF"/>
+<circle cx="190" cy="240" r="16" fill="#FFFFFF"/>
+<circle cx="322" cy="240" r="16" fill="#FFFFFF"/>
+<circle cx="256" cy="360" r="16" fill="#FFFFFF"/>
+</g>
+<defs>
+<clipPath id="clip0_mindguard">
+<rect width="512" height="512" rx="120" fill="white"/>
+</clipPath>
+</defs>
+</svg>

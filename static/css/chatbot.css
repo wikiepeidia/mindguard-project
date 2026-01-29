@@ -1,0 +1,23 @@
+.hover-shadow:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
+  background-color: #f8f9fa;
+  border-color: #dee2e6;
+}
+.transition-all {
+  transition: all 0.2s ease-in-out;
+}
+/* Custom Scrollbar for Chat Window */
+.chat-window::-webkit-scrollbar {
+  width: 8px;
+}
+.chat-window::-webkit-scrollbar-track {
+  background: #f1f1f1; 
+}
+.chat-window::-webkit-scrollbar-thumb {
+  background: #ced4da; 
+  border-radius: 4px;
+}
+.chat-window::-webkit-scrollbar-thumb:hover {
+  background: #adb5bd; 
+}

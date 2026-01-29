@@ -1,0 +1,3 @@
+-thay mau background cho dep
+-mobile friendly with flutter.
+-UI need better.

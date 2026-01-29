@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    
+    <!-- HEADER & BỘ LỌC -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4" data-aos="fade-down">
+        <div class="mb-3 mb-md-0">
+            <h2 class="fw-bold text-white mb-0"><i class="fas fa-gavel me-2 text-warning"></i>Kiểm Duyệt Tố Cáo</h2>
+            <p class="text-muted small">Quyết định của bạn sẽ giúp làm sạch không gian mạng</p>
+        </div>
+        
+        <div class="btn-group shadow-sm">
+            <a href="{{ url_for('admin.scammer_reports', status='all') }}" class="btn btn-outline-secondary {{ 'active' if status_filter == 'all' else '' }}">Tất cả</a>
+            <a href="{{ url_for('admin.scammer_reports', status='pending') }}" class="btn btn-outline-warning fw-bold {{ 'active' if status_filter == 'pending' else '' }}">Chờ duyệt</a>
+            <a href="{{ url_for('admin.scammer_reports', status='approved') }}" class="btn btn-outline-success {{ 'active' if status_filter == 'approved' else '' }}">Đã duyệt</a>
+            <a href="{{ url_for('admin.scammer_reports', status='rejected') }}" class="btn btn-outline-danger {{ 'active' if status_filter == 'rejected' else '' }}">Đã từ chối</a>
+        </div>
+    </div>
+
+    {% if reports|length == 0 %}
+        <div class="glass-card text-center py-5">
+            <i class="fas fa-clipboard-check fa-4x text-muted mb-3 opacity-50"></i>
+            <h4 class="text-muted">Không có dữ liệu tố cáo nào.</h4>
+        </div>
+    {% else %}
+        <!-- TABLE LIST -->
+        <div class="glass-card p-0 overflow-hidden" data-aos="fade-up">
+            <div class="table-responsive">
+                <table class="table table-admin mb-0 align-middle w-100">
+                    <thead>
+                        <tr>
+                            <th class="ps-4">ID</th>
+                            <th>Đối tượng</th>
+                            <th>Chi tiết vi phạm</th>
+                            <th>Bằng chứng</th>
+                            <th>Trạng thái</th>
+                            <th class="text-end pe-4">Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for report in reports %}
+                        <tr>
+                            <td class="ps-4 text-muted">#{{ report.id }}</td>
+                            
+                            <!-- Cột Đối tượng -->
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="bg-dark bg-opacity-50 p-2 rounded me-3 text-center d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                        {% if report.report_type == 'bank' %}
+                                            <i class="fas fa-university text-success"></i>
+                                        {% elif report.report_type == 'website' %}
+                                            <i class="fas fa-globe text-info"></i>
+                                        {% else %}
+                                            <i class="fas fa-phone text-warning"></i>
+                                        {% endif %}
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold text-white">{{ report.scammer_info_raw }}</div>
+                                        <small class="text-muted">{{ report.scam_type }}</small>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <!-- Cột Chi tiết -->
+                            <td style="max-width: 250px;">
+                                <div class="text-truncate text-muted small" title="{{ report.description }}">
+                                    {{ report.description }}
+                                </div>
+                            </td>
+
+                            <!-- Cột Bằng chứng (CHỈ CÓ NÚT BẤM, KHÔNG CÓ MODAL Ở ĐÂY) -->
+                            <td>
+                                {% if report.evidence_list and report.evidence_list|length > 0 %}
+                                    <button class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#modalEvidence{{ report.id }}">
+                                        <i class="fas fa-images me-1"></i> {{ report.evidence_list|length }} ảnh
+                                    </button>
+                                {% else %}
+                                    <span class="text-muted small fst-italic">Không có ảnh</span>
+                                {% endif %}
+                            </td>
+
+                            <!-- Cột Trạng thái -->
+                            <td>
+                                {% if report.status == 'pending' %}
+                                    <span class="badge bg-warning text-dark">Chờ duyệt</span>
+                                {% elif report.status == 'approved' %}
+                                    <span class="badge bg-success">Đã duyệt</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Đã từ chối</span>
+                                {% endif %}
+                            </td>
+
+                            <!-- Cột Hành động -->
+                            <td class="text-end pe-4">
+                                {% if report.status == 'pending' %}
+                                    <div class="btn-group">
+                                        <form action="{{ url_for('admin.approve_report', report_id=report.id) }}" method="POST" class="d-inline">
+                                            <button type="submit" class="btn btn-sm btn-success" title="Duyệt"><i class="fas fa-check"></i></button>
+                                        </form>
+                                        <form action="{{ url_for('admin.reject_report', report_id=report.id) }}" method="POST" class="d-inline ms-1">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Từ chối" onclick="return confirm('Từ chối tố cáo này?');"><i class="fas fa-times"></i></button>
+                                        </form>
+                                    </div>
+                                {% else %}
+                                    <button class="btn btn-sm btn-secondary" disabled>Đã xử lý</button>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<!-- ============================================== -->
+<!-- KHU VỰC MODAL (ĐƯỢC ĐƯA RA NGOÀI BẢNG) -->
+<!-- ============================================== -->
+{% for report in reports %}
+    {% if report.evidence_list and report.evidence_list|length > 0 %}
+    <div class="modal fade" id="modalEvidence{{ report.id }}" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg"> <!-- modal-lg để ảnh to hơn -->
+            <div class="modal-content bg-dark border border-secondary shadow-lg">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title text-white">Bằng chứng Tố cáo #{{ report.id }}</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-0 bg-black">
+                    <!-- Carousel Xem Ảnh -->
+                    <div id="carousel{{ report.id }}" class="carousel slide" data-bs-ride="false">
+                        <div class="carousel-inner">
+                            {% for img_url in report.evidence_list %}
+                            <div class="carousel-item {{ 'active' if loop.first }}">
+                                <div class="d-flex justify-content-center align-items-center" style="height: 500px; background: #000;">
+                                    <img src="{{ img_url }}" class="img-fluid" style="max-height: 100%; max-width: 100%; object-fit: contain;" alt="Evidence">
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        
+                        {% if report.evidence_list|length > 1 %}
+                        <button class="carousel-control-prev" type="button" data-bs-target="#carousel{{ report.id }}" data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon bg-dark rounded-circle p-2" aria-hidden="true"></span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#carousel{{ report.id }}" data-bs-slide="next">
+                            <span class="carousel-control-next-icon bg-dark rounded-circle p-2" aria-hidden="true"></span>
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="modal-footer border-secondary justify-content-center py-2">
+                    <small class="text-muted">Nhấn vào mũi tên để xem các ảnh tiếp theo</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+{% endfor %}
+
+{% endblock %}

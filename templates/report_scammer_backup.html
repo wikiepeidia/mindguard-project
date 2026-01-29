@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+
+{% block title %}Tố Cáo Scammer - MindGuard{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-danger text-white">
+                    <h4><i class="fas fa-exclamation-triangle"></i> Tố Cáo Scammer</h4>
+                    <p class="mb-0"><small>🔒 Danh tính của bạn được mã hóa và bảo mật hoàn toàn</small></p>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <strong>📋 Hướng dẫn tố cáo:</strong>
+                        <ul class="mb-0">
+                            <li>Cung cấp thông tin về scammer (SĐT, tài khoản, v.v.)</li>
+                            <li>Mô tả chi tiết hành vi lừa đảo</li>
+                            <li>Đính kèm ít nhất 1 bằng chứng (ảnh, link, v.v.)</li>
+                            <li>Hệ thống sẽ tự động xét duyệt</li>
+                        </ul>
+                    </div>
+
+                    <form method="POST" action="{{ url_for('scammer.report_scammer') }}">
+                        <div class="mb-3">
+                            <label for="scammer_identifier" class="form-label"><strong>Thông tin Scammer *</strong></label>
+                            <input type="text" class="form-control" id="scammer_identifier" name="scammer_identifier" 
+                                   placeholder="Số điện thoại, tài khoản Facebook/Zalo, email..." required>
+                            <small class="text-muted">Thông tin này sẽ được mã hóa để bảo mật</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="scammer_name" class="form-label"><strong>Tên Scammer (nếu biết)</strong></label>
+                            <input type="text" class="form-control" id="scammer_name" name="scammer_name" 
+                                   placeholder="Tên hiển thị, biệt danh...">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="scam_type" class="form-label"><strong>Loại Lừa Đảo *</strong></label>
+                            <select class="form-select" id="scam_type" name="scam_type" required>
+                                <option value="">-- Chọn loại lừa đảo --</option>
+                                <option value="Giả mạo ngân hàng">Giả mạo ngân hàng</option>
+                                <option value="Đầu tư lợi nhuận cao">Đầu tư lợi nhuận cao</option>
+                                <option value="Đánh cắp tài khoản">Đánh cắp tài khoản (phishing)</option>
+                                <option value="Trúng thưởng giả">Trúng thưởng giả</option>
+                                <option value="Việc nhẹ lương cao">Việc nhẹ lương cao</option>
+                                <option value="Lừa đảo quen biết">Lừa đảo quen biết</option>
+                                <option value="Giả mạo cơ quan">Giả mạo cơ quan nhà nước</option>
+                                <option value="Khác">Khác</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="platform" class="form-label"><strong>Kênh Liên Lạc</strong></label>
+                            <select class="form-select" id="platform" name="platform">
+                                <option value="">-- Chọn kênh --</option>
+                                <option value="Facebook">Facebook</option>
+                                <option value="Zalo">Zalo</option>
+                                <option value="SMS">SMS</option>
+                                <option value="Cuộc gọi">Cuộc gọi</option>
+                                <option value="Telegram">Telegram</option>
+                                <option value="Email">Email</option>
+                                <option value="Website">Website</option>
+                                <option value="Khác">Khác</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="description" class="form-label"><strong>Mô Tả Chi Tiết *</strong></label>
+                            <textarea class="form-control" id="description" name="description" rows="5" 
+                                      placeholder="Mô tả chi tiết hành vi lừa đảo, thủ đoạn, thiệt hại..." required></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label"><strong>Bằng Chứng (Link Google Drive, Ảnh, Video...) *</strong></label>
+                            <div class="alert alert-light border small">
+                                <i class="fab fa-google-drive text-success"></i> <strong>Khuyên dùng:</strong> Hãy tải bằng chứng lên Google Drive và dán link chia sẻ vào đây để đảm bảo an toàn và dung lượng.
+                            </div>
+                            
+                            <div class="input-group mb-2">
+                                <span class="input-group-text"><i class="fas fa-link"></i></span>
+                                <input type="text" class="form-control" name="evidence_1" placeholder="Link bằng chứng 1 (Google Drive, v.v.)" required>
+                            </div>
+                            <div class="input-group mb-2">
+                                <span class="input-group-text">2️⃣</span>
+                                <input type="text" class="form-control" name="evidence_2" placeholder="Link bằng chứng 2 (tùy chọn)">
+                            </div>
+                            <div class="input-group mb-2">
+                                <span class="input-group-text">3️⃣</span>
+                                <input type="text" class="form-control" name="evidence_3" placeholder="Link bằng chứng 3 (tùy chọn)">
+                            </div>
+                            <div class="input-group mb-2">
+                                <span class="input-group-text">4️⃣</span>
+                                <input type="text" class="form-control" name="evidence_4" placeholder="Link bằng chứng 4 (tùy chọn)">
+                            </div>
+                            <div class="input-group">
+                                <span class="input-group-text">5️⃣</span>
+                                <input type="text" class="form-control" name="evidence_5" placeholder="Link bằng chứng 5 (tùy chọn)">
+                            </div>
+                        </div>
+
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="consent" name="consent" required>
+                            <label class="form-check-label" for="consent">
+                                Tôi xác nhận thông tin trên là chính xác và đồng ý chia sẻ với cộng đồng MindGuard
+                            </label>
+                        </div>
+
+                        <button type="submit" class="btn btn-danger btn-lg w-100">
+                            <i class="fas fa-paper-plane"></i> Gửi Tố Cáo
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header text-white" style="background: linear-gradient(135deg, #d97706, #f59e0b);">
+                    <h5 class="mb-0"><i class="fas fa-shield-alt"></i> Bảo Mật</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>🔒 Cam kết bảo mật:</strong></p>
+                    <ul>
+                        <li>Danh tính người tố cáo được mã hóa</li>
+                        <li>Không hiển thị thông tin cá nhân</li>
+                        <li>Scammer không thể biết ai đã tố cáo</li>
+                        <li>Chỉ admin có thể xem dữ liệu gốc</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h5><i class="fas fa-list"></i> Scammer Mới Tố Cáo</h5>
+                </div>
+                <div class="card-body" style="max-height: 400px; overflow-y: auto;">
+                    {% if scammers %}
+                        {% for scammer in scammers %}
+                        <div class="alert alert-danger mb-2">
+                            <strong>{{ scammer.scam_type }}</strong><br>
+                            <small>{{ scammer.platform }} | {{ scammer.report_count }} tố cáo</small><br>
+                            <small class="text-muted">{{ scammer.updated_at.strftime('%d/%m/%Y') }}</small>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted">Chưa có tố cáo nào</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Support Chat Modal -->
+<div class="modal fade" id="supportChatModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title"><i class="fas fa-robot"></i> Trợ Lý Tố Cáo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="supportChatBody" style="height: 400px; overflow-y: auto;">
+                <div class="alert alert-info">
+                    👋 Xin chào! Tôi là trợ lý ảo của MindGuard. Bạn có thể hỏi tôi về:<br>
+                    • Cách tố cáo scammer<br>
+                    • Bằng chứng cần thiết<br>
+                    • Chính sách bảo mật<br>
+                    • Quy trình duyệt tố cáo
+                </div>
+            </div>
+            <div class="modal-footer">
+                <input type="text" class="form-control" id="supportChatInput" placeholder="Nhập câu hỏi...">
+                <button class="btn btn-info" id="btnSendSupportChat">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/report.js') }}"></script>
+{% endblock %}

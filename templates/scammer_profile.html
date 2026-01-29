@@ -1,0 +1,310 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-5">
+    
+    <!-- Header -->
+    <div class="text-center mb-4" data-aos="fade-down">
+        <a href="{{ url_for('main.leaderboard') }}" class="btn btn-outline-secondary btn-sm mb-3">
+            <i class="fas fa-arrow-left me-2"></i> Quay lại
+        </a>
+        <span class="badge rounded-pill border border-danger text-danger px-3 py-2 mb-3 bg-danger bg-opacity-10">
+            <i class="fas fa-user-secret me-2"></i> HỒ SƠ ĐỐI TƯỢNG
+        </span>
+        <h1 class="display-6 fw-bold text-white mb-2">Chi tiết cảnh báo</h1>
+    </div>
+
+    <div class="row g-4">
+        
+        <!-- Left Column: Main Info -->
+        <div class="col-lg-8">
+            
+            <!-- Entity Card -->
+            <div class="glass-card p-4 mb-4" data-aos="fade-up">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <div class="bg-danger bg-opacity-20 rounded-circle d-flex align-items-center justify-content-center border border-danger border-opacity-25" style="width: 80px; height: 80px;">
+                            {% if scammer.report_type == 'bank' %}
+                                <i class="fas fa-university fa-2x text-danger"></i>
+                            {% elif scammer.report_type == 'website' %}
+                                <i class="fas fa-globe fa-2x text-danger"></i>
+                            {% else %}
+                                <i class="fas fa-phone-alt fa-2x text-danger"></i>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <h3 class="text-white fw-bold mb-0" id="identifierDisplay">{{ scammer.scammer_info_raw }}</h3>
+                            <button class="btn btn-sm btn-outline-info" onclick="toggleMask()" id="maskToggle">
+                                <i class="fas fa-eye"></i> Xem đầy đủ
+                            </button>
+                        </div>
+                        <p class="text-slate-400 mb-2">{{ scammer.scammer_name or 'Chưa rõ danh tính' }}</p>
+                        <div class="d-flex gap-2 flex-wrap">
+                            <span class="badge bg-danger bg-opacity-20 text-danger border border-danger">
+                                {{ scammer.report_count }} báo cáo
+                            </span>
+                            {% if verification_badge %}
+                            <span class="badge bg-{{ verification_badge.class }} bg-opacity-20 text-{{ verification_badge.class }} border border-{{ verification_badge.class }}">
+                                <i class="fas {{ verification_badge.icon }}"></i> {{ verification_badge.text }}
+                            </span>
+                            {% endif %}
+                            {% if scammer.confirmed_by_count > 0 %}
+                            <span class="badge bg-info bg-opacity-20 text-info border border-info">
+                                <i class="fas fa-users"></i> {{ scammer.confirmed_by_count }} người xác nhận
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Risk Score -->
+            <div class="glass-card p-4 mb-4" data-aos="fade-up" data-aos-delay="100">
+                <h5 class="text-white fw-bold mb-3">
+                    <i class="fas fa-chart-line me-2 text-warning"></i> Điểm rủi ro
+                </h5>
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <div class="position-relative d-inline-block">
+                            <div class="bg-{{ risk_info.color }} bg-opacity-20 rounded-circle d-flex align-items-center justify-content-center border border-{{ risk_info.color }} border-2" style="width: 100px; height: 100px;">
+                                <h2 class="text-{{ risk_info.color }} fw-bold mb-0">{{ scammer.risk_score or 0 }}</h2>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <h4 class="text-{{ risk_info.color }} fw-bold mb-2">
+                            <i class="fas {{ risk_info.icon }} me-2"></i> {{ risk_info.text }}
+                        </h4>
+                        <p class="text-slate-400 small mb-0">
+                            Điểm rủi ro được tính toán dựa trên số lượng báo cáo, số người xác nhận, 
+                            bằng chứng và thời gian hoạt động.
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- Progress bar -->
+                <div class="progress mt-3" style="height: 10px;">
+                    <div class="progress-bar bg-{{ risk_info.color }}" role="progressbar" 
+                         style="width: {{ scammer.risk_score or 0 }}%;" 
+                         aria-valuenow="{{ scammer.risk_score or 0 }}" 
+                         aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+            </div>
+
+            <!-- Timeline -->
+            <div class="glass-card p-4 mb-4" data-aos="fade-up" data-aos-delay="200">
+                <h5 class="text-white fw-bold mb-3">
+                    <i class="fas fa-history me-2 text-info"></i> Timeline
+                </h5>
+                
+                <div class="timeline">
+                    <div class="timeline-item mb-3">
+                        <div class="d-flex align-items-start">
+                            <div class="timeline-marker bg-info me-3"></div>
+                            <div class="flex-grow-1">
+                                <div class="d-flex justify-content-between align-items-start mb-1">
+                                    <h6 class="text-white fw-bold mb-0">Báo cáo đầu tiên</h6>
+                                    <small class="text-slate-500">{{ scammer.created_at.strftime('%d/%m/%Y %H:%M') }}</small>
+                                </div>
+                                <p class="text-slate-400 small mb-0">Hồ sơ được tạo trong hệ thống</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {% if scammer.report_count > 1 %}
+                    <div class="timeline-item mb-3">
+                        <div class="d-flex align-items-start">
+                            <div class="timeline-marker bg-warning me-3"></div>
+                            <div class="flex-grow-1">
+                                <div class="d-flex justify-content-between align-items-start mb-1">
+                                    <h6 class="text-white fw-bold mb-0">Nhiều báo cáo</h6>
+                                    <small class="text-slate-500">{{ scammer.updated_at.strftime('%d/%m/%Y %H:%M') }}</small>
+                                </div>
+                                <p class="text-slate-400 small mb-0">
+                                    Nhận thêm {{ scammer.report_count - 1 }} báo cáo từ cộng đồng
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="timeline-item">
+                        <div class="d-flex align-items-start">
+                            <div class="timeline-marker bg-danger me-3"></div>
+                            <div class="flex-grow-1">
+                                <div class="d-flex justify-content-between align-items-start mb-1">
+                                    <h6 class="text-white fw-bold mb-0">Cập nhật cuối</h6>
+                                    <small class="text-slate-500">{{ scammer.updated_at.strftime('%d/%m/%Y %H:%M') }}</small>
+                                </div>
+                                <p class="text-slate-400 small mb-0">Hoạt động ghi nhận gần nhất</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Description -->
+            <div class="glass-card p-4" data-aos="fade-up" data-aos-delay="300">
+                <h5 class="text-white fw-bold mb-3">
+                    <i class="fas fa-file-alt me-2 text-warning"></i> Mô tả chi tiết
+                </h5>
+                <div class="bg-dark bg-opacity-30 p-3 rounded border border-secondary border-opacity-25">
+                    <p class="text-slate-300 mb-0" style="white-space: pre-line;">{{ scammer.description }}</p>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Right Column: Evidence & Info -->
+        <div class="col-lg-4">
+            
+            <!-- Category Info -->
+            <div class="glass-card p-4 mb-4" data-aos="fade-up">
+                <h6 class="text-white fw-bold mb-3">
+                    <i class="fas fa-tags me-2 text-info"></i> Thông tin
+                </h6>
+                
+                <div class="mb-3">
+                    <small class="text-slate-500 d-block mb-1">Loại lừa đảo</small>
+                    <span class="badge bg-danger bg-opacity-20 text-danger border border-danger px-3 py-2">
+                        {{ scammer.scam_type }}
+                    </span>
+                </div>
+                
+                <div class="mb-3">
+                    <small class="text-slate-500 d-block mb-1">Nền tảng</small>
+                    <span class="badge bg-info bg-opacity-20 text-info border border-info px-3 py-2">
+                        {{ scammer.platform or 'Không rõ' }}
+                    </span>
+                </div>
+                
+                {% if scammer.bank_name %}
+                <div class="mb-3">
+                    <small class="text-slate-500 d-block mb-1">Ngân hàng</small>
+                    <span class="badge bg-success bg-opacity-20 text-success border border-success px-3 py-2">
+                        {{ scammer.bank_name }}
+                    </span>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Evidence -->
+            <div class="glass-card p-4 mb-4" data-aos="fade-up" data-aos-delay="100">
+                <h6 class="text-white fw-bold mb-3">
+                    <i class="fas fa-image me-2 text-warning"></i> Bằng chứng
+                </h6>
+                
+                {% if evidence_images %}
+                <div class="row g-2">
+                    {% for img in evidence_images %}
+                    <div class="col-12">
+                        <img src="{{ img }}" class="img-fluid rounded border border-secondary border-opacity-25" 
+                             alt="Evidence" onclick="showImageModal(this.src)">
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-4 bg-dark bg-opacity-30 rounded">
+                    <i class="fas fa-image fa-3x text-slate-600 mb-2"></i>
+                    <p class="text-slate-500 small mb-0">Chưa có bằng chứng</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="glass-card p-4" data-aos="fade-up" data-aos-delay="200">
+                <h6 class="text-white fw-bold mb-3">
+                    <i class="fas fa-shield-alt me-2 text-success"></i> Hành động
+                </h6>
+                
+                <button class="btn btn-info w-100 mb-2" onclick="confirmReport()">
+                    <i class="fas fa-check-circle me-2"></i> Xác nhận báo cáo này
+                </button>
+                
+                <button class="btn btn-outline-warning w-100 mb-2" onclick="shareWarning()">
+                    <i class="fas fa-share-alt me-2"></i> Chia sẻ cảnh báo
+                </button>
+                
+                <a href="{{ url_for('scammer.report_scammer') }}" class="btn btn-outline-danger w-100">
+                    <i class="fas fa-plus-circle me-2"></i> Thêm báo cáo mới
+                </a>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- Image Modal -->
+<div class="modal fade" id="imageModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content bg-dark">
+            <div class="modal-body p-0">
+                <img src="" id="modalImage" class="img-fluid w-100">
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .timeline-marker {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        margin-top: 5px;
+    }
+    
+    .filter-btn.active {
+        background-color: rgba(34, 211, 238, 0.2) !important;
+        border-color: var(--accent-cyan) !important;
+        color: var(--accent-cyan) !important;
+    }
+</style>
+
+<script>
+    let isMasked = true;
+    const originalIdentifier = "{{ scammer.scammer_info_raw }}";
+    const maskedIdentifier = "{{ masked_identifier }}";
+    
+    function toggleMask() {
+        const display = document.getElementById('identifierDisplay');
+        const button = document.getElementById('maskToggle');
+        
+        if (isMasked) {
+            display.textContent = originalIdentifier;
+            button.innerHTML = '<i class="fas fa-eye-slash"></i> Ẩn';
+            isMasked = false;
+        } else {
+            display.textContent = maskedIdentifier;
+            button.innerHTML = '<i class="fas fa-eye"></i> Xem đầy đủ';
+            isMasked = true;
+        }
+    }
+    
+    function showImageModal(src) {
+        document.getElementById('modalImage').src = src;
+        new bootstrap.Modal(document.getElementById('imageModal')).show();
+    }
+    
+    function confirmReport() {
+        // TODO: Implement confirm functionality
+        alert('Chức năng xác nhận đang được phát triển!');
+    }
+    
+    function shareWarning() {
+        const url = window.location.href;
+        if (navigator.share) {
+            navigator.share({
+                title: 'Cảnh báo lừa đảo - MindGuard',
+                text: `Cảnh báo: ${originalIdentifier} - ${maskedIdentifier}`,
+                url: url
+            });
+        } else {
+            navigator.clipboard.writeText(url);
+            alert('Đã sao chép link vào clipboard!');
+        }
+    }
+</script>
+
+{% endblock %}

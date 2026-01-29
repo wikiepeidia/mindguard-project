@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+
+{% block head_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/chatbot.css') }}">
+<style>
+  /* Full screen layout overrides */
+  html, body {
+    height: 100%;
+    overflow: hidden; /* Prevent global scrollbar */
+  }
+  
+  /* Hide standard footer and floating widget on this specific page */
+  footer, .chatbot-widget {
+    display: none !important;
+  }
+
+  /* Make the main wrapper fill available space below navbar */
+  .full-screen-wrapper {
+    height: calc(100vh - 76px); /* Adjust based on navbar height approx 76px */
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Chat specific adjustments */
+  .chat-container {
+    flex: 1;
+    overflow-y: auto;
+    scroll-behavior: smooth;
+    background-color: #f8f9fa; /* Light gray background for contrast */
+  }
+
+  /* Input area fixed at bottom */
+  .input-area {
+    background: white;
+    border-top: 1px solid #dee2e6;
+    flex-shrink: 0;
+  }
+</style>
+{% endblock %}
+
+{% block main_wrapper %}
+<div class="full-screen-wrapper">
+  
+  <!-- Flash messages integrated into the top of the view -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="px-4 pt-3">
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} alert-dismissible fade show shadow-sm" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <!-- Chat Header/Toolbar -->
+  <div class="bg-white border-bottom px-4 py-3 d-flex align-items-center justify-content-between flex-shrink-0 shadow-sm" style="z-index: 10;">
+    <div class="d-flex align-items-center gap-3">
+      <div class="bg-primary bg-opacity-10 p-2 rounded-circle">
+        <i class="fas fa-robot fa-lg text-primary"></i>
+      </div>
+      <div>
+        <h6 class="fw-bold mb-0 text-dark">MindGuard Assistant</h6>
+        <div class="d-flex align-items-center">
+            <span class="badge bg-success rounded-pill me-2" style="width: 8px; height: 8px; padding: 0;"></span>
+            <small class="text-muted" style="font-size: 0.8rem;">Luôn sẵn sàng hỗ trợ</small>
+        </div>
+      </div>
+    </div>
+    <div class="d-flex gap-2">
+      <button class="btn btn-light btn-sm text-secondary border" onclick="location.reload()" title="Bắt đầu lại">
+        <i class="fas fa-redo-alt me-1"></i> Làm mới
+      </button>
+    </div>
+  </div>
+
+  <!-- Main Chat History Area -->
+  <div class="chat-container px-4 py-4" id="chatHistoryContainer">
+    {% if history %}
+      {% for msg in history %}
+        <div class="d-flex mb-4 {% if msg.sender == 'Bạn' %}justify-content-end{% endif %}">
+          
+          {% if msg.sender == 'MindGuard Bot' %}
+            <div class="flex-shrink-0 me-3">
+              <div class="bg-white border rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 40px; height: 40px;">
+                <i class="fas fa-robot text-primary"></i>
+              </div>
+            </div>
+          {% endif %}
+
+          <div class="d-flex flex-column {% if msg.sender == 'Bạn' %}align-items-end{% endif %}" style="max-width: 80%;">
+            <div class="px-4 py-3 rounded-4 shadow-sm {% if msg.sender == 'MindGuard Bot' %}bg-white border text-dark{% else %}bg-primary text-white{% endif %}">
+              {{ msg.text | nl2br }}
+            </div>
+            <small class="text-muted mt-1 px-1" style="font-size: 0.75rem;">
+                {{ msg.sender }}
+            </small>
+          </div>
+        </div>
+      {% endfor %}
+    {% else %}
+      <!-- Empty State / Welcome Screen -->
+      <div class="h-100 d-flex flex-column align-items-center justify-content-center text-center">
+        <div class="bg-white p-5 rounded-4 shadow-sm border" style="max-width: 700px;">
+          <div class="mb-4">
+             <div class="bg-primary bg-opacity-10 p-4 rounded-circle d-inline-block">
+               <i class="fas fa-robot fa-3x text-primary"></i>
+             </div>
+          </div>
+          <h4 class="fw-bold text-dark mb-3">Xin chào! Tôi có thể giúp gì cho bạn?</h4>
+          <p class="text-muted mb-5">MindGuard AI sẵn sàng hỗ trợ bạn nhận diện lừa đảo, kiểm tra độ tin cậy và tư vấn an toàn trực tuyến.</p>
+          
+          <div class="row g-3">
+            <div class="col-md-6">
+              <form method="post" class="h-100">
+                <button name="message" value="Cách nhận biết lừa đảo tuyển dụng?" class="btn btn-outline-light text-dark border p-3 w-100 h-100 rounded-3 text-start hover-shadow transition-all">
+                  <i class="fas fa-briefcase text-primary me-2"></i> Lừa đảo tuyển dụng
+                </button>
+              </form>
+            </div>
+            <div class="col-md-6">
+              <form method="post" class="h-100">
+                <button name="message" value="Kiểm tra độ tin cậy của website/SMS" class="btn btn-outline-light text-dark border p-3 w-100 h-100 rounded-3 text-start hover-shadow transition-all">
+                  <i class="fas fa-search-dollar text-success me-2"></i> Kiểm tra tin nhắn lạ
+                </button>
+              </form>
+            </div>
+            <div class="col-md-6">
+              <form method="post" class="h-100">
+                <button name="message" value="Tôi đã bị lừa tiền, phải làm sao?" class="btn btn-outline-light text-dark border p-3 w-100 h-100 rounded-3 text-start hover-shadow transition-all">
+                  <i class="fas fa-exclamation-triangle text-danger me-2"></i> <strong>Khẩn cấp: Vừa bị lừa tiền</strong>
+                </button>
+              </form>
+            </div>
+            <div class="col-md-6">
+              <form method="post" class="h-100">
+                <button name="message" value="Báo cáo số điện thoại lừa đảo" class="btn btn-outline-light text-dark border p-3 w-100 h-100 rounded-3 text-start hover-shadow transition-all">
+                  <i class="fas fa-phone-slash text-secondary me-2"></i> Báo cáo SĐT Spam
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- Input Area -->
+  <div class="input-area p-3 bg-light">
+    <div class="container-fluid" style="max-width: 1000px;"> <!-- Limit width for better readability on huge screens -->
+        <form method="post" class="d-flex gap-3 align-items-center">
+            <div class="input-group input-group-lg shadow-sm rounded-pill overflow-hidden border bg-white">
+                <span class="input-group-text bg-white border-0 ps-4"><i class="fas fa-keyboard text-muted"></i></span>
+                <input type="text" class="form-control border-0 shadow-none ps-2" name="message" placeholder="Nhập câu hỏi hoặc mô tả tình huống..." autofocus autocomplete="off">
+                <button type="submit" class="btn btn-primary px-4 fw-bold">
+                    <i class="fas fa-paper-plane me-2"></i> Gửi
+                </button>
+            </div>
+        </form>
+        <div class="text-center mt-2">
+            <small class="text-muted" style="font-size: 0.75rem;">
+                <i class="fas fa-lock me-1"></i> Nội dung đoạn chat được bảo mật.
+            </small>
+        </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/chatbot_page.js') }}"></script>
+{% endblock %}

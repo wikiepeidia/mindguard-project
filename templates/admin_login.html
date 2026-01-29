@@ -1,0 +1,45 @@
+
+{% extends "base.html" %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-5" data-aos="zoom-in">
+    <div class="card shadow-lg border-0 rounded-4 glass-card">
+      <div class="card-body p-5">
+        <div class="text-center mb-4">
+            <div class="d-inline-block p-3 rounded-circle bg-info bg-opacity-10 mb-3 border border-info border-opacity-20">
+                <i class="fas fa-user-shield fa-2x text-info"></i>
+            </div>
+            <h3 class="fw-bold text-white">Đăng nhập Admin</h3>
+            <div class="bg-dark bg-opacity-50 p-2 rounded border border-white border-opacity-10 mt-3">
+                <p class="small text-muted mb-0">
+                  Tài khoản demo: <code class="text-info">admin@mindguard.com</code> • Mật khẩu: <code class="text-info">mindguard2025</code>
+                </p>
+            </div>
+        </div>
+
+        <form method="post">
+          <div class="mb-4">
+            <label class="form-label text-secondary small fw-bold text-uppercase">Tên đăng nhập</label>
+            <div class="input-group">
+                <span class="input-group-text bg-transparent border-end-0 text-muted"><i class="fas fa-user"></i></span>
+                <input type="text" class="form-control border-start-0 ps-0" name="username" placeholder="Nhập username" required>
+            </div>
+          </div>
+          <div class="mb-4">
+            <label class="form-label text-secondary small fw-bold text-uppercase">Mật khẩu</label>
+            <div class="input-group">
+                <span class="input-group-text bg-transparent border-end-0 text-muted"><i class="fas fa-lock"></i></span>
+                <input type="password" class="form-control border-start-0 ps-0" name="password" placeholder="Nhập mật khẩu" required>
+            </div>
+          </div>
+          <div class="d-grid pt-2">
+            <button type="submit" class="btn btn-primary btn-lg rounded-pill fw-bold shadow-lg">
+                <i class="fas fa-sign-in-alt me-2"></i>XÁC THỰC QUYỀN ADMIN
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

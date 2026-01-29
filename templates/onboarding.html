@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Chào mừng - MindGuard{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-8 text-center">
+        <h1 class="fw-bold mb-4">Chào mừng bạn đến với MindGuard!</h1>
+        <p class="lead mb-5">Để bắt đầu, hãy cho chúng tôi biết mức độ hiểu biết của bạn về các hình thức lừa đảo trực tuyến.</p>
+        
+        <div class="row g-4 justify-content-center">
+            <div class="col-md-5">
+                <div class="card h-100 shadow border-primary border-2">
+                    <div class="card-body p-4 d-flex flex-column justify-content-between">
+                        <div>
+                            <div class="fs-1 mb-3">🎓</div>
+                            <h4 class="card-title fw-bold">Tôi đã có kiến thức</h4>
+                            <p class="card-text text-muted">
+                                Tôi đã tìm hiểu kỹ hoặc đã có chứng chỉ an toàn thông tin. Tôi muốn truy cập trang chủ ngay.
+                            </p>
+                        </div>
+                        <a href="{{ url_for('auth.complete_onboarding') }}" class="btn btn-outline-primary w-100 mt-3">Về Trang chủ & Bỏ qua</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-5">
+                <div class="card h-100 shadow bg-primary text-white">
+                    <div class="card-body p-4 d-flex flex-column justify-content-between">
+                        <div>
+                            <div class="fs-1 mb-3">📝</div>
+                            <h4 class="card-title fw-bold">Kiểm tra kiến thức</h4>
+                            <p class="card-text text-light">
+                                Tôi muốn làm bài test nhanh (15 câu hỏi) để đánh giá khả năng phòng vệ của mình trước khi tham gia.
+                            </p>
+                        </div>
+                        <a href="{{ url_for('quiz.quiz') }}" class="btn btn-light w-100 mt-3 text-primary fw-bold">Làm bài test ngay</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,300 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-5">
+    
+    <!-- Header -->
+    <div class="text-center mb-5" data-aos="fade-down">
+        <span class="badge rounded-pill border border-info text-info px-3 py-2 mb-3 bg-info bg-opacity-10">
+            <i class="fas fa-database me-2"></i> DỮ LIỆU CỘNG ĐỒNG
+        </span>
+        <h1 class="display-5 fw-bold text-white mb-2 text-uppercase">Gửi Tố Cáo Mới</h1>
+        <p class="text-muted mb-3" style="max-width: 600px; margin: 0 auto;">
+            Hệ thống sẽ mã hóa danh tính của bạn. Dữ liệu này giúp cảnh báo cộng đồng.
+        </p>
+        
+        <!-- Disclaimer quan trọng -->
+        <div class="alert alert-warning bg-warning bg-opacity-10 border-warning text-warning mx-auto" style="max-width: 700px;" role="alert">
+            <div class="d-flex align-items-start">
+                <i class="fas fa-shield-alt fa-2x me-3 mt-1"></i>
+                <div class="text-start">
+                    <h6 class="fw-bold mb-2">Cam kết bảo vệ người tố cáo</h6>
+                    <p class="small mb-0">
+                        • Danh tính được <strong>mã hóa hoàn toàn</strong><br>
+                        • Thông tin cá nhân <strong>không được chia sẻ</strong><br>
+                        • Hãy cung cấp thông tin <strong>chính xác</strong> để bảo vệ cộng đồng
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            
+            <!-- FORM CONTAINER -->
+            <form action="{{ url_for('scammer.report_scammer') }}" method="POST" enctype="multipart/form-data" id="reportForm">
+                
+                <!-- 1. CHỌN LOẠI TỐ CÁO (TABS) -->
+                <div class="row g-0 mb-4 rounded-4 overflow-hidden border border-secondary border-opacity-50" data-aos="fade-up">
+                    
+                    <!-- Tab 1: Kẻ gian -->
+                    <div class="col-md-6 position-relative">
+                        <input type="radio" class="btn-check" name="report_mode" id="mode_scammer" value="person" checked onchange="toggleForm('person')">
+                        <label class="btn btn-outline-dark border-0 w-100 h-100 p-4 d-flex flex-column align-items-center justify-content-center text-white mode-label active-mode" for="mode_scammer" id="label_scammer">
+                            <i class="fas fa-user-secret fa-3x mb-3 text-info"></i>
+                            <h5 class="fw-bold mb-1">TỐ CÁO KẺ GIAN</h5>
+                            <small class="text-muted">SĐT, Số tài khoản, Zalo...</small>
+                        </label>
+                    </div>
+
+                    <!-- Tab 2: Website -->
+                    <div class="col-md-6 position-relative border-start border-secondary border-opacity-50">
+                        <input type="radio" class="btn-check" name="report_mode" id="mode_website" value="website" onchange="toggleForm('website')">
+                        <label class="btn btn-outline-dark border-0 w-100 h-100 p-4 d-flex flex-column align-items-center justify-content-center text-white mode-label" for="mode_website" id="label_website">
+                            <i class="fas fa-globe-asia fa-3x mb-3 text-warning"></i>
+                            <h5 class="fw-bold mb-1">BÁO CÁO WEBSITE</h5>
+                            <small class="text-muted">Link độc hại, Web giả mạo...</small>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Input ẩn để Backend biết loại gì -->
+                <input type="hidden" name="report_type" id="hidden_report_type" value="general">
+
+                <!-- 2. NỘI DUNG FORM -->
+                <div class="glass-card p-4 p-md-5" data-aos="fade-up" data-aos-delay="100">
+                    
+                    <!-- A. FORM CHO KẺ GIAN (PERSON) -->
+                    <div id="form_person">
+                        <div class="section-header">
+                            <i class="fas fa-id-card fa-lg me-3 text-info"></i>
+                            <h3 class="section-title text-info">Thông tin đối tượng</h3>
+                        </div>
+
+                        <div class="row g-4 mb-4">
+                            <!-- Dòng 1: Định danh -->
+                            <div class="col-md-6">
+                                <label class="form-label-custom">Loại thông tin (*)</label>
+                                <select class="form-select bg-dark text-white" id="person_type_select" onchange="updatePersonType()" style="height: 50px;">
+                                    <option value="general">Số điện thoại / Zalo / MXH</option>
+                                    <option value="bank">Tài khoản Ngân hàng (STK)</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label-custom" id="label_identifier">Số điện thoại / ID (*)</label>
+                                <!-- Đặt tên khác nhau để tránh xung đột -->
+                                <input type="text" class="form-control" name="identifier_person" id="input_identifier_person" placeholder="VD: 0912345678" style="height: 50px; font-weight: 600;" required>
+                            </div>
+                            
+                            <!-- Dòng 2: Chi tiết ngân hàng -->
+                            <div class="col-md-12" id="bank_name_div" style="display:none;">
+                                <label class="form-label-custom">Tên Ngân hàng</label>
+                                <input type="text" class="form-control" name="bank_name" id="input_bank_name" placeholder="VD: MBBank, Vietcombank..." style="height: 50px;">
+                            </div>
+
+                            <!-- Dòng 3: Tên & CHIÊU TRÒ -->
+                            <div class="col-md-6">
+                                <label class="form-label-custom">Tên chủ tài khoản / Nickname</label>
+                                <input type="text" class="form-control" name="scammer_name" id="input_scammer_name" placeholder="VD: NGUYEN VAN A..." style="height: 50px;">
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label class="form-label-custom text-warning">Loại lừa đảo (*)</label>
+                                <select class="form-select bg-dark text-white border-warning border-opacity-25" name="scam_type_person" id="input_scam_type_person" style="height: 50px;" required>
+                                    <option value="">-- Chọn loại lừa đảo --</option>
+                                    <optgroup label="Lừa đảo tài chính">
+                                        <option value="Giả danh ngân hàng">Giả danh ngân hàng</option>
+                                        <option value="Cho vay trực tuyến lừa đảo">Cho vay trực tuyến lừa đảo</option>
+                                        <option value="Đầu tư chứng khoán ảo">Đầu tư chứng khoán ảo</option>
+                                        <option value="Tiền ảo / Crypto lừa đảo">Tiền ảo / Crypto lừa đảo</option>
+                                    </optgroup>
+                                    <optgroup label="Lừa đảo việc làm">
+                                        <option value="Tuyển cộng tác viên online">Tuyển cộng tác viên online</option>
+                                        <option value="Làm việc tại nhà lừa đảo">Làm việc tại nhà lừa đảo</option>
+                                        <option value="Kiếm tiền qua app/website">Kiếm tiền qua app/website</option>
+                                    </optgroup>
+                                    <optgroup label="Giả danh">
+                                        <option value="Giả danh công an">Giả danh công an</option>
+                                        <option value="Giả danh nhân viên giao hàng">Giả danh nhân viên giao hàng</option>
+                                        <option value="Giả danh ngân hàng/tổ chức">Giả danh ngân hàng/tổ chức</option>
+                                        <option value="Giả danh người thân">Giả danh người thân</option>
+                                    </optgroup>
+                                    <optgroup label="Mua bán">
+                                        <option value="Bán hàng giả / kém chất lượng">Bán hàng giả / kém chất lượng</option>
+                                        <option value="Nhận tiền không giao hàng">Nhận tiền không giao hàng</option>
+                                        <option value="Mua hàng rồi chiếm đoạt">Mua hàng rồi chiếm đoạt</option>
+                                    </optgroup>
+                                    <optgroup label="Khác">
+                                        <option value="Trúng thưởng giả">Trúng thưởng giả</option>
+                                        <option value="Hẹn hò lừa tình">Hẹn hò lừa tình</option>
+                                        <option value="Lừa đảo khác">Lừa đảo khác</option>
+                                    </optgroup>
+                                </select>
+                                <small class="text-muted d-block mt-1">
+                                    <i class="fas fa-info-circle me-1"></i> Chọn loại phù hợp để cảnh báo chính xác
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- B. FORM CHO WEBSITE (WEBSITE) -->
+                    <div id="form_website" style="display: none;">
+                        <div class="section-header">
+                            <i class="fas fa-link fa-lg me-3 text-warning"></i>
+                            <h3 class="section-title text-warning">Thông tin Đường link độc hại</h3>
+                        </div>
+
+                        <div class="row g-4 mb-4">
+                            <div class="col-12">
+                                <label class="form-label-custom text-warning">Đường dẫn Website (URL) (*)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-dark border-secondary text-muted"><i class="fas fa-lock"></i></span>
+                                    <!-- Đặt tên khác nhau -->
+                                    <input type="text" class="form-control" name="identifier_website" id="input_identifier_website" placeholder="VD: https://quatang-shopee-vip.com..." style="height: 50px; font-weight: 600;" disabled required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label-custom">Loại hình lừa đảo</label>
+                                <select class="form-select bg-dark text-white" name="scam_type_website" id="select_scam_type_website" style="height: 50px;" disabled>
+                                    <option value="Phishing Facebook">Giả mạo Facebook (Phishing)</option>
+                                    <option value="Phishing Bank">Giả mạo Ngân hàng</option>
+                                    <option value="Fake Shop">Shop bán hàng lừa đảo</option>
+                                    <option value="Malware">Link chứa virus/mã độc</option>
+                                    <option value="Gambling">Cờ bạc / Cá độ trá hình</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label-custom">Nền tảng phát tán</label>
+                                <input type="text" class="form-control" name="platform_website" id="input_platform_website" placeholder="VD: Gửi qua SMS, Zalo..." style="height: 50px;" disabled>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- C. PHẦN CHUNG -->
+                    <hr class="border-secondary opacity-25 my-5">
+                    
+                    <div class="mb-4">
+                        <label class="form-label-custom">Mô tả chi tiết (*)</label>
+                        <textarea class="form-control" name="description" rows="5" placeholder="Kể lại quá trình..." required></textarea>
+                    </div>
+
+                    <div class="mb-5">
+                        <label class="form-label-custom mb-2">Bằng chứng (Ảnh chụp màn hình)</label>
+                        <div class="upload-zone">
+                            <input type="file" class="upload-input" name="evidence_files" multiple accept="image/*" onchange="previewFiles(this)">
+                            <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                            <h6 class="text-white">Kéo thả hoặc bấm để chọn ảnh</h6>
+                            <div id="file-preview" class="mt-2 text-info small"></div>
+                        </div>
+                    </div>
+
+                    <div class="bg-dark bg-opacity-50 p-3 rounded border border-secondary border-opacity-25 mb-4">
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" name="term_truth" id="term1" required>
+                            <label class="form-check-label text-secondary small" for="term1">Tôi cam kết thông tin đúng sự thật.</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="term_responsibility" id="term2" required>
+                            <label class="form-check-label text-secondary small" for="term2">Tôi chịu trách nhiệm về tố cáo này.</label>
+                            <input type="hidden" name="consent" value="on">
+                        </div>
+                    </div>
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-lg shadow-lg py-3 fw-bold rounded-pill text-uppercase">
+                            <i class="fas fa-paper-plane me-2"></i> Gửi tố cáo
+                        </button>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- CSS RIÊNG -->
+<style>
+    .mode-label { cursor: pointer; transition: 0.3s; background: rgba(30, 41, 59, 0.4); }
+    .mode-label:hover { background: rgba(30, 41, 59, 0.8); }
+    .btn-check:checked + .mode-label {
+        background: linear-gradient(135deg, rgba(6, 182, 212, 0.2), rgba(15, 23, 42, 0.9));
+        border-bottom: 4px solid var(--accent-color) !important;
+        box-shadow: inset 0 0 20px rgba(6, 182, 212, 0.1);
+    }
+</style>
+
+<!-- JS XỬ LÝ LOGIC TAB (FIXED) -->
+<script>
+    function toggleForm(mode) {
+        const formPerson = document.getElementById('form_person');
+        const formWebsite = document.getElementById('form_website');
+        const hiddenType = document.getElementById('hidden_report_type');
+
+        // Lấy tất cả input của từng phần
+        const inputsPerson = [
+            document.getElementById('input_identifier_person'),
+            document.getElementById('input_scam_type_person'),
+            document.getElementById('input_scammer_name'),
+            document.getElementById('input_bank_name')
+        ];
+        
+        const inputsWebsite = [
+            document.getElementById('input_identifier_website'),
+            document.getElementById('select_scam_type_website'),
+            document.getElementById('input_platform_website')
+        ];
+
+        if (mode === 'person') {
+            formPerson.style.display = 'block';
+            formWebsite.style.display = 'none';
+            hiddenType.value = document.getElementById('person_type_select').value; // general or bank
+
+            // BẬT input Person
+            inputsPerson.forEach(el => el.disabled = false);
+            // TẮT input Website (để không bị bắt validation)
+            inputsWebsite.forEach(el => el.disabled = true);
+            
+            updatePersonType(); // Reset label SĐT/Bank
+
+        } else {
+            formPerson.style.display = 'none';
+            formWebsite.style.display = 'block';
+            hiddenType.value = 'website';
+
+            // TẮT input Person
+            inputsPerson.forEach(el => el.disabled = true);
+            // BẬT input Website
+            inputsWebsite.forEach(el => el.disabled = false);
+        }
+    }
+
+    function updatePersonType() {
+        const select = document.getElementById('person_type_select');
+        const label = document.getElementById('label_identifier');
+        const placeholder = document.getElementById('input_identifier_person');
+        const hiddenType = document.getElementById('hidden_report_type');
+        const bankDiv = document.getElementById('bank_name_div');
+
+        if (select.value === 'bank') {
+            label.innerText = 'Số Tài Khoản Ngân Hàng (*)';
+            placeholder.placeholder = 'VD: 1903xxx...';
+            hiddenType.value = 'bank';
+            bankDiv.style.display = 'block';
+        } else {
+            label.innerText = 'Số Điện Thoại / Zalo / ID (*)';
+            placeholder.placeholder = 'VD: 0912345678';
+            hiddenType.value = 'general';
+            bankDiv.style.display = 'none';
+        }
+    }
+
+    function previewFiles(input) {
+        const preview = document.getElementById('file-preview');
+        preview.innerHTML = (input.files && input.files.length > 0) ? 
+            `<i class="fas fa-check-circle me-1"></i> Đã chọn ${input.files.length} ảnh.` : '';
+    }
+
+    window.onload = function() { toggleForm('person'); };
+</script>
+{% endblock %}

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}Xác thực OTP - MindGuard{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-5">
+        <div class="card shadow-sm border-0 rounded-4 glass-card">
+            <div class="card-body">
+                <h3 class="fw-bold mb-3 text-center">Xác thực tài khoản</h3>
+                <p class="text-muted text-center mb-4">
+                    Một mã OTP đã được gửi đến email <strong>{{ session.get('pending_verification_email') }}</strong>.
+                    <br><small>(Mã demo: 123456)</small>
+                </p>
+                
+                <form method="POST">
+                    <div class="mb-3">
+                        <label class="form-label">Nhập mã OTP</label>
+                        <input type="text" class="form-control text-center text-uppercase fs-4" name="otp" placeholder="******" maxlength="6" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Xác thực</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

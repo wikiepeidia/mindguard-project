@@ -1,0 +1,45 @@
+
+{% extends "base.html" %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-9">
+    <div class="card shadow-sm border-0 rounded-4 glass-card">
+      <div class="card-body">
+        <h3 class="fw-bold mb-3">Bài test nhận thức MindGuard (15 câu)</h3>
+        <p class="text-muted small mb-3">
+          Trả lời các câu hỏi dưới đây để kiểm tra mức độ cảnh giác với lừa đảo & thao túng tâm lý.
+          Hệ thống MindGuard AI cũng có thể chèn các câu hỏi thực tế từ người dùng!
+          Để nhận chứng nhận MindGuard, bạn cần đạt tối thiểu <strong>75% số câu đúng</strong>.
+        </p>
+        <form method="post">
+          
+          {% if ai_question %}
+             <input type="hidden" name="ai_q_id" value="{{ ai_question.id }}">
+             <input type="hidden" name="ai_correct_{{ ai_question.id }}" value="{{ ai_question.answer }}">
+          {% endif %}
+
+          {% for q in questions %}
+            <div class="mb-4">
+              <p class="fw-semibold">
+                  {% if q.id > 9000 %}
+                     <span class="badge bg-warning text-dark me-2">AI Generated</span>
+                  {% endif %}
+                  Câu {{ loop.index }}. {{ q.question | nl2br }}
+              </p>
+              {% for option in q.options %}
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="q{{ q.id }}" id="q{{ q.id }}_{{ loop.index0 }}" value="{{ loop.index0 }}">
+                  <label class="form-check-label" for="q{{ q.id }}_{{ loop.index0 }}">
+                    {{ option }}
+                  </label>
+                </div>
+              {% endfor %}
+            </div>
+          {% endfor %}
+          <button type="submit" class="btn btn-primary btn-lg">Nộp bài</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

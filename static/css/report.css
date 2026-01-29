@@ -1,0 +1,54 @@
+.nav-pills .nav-link {
+    color: #64748b;
+    background-color: transparent;
+    border: 1px solid #e2e8f0;
+    margin-right: 5px;
+    border-radius: 12px;
+}
+
+.nav-pills .nav-link.active {
+    color: #fff;
+    background-color: #2563eb;
+    border-color: #2563eb;
+}
+
+.form-label {
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.glass-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+}
+
+.report-tabs {
+    justify-content: center;
+    margin-bottom: 2rem;
+}
+
+.report-tabs .nav-link {
+    padding: 10px 30px;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.input-group-text {
+    background-color: #f8fafc;
+    border-color: #e2e8f0;
+}
+
+@media (max-width: 576px) {
+    .report-tabs {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .report-tabs .nav-link {
+        width: 100%;
+        text-align: center;
+        padding: 10px 16px;
+    }
+}

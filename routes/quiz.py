@@ -41,6 +41,20 @@ def quiz():
     
     # Tạo câu hỏi AI (giữ nguyên logic cũ)
     ai_question = generate_dynamic_question()
+
+    # QUIZ GAMIFICATION: Calculate Title
+    quiz_title = "Học viên an ninh mạng"
+    last_score = session.get("last_quiz_score", 0)
+    max_quiz_score = session.get("max_quiz_score", 15)
+    
+    if max_quiz_score > 0:
+        percent = (last_score / max_quiz_score) * 100
+        if percent >= 90:
+            quiz_title = "Bậc thầy MindGuard"
+        elif percent >= 70:
+            quiz_title = "Chuyên gia phòng chống lừa đảo"
+        elif percent >= 50:
+            quiz_title = "Người dùng cảnh giác"
     
     if request.method == "POST":
         score = 0
@@ -84,8 +98,17 @@ def quiz():
             session["certificate_code"] = code
             result.certificate_code = code
             db.session.commit()
+            
+            # Custom title update
+            title = "Học viên an ninh mạng"
+            percent = (score/max_score)*100
+            if percent >= 90: title = "Bậc thầy MindGuard"
+            elif percent >= 70: title = "Chuyên gia phòng chống lừa đảo"
+            elif percent >= 50: title = "Người dùng cảnh giác"
+            session['quiz_rank_title'] = title
+            
             flash(
-                f"🎉 Tuyệt vời! Bạn đạt {score}/{max_score} điểm. Chứng chỉ đã được cập nhật!",
+                f"🎉 Tuyệt vời! Bạn đạt danh hiệu '{title}' ({score}/{max_score} điểm).",
                 "success",
             )
             return redirect(url_for("quiz.certificate"))

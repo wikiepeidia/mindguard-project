@@ -34,6 +34,10 @@ def query_ai_model(prompt, system_prompt=None):
                 result = json.loads(response.read().decode('utf-8'))
                 if 'choices' in result and len(result['choices']) > 0:
                      return result['choices'][0]['message']['content']
+        except urllib.error.HTTPError as e:
+            error_body = e.read().decode('utf-8')
+            print(f"Model {model} HTTP error {e.code}: {error_body}")
+            continue
         except Exception as e:
             print(f"Model {model} failed: {e}")
             continue

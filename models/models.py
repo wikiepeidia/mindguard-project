@@ -111,3 +111,11 @@ class ChatSupportMessage(db.Model):
     user_message = db.Column(db.Text, nullable=False)
     bot_reply = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+class Subscription(db.Model):
+    __tablename__ = 'subscriptions'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('registrations.id'), nullable=False)
+    target_identifier = db.Column(db.String(200), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+

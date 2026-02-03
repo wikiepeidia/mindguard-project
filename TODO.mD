@@ -1,117 +1,125 @@
+
+# Product TODO & Roadmap – Cảnh Báo Lừa Đảo (Beta → Launch)
+
+## UX/UI Cải thiện ngay (trước khi cho nhiều người dùng)
+
+- **Bảng LIVE**
+  - [x] Thêm bộ lọc nhanh (Quick filters):
+    - Loại lừa đảo: giả danh, đầu tư, tuyển dụng, vay online, tình yêu…
+    - Mức độ rủi ro (thang màu hoặc Low/Medium/High)
+    - Thời gian (24h, 7 ngày, 30 ngày…)
+    - Nguồn: cộng đồng / đối tác / đã xác minh
+  - [x] Hiển thị: Số báo cáo + Số người xác nhận (khác biệt rõ với chỉ “số report”)
+
+- **Text contrast & readability**
+  - [x] Tăng cỡ chữ + contrast cho phần mô tả/ghi chú trong card
+  - [x] Subtitle và dòng hướng dẫn dưới thanh tìm kiếm → tăng nhẹ size + contrast (ít “chìm” hơn)
+
+- **Thêm section “Cách hoạt động” ngay dưới hero / màn đầu**
+  - [x] 3 bước rõ ràng:
+    1. Nhập thông tin cần kiểm tra
+    2. Hệ thống phân tích rủi ro
+    3. Gợi ý hành động an toàn
+  → Mục tiêu: tăng chuyển đổi beta (người dùng hiểu nhanh → muốn thử)
+
+## P0 – Tính năng cốt lõi (phải có trước khi scale user)
+
+- **Trang kết quả tra cứu chi tiết & đáng tin cậy**
+  - [x] Risk Score (0–100) + giải thích ngắn gọn lý do điểm cao/thấp
+  - [x] Bằng chứng / nguồn / link liên quan (nếu có)
+  - [x] Lịch sử báo cáo theo thời gian (timeline)
+
+- **Entity Profile (trang riêng cho mỗi SĐT / STK / URL)**
+  - [x] Timeline báo cáo
+  - [x] Tags / loại lừa đảo
+  - [x] Liên kết liên quan (các entity khác xuất hiện cùng)
+
+- **Quy trình báo cáo (Report flow)**
+  - [x] Bắt buộc: mô tả + chọn danh mục + upload ảnh/chat/biên lai
+  - [x] Tự động gợi ý che mờ thông tin cá nhân người tố cáo
+  - [x] Chống spam: CAPTCHA (implemented full hybrid cloudflare/math) + rate limit + audit log
+  - [x] Ẩn danh nhưng có mức độ tín nhiệm (dựa trên lịch sử user)
+
+## P1 – Tạo cảm giác “đẳng cấp” (làm xong là khác biệt rõ)
+
+- **Subscribe / Theo dõi cảnh báo**
+  - [x] User follow 1 entity (SĐT/STK/URL) (Implemented DB & UI)
+  - [ ] Có report mới → push notification / email / Zalo / Telegram (API deferred)
+
+- **Chia sẻ cảnh báo nhanh**
+  - [x] Tạo link “warning page” ngắn gọn → gửi cho người thân trước khi chuyển tiền (Implemented Share button)
+
+- **Thư viện tình huống + mini game**
+  - [x] Bộ sưu tập tình huống lừa đảo phổ biến (Implemented Warning Library)
+  - [x] “Test IQ lừa đảo” cá nhân hóa (Upgraded Quiz with Gamification/Titles)
+
+## P2 – Mở rộng dài hạn
+
+- Extension trình duyệt + Bot Zalo/Telegram
+  - [x] Extension trình duyệt (Source code provided in `browser_extension/`)
+  - [ ] Phát hiện link lạ → cảnh báo realtime (Partially handled by extension demo)
+
+- API công khai cho đối tác
+  - [x] Ngân hàng, fintech, cộng đồng tra cứu rủi ro theo request (Implemented `/api/v1/check`)
+
+## Machine Learning Roadmap (tích hợp dần)
+
+### Stage 1 – Nhanh, hiệu quả cao, không cần dữ liệu quá lớn
+
+- Auto-tagging & gợi ý loại lừa đảo từ nội dung tố cáo
+- Entity extraction & chuẩn hóa (tách SĐT, STK, URL, tên…)
+- Deduplication + similarity grouping (nhiều report cùng vụ → gộp lại)
+
+### Stage 2 – Đưa sản phẩm lên mức “pro”
+
+- Explainable Risk Scoring (rule-based trước, sau nâng ML)
+  - Kết hợp: số report, độ tin cậy user, bằng chứng, độ mới, similarity…
+  - Sử dụng Wilson score / Bayesian để tránh bias từ report ít
+- Anomaly detection (bùng nổ report trong thời gian ngắn → “Cảnh báo nóng”)
+- Graph-based detection (phát hiện mạng lưới: SĐT → STK → URL…)
+
+### Stage 3 – Nâng cao (khi có đủ dữ liệu + nguồn crawl hợp pháp)
+
+- Domain/URL risk scoring (tuổi domain, redirect chain, pattern phishing…)
+
+## Combo 5 tính năng “ngắn hạn nhưng xịn” – Nên ưu tiên beta
+
+1. Entity Profile + Timeline (trái tim sản phẩm)
+2. Trạng thái xác minh + cơ chế khiếu nại/đính chính
+3. Subscribe cảnh báo (Zalo/Telegram là kênh chính)
+4. Auto-tag + deduplication/similarity (ML stage 1)
+5. Risk score có giải thích (bắt đầu rule-based, sau nâng ML)
+
+## completed
+
 Nên cải thiện (ưu tiên cao)
 
 - [x] ngrok them de teet cloudfare.
 - [x] capcha them cloudfare (cloudfare.json) Login,signup,report....
-Animation trang login phaầ đang nhaập, danf ky chuưa co
-chatbot/api loi
+- [x] Animation trang login phaầ đang nhaập, danf ky chuưa co
+- [x] chatbot/api loi (Fixed config loading for OpenRouter key)
+<http://127.0.0.1:5000/> chua login:
+- [x] Tố cáo ẩn danh(<http://127.0.0.1:5000/>) sao lai bat login? (Removed login requirement)
+- [x] Chatbot AI 24/7 (<http://127.0.0.1:5000/)ko> bam duoc -->route sang login (Enabled global widget for anonymous users)
+- [x] Base html, 1 so file html co ca css/js trong html, tach ra file rieng de quan ly
+- [x] Nhập thông tin :icon hidden behind circle reimplement whole (o trang<<http://127.0.0.1:5000/> )
+- [x] Phân tích rủi ro -->icon hidden behind circle reimplement whole (o trang<<http://127.0.0.1:5000/> )
+- [x] Gợi ý hành động-->icon hidden behind circle reimplement whole (o trang<<http://127.0.0.1:5000/> )
+- [x] Background ko stretch full page
+- [x] footer trash © 2025 MindGuard Community Project. Bảo mật & Minh bạch. fix footer.
+- [x] Remove unused social icons and support links from footer. Add Github source link.
+- [x] Fallback cloudfare:development : ko dung cloudfare (link 127.0.0.1 /localhost) dung capcha math con web thi dung , fallback neu cloudfare sap
 
 Tăng “trust cues” + tránh rủi ro pháp lý
 
-Ở mỗi cảnh báo nên có trạng thái: “Chưa xác minh” / “Đang xác minh” / “Đã xác minh (nếu có)”.
+- [x] Ở mỗi cảnh báo nên có trạng thái: “Chưa xác minh” / “Đang xác minh” / “Đã xác minh (nếu có)”.
 
-Ẩn/mask mặc định thông tin nhạy cảm: SĐT/ STK hiển thị kiểu 0123***789 (bấm “Xem đầy đủ” khi người dùng đăng nhập / đồng ý điều khoản).
+- [x] Ẩn/mask mặc định thông tin nhạy cảm: SĐT/ STK hiển thị kiểu 0123***789 (bấm “Xem đầy đủ” khi người dùng đăng nhập / đồng ý điều khoản).
 
-Thêm dòng nhỏ gần ô tìm kiếm: “Dữ liệu do cộng đồng cung cấp, kết quả mang tính cảnh báo — vui lòng kiểm chứng trước khi giao dịch.”
+- [x] Thêm dòng nhỏ gần ô tìm kiếm: “Dữ liệu do cộng đồng cung cấp, kết quả mang tính cảnh báo — vui lòng kiểm chứng trước khi giao dịch.”
 
 Tối ưu ô tra cứu
 
-Hiện bạn để “SĐT, STK, Link web…” rất tốt. Nên thêm “chips” gợi ý: SĐT | STK | URL (auto-detect vẫn được, nhưng chip giúp người dùng hiểu hệ thống làm gì).
+- [x] Hiện bạn để “SĐT, STK, Link web…” rất tốt. Nên thêm “chips” gợi ý: SĐT | STK | URL (auto-detect vẫn được, nhưng chip giúp người dùng hiểu hệ thống làm gì).
 
-Thêm ví dụ trong placeholder: VD: 090xxxxxxx • 123456789012 • https://...
-
-Bảng LIVE nên có “lọc nhanh”
-
-Filter theo: Loại lừa đảo (giả danh, đầu tư, tuyển dụng…), Mức độ rủi ro, Thời gian, Nguồn (cộng đồng/đối tác).
-
-Hiển thị đếm số báo cáo + số người xác nhận (khác với “reports” đơn thuần).
-
-Chữ mô tả/ghi chú hơi nhỏ & hơi chìm
-
-Subtitle và dòng hướng dẫn dưới ô tìm kiếm hơi “low contrast”. Tăng nhẹ size/contrast là sẽ sang hơn và dễ đọc.
-
-Thêm 1 section “Cách hoạt động” ngay dưới màn đầu
-
-3 bước: Nhập thông tin → Hệ thống phân tích rủi ro → Gợi ý hành động an toàn
-Cái này tăng chuyển đổi beta rất mạnh.
-
-1) Tính năng nên thêm để “xịn xò” (không cần ML vẫn đã mạnh)
-P0 (nên có trước khi đông người dùng)
-
-Trang kết quả tra cứu thật rõ:
-
-Risk score (thang 0–100), lý do (vì sao điểm cao), bằng chứng/nguồn, lịch sử report theo thời gian.
-
-Hồ sơ đối tượng (entity profile): mỗi SĐT/STK/URL có trang riêng: timeline, tag, liên kết liên quan.
-
-Quy trình report chuẩn: mô tả + danh mục + upload ảnh/chat/biên lai + che thông tin cá nhân người tố cáo.
-
-Cơ chế chống spam/bịa đặt: CAPTCHA, rate-limit, “tố cáo ẩn danh nhưng có tín nhiệm”, log audit.
-
-P1 (làm xong là thấy “đẳng cấp sản phẩm”)
-
-Theo dõi & cảnh báo (subscribe): người dùng “Follow” 1 SĐT/STK/URL → có report mới thì push/email/Zalo/Telegram.
-
-Chia sẻ cảnh báo 1 link (dạng “warning page”) để gửi người thân trước khi chuyển tiền.
-
-Thư viện tình huống lừa đảo + “Test IQ” cá nhân hóa (vừa giáo dục vừa giữ chân user).
-
-P2 (đi xa hơn)
-
-Extension trình duyệt / bot Zalo/Telegram: gặp link lạ → cảnh báo ngay.
-
-API cho đối tác (ngân hàng/fintech/cộng đồng): tra cứu rủi ro theo request.
-
-1) Máy học (ML): nên tích hợp, nhưng chọn đúng bài toán để “đáng công”
-2)
-
-Nếu beta dữ liệu còn ít, ML vẫn làm được nhưng nên đi theo lộ trình:
-
-ML stage 1 (dễ làm – hiệu quả thấy ngay)
-
-Auto-tag & phân loại loại lừa đảo từ nội dung tố cáo
-
-Người dùng gõ tự do → hệ thống gợi ý tag: “giả danh công an”, “đầu tư”, “tuyển dụng”, “vay online”…
-
-Chuẩn hóa & nhận diện thực thể (entity extraction)
-
-Tự tách SĐT/STK/URL từ đoạn chat; chuẩn hóa format (có/không dấu cách, đầu số…).
-
-Gom trùng (dedup) + tìm báo cáo tương tự
-
-Dùng embedding/similarity để phát hiện 10 report thực ra là 1 vụ → tăng chất lượng “LIVE”.
-
-ML stage 2 (đưa sản phẩm lên “pro”)
-
-Chấm điểm rủi ro có giải thích (explainable risk scoring)
-
-Kết hợp: số report, độ tin cậy người báo, bằng chứng, độ mới, mức độ trùng khớp, hành vi bất thường…
-
-Rất nên dùng kiểu Bayesian/Wilson score để tránh “1 report là kết luận”.
-
-Phát hiện bất thường theo thời gian (anomaly detection)
-
-Tự bật “Cảnh báo nóng” khi một SĐT/URL bùng report trong 1–2 giờ.
-
-Graph/ring detection (mạng lưới lừa đảo)
-
-Nối quan hệ: SĐT ↔ STK ↔ URL ↔ tên ↔ nền tảng… → phát hiện cụm.
-
-ML stage 3 (nâng hạng)
-
-URL/domain risk (nếu bạn crawl được dữ liệu hợp pháp)
-
-Tín hiệu: tên miền giống brand, redirect chain, độ mới domain, pattern phishing…
-
-1) Một “combo” rất đáng làm cho beta của bạn
-
-Nếu chọn 5 thứ làm trong ngắn hạn để vừa xịn vừa thực dụng, mình chốt combo:
-
-Entity profile + timeline (trái tim của sản phẩm)
-
-Trạng thái xác minh + cơ chế khiếu nại/đính chính
-
-Subscribe cảnh báo (Zalo/Telegram/email)
-
-Auto-tag + similarity/dedup (ML stage 1)
-
-Risk score có giải thích (dù ban đầu rule-based, sau nâng thành ML)
+- [x] Thêm ví dụ trong placeholder: VD: 090xxxxxxx • 123456789012 • https://...

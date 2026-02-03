@@ -19,20 +19,43 @@ def login():
     import requests
     
     if request.method == "POST":
-        # 1. Validate CAPTCHA
+        # 1. Validate CAPTCHA (Hybrid: Turnstile + Math Fallback)
         cf_token = request.form.get('cf-turnstile-response')
         cf_secret = Config.CLOUDFLARE_SECRET_KEY
         
-        # Only validate if secret key is present (production-like env)
-        if cf_secret:
+        captcha_success = False
+        
+        # A. Try Cloudflare (if keys exist and token provided)
+        if cf_secret and cf_token:
             try:
                 verify_url = "https://challenges.cloudflare.com/turnstile/v0/siteverify"
-                validate_res = requests.post(verify_url, data={'secret': cf_secret, 'response': cf_token}, timeout=5)
-                if not validate_res.json().get('success'):
-                    flash("Xác thực bảo mật thất bại. Vui lòng thử lại.", "danger")
-                    return render_template("login.html", site_key=Config.CLOUDFLARE_SITE_KEY)
-            except Exception:
-                pass # Fail open if API fails
+                validate_res = requests.post(verify_url, data={'secret': cf_secret, 'response': cf_token}, timeout=2)
+                if validate_res.json().get('success'):
+                    captcha_success = True
+            except:
+                pass # Failed to connect to CF, proceed to Math check if available
+        
+        # B. Check Math Captcha (if CF failed or no keys)
+        if not captcha_success:
+            user_math = request.form.get('math_answer')
+            correct_math = session.get('math_captcha_answer')
+            # If user answered math correctly
+            if user_math and correct_math and user_math.strip() == correct_math:
+                captcha_success = True
+            # Handling "Fail Open" only if NO keys are configured AND no math answer provided? 
+            # No, user wants Math fallback for localhost (no keys).
+            # If no CF keys, we require math.
+            elif not cf_secret and (not correct_math): 
+                 # Edge case: First load didn't generate math? Should fail.
+                 pass
+
+        if not captcha_success:
+             flash("Vui lòng hoàn thành xác thực (CAPTCHA/Toán).", "danger")
+             # Regenerate for re-render
+             from utils.helpers import generate_math_problem
+             math_prob = generate_math_problem()
+             session['math_captcha_answer'] = math_prob['answer']
+             return render_template("login.html", site_key=Config.CLOUDFLARE_SITE_KEY, math_question=math_prob['question'], force_math=True)
 
         email = request.form.get("login_email")
         password = request.form.get("login_password")
@@ -71,7 +94,12 @@ def login():
             flash("Email chưa được đăng ký.", "warning")
             
     from config import Config
-    return render_template("login.html", site_key=Config.CLOUDFLARE_SITE_KEY)
+    # Generate Math Captcha for potential fallback usage
+    from utils.helpers import generate_math_problem
+    math_prob = generate_math_problem()
+    session['math_captcha_answer'] = math_prob['answer']
+    
+    return render_template("login.html", site_key=Config.CLOUDFLARE_SITE_KEY, math_question=math_prob['question'])
 
 
 @auth_bp.route("/register", methods=["GET", "POST"])
@@ -82,21 +110,46 @@ def register():
 
     from config import Config
     import requests
+    from utils.helpers import generate_math_problem
+
+    # Generate Math Captcha for fallback on GET
+    if request.method == "GET":
+         math_prob = generate_math_problem()
+         session['math_captcha_answer_register'] = math_prob['answer']
+         return render_template("register.html", site_key=Config.CLOUDFLARE_SITE_KEY, math_question=math_prob['question'])
 
     if request.method == "POST":
-        # 1. Validate CAPTCHA
+        # 1. Validate CAPTCHA (Hybrid)
         cf_token = request.form.get('cf-turnstile-response')
         cf_secret = Config.CLOUDFLARE_SECRET_KEY
         
-        if cf_secret:
+        captcha_success = False
+
+        # Try Cloudflare
+        if cf_secret and cf_token:
             try:
                 verify_url = "https://challenges.cloudflare.com/turnstile/v0/siteverify"
-                validate_res = requests.post(verify_url, data={'secret': cf_secret, 'response': cf_token}, timeout=5)
-                if not validate_res.json().get('success'):
-                    flash("Xác thực bảo mật thất bại. Vui lòng thử lại.", "danger")
-                    return render_template("register.html", site_key=Config.CLOUDFLARE_SITE_KEY)
-            except Exception:
-                pass
+                validate_res = requests.post(verify_url, data={'secret': cf_secret, 'response': cf_token}, timeout=2)
+                if validate_res.json().get('success'):
+                    captcha_success = True
+            except:
+                pass 
+        
+        # Try Math Fallback
+        if not captcha_success:
+            user_math = request.form.get('math_answer')
+            correct_math = session.get('math_captcha_answer_register')
+            if user_math and correct_math and user_math.strip() == correct_math:
+                captcha_success = True
+            # Allow pure dev mode if no keys and no math (first load issue?) -> No, enforce math.
+            elif not cf_secret and (not correct_math):
+                pass 
+        
+        if not captcha_success:
+            flash("Vui lòng hoàn thành xác thực (CAPTCHA/Toán).", "danger")
+            math_prob = generate_math_problem()
+            session['math_captcha_answer_register'] = math_prob['answer']
+            return render_template("register.html", site_key=Config.CLOUDFLARE_SITE_KEY, math_question=math_prob['question'], force_math=True)
 
         name = request.form.get("name")
         email = request.form.get("email")

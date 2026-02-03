@@ -1,8 +1,8 @@
 """Main routes for MindGuard application."""
 import json
-from flask import Blueprint, render_template, request, jsonify
+from flask import Blueprint, render_template, request, jsonify, session
 from sqlalchemy import func, or_
-from models import ScamReport, Registration, ScammerLeaderboard, ScammerReport, db
+from models import ScamReport, Registration, ScammerLeaderboard, ScammerReport, Subscription, db
 from utils.helpers import mask_sensitive_data, calculate_risk_score, get_verification_badge, get_risk_level_info
 from datetime import datetime
 
@@ -101,6 +101,15 @@ def scammer_profile(scammer_id):
     """Display detailed scammer profile."""
     scammer = ScammerReport.query.get_or_404(scammer_id)
     
+    # Check follow status
+    is_following = False
+    if session.get('registration_email'):
+        user = Registration.query.filter_by(email=session['registration_email']).first()
+        if user:
+            sub = Subscription.query.filter_by(user_id=user.id, target_identifier=scammer.scammer_info_raw).first()
+            if sub:
+                is_following = True
+
     # Mask sensitive data by default
     data_type = 'phone' if scammer.report_type == 'general' else 'account'
     masked_identifier = mask_sensitive_data(scammer.scammer_info_raw, data_type)
@@ -110,8 +119,8 @@ def scammer_profile(scammer_id):
         days_since = (datetime.utcnow() - scammer.created_at).days
         has_evidence = bool(scammer.evidence_urls)
         scammer.risk_score = calculate_risk_score(
-            scammer.report_count,
-            scammer.confirmed_by_count or 0,
+            int(scammer.report_count),
+            int(scammer.confirmed_by_count or 0),
             has_evidence,
             days_since
         )
@@ -137,5 +146,6 @@ def scammer_profile(scammer_id):
         masked_identifier=masked_identifier,
         verification_badge=verification_badge,
         risk_info=risk_info,
-        evidence_images=evidence_images
+        evidence_images=evidence_images,
+        is_following=is_following
     )

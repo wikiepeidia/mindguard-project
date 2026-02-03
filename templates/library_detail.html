@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row g-4">
+        <!-- Main Content -->
+        <div class="col-lg-8">
+            <div class="mb-4" data-aos="fade-right">
+                <a href="{{ url_for('library.index') }}"
+                    class="text-slate-400 text-decoration-none mb-3 d-inline-block hover-text-white">
+                    <i class="fas fa-arrow-left me-2"></i> Quay lại thư viện
+                </a>
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <span class="badge bg-warning bg-opacity-20 text-warning border border-warning px-3 py-2">
+                        {{ article.category or 'Cảnh báo' }}
+                    </span>
+                    <span class="text-slate-500">
+                        <i class="far fa-clock me-1"></i> {{ article.created_at.strftime('%d/%m/%Y') }}
+                    </span>
+                </div>
+                <h1 class="display-6 fw-bold text-white mb-4">{{ article.title }}</h1>
+            </div>
+
+            <div class="glass-card p-4 p-md-5 mb-4" data-aos="fade-up">
+                <div class="article-content text-slate-300">
+                    <h5 class="text-white fw-bold mb-3"><i class="fas fa-mask me-2 text-danger"></i> Dấu hiệu nhận biết
+                    </h5>
+                    <p class="mb-4 fs-5">{{ article.description }}</p>
+
+                    {% if article.channel %}
+                    <div class="alert alert-dark border-secondary d-flex align-items-center mb-4">
+                        <i class="fas fa-broadcast-tower fa-2x text-info me-3"></i>
+                        <div>
+                            <div class="fw-bold text-white">Kênh phát tán</div>
+                            <div class="text-slate-400">{{ article.channel }}</div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if article.protection_tip %}
+                    <hr class="border-secondary border-opacity-25 my-4">
+                    <h5 class="text-white fw-bold mb-3"><i class="fas fa-shield-alt me-2 text-success"></i> Cách phòng
+                        tránh</h5>
+                    <div class="bg-success bg-opacity-10 border border-success border-opacity-25 rounded-3 p-4">
+                        <p class="mb-0 text-white">{{ article.protection_tip }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Quick Share -->
+            <div
+                class="d-flex justify-content-between align-items-center border-top border-secondary border-opacity-25 pt-4">
+                <span class="text-slate-400">Thấy hữu ích? Chia sẻ ngay:</span>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-outline-light btn-sm"
+                        onclick="navigator.clipboard.writeText(window.location.href); alert('Đã sao chép link!')">
+                        <i class="fas fa-link"></i> Sao chép
+                    </button>
+                    <!-- Add more share buttons as needed -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <div class="glass-card p-4 sticky-top" style="top: 100px;" data-aos="fade-left">
+                <h5 class="text-white fw-bold mb-4 border-bottom border-secondary border-opacity-25 pb-3">Mới cập nhật
+                </h5>
+
+                <div class="d-flex flex-column gap-3">
+                    {% for recent in recent_articles %}
+                    {% if recent.id != article.id %}
+                    <a href="{{ url_for('library.detail', article_id=recent.id) }}" class="text-decoration-none group">
+                        <div class="d-flex gap-3 align-items-center">
+                            <div class="flex-shrink-0">
+                                <div class="bg-dark rounded p-2 text-center" style="width: 50px;">
+                                    <span class="d-block text-warning fw-bold">{{ recent.created_at.strftime('%d')
+                                        }}</span>
+                                    <span class="d-block text-slate-500 fs-7">{{ recent.created_at.strftime('%m')
+                                        }}</span>
+                                </div>
+                            </div>
+                            <div>
+                                <h6 class="text-white mb-1 group-hover-text-info text-truncate-2"
+                                    style="font-size: 0.95rem;">{{ recent.title }}</h6>
+                                <small class="text-slate-500">{{ recent.category }}</small>
+                            </div>
+                        </div>
+                    </a>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+
+                <div class="mt-4 pt-3 border-top border-secondary border-opacity-25">
+                    <a href="{{ url_for('library.index') }}" class="btn btn-outline-info w-100">
+                        Xem tất cả <i class="fas fa-arrow-right ms-2"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

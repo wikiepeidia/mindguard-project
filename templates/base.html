@@ -1,191 +1,21 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}MindGuard - An ninh mạng cộng đồng{% endblock %}</title>
-    
+
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-
-    <style>
-        :root {
-            --primary-bg: #0f172a;
-            --accent-color: #06b6d4; /* Cyan */
-            --glass-bg: rgba(15, 23, 42, 0.85);
-            --glass-border: rgba(255, 255, 255, 0.1);
-        }
-
-        body {
-            background-color: var(--primary-bg);
-            background-image: radial-gradient(circle at 50% 0%, #1e293b 0%, #0f172a 80%);
-            color: #f1f5f9;
-            overflow-x: hidden;
-            font-family: 'Inter', sans-serif;
-        }
-
-        /* Hiệu ứng hạt mạng lưới nền */
-        #network-canvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            opacity: 0.6;
-            pointer-events: none;
-        }
-
-        /* Nâng cấp Navbar của bạn */
-        .navbar {
-            background: rgba(15, 23, 42, 0.7) !important;
-            backdrop-filter: blur(15px);
-            border-bottom: 1px solid var(--glass-border);
-            padding: 15px 0;
-            transition: 0.3s;
-        }
-        .navbar-brand {
-            font-weight: 800;
-            font-size: 1.5rem;
-            letter-spacing: -1px;
-            color: #fff !important;
-        }
-        .navbar-brand span { color: var(--accent-color); }
-        .nav-link {
-            color: #cbd5e1 !important;
-            font-weight: 500;
-            transition: 0.3s;
-        }
-        .nav-link:hover { color: var(--accent-color) !important; }
-
-        /* Nút tròn nổi Chatbot */
-        .chatbot-toggler {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            width: 60px;
-            height: 60px;
-            background: var(--accent-color);
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 0 20px rgba(6, 182, 212, 0.5);
-            transition: 0.3s;
-            z-index: 9999;
-            border: none;
-        }
-        .chatbot-toggler:hover { transform: scale(1.1) rotate(15deg); }
-        
-        /* Cửa sổ Chat Glassmorphism */
-        .chatbot-window {
-            position: fixed;
-            right: 35px;
-            bottom: 100px;
-            width: 380px;
-            height: 550px;
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            box-shadow: 0 15px 50px rgba(0,0,0,0.6);
-            overflow: hidden;
-            opacity: 0;
-            pointer-events: none;
-            transform: translateY(20px);
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            z-index: 9999;
-            display: flex;
-            flex-direction: column;
-        }
-
-        body.show-chatbot .chatbot-window {
-            opacity: 1;
-            pointer-events: auto;
-            transform: translateY(0);
-        }
-
-        .chat-header {
-            background: linear-gradient(135deg, var(--accent-color), #3b82f6);
-            padding: 18px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .chatbox {
-            flex: 1;
-            padding: 20px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            background: rgba(0,0,0,0.2);
-        }
-
-        .chat-msg {
-            max-width: 85%;
-            padding: 12px 16px;
-            border-radius: 15px;
-            font-size: 0.92rem;
-            line-height: 1.5;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-
-        .msg-incoming {
-            align-self: flex-start;
-            background: #1e293b;
-            color: #e2e8f0;
-            border-bottom-left-radius: 2px;
-            border: 1px solid var(--glass-border);
-        }
-
-        .msg-outgoing {
-            align-self: flex-end;
-            background: linear-gradient(135deg, var(--accent-color), #2563eb);
-            color: #fff;
-            border-bottom-right-radius: 2px;
-        }
-
-        .chat-input {
-            padding: 15px;
-            background: rgba(15, 23, 42, 0.9);
-            border-top: 1px solid var(--glass-border);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .chat-input textarea {
-            flex: 1;
-            background: rgba(255,255,255,0.05);
-            border: 1px solid var(--glass-border);
-            border-radius: 10px;
-            color: white;
-            resize: none;
-            height: 45px;
-            padding: 10px 15px;
-            transition: 0.3s;
-        }
-        .chat-input textarea:focus { 
-            outline: none; 
-            border-color: var(--accent-color);
-            background: rgba(255,255,255,0.08);
-        }
-
-        /* Glass Card cho thông báo Flash */
-        .glass-card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(10px);
-            border-left: 4px solid var(--accent-color) !important;
-            border: 1px solid var(--glass-border);
-        }
-    </style>
+    <!-- Custom Base CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
 </head>
+
 <body>
 
     <canvas id="network-canvas"></canvas>
@@ -195,43 +25,55 @@
             <a class="navbar-brand" href="{{ url_for('main.index') }}">
                 <i class="fas fa-shield-alt text-info me-2"></i>Mind<span>Guard</span>
             </a>
-            <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarNav">
                 <i class="fas fa-bars text-white"></i>
             </button>
-            
+
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto align-items-center">
-                    
+
                     {% if session.get('is_admin') %}
-                        <li class="nav-item">
-                            <span class="badge bg-danger bg-opacity-10 text-danger border border-danger p-2 me-3">
-                                <i class="fas fa-user-secret me-1"></i> ADMIN ACCESS
-                            </span>
-                        </li>
-                        <li class="nav-item"><a class="btn btn-info btn-sm fw-bold px-3 rounded-pill text-dark" href="{{ url_for('admin.admin_dashboard') }}">Dashboard</a></li>
-                        <li class="nav-item ms-2"><a class="btn btn-outline-light btn-sm rounded-pill px-3" href="{{ url_for('admin.admin_logout') }}">Thoát</a></li>
+                    <li class="nav-item">
+                        <span class="badge bg-danger bg-opacity-10 text-danger border border-danger p-2 me-3">
+                            <i class="fas fa-user-secret me-1"></i> ADMIN ACCESS
+                        </span>
+                    </li>
+                    <li class="nav-item"><a class="btn btn-info btn-sm fw-bold px-3 rounded-pill text-dark"
+                            href="{{ url_for('admin.admin_dashboard') }}">Dashboard</a></li>
+                    <li class="nav-item ms-2"><a class="btn btn-outline-light btn-sm rounded-pill px-3"
+                            href="{{ url_for('admin.admin_logout') }}">Thoát</a></li>
 
                     {% elif session.get('registration_email') %}
-                        <li class="nav-item"><a class="nav-link" href="{{ url_for('main.index') }}">Trang chủ</a></li>
-                        <li class="nav-item"><a class="nav-link" href="{{ url_for('quiz.quiz') }}">Test IQ</a></li>
-                        <li class="nav-item"><a class="nav-link" href="{{ url_for('scammer.report_scammer') }}">Tố cáo</a></li>
-                        <li class="nav-item"><a class="nav-link" href="{{ url_for('main.leaderboard') }}">Sổ đen</a></li>
-                        <li class="nav-item"><a class="nav-link text-info fw-bold" href="#" onclick="document.body.classList.toggle('show-chatbot'); return false;">AI Chat</a></li>
-                        
-                        <li class="nav-item dropdown ms-3">
-                            <a class="nav-link dropdown-toggle btn btn-outline-light rounded-pill px-4 py-1 text-white border-opacity-25" href="#" data-bs-toggle="dropdown">
-                                {{ session.get('registration_name') }}
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 bg-dark mt-2 p-2">
-                                <li><a class="dropdown-item rounded text-white" href="{{ url_for('auth.profile') }}"><i class="fas fa-id-card me-2 text-info"></i> Hồ sơ</a></li>
-                                <li><hr class="dropdown-divider bg-secondary opacity-25"></li>
-                                <li><a class="dropdown-item rounded text-danger" href="{{ url_for('auth.logout') }}"><i class="fas fa-power-off me-2"></i> Đăng xuất</a></li>
-                            </ul>
-                        </li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('main.index') }}">Trang chủ</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('quiz.quiz') }}">Test IQ</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('scammer.report_scammer') }}">Tố cáo</a>
+                    </li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('main.leaderboard') }}">Sổ đen</a></li>
+                    <li class="nav-item"><a class="nav-link text-info fw-bold" href="#"
+                            onclick="document.body.classList.toggle('show-chatbot'); return false;">AI Chat</a></li>
+
+                    <li class="nav-item dropdown ms-3">
+                        <a class="nav-link dropdown-toggle btn btn-outline-light rounded-pill px-4 py-1 text-white border-opacity-25"
+                            href="#" data-bs-toggle="dropdown">
+                            {{ session.get('registration_name') }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 bg-dark mt-2 p-2">
+                            <li><a class="dropdown-item rounded text-white" href="{{ url_for('auth.profile') }}"><i
+                                        class="fas fa-id-card me-2 text-info"></i> Hồ sơ</a></li>
+                            <li>
+                                <hr class="dropdown-divider bg-secondary opacity-25">
+                            </li>
+                            <li><a class="dropdown-item rounded text-danger" href="{{ url_for('auth.logout') }}"><i
+                                        class="fas fa-power-off me-2"></i> Đăng xuất</a></li>
+                        </ul>
+                    </li>
                     {% else %}
-                        <li class="nav-item"><a class="nav-link" href="{{ url_for('main.leaderboard') }}">Cảnh báo</a></li>
-                        <li class="nav-item ms-2"><a class="nav-link fw-bold text-white" href="{{ url_for('auth.login') }}">Đăng nhập</a></li>
-                        <li class="nav-item ms-3"><a class="btn btn-info fw-bold px-4 rounded-pill text-dark shadow-sm" href="{{ url_for('auth.register') }}">Tham gia ngay</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('main.leaderboard') }}">Cảnh báo</a></li>
+                    <li class="nav-item ms-2"><a class="nav-link fw-bold text-white"
+                            href="{{ url_for('auth.login') }}">Đăng nhập</a></li>
+                    <li class="nav-item ms-3"><a class="btn btn-info fw-bold px-4 rounded-pill text-dark shadow-sm"
+                            href="{{ url_for('auth.register') }}">Tham gia ngay</a></li>
                     {% endif %}
                 </ul>
             </div>
@@ -242,23 +84,27 @@
 
     <div class="container mt-3" style="position: absolute; top: 90px; right: 20px; z-index: 9999; max-width: 400px;">
         {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ category }} alert-dismissible fade show shadow glass-card p-3 mb-2 text-white" role="alert">
-                        <i class="fas fa-info-circle me-2 text-info"></i> {{ message }}
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
-                    </div>
-                {% endfor %}
-            {% endif %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show shadow glass-card p-3 mb-2 text-white"
+            role="alert">
+            <i class="fas fa-info-circle me-2 text-info"></i> {{ message }}
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+        {% endif %}
         {% endwith %}
     </div>
 
     {% block content %}{% endblock %}
 
-    {% if session.get('registration_email') %}
-    <button class="chatbot-toggler" onclick="document.body.classList.toggle('show-chatbot')">
-        <span class="icon-chat"><i class="fas fa-robot fa-lg text-white"></i></span>
-        <span class="icon-close" style="opacity: 0;"><i class="fas fa-times fa-lg text-white"></i></span>
+    <!-- Chatbot Widget: Always available (Anonymous or Logged In) -->
+    <button class="chatbot-toggler d-flex align-items-center justify-content-center"
+        onclick="document.body.classList.toggle('show-chatbot')">
+        <span class="icon-chat position-absolute d-flex align-items-center justify-content-center w-100 h-100"><i
+                class="fas fa-robot fa-lg text-white"></i></span>
+        <span class="icon-close position-absolute d-flex align-items-center justify-content-center w-100 h-100"
+            style="opacity: 0;"><i class="fas fa-times fa-lg text-white"></i></span>
     </button>
 
     <div class="chatbot-window">
@@ -270,11 +116,13 @@
                     <small class="opacity-75" style="font-size: 0.7rem;">Online 24/7 • Chuyên gia bảo mật</small>
                 </div>
             </div>
-            <i class="fas fa-times fs-5" style="cursor: pointer;" onclick="document.body.classList.remove('show-chatbot')"></i>
+            <i class="fas fa-times fs-5" style="cursor: pointer;"
+                onclick="document.body.classList.remove('show-chatbot')"></i>
         </div>
         <div class="chatbox" id="chatbox">
             <div class="chat-msg msg-incoming">
-                👋 Xin chào! Tôi là AI phân tích lừa đảo. Bạn hãy copy tin nhắn hoặc đường link nghi ngờ vào đây để tôi kiểm tra nhé!
+                👋 Xin chào! Tôi là AI phân tích lừa đảo. Bạn hãy copy tin nhắn hoặc đường link nghi ngờ vào đây để tôi
+                kiểm tra nhé!
             </div>
         </div>
         <div class="chat-input">
@@ -282,105 +130,62 @@
             <button id="sendChatBtn" class="send-btn"><i class="fas fa-paper-plane"></i></button>
         </div>
     </div>
-    {% endif %}
 
-    <footer class="mt-auto">
-        <div class="container text-center pt-5 pb-5 mt-5 border-top border-secondary border-opacity-10">
-            <p class="text-secondary small mb-0">&copy; 2025 MindGuard Community Project. Bảo mật & Minh bạch.</p>
+    <footer class="mt-auto border-top border-white border-opacity-10 bg-black bg-opacity-20 pt-5 pb-4">
+        <div class="container">
+            <div class="row g-4 mb-4">
+                <div class="col-lg-5">
+                    <a class="navbar-brand d-block mb-3" href="{{ url_for('main.index') }}">
+                        <i class="fas fa-shield-alt text-info me-2"></i>Mind<span>Guard</span>
+                    </a>
+                    <p class="text-slate-400 small mb-3">
+                        Hệ thống cảnh báo và phòng chống lừa đảo trực tuyến dựa trên sức mạnh cộng đồng và trí tuệ nhân
+                        tạo.
+                    </p>
+                    <div class="d-flex gap-2">
+                        <a href="https://github.com/wikiepeidia/mindguard-project" target="_blank"
+                            class="btn btn-outline-light btn-sm rounded-circle border-opacity-25"
+                            style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;"
+                            title="View Source Code"><i class="fab fa-github"></i></a>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-6">
+                    <h6 class="text-white fw-bold mb-3">Liên kết</h6>
+                    <ul class="list-unstyled small">
+                        <li class="mb-2"><a href="{{ url_for('main.index') }}"
+                                class="text-slate-400 text-decoration-none hover:text-info">Trang chủ</a></li>
+                        <li class="mb-2"><a href="{{ url_for('scammer.report_scammer') }}"
+                                class="text-slate-400 text-decoration-none hover:text-info">Tố cáo</a></li>
+                        <li class="mb-2"><a href="{{ url_for('main.leaderboard') }}"
+                                class="text-slate-400 text-decoration-none hover:text-info">Cảnh báo</a></li>
+                        <li class="mb-2"><a href="{{ url_for('quiz.quiz') }}"
+                                class="text-slate-400 text-decoration-none hover:text-info">Kiểm tra IQ</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-4">
+                    <h6 class="text-white fw-bold mb-3">Đăng ký nhận tin</h6>
+                    <p class="text-slate-400 small mb-3">Nhận cảnh báo mới nhất qua email.</p>
+                    <div class="input-group">
+                        <input type="email" class="form-control bg-dark border-secondary text-white"
+                            placeholder="Email của bạn">
+                        <button class="btn btn-info text-white" type="button"><i
+                                class="fas fa-paper-plane"></i></button>
+                    </div>
+                </div>
+            </div>
+            <div class="text-center border-top border-white border-opacity-10 pt-4">
+                <p class="text-secondary small mb-0">&copy; 2025 MindGuard Community Project. <span
+                        class="text-slate-400">Bảo mật & Minh bạch.</span></p>
+            </div>
         </div>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script>
-        AOS.init({ duration: 800, once: true });
-
-        // --- JS CHO HIỆU ỨNG HẠT NỀN (Áo mới) ---
-        const canvas = document.getElementById('network-canvas');
-        const ctx = canvas.getContext('2d');
-        let particles = [];
-        function initCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            particles = [];
-            for(let i=0; i<80; i++) {
-                particles.push({
-                    x: Math.random()*canvas.width,
-                    y: Math.random()*canvas.height,
-                    vx: (Math.random()-0.5)*0.5,
-                    vy: (Math.random()-0.5)*0.5
-                });
-            }
-        }
-        function animateCanvas() {
-            ctx.clearRect(0,0,canvas.width, canvas.height);
-            ctx.fillStyle = '#06b6d4';
-            ctx.strokeStyle = 'rgba(6, 182, 212, 0.15)';
-            particles.forEach((p, i) => {
-                p.x += p.vx; p.y += p.vy;
-                if(p.x<0 || p.x>canvas.width) p.vx *= -1;
-                if(p.y<0 || p.y>canvas.height) p.vy *= -1;
-                ctx.beginPath(); ctx.arc(p.x, p.y, 2, 0, Math.PI*2); ctx.fill();
-                for(let j=i+1; j<particles.length; j++) {
-                    let p2 = particles[j];
-                    let dist = Math.hypot(p.x-p2.x, p.y-p2.y);
-                    if(dist < 150) {
-                        ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p2.x, p2.y); ctx.stroke();
-                    }
-                }
-            });
-            requestAnimationFrame(animateCanvas);
-        }
-        initCanvas(); animateCanvas();
-        window.onresize = initCanvas;
-
-        // --- CHATBOT LOGIC (Giữ nguyên 100% của bạn) ---
-        const chatInput = document.getElementById("chatInput");
-        const sendChatBtn = document.getElementById("sendChatBtn");
-        const chatbox = document.getElementById("chatbox");
-
-        const createChatLi = (message, className) => {
-            const chatLi = document.createElement("div");
-            chatLi.classList.add("chat-msg", className);
-            chatLi.innerHTML = message;
-            return chatLi;
-        }
-
-        const handleChat = () => {
-            const userMessage = chatInput.value.trim();
-            if(!userMessage) return;
-
-            chatbox.appendChild(createChatLi(userMessage, "msg-outgoing"));
-            chatbox.scrollTo(0, chatbox.scrollHeight);
-            chatInput.value = "";
-
-            const loadingLi = createChatLi('<i class="fas fa-ellipsis-h fa-bounce"></i> Đang phân tích...', "msg-incoming");
-            chatbox.appendChild(loadingLi);
-            chatbox.scrollTo(0, chatbox.scrollHeight);
-
-            fetch("{{ url_for('chatbot.chatbot_api') }}", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ message: userMessage })
-            }).then(res => res.json()).then(data => {
-                chatbox.removeChild(loadingLi);
-                chatbox.appendChild(createChatLi(data.reply, "msg-incoming"));
-                chatbox.scrollTo(0, chatbox.scrollHeight);
-            }).catch(() => {
-                chatbox.removeChild(loadingLi);
-                chatbox.appendChild(createChatLi("❌ Lỗi kết nối AI. Vui lòng thử lại.", "msg-incoming"));
-            });
-        }
-
-        if(sendChatBtn) {
-            sendChatBtn.addEventListener("click", handleChat);
-            chatInput.addEventListener("keydown", (e) => {
-                if(e.key === "Enter" && !e.shiftKey) {
-                    e.preventDefault();
-                    handleChat();
-                }
-            });
-        }
+        window.CHATBOT_API_URL = "{{ url_for('chatbot.chatbot_api') }}";
     </script>
+    <script src="{{ url_for('static', filename='js/base.js') }}"></script>
 </body>
+
 </html>

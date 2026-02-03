@@ -8,6 +8,7 @@ from routes.chatbot import chatbot_bp
 from routes.quiz import quiz_bp
 from routes.auth import auth_bp
 from routes.admin import admin_bp
+from utils.helpers import mask_sensitive_data, get_verification_badge
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -17,6 +18,11 @@ app.config.from_object(Config)
 def nl2br_filter(s):
     from markupsafe import Markup, escape
     return Markup(str(escape(s)).replace('\n', '<br>')) if s else ""
+
+# Bộ lọc Masking (Ẩn thông tin nhạy cảm)
+@app.template_filter('mask')
+def mask_filter(s, data_type='auto'):
+    return mask_sensitive_data(s, data_type)
 
 # Khởi tạo DB & Mail
 db.init_app(app)
@@ -33,7 +39,10 @@ app.register_blueprint(admin_bp)
 # Biến toàn cục cho template
 @app.context_processor
 def inject_globals():
-    return {"current_year": datetime.now().year}
+    return {
+        "current_year": datetime.now().year,
+        "get_verification_badge": get_verification_badge
+    }
 
 # --- ĐƯỜNG DẪN TẮT CHO ADMIN ---
 @app.route('/admin')

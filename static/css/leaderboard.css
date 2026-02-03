@@ -1,0 +1,8 @@
+.cursor-pointer {
+    cursor: pointer;
+}
+
+.hover-highlight:hover td {
+    background-color: rgba(6, 182, 212, 0.1) !important;
+    transition: 0.2s;
+}

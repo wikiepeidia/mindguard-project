@@ -2,97 +2,58 @@
 
 {% block content %}
 
-<style>
-    .hero-glow {
-        position: absolute;
-        width: 400px;
-        height: 400px;
-        background: radial-gradient(circle, rgba(34, 211, 238, 0.15) 0%, transparent 70%);
-        border-radius: 50%;
-        filter: blur(50px);
-        z-index: -1;
-    }
-    
-    .glass-card {
-        background: rgba(15, 23, 42, 0.8) !important;
-        backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
-        border: 1px solid rgba(255, 255, 255, 0.1) !important;
-        border-radius: 20px;
-        transition: 0.3s ease;
-    }
+<!-- Custom CSS for Homepage -->
+<link rel="stylesheet" href="{{ url_for('static', filename='css/homepage.css') }}">
 
-    .hover-up:hover {
-        transform: translateY(-10px);
-        border-color: var(--accent-cyan) !important;
-        box-shadow: 0 10px 40px rgba(34, 211, 238, 0.15) !important;
-    }
+<section class="hero-section position-relative" style="padding-top: 120px; padding-bottom: 40px; overflow: hidden;">
+    <!-- Removed .hero-glow to fix UI issues -->
 
-    .search-wrapper .input-group {
-        background: rgba(15, 23, 42, 0.9);
-        border: 1px solid rgba(34, 211, 238, 0.3);
-        box-shadow: 0 0 30px rgba(34, 211, 238, 0.1);
-    }
-
-    .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-    .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(34, 211, 238, 0.3); border-radius: 10px; }
-
-    .text-gradient {
-        background: linear-gradient(to right, #06b6d4, #3b82f6);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-    }
-
-    /* Giữ nguyên logic Pulse cho LIVE badge */
-    .animate-pulse {
-        animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-    }
-    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
-</style>
-
-<section class="hero-section position-relative" style="padding-top: 100px; padding-bottom: 60px;">
-    <div class="hero-glow" style="top: -10%; left: 10%;"></div>
-    <div class="hero-glow" style="bottom: 10%; right: 10%;"></div>
-    
     <div class="container position-relative" style="z-index: 10;">
         <div class="row align-items-center g-5">
-            
+
             <div class="col-lg-7" data-aos="fade-right">
                 <span class="badge rounded-pill border border-info text-info px-3 py-2 mb-4 bg-info bg-opacity-10">
                     <i class="fas fa-shield-virus me-2 text-cyan-400"></i> Hệ thống Phòng chống Lừa đảo Quốc gia
                 </span>
-                
+
                 <h1 class="display-4 fw-bold text-white mb-4" style="line-height: 1.2;">
-                    Lá chắn số bảo vệ bạn <br> 
+                    Lá chắn số bảo vệ bạn <br>
                     trước <span class="text-gradient">Lừa đảo trực tuyến</span>
                 </h1>
-                
-                <p class="lead text-slate-400 mb-4">
-                    Hệ thống cảnh báo sớm và phân tích lừa đảo dựa trên dữ liệu cộng đồng. 
+
+                <p class="lead text-slate-200 mb-4" style="font-weight: 400;">
+                    Hệ thống cảnh báo sớm và phân tích lừa đảo dựa trên dữ liệu cộng đồng.
                     Kiểm tra độ an toàn, học cách phòng tránh và bảo vệ tài sản của bạn ngay hôm nay.
                 </p>
-                
+
                 <!-- Chips gợi ý -->
                 <div class="d-flex flex-wrap gap-2 mb-3" data-aos="fade-up">
-                    <span class="badge bg-dark bg-opacity-50 text-white border border-info border-opacity-25 px-3 py-2" style="font-size: 0.85rem;">
+                    <span class="badge bg-dark bg-opacity-50 text-white border border-info border-opacity-25 px-3 py-2"
+                        style="font-size: 0.85rem;">
                         <i class="fas fa-phone-alt me-1 text-info"></i> SĐT
                     </span>
-                    <span class="badge bg-dark bg-opacity-50 text-white border border-success border-opacity-25 px-3 py-2" style="font-size: 0.85rem;">
+                    <span
+                        class="badge bg-dark bg-opacity-50 text-white border border-success border-opacity-25 px-3 py-2"
+                        style="font-size: 0.85rem;">
                         <i class="fas fa-university me-1 text-success"></i> STK
                     </span>
-                    <span class="badge bg-dark bg-opacity-50 text-white border border-warning border-opacity-25 px-3 py-2" style="font-size: 0.85rem;">
+                    <span
+                        class="badge bg-dark bg-opacity-50 text-white border border-warning border-opacity-25 px-3 py-2"
+                        style="font-size: 0.85rem;">
                         <i class="fas fa-link me-1 text-warning"></i> URL
                     </span>
                 </div>
-                
+
                 <div class="search-wrapper mb-3">
                     <div class="input-group input-group-lg shadow-lg rounded-pill overflow-hidden">
                         <span class="input-group-text bg-transparent border-0 text-info ps-4">
                             <i class="fas fa-search"></i>
                         </span>
-                        <input type="text" id="searchInput" class="form-control bg-transparent border-0 text-white shadow-none" placeholder="VD: 090xxxxxxx • 123456789012 • https://..." style="height: 60px;">
-                        <button class="btn btn-info fw-bold px-5 text-white rounded-pill" type="button" onclick="performSearch()" style="margin: 5px;">
+                        <input type="text" id="searchInput"
+                            class="form-control bg-transparent border-0 text-white shadow-none"
+                            placeholder="VD: 090xxxxxxx • 123456789012 • https://..." style="height: 60px;">
+                        <button class="btn btn-info fw-bold px-5 text-white rounded-pill" type="button"
+                            onclick="performSearch()" style="margin: 5px;">
                             KIỂM TRA
                         </button>
                     </div>
@@ -100,18 +61,21 @@
                     <div class="mt-2 px-3">
                         <div class="d-flex align-items-start gap-2">
                             <i class="fas fa-info-circle text-info mt-1" style="font-size: 0.9rem;"></i>
-                            <p class="text-muted small mb-0" style="font-size: 0.85rem; line-height: 1.6;">
-                                <strong class="text-white">Dữ liệu do cộng đồng cung cấp</strong>, kết quả mang tính cảnh báo — vui lòng kiểm chứng trước khi giao dịch.
+                            <p class="text-white opacity-75 mb-0" style="font-size: 0.9rem; line-height: 1.6;">
+                                <strong class="text-white">Dữ liệu do cộng đồng cung cấp</strong>, kết quả mang tính
+                                cảnh báo — vui lòng kiểm chứng trước khi giao dịch.
                             </p>
                         </div>
                     </div>
                 </div>
 
                 <div class="d-flex flex-wrap gap-3 mb-5">
-                    <a href="{{ url_for('scammer.report_scammer') }}" class="btn btn-primary btn-lg px-4 rounded-pill shadow-lg fw-bold border-0 bg-gradient-to-r from-blue-600 to-cyan-500">
+                    <a href="{{ url_for('scammer.report_scammer') }}"
+                        class="btn btn-primary btn-lg px-4 rounded-pill shadow-lg fw-bold border-0 bg-gradient-to-r from-blue-600 to-cyan-500">
                         <i class="fas fa-bullhorn me-2"></i> Gửi tố cáo
                     </a>
-                    <a href="{{ url_for('quiz.quiz') }}" class="btn btn-outline-light btn-lg px-4 rounded-pill fw-bold border-opacity-25">
+                    <a href="{{ url_for('quiz.quiz') }}"
+                        class="btn btn-outline-light btn-lg px-4 rounded-pill fw-bold border-opacity-25">
                         <i class="fas fa-brain me-2"></i> Test IQ
                     </a>
                 </div>
@@ -133,121 +97,149 @@
             </div>
 
             <div class="col-lg-5" data-aos="fade-left">
-                <div class="glass-card p-0 overflow-hidden shadow-2xl border-0" style="height: 550px; display: flex; flex-direction: column;">
-                    
+                <div class="glass-card p-0 overflow-hidden shadow-2xl border-0"
+                    style="height: 550px; display: flex; flex-direction: column;">
+
                     <div class="p-3 border-bottom border-white border-opacity-10 bg-white bg-opacity-5">
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <div class="d-flex align-items-center">
                                 <span class="badge bg-danger animate-pulse me-2">LIVE</span>
                                 <h6 class="fw-bold text-white mb-0">Cảnh báo rủi ro</h6>
                             </div>
-                            <a href="{{ url_for('main.leaderboard') }}" class="text-info small text-decoration-none hover:text-white transition">Xem tất cả <i class="fas fa-arrow-right"></i></a>
+                            <a href="{{ url_for('main.leaderboard') }}"
+                                class="text-info small text-decoration-none hover:text-white transition">Xem tất cả <i
+                                    class="fas fa-arrow-right"></i></a>
                         </div>
                         <!-- Filter nhanh -->
                         <div class="d-flex gap-2 flex-wrap mt-2">
-                            <button class="btn btn-sm btn-outline-secondary px-2 py-1 filter-btn active" data-filter="all" style="font-size: 0.7rem;" onclick="filterLive(this, 'all')">
+                            <button class="btn btn-sm btn-outline-secondary px-2 py-1 filter-btn active"
+                                data-filter="all" style="font-size: 0.7rem;" onclick="filterLive(this, 'all')">
                                 <i class="fas fa-list me-1"></i> Tất cả
                             </button>
-                            <button class="btn btn-sm btn-outline-danger px-2 py-1 filter-btn" data-filter="high-risk" style="font-size: 0.7rem;" onclick="filterLive(this, 'high-risk')">
+                            <button class="btn btn-sm btn-outline-danger px-2 py-1 filter-btn" data-filter="high-risk"
+                                style="font-size: 0.7rem;" onclick="filterLive(this, 'high-risk')">
                                 <i class="fas fa-exclamation-triangle me-1"></i> Nguy hiểm
                             </button>
-                            <button class="btn btn-sm btn-outline-success px-2 py-1 filter-btn" data-filter="verified" style="font-size: 0.7rem;" onclick="filterLive(this, 'verified')">
+                            <button class="btn btn-sm btn-outline-success px-2 py-1 filter-btn" data-filter="verified"
+                                style="font-size: 0.7rem;" onclick="filterLive(this, 'verified')">
                                 <i class="fas fa-check-circle me-1"></i> Đã xác minh
+                            </button>
+
+                            <!-- New Type Filters -->
+                            <div class="vr bg-secondary mx-1 opacity-50"></div>
+
+                            <button class="btn btn-sm btn-outline-info px-2 py-1 filter-btn" data-filter="bank"
+                                style="font-size: 0.7rem;" onclick="filterLive(this, 'bank')">
+                                <i class="fas fa-university me-1"></i> STK
+                            </button>
+                            <button class="btn btn-sm btn-outline-warning px-2 py-1 filter-btn" data-filter="phone"
+                                style="font-size: 0.7rem;" onclick="filterLive(this, 'general')">
+                                <i class="fas fa-phone-alt me-1"></i> SĐT
+                            </button>
+                            <button class="btn btn-sm btn-outline-light px-2 py-1 filter-btn" data-filter="website"
+                                style="font-size: 0.7rem;" onclick="filterLive(this, 'website')">
+                                <i class="fas fa-globe me-1"></i> Link
                             </button>
                         </div>
                     </div>
 
-                    <div class="p-3 overflow-auto custom-scrollbar" style="flex: 1; background: rgba(0,0,0,0.1);" id="liveScammerList">
+                    <div class="p-3 overflow-auto custom-scrollbar" style="flex: 1; background: rgba(0,0,0,0.1);"
+                        id="liveScammerList">
                         {% if top_scammers %}
-                            <div class="vstack gap-3">
-                                {% for entry in top_scammers %}
-                                <div class="bg-white bg-opacity-5 p-3 rounded-xl border border-white border-opacity-5 hover-up cursor-pointer transition-all scammer-item" 
-                                     data-risk-level="{{ 'high' if entry.risk_score >= 60 else 'low' }}"
-                                     data-verification="{{ entry.verification_status }}"
-                                     data-scammer-id="{{ entry.id }}"
-                                     onclick="window.location.href='{{ url_for('main.scammer_profile', scammer_id=entry.id) }}'"
-                                     data-identifier="{{ entry.identifier }}"
-                                     data-name="{{ entry.name }}"
-                                     data-type="{{ entry.type }}"
-                                     data-platform="{{ entry.platform }}"
-                                     data-desc="{{ entry.description }}"
-                                     data-reports="{{ entry.total_reports }}"
-                                     data-confirmed="{{ entry.confirmed_by_count }}"
-                                     data-risk-score="{{ entry.risk_score }}"
-                                     data-verification-status="{{ entry.verification_status }}"
-                                     data-date="{{ entry.updated_at }}"
-                                     data-image="{{ entry.image }}">
-                                    
-                                    <div class="d-flex align-items-start">
-                                        <div class="bg-info bg-opacity-10 p-2 rounded-lg me-3 text-center" style="width: 42px; height: 42px; display: flex; align-items: center; justify-content: center;">
-                                            {% if entry.report_type == 'bank' %}
-                                                <i class="fas fa-university text-success"></i>
-                                            {% elif entry.report_type == 'website' %}
-                                                <i class="fas fa-globe text-info"></i>
-                                            {% else %}
-                                                <i class="fas fa-phone-alt text-warning"></i>
+                        <div class="vstack gap-3">
+                            {% for entry in top_scammers %}
+                            <div class="bg-white bg-opacity-5 p-3 rounded-xl border border-white border-opacity-5 hover-up cursor-pointer transition-all scammer-item"
+                                data-risk-level="{{ 'high' if entry.risk_score >= 60 else 'low' }}"
+                                data-verification="{{ entry.verification_status }}" data-scammer-id="{{ entry.id }}"
+                                data-report-type="{{ entry.report_type }}"
+                                onclick="window.location.href='{{ url_for('main.scammer_profile', scammer_id=entry.id) }}';"
+                                data-identifier="{% if session.get('registration_email') or session.get('is_admin') %}{{ entry.identifier }}{% else %}{{ entry.identifier | mask }}{% endif %}"
+                                data-name="{{ entry.name }}" data-type="{{ entry.type }}"
+                                data-platform="{{ entry.platform }}" data-desc="{{ entry.description }}"
+                                data-reports="{{ entry.total_reports }}" data-confirmed="{{ entry.confirmed_by_count }}"
+                                data-risk-score="{{ entry.risk_score }}"
+                                data-verification-status="{{ entry.verification_status }}"
+                                data-date="{{ entry.updated_at }}" data-image="{{ entry.image }}">
+
+                                <div class="d-flex align-items-center">
+                                    <div class="me-3 text-center">
+                                        {% if entry.report_type == 'bank' %}
+                                        <div class="bg-success bg-opacity-10 text-success rounded-circle d-flex align-items-center justify-content-center"
+                                            style="width: 48px; height: 48px;">
+                                            <i class="fas fa-university fa-lg"></i>
+                                        </div>
+                                        {% elif entry.report_type == 'website' %}
+                                        <div class="bg-info bg-opacity-10 text-info rounded-circle d-flex align-items-center justify-content-center"
+                                            style="width: 48px; height: 48px;">
+                                            <i class="fas fa-globe fa-lg"></i>
+                                        </div>
+                                        {% else %}
+                                        <div class="bg-warning bg-opacity-10 text-warning rounded-circle d-flex align-items-center justify-content-center"
+                                            style="width: 48px; height: 48px;">
+                                            <i class="fas fa-phone-alt fa-lg"></i>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="flex-grow-1 overflow-hidden">
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <h6 class="text-white fw-bold mb-0 text-truncate me-2"
+                                                style="font-size: 1rem;">
+                                                {% if session.get('registration_email') or session.get('is_admin') %}
+                                                {{ entry.identifier }}
+                                                {% else %}
+                                                {{ entry.identifier | mask }}
+                                                {% endif %}
+                                            </h6>
+                                            <span
+                                                class="badge bg-danger bg-opacity-20 text-danger border border-danger border-opacity-20 rounded-pill">
+                                                {{ entry.total_reports }} <i class="fas fa-exclamation-triangle ms-1"
+                                                    style="font-size: 0.6rem;"></i>
+                                            </span>
+                                            {% if entry.confirmed_by_count > 0 %}
+                                            <span
+                                                class="badge bg-info bg-opacity-20 text-info border border-info border-opacity-20 rounded-pill ms-1">
+                                                {{ entry.confirmed_by_count }} <i class="fas fa-users ms-1"
+                                                    style="font-size: 0.6rem;"></i>
+                                            </span>
                                             {% endif %}
                                         </div>
-                                        
-                                        <div class="flex-grow-1 overflow-hidden">
-                                            <div class="d-flex justify-content-between align-items-start mb-1">
-                                                <h6 class="text-white fw-bold mb-0 text-truncate me-2" style="font-size: 0.9rem;">
-                                                    {{ entry.identifier }}
-                                                </h6>
-                                                <div class="d-flex gap-1 flex-shrink-0">
-                                                    <!-- Verification badge -->
-                                                    {% if entry.verification_status == 'verified' %}
-                                                        <span class="badge bg-success bg-opacity-20 text-success border border-success border-opacity-25" style="font-size: 0.6rem;" title="Đã xác minh">
-                                                            <i class="fas fa-check-circle"></i>
-                                                        </span>
-                                                    {% elif entry.verification_status == 'pending' %}
-                                                        <span class="badge bg-warning bg-opacity-20 text-warning border border-warning border-opacity-25" style="font-size: 0.6rem;" title="Đang xác minh">
-                                                            <i class="fas fa-clock"></i>
-                                                        </span>
-                                                    {% else %}
-                                                        <span class="badge bg-secondary bg-opacity-20 text-secondary border border-secondary border-opacity-25" style="font-size: 0.6rem;" title="Chưa xác minh">
-                                                            <i class="fas fa-question-circle"></i>
-                                                        </span>
-                                                    {% endif %}
-                                                    
-                                                    <span class="badge bg-danger bg-opacity-20 text-danger border border-danger border-opacity-20" style="font-size: 0.65rem;">
-                                                        {{ entry.total_reports }}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                            <p class="text-slate-400 small mb-1 text-truncate" style="font-size: 0.8rem;">
-                                                {{ entry.name }}
-                                            </p>
-                                            <div class="d-flex justify-content-between align-items-center mt-2">
-                                                <div class="d-flex gap-2 align-items-center">
-                                                    <span class="badge bg-white bg-opacity-5 text-slate-300 border border-white border-opacity-10" style="font-size: 0.65rem;">
-                                                        {{ entry.type }}
-                                                    </span>
-                                                    {% if entry.confirmed_by_count > 0 %}
-                                                        <span class="badge bg-info bg-opacity-20 text-info border border-info border-opacity-25" style="font-size: 0.6rem;" title="Số người xác nhận">
-                                                            <i class="fas fa-users"></i> {{ entry.confirmed_by_count }}
-                                                        </span>
-                                                    {% endif %}
-                                                </div>
-                                                <small class="text-slate-500" style="font-size: 0.65rem;">
-                                                    {{ entry.updated_at }}
+                                        <div class="d-flex align-items-center text-slate-300 small mb-1">
+                                            <span class="text-truncate me-2" style="max-width: 150px;">{{ entry.name
+                                                }}</span>
+                                            <span class="mx-1">•</span>
+                                            <span class="text-info">{{ entry.type }}</span>
+                                        </div>
+                                        <div
+                                            class="d-flex justify-content-between align-items-center mt-2 border-top border-white border-opacity-5 pt-2">
+                                            <div class="d-flex align-items-center gap-2">
+                                                {% set badge = get_verification_badge(entry.verification_status) %}
+                                                <span
+                                                    class="badge bg-{{ badge.class }} bg-opacity-10 text-{{ badge.class }} border border-{{ badge.class }} border-opacity-20 rounded-pill px-2">
+                                                    <i class="fas {{ badge.icon }} me-1"></i> {{ badge.text }}
+                                                </span>
+                                                <small class="text-slate-400" style="font-size: 0.7rem;">
+                                                    <i class="far fa-clock me-1"></i> {{ entry.updated_at }}
                                                 </small>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                                {% endfor %}
                             </div>
+                            {% endfor %}
+                        </div>
                         {% else %}
-                            <div class="h-100 d-flex flex-column align-items-center justify-content-center text-center opacity-30">
-                                <i class="fas fa-shield-alt fa-4x text-white mb-3"></i>
-                                <p class="text-white small">Hệ thống an toàn. Chưa có cảnh báo.</p>
-                            </div>
+                        <div
+                            class="h-100 d-flex flex-column align-items-center justify-content-center text-center opacity-30">
+                            <i class="fas fa-shield-alt fa-4x text-white mb-3"></i>
+                            <p class="text-white small">Hệ thống an toàn. Chưa có cảnh báo.</p>
+                        </div>
                         {% endif %}
                     </div>
-                    
+
                     <div class="p-2 bg-black bg-opacity-20 text-center border-top border-white border-opacity-5">
-                        <small class="text-slate-500" style="font-size: 0.65rem;">Dữ liệu cập nhật theo thời gian thực</small>
+                        <small class="text-slate-500" style="font-size: 0.65rem;">Dữ liệu cập nhật theo thời gian
+                            thực</small>
                     </div>
                 </div>
             </div>
@@ -262,38 +254,44 @@
             <h2 class="fw-bold text-white">Công cụ hỗ trợ toàn diện</h2>
             <p class="text-slate-400">MindGuard trang bị cho bạn bộ 3 lá chắn mạnh mẽ nhất</p>
         </div>
-        
+
         <div class="row g-4">
             <div class="col-md-4" data-aos="fade-up" data-aos-delay="100">
                 <div class="glass-card h-100 text-center hover-up p-5 d-flex flex-column">
                     <div class="mb-4 text-info"><i class="fas fa-user-secret fa-3x"></i></div>
                     <h4 class="text-white fw-bold mb-3">Tố cáo ẩn danh</h4>
-                    <p class="text-slate-400 small mb-4 flex-grow-1">Gửi báo cáo về các số điện thoại, tài khoản ngân hàng hoặc website lừa đảo một cách an toàn. Danh tính được mã hóa tuyệt đối.</p>
-                    <a href="{{ url_for('scammer.report_scammer') }}" class="btn btn-outline-info rounded-pill px-4">Gửi tố cáo ngay</a>
+                    <p class="text-slate-400 small mb-4 flex-grow-1">Gửi báo cáo về các số điện thoại, tài khoản ngân
+                        hàng hoặc website lừa đảo một cách an toàn. Danh tính được mã hóa tuyệt đối.</p>
+                    <a href="{{ url_for('scammer.report_scammer') }}" class="btn btn-outline-info rounded-pill px-4">Gửi
+                        tố cáo ngay</a>
                 </div>
             </div>
             <div class="col-md-4" data-aos="fade-up" data-aos-delay="200">
                 <div class="glass-card h-100 text-center hover-up p-5 d-flex flex-column">
                     <div class="mb-4 text-warning"><i class="fas fa-robot fa-3x"></i></div>
                     <h4 class="text-white fw-bold mb-3">Chatbot AI 24/7</h4>
-                    <p class="text-slate-400 small mb-4 flex-grow-1">Nghi ngờ một tin nhắn lạ? Copy và gửi ngay cho AI. Hệ thống sẽ phân tích ngôn ngữ, kiểm tra đường link và đưa ra cảnh báo trong 3 giây.</p>
-                    <button onclick="document.body.classList.toggle('show-chatbot')" class="btn btn-outline-warning rounded-pill px-4">Chat với AI</button>
+                    <p class="text-slate-400 small mb-4 flex-grow-1">Nghi ngờ một tin nhắn lạ? Copy và gửi ngay cho AI.
+                        Hệ thống sẽ phân tích ngôn ngữ, kiểm tra đường link và đưa ra cảnh báo trong 3 giây.</p>
+                    <button onclick="document.body.classList.toggle('show-chatbot')"
+                        class="btn btn-outline-warning rounded-pill px-4">Chat với AI</button>
                 </div>
             </div>
             <div class="col-md-4" data-aos="fade-up" data-aos-delay="300">
                 <div class="glass-card h-100 text-center hover-up p-5 d-flex flex-column">
                     <div class="mb-4 text-success"><i class="fas fa-graduation-cap fa-3x"></i></div>
                     <h4 class="text-white fw-bold mb-3">Kiến thức phòng vệ</h4>
-                    <p class="text-slate-400 small mb-4 flex-grow-1">Nâng cao "sức đề kháng" số của bạn thông qua các bài trắc nghiệm tình huống thực tế. Nhận chứng chỉ an toàn sau khi hoàn thành.</p>
-                    <a href="{{ url_for('quiz.quiz') }}" class="btn btn-outline-success rounded-pill px-4">Làm bài test</a>
+                    <p class="text-slate-400 small mb-4 flex-grow-1">Nâng cao "sức đề kháng" số của bạn thông qua các
+                        bài trắc nghiệm tình huống thực tế. Nhận chứng chỉ an toàn sau khi hoàn thành.</p>
+                    <a href="{{ url_for('quiz.quiz') }}" class="btn btn-outline-success rounded-pill px-4">Làm bài
+                        test</a>
                 </div>
             </div>
         </div>
     </div>
 </section>
 
-<!-- Section: Cách hoạt động -->
-<section class="py-5 bg-dark bg-opacity-30">
+<!-- Section: Cách hoạt động (Redesigned) -->
+<section class="py-5 bg-transparent">
     <div class="container">
         <div class="text-center mb-5" data-aos="fade-up">
             <span class="badge rounded-pill border border-info text-info px-3 py-2 mb-3 bg-info bg-opacity-10">
@@ -304,56 +302,79 @@
                 Hệ thống bảo vệ bạn qua 3 bước đơn giản và nhanh chóng
             </p>
         </div>
-        
-        <div class="row g-4 align-items-center">
+
+        <div class="row g-4 align-items-stretch">
+            <!-- Step 1 -->
             <div class="col-md-4" data-aos="fade-up" data-aos-delay="100">
-                <div class="glass-card p-4 text-center h-100 hover-up">
-                    <div class="position-relative d-inline-block mb-4">
-                        <div class="bg-info bg-opacity-20 rounded-circle d-flex align-items-center justify-content-center" style="width: 80px; height: 80px; margin: 0 auto;">
-                            <i class="fas fa-keyboard fa-2x text-info"></i>
+                <div
+                    class="glass-card p-5 text-center h-100 hover-up position-relative overflow-hidden border-0 bg-gradient-to-br from-slate-900 to-slate-800">
+                    <!-- Big Background Number -->
+                    <h1 class="position-absolute top-0 end-0 me-3 mt-n2 fw-bold text-white display-1"
+                        style="font-size: 6rem; z-index: 0; opacity: 0.07;">
+                        1
+                    </h1>
+
+                    <div class="position-relative" style="z-index: 1;">
+                        <div class="mb-4 d-inline-block p-3 rounded-circle bg-info bg-opacity-10 shadow-lg">
+                            <i class="fas fa-search fa-3x text-info"></i>
                         </div>
-                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-info" style="font-size: 1rem;">1</span>
+                        <h4 class="text-white fw-bold mb-3">Nhập thông tin</h4>
+                        <p class="text-light opacity-75 small mb-0 px-2" style="line-height: 1.6;">
+                            Nhập SĐT, STK ngân hàng hoặc URL cần kiểm tra vào ô tìm kiếm.
+                            Hệ thống sẽ tự động nhận diện loại dữ liệu.
+                        </p>
                     </div>
-                    <h5 class="text-white fw-bold mb-3">Nhập thông tin</h5>
-                    <p class="text-slate-400 small mb-0">
-                        Nhập SĐT, STK ngân hàng hoặc URL cần kiểm tra vào ô tìm kiếm. Hệ thống tự động phát hiện loại dữ liệu.
-                    </p>
                 </div>
             </div>
-            
+
+            <!-- Step 2 -->
             <div class="col-md-4" data-aos="fade-up" data-aos-delay="200">
-                <div class="glass-card p-4 text-center h-100 hover-up">
-                    <div class="position-relative d-inline-block mb-4">
-                        <div class="bg-warning bg-opacity-20 rounded-circle d-flex align-items-center justify-content-center" style="width: 80px; height: 80px; margin: 0 auto;">
-                            <i class="fas fa-search-plus fa-2x text-warning"></i>
+                <div
+                    class="glass-card p-5 text-center h-100 hover-up position-relative overflow-hidden border-0 bg-gradient-to-br from-slate-900 to-slate-800">
+                    <h1 class="position-absolute top-0 end-0 me-3 mt-n2 fw-bold text-white display-1"
+                        style="font-size: 6rem; z-index: 0; opacity: 0.07;">
+                        2
+                    </h1>
+
+                    <div class="position-relative" style="z-index: 1;">
+                        <div class="mb-4 d-inline-block p-3 rounded-circle bg-warning bg-opacity-10 shadow-lg">
+                            <i class="fas fa-brain fa-3x text-warning"></i>
                         </div>
-                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning" style="font-size: 1rem;">2</span>
+                        <h4 class="text-white fw-bold mb-3">AI Phân tích</h4>
+                        <p class="text-light opacity-75 small mb-0 px-2" style="line-height: 1.6;">
+                            Trí tuệ nhân tạo quét cơ sở dữ liệu lớn, đối chiếu hàng nghìn báo cáo
+                            và tính toán điểm rủi ro theo thời gian thực.
+                        </p>
                     </div>
-                    <h5 class="text-white fw-bold mb-3">Phân tích rủi ro</h5>
-                    <p class="text-slate-400 small mb-0">
-                        AI quét cơ sở dữ liệu, đối chiếu với hàng nghìn báo cáo từ cộng đồng và tính toán điểm rủi ro.
-                    </p>
                 </div>
             </div>
-            
+
+            <!-- Step 3 -->
             <div class="col-md-4" data-aos="fade-up" data-aos-delay="300">
-                <div class="glass-card p-4 text-center h-100 hover-up">
-                    <div class="position-relative d-inline-block mb-4">
-                        <div class="bg-success bg-opacity-20 rounded-circle d-flex align-items-center justify-content-center" style="width: 80px; height: 80px; margin: 0 auto;">
-                            <i class="fas fa-shield-alt fa-2x text-success"></i>
+                <div
+                    class="glass-card p-5 text-center h-100 hover-up position-relative overflow-hidden border-0 bg-gradient-to-br from-slate-900 to-slate-800">
+                    <h1 class="position-absolute top-0 end-0 me-3 mt-n2 fw-bold text-white display-1"
+                        style="font-size: 6rem; z-index: 0; opacity: 0.07;">
+                        3
+                    </h1>
+
+                    <div class="position-relative" style="z-index: 1;">
+                        <div class="mb-4 d-inline-block p-3 rounded-circle bg-success bg-opacity-10 shadow-lg">
+                            <i class="fas fa-shield-alt fa-3x text-success"></i>
                         </div>
-                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-success" style="font-size: 1rem;">3</span>
+                        <h4 class="text-white fw-bold mb-3">Nhận kết quả</h4>
+                        <p class="text-light opacity-75 small mb-0 px-2" style="line-height: 1.6;">
+                            Nhận cảnh báo rủi ro (An toàn / Nguy hiểm) kèm theo gợi ý hành động
+                            cụ thể để bảo vệ tài sản của bạn.
+                        </p>
                     </div>
-                    <h5 class="text-white fw-bold mb-3">Gợi ý hành động</h5>
-                    <p class="text-slate-400 small mb-0">
-                        Nhận kết quả ngay lập tức với cảnh báo rõ ràng và hướng dẫn cụ thể để bảo vệ tài sản của bạn.
-                    </p>
                 </div>
             </div>
         </div>
-        
+
         <div class="text-center mt-5" data-aos="fade-up">
-            <a href="{{ url_for('scammer.report_scammer') }}" class="btn btn-info btn-lg px-5 rounded-pill fw-bold shadow-lg">
+            <a href="{{ url_for('scammer.report_scammer') }}"
+                class="btn btn-info btn-lg px-5 rounded-pill fw-bold shadow-lg">
                 <i class="fas fa-play-circle me-2"></i> Bắt đầu kiểm tra ngay
             </a>
         </div>
@@ -364,14 +385,16 @@
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content glass-card shadow-2xl border-white border-opacity-10">
             <div class="modal-header border-bottom border-white border-opacity-10 p-4">
-                <h5 class="modal-title text-white fw-bold"><i class="fas fa-file-alt me-2 text-warning"></i>Hồ sơ Cảnh báo</h5>
+                <h5 class="modal-title text-white fw-bold"><i class="fas fa-file-alt me-2 text-warning"></i>Hồ sơ Cảnh
+                    báo</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body p-4">
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <div class="text-center mb-4">
-                            <div class="d-inline-block p-3 rounded-circle bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 mb-3">
+                            <div
+                                class="d-inline-block p-3 rounded-circle bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 mb-3">
                                 <i class="fas fa-exclamation-triangle fa-2x"></i>
                             </div>
                             <h3 class="text-white fw-bold mb-1 text-break" id="detailId">...</h3>
@@ -396,18 +419,24 @@
 
                         <div class="mb-3">
                             <label class="text-slate-500 small fw-bold text-uppercase">Chi tiết thủ đoạn:</label>
-                            <p class="text-white small fst-italic mt-1 p-3 bg-white bg-opacity-5 rounded-lg border border-white border-opacity-5" id="detailDesc">...</p>
+                            <p class="text-white small fst-italic mt-1 p-3 bg-white bg-opacity-5 rounded-lg border border-white border-opacity-5"
+                                id="detailDesc">...</p>
                         </div>
                     </div>
 
                     <div class="col-md-6">
                         <div id="evidenceSection" class="h-100 d-none d-flex flex-column">
-                            <label class="text-slate-500 small fw-bold text-uppercase mb-2 text-center">Ảnh Bằng Chứng</label>
-                            <div class="rounded-xl overflow-hidden border border-white border-opacity-10 bg-black bg-opacity-50 flex-grow-1 d-flex align-items-center justify-content-center" style="min-height: 250px;">
-                                <img src="" id="detailImage" class="img-fluid" style="max-height: 350px; max-width: 100%; object-fit: contain;">
+                            <label class="text-slate-500 small fw-bold text-uppercase mb-2 text-center">Ảnh Bằng
+                                Chứng</label>
+                            <div class="rounded-xl overflow-hidden border border-white border-opacity-10 bg-black bg-opacity-50 flex-grow-1 d-flex align-items-center justify-content-center"
+                                style="min-height: 250px;">
+                                <img src="" id="detailImage" class="img-fluid"
+                                    style="max-height: 350px; max-width: 100%; object-fit: contain;">
                             </div>
                         </div>
-                        <div id="noEvidenceSection" class="h-100 d-flex flex-column align-items-center justify-content-center text-slate-500 border border-white border-opacity-10 rounded-xl border-dashed bg-white bg-opacity-5" style="min-height: 250px;">
+                        <div id="noEvidenceSection"
+                            class="h-100 d-flex flex-column align-items-center justify-content-center text-slate-500 border border-white border-opacity-10 rounded-xl border-dashed bg-white bg-opacity-5"
+                            style="min-height: 250px;">
                             <i class="fas fa-user-secret fa-4x mb-3 opacity-20"></i>
                             <small class="text-uppercase fw-bold opacity-50">Chưa có ảnh bằng chứng</small>
                         </div>
@@ -415,7 +444,8 @@
                 </div>
             </div>
             <div class="modal-footer border-top border-white border-opacity-10 justify-content-center p-4">
-                <button type="button" class="btn btn-outline-light rounded-pill px-5 border-opacity-25" data-bs-dismiss="modal">Đóng hồ sơ</button>
+                <button type="button" class="btn btn-outline-light rounded-pill px-5 border-opacity-25"
+                    data-bs-dismiss="modal">Đóng hồ sơ</button>
             </div>
         </div>
     </div>
@@ -431,112 +461,27 @@
             </div>
             <div class="modal-body text-center pb-5 px-4">
                 <h3 class="fw-bold text-white mb-2" id="resultTitle">Đang quét...</h3>
-                <p class="text-slate-400 mb-4" id="resultDesc">Vui lòng chờ giây lát trong khi hệ thống phân tích dữ liệu.</p>
-                <div id="foundList" class="text-start bg-black bg-opacity-20 p-3 rounded-xl border border-white border-opacity-5 d-none custom-scrollbar" style="max-height: 200px; overflow-y: auto;"></div>
+                <p class="text-slate-400 mb-4" id="resultDesc">Vui lòng chờ giây lát trong khi hệ thống phân tích dữ
+                    liệu.</p>
+                <div id="foundList"
+                    class="text-start bg-black bg-opacity-20 p-3 rounded-xl border border-white border-opacity-5 d-none custom-scrollbar"
+                    style="max-height: 200px; overflow-y: auto;"></div>
             </div>
             <div class="modal-footer border-top border-white border-opacity-10 justify-content-center p-4 gap-3">
-                <button type="button" class="btn btn-outline-light rounded-pill px-4 border-opacity-25" data-bs-dismiss="modal">Đóng</button>
-                <a href="{{ url_for('scammer.report_scammer') }}" class="btn btn-primary rounded-pill px-4 bg-gradient-to-r from-blue-600 to-cyan-500 border-0">Gửi tố cáo mới</a>
+                <button type="button" class="btn btn-outline-light rounded-pill px-4 border-opacity-25"
+                    data-bs-dismiss="modal">Đóng</button>
+                <a href="{{ url_for('scammer.report_scammer') }}"
+                    class="btn btn-primary rounded-pill px-4 bg-gradient-to-r from-blue-600 to-cyan-500 border-0">Gửi tố
+                    cáo mới</a>
             </div>
         </div>
     </div>
 </div>
 
+<!-- Custom JS for Homepage -->
 <script>
-    function filterLive(button, filterType) {
-        // Update active button
-        document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
-        button.classList.add('active');
-        
-        const items = document.querySelectorAll('.scammer-item');
-        items.forEach(item => {
-            let show = true;
-            
-            if (filterType === 'high-risk') {
-                show = item.dataset.riskLevel === 'high';
-            } else if (filterType === 'verified') {
-                show = item.dataset.verification === 'verified';
-            }
-            // 'all' shows everything
-            
-            item.style.display = show ? 'block' : 'none';
-        });
-    }
-
-    function showDetail(element) {
-        const identifier = element.getAttribute('data-identifier');
-        const name = element.getAttribute('data-name');
-        const type = element.getAttribute('data-type');
-        const platform = element.getAttribute('data-platform');
-        const desc = element.getAttribute('data-desc');
-        const reports = element.getAttribute('data-reports');
-        const confirmed = element.getAttribute('data-confirmed') || '0';
-        const riskScore = element.getAttribute('data-risk-score') || '0';
-        const verificationStatus = element.getAttribute('data-verification-status') || 'unverified';
-        const date = element.getAttribute('data-date');
-        const image = element.getAttribute('data-image');
-
-        document.getElementById('detailId').innerText = identifier;
-        document.getElementById('detailName').innerText = name;
-        document.getElementById('detailType').innerText = type;
-        document.getElementById('detailPlatform').innerText = platform || 'Không rõ';
-        document.getElementById('detailReports').innerText = reports + ' lượt';
-        document.getElementById('detailDate').innerText = date;
-        document.getElementById('detailDesc').innerText = desc;
-
-        const evidenceSec = document.getElementById('evidenceSection');
-        const noEvidenceSec = document.getElementById('noEvidenceSection');
-        const evidenceImg = document.getElementById('detailImage');
-        
-        if (image && image !== 'None' && image !== '' && image !== '[]') {
-            evidenceImg.src = image;
-            evidenceSec.classList.remove('d-none'); 
-            evidenceSec.classList.add('d-flex');
-            noEvidenceSec.classList.add('d-none');
-            noEvidenceSec.classList.remove('d-flex');
-        } else {
-            evidenceSec.classList.add('d-none');
-            evidenceSec.classList.remove('d-flex');
-            noEvidenceSec.classList.remove('d-none');
-            noEvidenceSec.classList.add('d-flex');
-        }
-
-        new bootstrap.Modal(document.getElementById('scammerDetailModal')).show();
-    }
-
-    function performSearch() {
-        const query = document.getElementById('searchInput').value.trim();
-        if (!query) { alert("Vui lòng nhập thông tin!"); return; }
-        const modal = new bootstrap.Modal(document.getElementById('searchResultModal'));
-        document.getElementById('resultIcon').className = 'fas fa-circle-notch fa-spin text-info';
-        document.getElementById('resultTitle').innerText = 'Đang quét...';
-        document.getElementById('foundList').classList.add('d-none');
-        modal.show();
-
-        fetch("{{ url_for('main.search_scammer') }}", {
-            method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ query: query })
-        }).then(res => res.json()).then(data => {
-            if (data.status === 'danger') {
-                document.getElementById('resultIcon').className = 'fas fa-exclamation-triangle text-danger';
-                document.getElementById('resultTitle').innerText = 'CẢNH BÁO!';
-                document.getElementById('resultDesc').innerHTML = `Thông tin <b>"${query}"</b> bị báo cáo <b>${data.total_reports} lần</b>.`;
-                let html = '';
-                data.data.forEach(item => {
-                    html += `<div class="d-flex align-items-center mb-2 border-bottom border-white border-opacity-5 pb-2"><i class="fas fa-user-secret text-danger me-3"></i><div><div class="text-white fw-bold">${item.identifier}</div><div class="small text-slate-500">${item.type}</div></div></div>`;
-                });
-                document.getElementById('foundList').innerHTML = html;
-                document.getElementById('foundList').classList.remove('d-none');
-            } else {
-                document.getElementById('resultIcon').className = 'fas fa-shield-alt text-success';
-                document.getElementById('resultTitle').innerText = 'CHƯA CÓ DỮ LIỆU';
-                document.getElementById('resultDesc').innerText = `Hệ thống chưa ghi nhận báo cáo về "${query}".`;
-            }
-        });
-    }
-
-    document.getElementById('searchInput').addEventListener('keypress', function (e) {
-        if (e.key === 'Enter') performSearch();
-    });
+    window.SEARCH_URL = "{{ url_for('main.search_scammer') }}";
 </script>
+<script src="{{ url_for('static', filename='js/homepage.js') }}"></script>
 
 {% endblock %}

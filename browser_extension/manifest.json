@@ -1,0 +1,22 @@
+{
+  "manifest_version": 3,
+  "name": "MindGuard - Chống Lừa Đảo",
+  "version": "1.0",
+  "description": "Cảnh báo lừa đảo thời gian thực khi truy cập website hoặc nhận tin nhắn lạ.",
+  "permissions": ["activeTab", "scripting"],
+  "host_permissions": ["<all_urls>"],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"]
+    }
+  ]
+}

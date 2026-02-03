@@ -14,6 +14,7 @@ def load_local_env(filename):
     return {}
 
 cf_config = load_local_env('cloudflare.json')
+ai_config = load_local_env('chatbot.json')
 
 class Config:
     BASE_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -26,11 +27,12 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
     # Cấu hình AI (OpenRouter)
-    OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY") or "sk-or-v1-..." 
+    OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY") or ai_config.get("OPENROUTER_API_KEY") or "sk-or-v1-..." 
     OPENROUTER_MODELS = [
-        "qwen/qwen-2.5-vl-7b-instruct:free",
-        "google/gemini-2.0-flash-exp:free",
-        "meta-llama/llama-3.3-70b-instruct:free",
+        "liquid/lfm-2.5-1.2b-instruct:free",
+        "liquid/lfm-2.5-1.2b-thinking:free",
+        "allenai/molmo-2-8b:free",
+        "google/gemini-2.0-flash-lite-preview-02-05:free"
     ]
     
     # Cloudflare Turnstile

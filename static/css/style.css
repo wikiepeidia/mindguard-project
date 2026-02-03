@@ -5,21 +5,30 @@
 
 :root {
     /* --- BẢNG MÀU GIAO DIỆN TỐI (CYBER SECURITY THEME) --- */
-    --primary-bg: #0f172a;       /* Nền chính: Xanh than đậm */
-    --secondary-bg: #1e293b;     /* Nền phụ: Xanh xám */
-    
+    --primary-bg: #0f172a;
+    /* Nền chính: Xanh than đậm */
+    --secondary-bg: #1e293b;
+    /* Nền phụ: Xanh xám */
+
     /* Màu chữ đã chỉnh sửa cho dễ đọc */
-    --text-main: #f1f5f9;        /* Chữ chính: Trắng kem (Slate 100) */
-    --text-secondary: #cbd5e1;   /* Chữ phụ: Xám bạc (Slate 300) */
-    --text-muted: #94a3b8;       /* Chữ mờ: Xám sáng (Slate 400) - Sửa lỗi khó đọc */
-    
-    --accent-color: #06b6d4;     /* Điểm nhấn: Xanh Neon (Cyan) */
+    --text-main: #f1f5f9;
+    /* Chữ chính: Trắng kem (Slate 100) */
+    --text-secondary: #cbd5e1;
+    /* Chữ phụ: Xám bạc (Slate 300) */
+    --text-muted: #94a3b8;
+    /* Chữ mờ: Xám sáng (Slate 400) - Sửa lỗi khó đọc */
+
+    --accent-color: #06b6d4;
+    /* Điểm nhấn: Xanh Neon (Cyan) */
     --accent-hover: #22d3ee;
-    
-    --danger: #ef4444;           /* Đỏ cảnh báo */
-    --success: #10b981;          /* Xanh thành công */
-    --warning: #f59e0b;          /* Vàng cảnh báo */
-    
+
+    --danger: #ef4444;
+    /* Đỏ cảnh báo */
+    --success: #10b981;
+    /* Xanh thành công */
+    --warning: #f59e0b;
+    /* Vàng cảnh báo */
+
     /* Hiệu ứng kính */
     --glass-bg: rgba(30, 41, 59, 0.75);
     --glass-border: rgba(255, 255, 255, 0.12);
@@ -29,13 +38,27 @@
 body {
     font-family: 'Inter', sans-serif;
     background-color: var(--primary-bg);
-    color: var(--text-main) !important; /* Áp dụng màu chữ sáng cho toàn web */
+    color: var(--text-main) !important;
+    /* Áp dụng màu chữ sáng cho toàn web */
     line-height: 1.6;
     overflow-x: hidden;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Ensure footer sticks to bottom */
+footer {
+    margin-top: auto;
 }
 
 /* Reset màu chữ cho các thẻ Heading */
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
     color: #ffffff !important;
     font-weight: 700;
     letter-spacing: -0.5px;
@@ -53,11 +76,13 @@ a:hover {
 
 /* Ghi đè màu chữ của Bootstrap */
 .text-muted {
-    color: var(--text-muted) !important; /* Quan trọng: Làm sáng chữ muted */
+    color: var(--text-muted) !important;
+    /* Quan trọng: Làm sáng chữ muted */
 }
 
 .text-dark {
-    color: var(--text-main) !important; /* Đổi text-dark thành sáng trong nền tối */
+    color: var(--text-main) !important;
+    /* Đổi text-dark thành sáng trong nền tối */
 }
 
 .text-secondary {
@@ -68,13 +93,16 @@ a:hover {
 ::-webkit-scrollbar {
     width: 8px;
 }
+
 ::-webkit-scrollbar-track {
     background: var(--primary-bg);
 }
+
 ::-webkit-scrollbar-thumb {
     background: #334155;
     border-radius: 4px;
 }
+
 ::-webkit-scrollbar-thumb:hover {
     background: var(--accent-color);
 }
@@ -102,7 +130,8 @@ a:hover {
     font-weight: 500;
 }
 
-.nav-link:hover, .nav-link.active {
+.nav-link:hover,
+.nav-link.active {
     color: var(--accent-color) !important;
 }
 
@@ -126,7 +155,7 @@ a:hover {
 }
 
 .btn-outline-light {
-    border: 2px solid rgba(255,255,255,0.2);
+    border: 2px solid rgba(255, 255, 255, 0.2);
     border-radius: 50px;
     font-weight: 600;
     color: var(--text-main) !important;
@@ -146,19 +175,23 @@ a:hover {
     border-radius: 16px;
     padding: 2rem;
     box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-    color: var(--text-main) !important; /* Đảm bảo chữ trong card màu trắng */
+    color: var(--text-main) !important;
+    /* Đảm bảo chữ trong card màu trắng */
 }
 
 /* --- FORM INPUTS (Sửa lỗi chữ đen trong ô nhập) --- */
-.form-control, .form-select {
+.form-control,
+.form-select {
     background-color: rgba(255, 255, 255, 0.05) !important;
     border: 1px solid var(--glass-border) !important;
-    color: #fff !important; /* Chữ khi gõ vào là màu trắng */
+    color: #fff !important;
+    /* Chữ khi gõ vào là màu trắng */
     border-radius: 10px;
     padding: 0.8rem 1rem;
 }
 
-.form-control:focus, .form-select:focus {
+.form-control:focus,
+.form-select:focus {
     background-color: rgba(255, 255, 255, 0.1) !important;
     border-color: var(--accent-color) !important;
     box-shadow: 0 0 0 4px rgba(6, 182, 212, 0.15);
@@ -166,7 +199,8 @@ a:hover {
 }
 
 .form-control::placeholder {
-    color: #64748b !important; /* Màu placeholder xám dễ nhìn */
+    color: #64748b !important;
+    /* Màu placeholder xám dễ nhìn */
 }
 
 /* --- HERO SECTION --- */
@@ -174,12 +208,14 @@ a:hover {
     position: relative;
     padding: 120px 0 80px;
     overflow: hidden;
-    z-index: 1; /* Đảm bảo section nằm đúng lớp */
+    z-index: 1;
+    /* Đảm bảo section nằm đúng lớp */
 }
 
 .hero-section .container {
     position: relative;
-    z-index: 10; /* Đẩy nội dung (chữ, nút bấm) lên cao nhất để bấm được */
+    z-index: 10;
+    /* Đẩy nội dung (chữ, nút bấm) lên cao nhất để bấm được */
 }
 
 .hero-glow {
@@ -190,11 +226,22 @@ a:hover {
     filter: blur(180px);
     opacity: 0.15;
     border-radius: 50%;
-    z-index: -1; /* Nằm dưới cùng */
-    pointer-events: none; /* QUAN TRỌNG: Cho phép chuột bấm xuyên qua lớp nền này */
+    z-index: -1;
+    /* Nằm dưới cùng */
+    pointer-events: none;
+    /* QUAN TRỌNG: Cho phép chuột bấm xuyên qua lớp nền này */
 }
-.hero-glow-1 { top: -100px; right: -100px; }
-.hero-glow-2 { bottom: -100px; left: -100px; background: #6366f1; }
+
+.hero-glow-1 {
+    top: -100px;
+    right: -100px;
+}
+
+.hero-glow-2 {
+    bottom: -100px;
+    left: -100px;
+    background: #6366f1;
+}
 
 .hero-title {
     font-size: 3.5rem;
@@ -205,7 +252,8 @@ a:hover {
     line-height: 1.2;
     margin-bottom: 1.5rem;
     position: relative;
-    z-index: 10; /* Đảm bảo tiêu đề nổi lên */
+    z-index: 10;
+    /* Đảm bảo tiêu đề nổi lên */
 }
 
 /* --- SCAM CARDS (Thẻ báo cáo) --- */
@@ -221,21 +269,37 @@ a:hover {
 .scam-card:hover {
     border-color: var(--accent-color);
     transform: translateY(-5px);
-    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 }
 
 .scam-header {
-    background: rgba(0,0,0,0.2);
+    background: rgba(0, 0, 0, 0.2);
     padding: 1rem;
     border-bottom: 1px solid var(--glass-border);
 }
 
-.scam-body { padding: 1.5rem; }
+.scam-body {
+    padding: 1.5rem;
+}
 
 /* Badges */
-.badge-danger { background: rgba(239, 68, 68, 0.2); color: #fca5a5 !important; border: 1px solid rgba(239, 68, 68, 0.3); }
-.badge-warning { background: rgba(245, 158, 11, 0.2); color: #fcd34d !important; border: 1px solid rgba(245, 158, 11, 0.3); }
-.badge-tech { background: rgba(6, 182, 212, 0.2); color: #67e8f9 !important; border: 1px solid rgba(6, 182, 212, 0.3); }
+.badge-danger {
+    background: rgba(239, 68, 68, 0.2);
+    color: #fca5a5 !important;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.badge-warning {
+    background: rgba(245, 158, 11, 0.2);
+    color: #fcd34d !important;
+    border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.badge-tech {
+    background: rgba(6, 182, 212, 0.2);
+    color: #67e8f9 !important;
+    border: 1px solid rgba(6, 182, 212, 0.3);
+}
 
 /* --- FOOTER --- */
 footer {
@@ -254,6 +318,7 @@ footer h5 {
 .hover-link {
     transition: 0.2s;
 }
+
 .hover-link:hover {
     color: var(--accent-color) !important;
     padding-left: 5px;
@@ -263,7 +328,7 @@ footer h5 {
 .dropdown-menu {
     background: #1e293b !important;
     border: 1px solid var(--glass-border);
-    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
 }
 
 .dropdown-item {
@@ -272,7 +337,7 @@ footer h5 {
 }
 
 .dropdown-item:hover {
-    background: rgba(255,255,255,0.05);
+    background: rgba(255, 255, 255, 0.05);
     color: #fff !important;
 }
 
@@ -286,11 +351,13 @@ footer h5 {
     border: none;
     border-left: 4px solid var(--accent-color);
     color: #fff !important;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
 }
+
 .btn-close {
     filter: invert(1) grayscale(100%) brightness(200%);
 }
+
 /* --- REPORT PAGE STYLING --- */
 
 /* Tiêu đề section dạng thẻ bài */
@@ -362,6 +429,7 @@ footer h5 {
     color: var(--accent-color);
     transform: translateY(-5px);
 }
+
 /* --- ADMIN DASHBOARD STYLES (Dán vào cuối file style.css) --- */
 
 /* Sidebar (Menu trái) */
@@ -376,7 +444,8 @@ footer h5 {
     text-decoration: none;
 }
 
-.admin-sidebar-link:hover, .admin-sidebar-link.active {
+.admin-sidebar-link:hover,
+.admin-sidebar-link.active {
     background: rgba(6, 182, 212, 0.15);
     color: var(--accent-color) !important;
     padding-left: 1.5rem;
@@ -384,15 +453,17 @@ footer h5 {
 
 /* Thẻ thống kê (Stat Card) - Sửa lỗi hiện ô trắng */
 .stat-card-admin {
-    background: linear-gradient(145deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.95)) !important; /* Màu tối */
+    background: linear-gradient(145deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.95)) !important;
+    /* Màu tối */
     border: 1px solid var(--glass-border);
     border-radius: 12px;
     padding: 1.5rem;
     position: relative;
     overflow: hidden;
     transition: 0.3s;
-    min-height: 140px; /* Đảm bảo độ cao */
-    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+    min-height: 140px;
+    /* Đảm bảo độ cao */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
 }
 
 .stat-card-admin h3 {
@@ -437,14 +508,17 @@ footer h5 {
 .table-admin tr:hover td {
     background-color: rgba(255, 255, 255, 0.05) !important;
 }
+
 /* Animation nhấp nháy cho chữ LIVE */
 @keyframes pulse-red {
     0% {
         box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
     }
+
     70% {
         box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
     }
+
     100% {
         box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
     }
@@ -457,20 +531,25 @@ footer h5 {
 .hover-up {
     transition: transform 0.3s ease;
 }
+
 .hover-up:hover {
     transform: translateY(-10px);
 }
+
 /* Tùy chỉnh thanh cuộn cho ô cửa sổ Live Feed */
 .custom-scrollbar::-webkit-scrollbar {
     width: 5px;
 }
+
 .custom-scrollbar::-webkit-scrollbar-track {
-    background: rgba(0,0,0,0.1);
+    background: rgba(0, 0, 0, 0.1);
 }
+
 .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: rgba(255,255,255,0.1);
+    background: rgba(255, 255, 255, 0.1);
     border-radius: 10px;
 }
+
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
     background: var(--accent-color);
 }
@@ -478,6 +557,7 @@ footer h5 {
 .transition-fast {
     transition: 0.2s ease;
 }
+
 /* Paste vào cuối file style.css */
 
 /* SEARCH BAR */
@@ -485,6 +565,7 @@ footer h5 {
     color: #64748b !important;
     font-style: italic;
 }
+
 .search-wrapper .input-group:focus-within {
     box-shadow: 0 0 25px rgba(6, 182, 212, 0.4) !important;
     border-color: var(--accent-color) !important;
@@ -497,8 +578,8 @@ footer h5 {
     justify-content: center;
     width: 100px;
     height: 100px;
-    background: rgba(0,0,0,0.3) !important;
-    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(0, 0, 0, 0.3) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 /* ADMIN SIDEBAR & STATS */
@@ -512,11 +593,14 @@ footer h5 {
     font-weight: 600;
     text-decoration: none;
 }
-.admin-sidebar-link:hover, .admin-sidebar-link.active {
+
+.admin-sidebar-link:hover,
+.admin-sidebar-link.active {
     background: rgba(6, 182, 212, 0.15) !important;
     color: var(--accent-color) !important;
     padding-left: 1.5rem;
 }
+
 .stat-card-admin {
     background: linear-gradient(145deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.95)) !important;
     border: 1px solid var(--glass-border);
@@ -526,6 +610,7 @@ footer h5 {
     overflow: hidden;
     min-height: 140px;
 }
+
 .stat-icon-bg {
     position: absolute;
     right: -10px;
@@ -536,48 +621,73 @@ footer h5 {
 }
 
 /* TABLE ADMIN */
-.table-admin { color: var(--text-main) !important; }
+.table-admin {
+    color: var(--text-main) !important;
+}
+
 .table-admin thead th {
     background-color: rgba(15, 23, 42, 0.8) !important;
     color: var(--accent-color) !important;
     border-bottom: 2px solid var(--glass-border);
     padding: 1rem;
 }
+
 .table-admin tbody td {
     border-bottom: 1px solid var(--glass-border);
     background: transparent !important;
     padding: 1rem;
 }
-.table-admin tr:hover td { background-color: rgba(255, 255, 255, 0.05) !important; }
+
+.table-admin tr:hover td {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+}
 
 /* CUSTOM SCROLLBAR FOR LIVE FEED */
-.custom-scrollbar::-webkit-scrollbar { width: 5px; }
-.custom-scrollbar::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); }
-.custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+.custom-scrollbar::-webkit-scrollbar {
+    width: 5px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+}
+
 .form-select option {
-background-color: #1e293b !important; /* Màu nền xanh đen (khớp giao diện) */
-    color: #f1f5f9 !important; /* Màu chữ trắng sáng */
+    background-color: #1e293b !important;
+    /* Màu nền xanh đen (khớp giao diện) */
+    color: #f1f5f9 !important;
+    /* Màu chữ trắng sáng */
     padding: 10px;
 }
+
 /* --- FIX MÀU CHỮ BẢNG SỔ ĐEN --- */
 
 /* 1. Ép màu chữ trong các ô bảng thành màu trắng sáng */
 .table-admin tbody td {
-    color: #f8fafc !important; /* Trắng sáng */
-    vertical-align: middle;     /* Căn giữa chiều dọc */
-    font-size: 0.95rem;         /* Chữ to hơn xíu cho dễ đọc */
+    color: #f8fafc !important;
+    /* Trắng sáng */
+    vertical-align: middle;
+    /* Căn giữa chiều dọc */
+    font-size: 0.95rem;
+    /* Chữ to hơn xíu cho dễ đọc */
 }
 
 /* 2. Ép các dòng chữ phụ (text-muted) sáng lên (màu xám bạc) */
-.table-admin tbody td .text-muted, 
+.table-admin tbody td .text-muted,
 .table-admin tbody td .small {
-    color: #cbd5e1 !important; /* Xám bạc sáng, dễ đọc trên nền đen */
+    color: #cbd5e1 !important;
+    /* Xám bạc sáng, dễ đọc trên nền đen */
 }
 
 /* 3. Hiệu ứng khi di chuột vào dòng: Nền sáng lên, chữ trắng tinh */
 .table-admin tbody tr:hover td {
     color: #ffffff !important;
-    background-color: rgba(6, 182, 212, 0.1) !important; /* Highlight màu xanh nhẹ */
+    background-color: rgba(6, 182, 212, 0.1) !important;
+    /* Highlight màu xanh nhẹ */
 }
 
 /* 4. Fix riêng cho cột Hình thức (tránh bị dính màu đen mặc định) */
@@ -630,13 +740,17 @@ input[type="file"]::file-selector-button {
 }
 
 /* === TRIỆT TIÊU KHỐI TRẮNG Ở HEADER VÀ LIVE FEED === */
-.bg-white, .bg-light {
+.bg-white,
+.bg-light {
     background-color: transparent !important;
 }
+
 /* FIX RIÊNG CHO BADGE ĐỎ TRONG LIVE FEED */
 .compact-item-new .badge-danger-custom {
-    background: rgba(239, 68, 68, 0.1) !important; /* Đỏ nhạt cực mỏng */
-    color: #f87171 !important;                     /* Chữ đỏ sáng */
+    background: rgba(239, 68, 68, 0.1) !important;
+    /* Đỏ nhạt cực mỏng */
+    color: #f87171 !important;
+    /* Chữ đỏ sáng */
     border: 1px solid rgba(239, 68, 68, 0.2) !important;
     font-size: 0.65rem !important;
     font-weight: 700;

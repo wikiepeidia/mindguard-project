@@ -2,7 +2,7 @@
 {% block content %}
 <div class="row justify-content-center">
   <div class="col-lg-5">
-    <div class="card shadow-sm border-0 rounded-4 glass-card">
+    <div class="card shadow-sm border-0 rounded-4 glass-card" data-aos="fade-up" data-aos-duration="1000">
       <div class="card-body p-5">
         <h3 class="fw-bold mb-3 text-center">Đăng nhập</h3>
 
@@ -18,10 +18,22 @@
 
           <!-- Cloudflare Turnstile -->
           {% if site_key %}
-          <div class="mb-3 d-flex justify-content-center">
-            <div class="cf-turnstile" data-sitekey="{{ site_key }}"></div>
+          <div class="mb-3 d-flex justify-content-center" id="turnstile-container">
+            <div class="cf-turnstile" data-sitekey="{{ site_key }}" data-theme="dark"></div>
           </div>
           {% endif %}
+
+          <!-- Math Captcha Fallback (shown if Turnstile missing or via JS fallback) -->
+          <div id="math-captcha-container" class="mb-3 {% if site_key and not force_math %}d-none{% endif %}">
+            <label class="form-label text-warning"><i class="fas fa-calculator me-2"></i>Câu hỏi bảo mật (Không dùng
+              Cloudflare)</label>
+            <div class="input-group">
+              <span class="input-group-text bg-secondary border-secondary text-white fw-bold">{{ math_question }}</span>
+              <input type="number" class="form-control bg-dark border-secondary text-white" name="math_answer"
+                placeholder="Kết quả?">
+            </div>
+            <small class="text-muted d-block mt-1">* Nhập kết quả phép tính trên để xác thực.</small>
+          </div>
 
           <div class="d-grid mb-3">
             <button type="submit" class="btn btn-primary btn-lg rounded-pill fw-bold">Đăng nhập</button>

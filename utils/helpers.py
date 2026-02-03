@@ -192,3 +192,13 @@ def get_risk_level_info(risk_score: int) -> dict:
             'text': 'RỦI RO THẤP',
             'icon': 'fa-shield-alt'
         }
+import random
+
+def generate_math_problem():
+    """Generate a simple math problem for captcha."""
+    a = random.randint(1, 10)
+    b = random.randint(1, 10)
+    return {
+        "question": f"{a} + {b} = ?",
+        "answer": str(a + b)
+    }

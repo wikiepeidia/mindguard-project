@@ -1,7 +1,7 @@
 import os, uuid, requests
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, current_app
 from werkzeug.utils import secure_filename
-from models import db, ScammerReport, ScammerLeaderboard
+from models import db, ScammerReport, ScammerLeaderboard, Subscription, Registration
 from utils.encryption import hash_reporter_id, encrypt_scammer_info, validate_evidence, serialize_evidence
 from utils.helpers import calculate_danger_level, login_required
 from config import Config
@@ -9,30 +9,51 @@ from config import Config
 scammer_bp = Blueprint('scammer', __name__, url_prefix='/scammer')
 
 @scammer_bp.route("/report", methods=["GET", "POST"])
-@login_required
+# @login_required  <-- Removed to allow anonymous reporting
 def report_scammer():
+    from utils.helpers import generate_math_problem
+    
     if request.method == "POST":
-        # 1. Validate CAPTCHA (Cloudflare Turnstile)
+        # 1. Validate CAPTCHA (Hybrid)
         cf_token = request.form.get('cf-turnstile-response')
         cf_secret = Config.CLOUDFLARE_SECRET_KEY
         
-        if cf_secret:
+        captcha_success = False
+        
+        # Try Cloudflare
+        if cf_secret and cf_token:
             try:
                 verify_url = "https://challenges.cloudflare.com/turnstile/v0/siteverify"
-                validate_res = requests.post(verify_url, data={'secret': cf_secret, 'response': cf_token}, timeout=5)
-                if not validate_res.json().get('success'):
-                    flash("Xác thực bảo mật thất bại. Vui lòng thử lại.", "danger")
-                    return redirect(url_for("scammer.report_scammer"))
+                validate_res = requests.post(verify_url, data={'secret': cf_secret, 'response': cf_token}, timeout=2)
+                if validate_res.json().get('success'):
+                    captcha_success = True
             except Exception as e:
                 print(f"CAPTCHA Error: {e}")
-                # Optional: Fail open or closed? Here failing open for dev convenience might be ok, but closed is safer.
                 pass 
+        
+        # Try Math
+        if not captcha_success:
+            user_math = request.form.get('math_answer')
+            correct_math = session.get('math_captcha_answer_report')
+            if user_math and correct_math and user_math.strip() == correct_math:
+                captcha_success = True
+                
+        if not captcha_success:
+            flash("Vui lòng hoàn thành xác thực (CAPTCHA hoặc Toán).", "danger")
+            math_prob = generate_math_problem()
+            session['math_captcha_answer_report'] = math_prob['answer']
+            return render_template("report_scammer.html", site_key=Config.CLOUDFLARE_SITE_KEY, math_question=math_prob['question'], force_math=True)
 
         # 2. Validate Terms
         term_truth = request.form.get("term_truth")
         term_responsibility = request.form.get("term_responsibility")
         if not term_truth or not term_responsibility:
              flash("Vui lòng đồng ý các điều khoản.", "danger")
+             # Regenerate math because redirect clears render context, although session persists.
+             # Better to render template again to keep form data if possible, but redirect is safer for reset.
+             # Sticking to redirect here as validation failure logic? 
+             # No, let's keep consistent UX. If terms fail, we should probably stick to page.
+             # But for minimal changes let's redirect.
              return redirect(url_for("scammer.report_scammer"))
 
         report_type = request.form.get("report_type", "general")
@@ -130,4 +151,32 @@ def report_scammer():
         
         return redirect(url_for("scammer.report_scammer"))
     
-    return render_template("report_scammer.html", site_key=Config.CLOUDFLARE_SITE_KEY)
+    # GET: Generate math
+    from utils.helpers import generate_math_problem
+    math_prob = generate_math_problem()
+    session['math_captcha_answer_report'] = math_prob['answer']
+    
+    return render_template("report_scammer.html", site_key=Config.CLOUDFLARE_SITE_KEY, math_question=math_prob['question'])
+
+@scammer_bp.route("/follow", methods=["POST"])
+@login_required
+def follow_scammer():
+    identifier = request.form.get("identifier")
+    if not identifier:
+        return {"status": "error", "message": "Missing identifier"}, 400
+    
+    email = session.get("registration_email")
+    user = Registration.query.filter_by(email=email).first()
+    if not user:
+        return {"status": "error", "message": "User not found"}, 404
+        
+    sub = Subscription.query.filter_by(user_id=user.id, target_identifier=identifier).first()
+    if sub:
+        db.session.delete(sub)
+        db.session.commit()
+        return {"status": "unfollowed", "message": "Đã hủy theo dõi"}
+    else:
+        new_sub = Subscription(user_id=user.id, target_identifier=identifier)
+        db.session.add(new_sub)
+        db.session.commit()
+        return {"status": "followed", "message": "Đã theo dõi"}

@@ -36,6 +36,7 @@ Huong toi uu cho scope nay la:
 - `Jinja2` (theo Flask dependency)
 
 **Implementation note:**
+
 - Khong can doi sang FastAPI/ASGI cho scope nay.
 - Thuc hien update theo tung dependency batch nho, co regression test route auth/quiz/report.
 
@@ -45,6 +46,7 @@ Huong toi uu cho scope nay la:
 - **Soon (phase tiep theo neu growth):** PostgreSQL 16+ cho write concurrency va analytics query.
 
 **SQLite hardening checklist (ap dung ngay):**
+
 - Bat `PRAGMA foreign_keys=ON` tren moi connection.
 - Can nhac transaction mode non-legacy (Python 3.12+ `autocommit=False` at connect level) de tranh edge-case transactional DDL.
 - Tao unique/index phuc vu:
@@ -60,11 +62,13 @@ Huong toi uu cho scope nay la:
 - Cloudflare Turnstile (giu va nang cap server-side verification pipeline)
 
 **Rate-limit key design (important):**
+
 - Khong chi `remote_addr`.
 - Dung composite key: `normalized_ip + session_id + device_cookie_hash + route_scope`.
 - Neu deploy sau reverse proxy, bat buoc `ProxyFix` dung so hop proxy de tranh spoof `X-Forwarded-For`.
 
 **Risk scoring inputs:**
+
 - velocity (so report / 5m, 1h)
 - duplicate content ratio
 - fingerprint churn (1 cookie -> nhieu account, 1 IP -> nhieu account)
@@ -75,11 +79,13 @@ Huong toi uu cho scope nay la:
 - `rq` + Redis worker
 
 **Use for:**
+
 - recompute leaderboard denormalized table
 - async dedupe similarity scoring
 - delayed moderation escalation
 
 **Why RQ over Celery here:**
+
 - Scope vua/nhỏ, monolith-first, RQ setup don gian hon va du dung.
 
 ### 5. Privacy and Data Protection
@@ -90,6 +96,7 @@ Huong toi uu cho scope nay la:
 - `phonenumbers` for E.164 normalization truoc khi mask/hash
 
 **Masking policy for phone (requested):**
+
 - Chi hien thi `*** *** XYZ` (3 so cuoi)
 - Luu 2 cot logic:
   - `phone_masked` (display-safe)
@@ -104,6 +111,7 @@ Huong toi uu cho scope nay la:
 - Tach style theo page (`quiz.css`, `report.css`) nhu repo da co, khong nhung inline CSS/JS vao template.
 
 **For per-question quiz flow:**
+
 - Server-rendered multi-step route (`/quiz/<attempt_id>/<step>`)
 - Session + DB state (attempt table) de support refresh/back safely
 - Optional progressive enhancement JS cho transition, nhung logic chot diem o server
@@ -158,25 +166,30 @@ Huong toi uu cho scope nay la:
 ## Implementation Approach by Target Scope
 
 1. **Light-mode UX overhaul**
+
 - Introduce design token file trong `static/css/base.css`.
 - Refactor page CSS de dong nhat contrast, spacing, typography.
 - Keep Bootstrap utility-first approach de giam rewrite.
 
-2. **Per-question quiz flow**
+1. **Per-question quiz flow**
+
 - Add `quiz_attempts` + `quiz_attempt_answers` tables.
 - Track progress theo question index; autosave moi submit.
 - Lock final scoring server-side sau question cuoi.
 
-3. **Leaderboard for reporters**
+1. **Leaderboard for reporters**
+
 - Add denormalized aggregate table (daily/weekly/all-time).
 - Update via transactional write + async reconcile job (RQ).
 - Chi hien thi identity da mask.
 
-4. **Privacy masking**
+1. **Privacy masking**
+
 - Normalize -> hash/encrypt -> mask pipeline khi ingest report.
 - Expose chi masked fields o template/API.
 
-5. **Anti-spam / anti-fraud controls**
+1. **Anti-spam / anti-fraud controls**
+
 - Route-level rate limits:
   - `/scammer/report` strict
   - auth routes medium
@@ -199,13 +212,13 @@ Huong toi uu cho scope nay la:
 
 ## Sources
 
-- Flask docs (stable): https://flask.palletsprojects.com/
-- Flask deploy behind proxy: https://flask.palletsprojects.com/en/stable/deploying/proxy_fix/
-- Flask-SQLAlchemy docs: https://flask-sqlalchemy.readthedocs.io/en/stable/
-- SQLAlchemy SQLite dialect (2.0 docs): https://docs.sqlalchemy.org/en/20/dialects/sqlite.html
-- Alembic docs (context only): https://alembic.sqlalchemy.org/en/latest/
-- Flask-Limiter docs: https://flask-limiter.readthedocs.io/en/stable/
-- Cloudflare Turnstile docs: https://developers.cloudflare.com/turnstile/
-- RQ docs: https://python-rq.org/
-- Flask-WTF docs (CSRF option): https://flask-wtf.readthedocs.io/en/1.2.x/
-- Flask-Talisman repository status check: https://github.com/GoogleCloudPlatform/flask-talisman
+- Flask docs (stable): <https://flask.palletsprojects.com/>
+- Flask deploy behind proxy: <https://flask.palletsprojects.com/en/stable/deploying/proxy_fix/>
+- Flask-SQLAlchemy docs: <https://flask-sqlalchemy.readthedocs.io/en/stable/>
+- SQLAlchemy SQLite dialect (2.0 docs): <https://docs.sqlalchemy.org/en/20/dialects/sqlite.html>
+- Alembic docs (context only): <https://alembic.sqlalchemy.org/en/latest/>
+- Flask-Limiter docs: <https://flask-limiter.readthedocs.io/en/stable/>
+- Cloudflare Turnstile docs: <https://developers.cloudflare.com/turnstile/>
+- RQ docs: <https://python-rq.org/>
+- Flask-WTF docs (CSRF option): <https://flask-wtf.readthedocs.io/en/1.2.x/>
+- Flask-Talisman repository status check: <https://github.com/GoogleCloudPlatform/flask-talisman>

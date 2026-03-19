@@ -7,7 +7,11 @@ test/
 tests/
 # C extensions
 token.json
-
+.github/agents
+.github/get-shit-done
+.github/skills
+.github/appmod
+*.docx
 *.so
 examples/
 example/
@@ -358,3 +362,4 @@ test_orders/
 sample_retail_data/
 fun_work_hub.db
 group_project_ai_ml.db
+.github/gsd-file-manifest.json

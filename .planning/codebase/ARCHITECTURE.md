@@ -7,6 +7,7 @@
 **Overall:** Modular Flask monolith using Blueprint-based feature modules.
 
 **Key Characteristics:**
+
 - Application bootstraps in a single entrypoint (`app.py`) and registers feature blueprints as route boundaries.
 - Data access is mostly route-driven through SQLAlchemy models imported from `models/models.py` and `extensions.py`.
 - Utility modules in `utils/` provide cross-cutting logic (auth decorators, masking, risk scoring, AI calls, encryption) consumed by routes.
@@ -14,6 +15,7 @@
 ## Layers
 
 **Application Bootstrap Layer:**
+
 - Purpose: Create Flask app, load config, initialize extensions, register runtime routes and template globals.
 - Location: `app.py`, `config.py`, `extensions.py`
 - Contains: Flask app creation, `Config` loading, `db`/`mail` initialization, `app.register_blueprint(...)`, template filters, startup logic.
@@ -21,6 +23,7 @@
 - Used by: All HTTP requests entering the process.
 
 **HTTP Interface Layer (Blueprints):**
+
 - Purpose: Handle request parsing, session checks, validation, render templates or JSON, and orchestrate database updates.
 - Location: `routes/main.py`, `routes/auth.py`, `routes/quiz.py`, `routes/scammer.py`, `routes/chatbot.py`, `routes/admin.py`
 - Contains: Web pages, JSON endpoints, redirects, flash messages, upload handling.
@@ -28,6 +31,7 @@
 - Used by: Browser clients and frontend JavaScript.
 
 **Data Access Layer (ORM Models):**
+
 - Purpose: Define database schema and relationships for domain entities.
 - Location: `models/models.py`, re-exported in `models/__init__.py`
 - Contains: `Registration`, `ScamReport`, `ScammerReport`, `ScammerLeaderboard`, `QuizResult`, AI chat/session entities, `Subscription`.
@@ -35,6 +39,7 @@
 - Used by: All blueprint modules and utility logic that queries persistence.
 
 **Domain Utility Layer:**
+
 - Purpose: Shared business utilities reused across route modules.
 - Location: `utils/helpers.py`, `utils/encryption.py`, `utils/ai_agent.py`, `utils/chatbot.py`, `utils/quiz_data.py`, `utils/ngrok_tunnel.py`
 - Contains: Auth decorators, score/risk calculators, masking, CAPTCHA math fallback, identifier hashing, AI prompt/query wrappers.
@@ -42,6 +47,7 @@
 - Used by: Feature blueprints in `routes/` and app bootstrap in `app.py`.
 
 **Presentation Layer:**
+
 - Purpose: Render server-side UI with static assets.
 - Location: `templates/*.html`, `static/css/*`, `static/js/*`
 - Contains: Jinja templates, page styles/scripts, dashboard/chatbot/quiz/report views.
@@ -76,6 +82,7 @@
 5. Bot reply is persisted as `AiChatMessage` and returned as JSON.
 
 **State Management:**
+
 - Request-level state: Flask request context.
 - User/auth state: Cookie-based Flask session (`registration_email`, `is_admin`, quiz values).
 - Persistent state: SQLite (`database/mindguard_v2.db`) accessed through SQLAlchemy models.
@@ -83,16 +90,19 @@
 ## Key Abstractions
 
 **Blueprint-as-Module Boundary:**
+
 - Purpose: Encapsulate route namespaces by feature.
 - Examples: `routes/main.py`, `routes/scammer.py`, `routes/chatbot.py`, `routes/admin.py`, `routes/auth.py`, `routes/quiz.py`
 - Pattern: One blueprint per module; app-level assembly in `app.py`.
 
 **Session-backed Identity Context:**
+
 - Purpose: Lightweight identity and role checks without Flask-Login.
 - Examples: `utils/helpers.py` (`login_required`), `routes/admin.py` (`session.get('is_admin')`), `routes/auth.py`.
 - Pattern: Session keys gate route access and personalization.
 
 **Active Record-like ORM Usage:**
+
 - Purpose: Route handlers execute queries directly on model classes.
 - Examples: `models/models.py` entities used in `routes/main.py`, `routes/scammer.py`, `routes/admin.py`.
 - Pattern: Query and mutation logic lives close to route handlers, with minimal repository/service layer.
@@ -100,21 +110,25 @@
 ## Entry Points
 
 **Flask Runtime Entry:**
+
 - Location: `app.py`
 - Triggers: `python app.py` or WSGI startup.
 - Responsibilities: Construct app, initialize extensions, register blueprints, set filters/context processor, run server.
 
 **Web Entry (Public):**
+
 - Location: `routes/main.py` (`/`), `routes/auth.py` (`/login`, `/register`), `routes/scammer.py` (`/scammer/report`)
 - Triggers: Browser navigation/forms.
 - Responsibilities: Public pages, auth, report intake, search/profile pages.
 
 **Web Entry (Authenticated):**
+
 - Location: `routes/quiz.py`, `routes/chatbot.py`, `routes/auth.py` (`/profile`)
 - Triggers: Logged-in user actions.
 - Responsibilities: Quiz lifecycle, certificate issuance, chat session history.
 
 **Web Entry (Admin):**
+
 - Location: `routes/admin.py` (prefix `/admin`)
 - Triggers: Admin login/session.
 - Responsibilities: Dashboard, moderation, user management, dataset export.
@@ -124,6 +138,7 @@
 **Strategy:** Localized defensive handling in route/util functions, usually with graceful fallback and user-facing flash messages.
 
 **Patterns:**
+
 - Broad `try/except` around external calls and JSON parsing (for example `utils/chatbot.py`, `routes/scammer.py`, `routes/main.py`).
 - Redirect and flash on validation failures rather than central exception middleware.
 - AI and CAPTCHA paths prefer fallback behavior over hard failure.

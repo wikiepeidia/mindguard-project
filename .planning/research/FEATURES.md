@@ -67,6 +67,7 @@ Moderation outcomes -> Quality scoring -> Credibility-weighted leaderboard
 ## MVP Recommendation (for this subsequent milestone)
 
 Prioritize:
+
 1. Light mode UX consistency (table-stake trust and usability baseline)
 2. 1-question-per-page quiz with progress and safe state handling
 3. Spam rate limits + IP/cookie-aware anti-abuse baseline
@@ -77,6 +78,7 @@ Then add:
 6. Contextual micro-learning hints in report flow
 
 Defer:
+
 - Full adaptive friction engine with advanced risk scoring: defer until telemetry quality is validated for at least one release cycle.
 - Complex ML-based bot classification: defer until rule-based false-positive/false-negative patterns are measured.
 
@@ -97,11 +99,11 @@ Defer:
 
 ## Sources
 
-- OWASP Authentication Cheat Sheet (2026): https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html
-- OWASP User Privacy Protection Cheat Sheet (2026): https://cheatsheetseries.owasp.org/cheatsheets/User_Privacy_Protection_Cheat_Sheet.html
-- Cloudflare Learning Center, What is rate limiting? (2026): https://www.cloudflare.com/learning/bots/what-is-rate-limiting/
-- FTC Consumer Scams hub (2026 updates visible): https://consumer.ftc.gov/scams
-- Nielsen Norman Group, Progressive Disclosure (classic, still relevant): https://www.nngroup.com/articles/progressive-disclosure/
+- OWASP Authentication Cheat Sheet (2026): <https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html>
+- OWASP User Privacy Protection Cheat Sheet (2026): <https://cheatsheetseries.owasp.org/cheatsheets/User_Privacy_Protection_Cheat_Sheet.html>
+- Cloudflare Learning Center, What is rate limiting? (2026): <https://www.cloudflare.com/learning/bots/what-is-rate-limiting/>
+- FTC Consumer Scams hub (2026 updates visible): <https://consumer.ftc.gov/scams>
+- Nielsen Norman Group, Progressive Disclosure (classic, still relevant): <https://www.nngroup.com/articles/progressive-disclosure/>
 
 ## Research Limits
 

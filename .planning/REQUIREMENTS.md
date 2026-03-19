@@ -83,6 +83,7 @@
 | LEAD-02 | Phase 5 | Pending |
 
 **Coverage:**
+
 - v1 requirements: 16 total
 - Mapped to phases: 16
 - Unmapped: 0 ✓

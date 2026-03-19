@@ -20,6 +20,7 @@ The largest risks are false-positive abuse controls, privacy leakage from sensit
 Keep the current monolith and upgrade in place rather than adopting microservices or SPA architecture. Add Redis-backed anti-abuse capabilities and lightweight background processing while preserving existing route and template contracts.
 
 **Core technologies:**
+
 - Flask 3.1.x: request lifecycle and blueprint composition, stable documented path from current 3.0.x baseline.
 - Flask-SQLAlchemy 3.1.x (SQLAlchemy 2.0 style incrementally): keeps model compatibility while enabling cleaner query/migration hygiene.
 - SQLite (current phase) with strict migration/index hardening: fastest delivery for v1; prepare PostgreSQL path when concurrency grows.
@@ -33,6 +34,7 @@ Keep the current monolith and upgrade in place rather than adopting microservice
 The feature research separates baseline trust expectations from engagement enhancements. For v1 planning, table-stakes should ship first, differentiators should be gated by anti-gaming safeguards, and anti-features should be explicitly blocked.
 
 **Table-stakes:**
+
 - Light-mode UX consistency across auth, quiz, reporting, and profile flows.
 - 1-question-per-page quiz with visible progress and safe state persistence.
 - Baseline anti-abuse controls on report submission (rate limiting + clear cooldown feedback).
@@ -41,6 +43,7 @@ The feature research separates baseline trust expectations from engagement enhan
 - Abuse telemetry for monitoring false positives/false negatives.
 
 **Differentiators:**
+
 - Reporter leaderboard with integrity controls.
 - Credibility-weighted scoring (quality over raw quantity).
 - Adaptive friction (step-up challenge based on risk, not blanket friction).
@@ -48,6 +51,7 @@ The feature research separates baseline trust expectations from engagement enhan
 - Privacy transparency panel explaining tracked signals and retention intent.
 
 **Anti-features (avoid in v1):**
+
 - Raw phone display in public/admin-by-default views.
 - Count-only leaderboard without quality or moderation gates.
 - Hard blocking using only a single signal (IP or cookie alone).
@@ -60,6 +64,7 @@ The feature research separates baseline trust expectations from engagement enhan
 The architecture research strongly supports additive integration seams around existing routes (`auth`, `scammer`, `quiz`) and monitor-first policy rollout.
 
 **Build order:**
+
 1. Security and data-governance foundation: migration hygiene, CSRF/rate-limit guardrails, audit logging, abuse event schema.
 2. Anti-spam monitor mode: add service layer + policy engine + telemetry repository with no hard blocks yet.
 3. Soft enforcement on report flow: challenge/block thresholds only for clearly abusive patterns; validate false-positive rate.
@@ -84,30 +89,35 @@ The architecture research strongly supports additive integration seams around ex
 Suggested phase structure for requirements and roadmap generation:
 
 ### Phase 1: Foundations (Security, Data, Observability)
+
 **Rationale:** De-risks every later feature and blocks high-severity governance failures early.
 **Delivers:** Migration hygiene, abuse tables, CSRF/rate-limit baseline, moderation audit trail, privacy masking utilities.
 **Addresses:** Table-stakes for privacy and abuse monitoring.
 **Avoids:** Pitfalls 2, 3, 7, 8.
 
 ### Phase 2: Anti-Spam Engine (Monitor -> Soft Enforce)
+
 **Rationale:** Needs telemetry before strict blocking to prevent user lockouts.
 **Delivers:** Anti-spam service + rule engine + route guard wrappers on report flow, threshold configs, reason-coded decisions.
 **Addresses:** Table-stakes for anti-abuse and cooldown feedback.
 **Avoids:** Pitfalls 1, 4, 5.
 
 ### Phase 3: UX System and Quiz Flow Modernization
+
 **Rationale:** Build shared token system before page-level redesign to avoid inconsistent UI drift.
 **Delivers:** Light-mode design token foundation, one-question-per-page quiz with progress + resilient state, mobile-first regression checks.
 **Addresses:** Table-stakes for UX consistency and staged quiz flow.
 **Avoids:** Pitfall 6.
 
 ### Phase 4: Leaderboard Integrity and Engagement
+
 **Rationale:** Leaderboard should only launch after anti-gaming and moderation signals exist.
 **Delivers:** Reporter leaderboard, quality-weighted scoring, integrity rules, reconciliation job.
 **Addresses:** Differentiators (leaderboard and credibility scoring).
 **Avoids:** Count-only gaming anti-feature.
 
 ### Phase 5: Tuning, Reliability, and Scale Preparation
+
 **Rationale:** Consolidates metrics-driven tuning after initial rollout behavior is observed.
 **Delivers:** Threshold tuning, false-positive reduction, queue hardening, optional PostgreSQL migration plan trigger criteria.
 **Addresses:** Reliability and sustainability goals.
@@ -116,12 +126,14 @@ Suggested phase structure for requirements and roadmap generation:
 ### Recommendations for v1 Scope
 
 Include in v1:
+
 - Light-mode consistency and quiz flow redesign (1 question/page) with telemetry.
 - Privacy-safe reporter masking everywhere rendered.
 - Multi-signal anti-abuse baseline with monitor-first rollout and soft enforcement.
 - Foundation for moderation auditability.
 
 Gate or defer beyond core v1:
+
 - Advanced adaptive friction engine beyond rules-based thresholds.
 - ML-driven bot classification.
 - Broad platform redesign outside targeted UX flows.
@@ -130,11 +142,13 @@ Gate or defer beyond core v1:
 ### Research Flags
 
 Phases likely needing deeper research during planning:
+
 - Phase 2: threshold calibration and false-positive management strategy under real traffic.
 - Phase 4: quality-weighted leaderboard formula and abuse-resistance economics.
 - Phase 5: PostgreSQL migration trigger criteria and cutover strategy.
 
 Phases with established patterns (lower research burden):
+
 - Phase 1: CSRF/rate limiting/audit logging/migration hygiene in Flask monoliths.
 - Phase 3: design tokens + progressive disclosure quiz UX patterns.
 
@@ -159,6 +173,7 @@ Phases with established patterns (lower research burden):
 ## Sources
 
 ### Primary (HIGH confidence)
+
 - `.planning/research/STACK.md`
 - `.planning/research/FEATURES.md`
 - `.planning/research/ARCHITECTURE.md`
@@ -166,6 +181,7 @@ Phases with established patterns (lower research burden):
 - `.planning/PROJECT.md`
 
 ### Secondary (MEDIUM confidence)
+
 - Flask official docs and deployment guidance
 - Flask-SQLAlchemy and SQLAlchemy SQLite dialect docs
 - Flask-Limiter docs

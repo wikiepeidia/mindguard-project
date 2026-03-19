@@ -5,33 +5,40 @@
 **Confidence:** MEDIUM-HIGH
 
 <user_constraints>
+
 ## User Constraints (from CONTEXT.md)
 
 ### Locked Decisions
+
 ### Quy tac masking du lieu
+
 - So dien thoai: giu 3 so cuoi, phan con lai che bang `*`.
 - Identifier khong phai so dien thoai: giu 2 ky tu dau + 2 ky tu cuoi, phan giua che.
 - Cac diem bat buoc masking trong Phase 1: index/leaderboard/public search, scammer profile khi khong du quyen, va API public responses.
 - Hien chu thich ro rang: "Du lieu da duoc che de bao mat".
 
 ### Pham vi hien thi theo vai tro
+
 - Khach chua dang nhap: chi thay du lieu da che o moi noi.
 - User da dang nhap (khong admin): van chi thay du lieu da che.
 - Admin: duoc xem full-data, nhung moi lan truy cap full-data phai ghi audit log.
 - Export admin: mac dinh masked; neu can full thi bat buoc co reason.
 
 ### Thiet ke audit log truy cap
+
 - Truong bat buoc: actor (admin id/email), timestamp, action (view/export/update), object bi truy cap, reason khi full-data, IP + user-agent.
 - Retention cho Phase 1: 90 ngay.
 - Admin UI: bang co filter theo thoi gian, actor, action.
 - Canh bao: bat alert khi tan suat truy cap full-data vuot nguong theo actor/IP.
 
 ### Claude's Discretion
+
 - Chi tiet UI component cho bang audit (pagination/filter chips/table density).
 - Rule cu the cho format mask voi cac edge-case chuoi ngan.
 - Cach to chuc service/helper de tai su dung masking logic giua route va template.
 
 ### Deferred Ideas (OUT OF SCOPE)
+
 - Anti-spam multi-signal engine, monitor -> soft-enforce logic (Phase 2).
 - Light mode token system va UX redesign (Phase 3).
 - Quiz 1-question-per-page flow (Phase 4).
@@ -39,6 +46,7 @@
 </user_constraints>
 
 <phase_requirements>
+
 ## Phase Requirements
 
 | ID | Description | Research Support |
@@ -61,12 +69,14 @@ Testing infrastructure is currently ad-hoc (script-style tests, no pytest instal
 ## Implementation Options
 
 ### Option A: Minimal Patch-In-Place (fastest, highest regression risk)
+
 - Modify existing `mask_sensitive_data` and patch each route/template individually.
 - Keep audit logging inline in `routes/admin.py` handlers.
 - Pros: low immediate code movement.
 - Cons: high drift risk, duplicate logic, easy to miss endpoints, difficult to verify PRIV-02.
 
 ### Option B: Central Privacy Policy + Audit Service (recommended)
+
 - Add a dedicated privacy policy function set (mask + role visibility + payload transformation).
 - Add `SensitiveAccessLog` model + migration + service function `log_sensitive_access(...)`.
 - Route all public/user display and API output through policy functions.
@@ -75,6 +85,7 @@ Testing infrastructure is currently ad-hoc (script-style tests, no pytest instal
 - Cons: moderate refactor in `routes/main.py`, `routes/api.py`, `routes/admin.py`, and templates.
 
 ### Option C: SQL/View-Layer Masking (not recommended for this phase)
+
 - Push masking into SQL projections/views.
 - Pros: database-level consistency for selected queries.
 - Cons: poor fit for mixed display types and Flask template logic, harder to preserve existing route behavior quickly in brownfield.
@@ -82,6 +93,7 @@ Testing infrastructure is currently ad-hoc (script-style tests, no pytest instal
 ## Recommended Approach
 
 Use Option B with phased rollout:
+
 1. Introduce policy + audit primitives (no behavior change yet).
 2. Switch public and authenticated non-admin display paths to masked outputs.
 3. Add admin-only full-data paths with mandatory audit writes.
@@ -91,6 +103,7 @@ Use Option B with phased rollout:
 ## Standard Stack
 
 ### Core
+
 | Library | Version | Purpose | Why Standard |
 |---------|---------|---------|--------------|
 | Flask | 3.0.3 (pinned), 3.1.3 (installed) | Request handling, session role checks, template rendering | Existing framework, all routes already built on blueprints. |
@@ -99,12 +112,14 @@ Use Option B with phased rollout:
 | sqlite3 | 3.49.1 (runtime) | Current DB engine | Supports additive ALTER TABLE strategy and reliable local operations. |
 
 ### Supporting
+
 | Library | Version | Purpose | When to Use |
 |---------|---------|---------|-------------|
 | Werkzeug request API (via Flask) | bundled | `request.remote_addr`, `request.user_agent.string` for audit metadata | Every admin full-data access write. |
 | Python `csv` | stdlib | Controlled masked/full export output | Admin export endpoint policy enforcement. |
 
 ### Alternatives Considered
+
 | Instead of | Could Use | Tradeoff |
 |------------|-----------|----------|
 | Flask session booleans (`is_admin`) | Flask-Login roles/permissions | Better long-term auth model, but too large for Phase 1 scope. |
@@ -112,6 +127,7 @@ Use Option B with phased rollout:
 | Script-style unittest only | pytest + fixtures | Better maintainability; requires Wave 0 setup work. |
 
 **Installation (if environment missing runtime deps):**
+
 ```bash
 pip install -r requirements.txt
 ```
@@ -119,6 +135,7 @@ pip install -r requirements.txt
 ## Architecture Patterns
 
 ### Recommended Project Structure
+
 ```text
 utils/
   privacy_policy.py        # mask rules + role-based visibility + annotation helper
@@ -135,9 +152,11 @@ templates/
 ```
 
 ### Pattern 1: Privacy-By-Default Output Adapter
+
 **What:** Convert model objects to safe display payloads before rendering/JSON.
 **When to use:** Any route returning identifier/phone-like fields.
 **Example:**
+
 ```python
 # Source: project pattern + PRIV decisions
 def to_display_identifier(raw_identifier: str, report_type: str, is_admin: bool) -> str:
@@ -150,9 +169,11 @@ def to_display_identifier(raw_identifier: str, report_type: str, is_admin: bool)
 ```
 
 ### Pattern 2: Explicit Sensitive Access Logging at Intent Points
+
 **What:** Write audit row where full-data is intentionally exposed/exported/updated.
 **When to use:** Admin full view actions, full export actions, sensitive updates.
 **Example:**
+
 ```python
 # Source: Flask request API + SQLAlchemy session practices
 def log_sensitive_access(db, actor_id, actor_email, action, object_type, object_id, reason=None):
@@ -171,6 +192,7 @@ def log_sensitive_access(db, actor_id, actor_email, action, object_type, object_
 ```
 
 ### Anti-Patterns to Avoid
+
 - **Template-level role branching for raw identifier:** current templates expose full data for logged-in non-admin users; violates locked constraints.
 - **Multiple mask rules across files:** causes PRIV-02 drift and silent inconsistencies.
 - **Best-effort audit logging (`try/except: pass`) for admin full access:** governance data loss.
@@ -210,24 +232,28 @@ def log_sensitive_access(db, actor_id, actor_email, action, object_type, object_
 ## Common Pitfalls
 
 ### Pitfall 1: Logged-in Non-Admin Sees Full Identifier
+
 **What goes wrong:** Current condition patterns (`registration_email or is_admin`) expose raw identifiers to any logged-in user.
 **Why it happens:** Authenticated state is treated as privileged state.
 **How to avoid:** Separate `is_authenticated` from `can_view_sensitive_full`; only admin returns full.
 **Warning signs:** Template snippets with `or session.get('registration_email')` around sensitive fields.
 
 ### Pitfall 2: API and UI Policy Drift
+
 **What goes wrong:** HTML masked, API still returns raw identifier.
 **Why it happens:** No shared serializer/policy layer.
 **How to avoid:** Use one output adapter in both `routes/main.py` and `routes/api.py`.
 **Warning signs:** `top_match.scammer_info_raw` directly in JSON response.
 
 ### Pitfall 3: Audit Coverage Gaps
+
 **What goes wrong:** Some admin full-data flows are not logged (especially exports).
 **Why it happens:** Logging added only in one route.
 **How to avoid:** Enumerate all sensitive action paths and add tests per action.
 **Warning signs:** `send_file` export route with no audit write.
 
 ### Pitfall 4: Manual Migration Non-Idempotent
+
 **What goes wrong:** Re-running script fails on existing columns/indexes.
 **Why it happens:** Raw ALTER without existence checks.
 **How to avoid:** Inspect schema before DDL and commit once.
@@ -238,6 +264,7 @@ def log_sensitive_access(db, actor_id, actor_email, action, object_type, object_
 Verified/adapted patterns:
 
 ### Mask Rule Helpers
+
 ```python
 def mask_phone_keep_last3(value: str) -> str:
     if not value:
@@ -257,6 +284,7 @@ def mask_identifier_keep_2_2(value: str) -> str:
 ```
 
 ### Public API Output Guard
+
 ```python
 def scammer_to_public_payload(report):
     return {
@@ -279,6 +307,7 @@ def scammer_to_public_payload(report):
 | Unstructured print logs | Structured DB audit trail with filterable metadata | Common compliance baseline | Enables incident forensics and accountability. |
 
 **Deprecated/outdated for this phase:**
+
 - Treating authenticated users as sensitive-data privileged by default.
 - Returning raw identifiers in public endpoints.
 
@@ -319,6 +348,7 @@ def scammer_to_public_payload(report):
 ## Validation Architecture
 
 ### Test Framework
+
 | Property | Value |
 |----------|-------|
 | Framework | `unittest` (stdlib) currently; `pytest` not installed |
@@ -327,6 +357,7 @@ def scammer_to_public_payload(report):
 | Full suite command | `python -m unittest discover -s tests -p "test_*.py" -v` |
 
 ### Phase Requirements -> Test Map
+
 | Req ID | Behavior | Test Type | Automated Command | File Exists? |
 |--------|----------|-----------|-------------------|-------------|
 | PRIV-01 | Phone always masked with only last 3 shown on public/user views | unit + integration | `python -m unittest tests/test_privacy_masking.py -v` | ❌ Wave 0 |
@@ -334,11 +365,13 @@ def scammer_to_public_payload(report):
 | PRIV-03 | Admin full-data access creates audit log rows with metadata | integration | `python -m unittest tests/test_sensitive_access_audit.py -v` | ❌ Wave 0 |
 
 ### Sampling Rate
+
 - **Per task commit:** `python -m unittest tests/test_privacy_masking.py -v`
 - **Per wave merge:** `python -m unittest discover -s tests -p "test_privacy_*.py" -v`
 - **Phase gate:** Full phase privacy test suite green before `/gsd-verify-work`
 
 ### Wave 0 Gaps
+
 - [ ] `tests/test_privacy_masking.py` - covers PRIV-01 edge cases and fixed examples.
 - [ ] `tests/test_privacy_consistency.py` - covers PRIV-02 route/API/template parity.
 - [ ] `tests/test_sensitive_access_audit.py` - covers PRIV-03 log writes and required fields.
@@ -348,23 +381,27 @@ def scammer_to_public_payload(report):
 ## Sources
 
 ### Primary (HIGH confidence)
-- SQLite ALTER TABLE reference: https://www.sqlite.org/lang_altertable.html (updated 2025-11-13)
-- Flask request API (`remote_addr`, `user_agent`): https://flask.palletsprojects.com/en/stable/api/#flask.Request.remote_addr
-- Flask request context lifecycle: https://flask.palletsprojects.com/en/stable/reqcontext/
-- SQLAlchemy session/transaction basics: https://docs.sqlalchemy.org/en/20/orm/session_basics.html
+
+- SQLite ALTER TABLE reference: <https://www.sqlite.org/lang_altertable.html> (updated 2025-11-13)
+- Flask request API (`remote_addr`, `user_agent`): <https://flask.palletsprojects.com/en/stable/api/#flask.Request.remote_addr>
+- Flask request context lifecycle: <https://flask.palletsprojects.com/en/stable/reqcontext/>
+- SQLAlchemy session/transaction basics: <https://docs.sqlalchemy.org/en/20/orm/session_basics.html>
 
 ### Secondary (MEDIUM confidence)
+
 - Project codebase analysis files:
   - `.planning/codebase/ARCHITECTURE.md`
   - `.planning/codebase/CONVENTIONS.md`
   - `.planning/codebase/CONCERNS.md`
 
 ### Tertiary (LOW confidence)
+
 - None.
 
 ## Metadata
 
 **Confidence breakdown:**
+
 - Standard stack: HIGH - based on repository pins, installed runtime checks, and official docs.
 - Architecture: MEDIUM-HIGH - strongly grounded in existing code patterns; some refactor scope assumptions remain.
 - Pitfalls: HIGH - directly observed in current routes/templates/API and confirmed against locked constraints.

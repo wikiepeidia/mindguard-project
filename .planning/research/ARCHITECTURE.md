@@ -10,6 +10,7 @@
 Integrate new capabilities as **additive slices** around existing blueprints, not by rewriting the request handlers. The current structure (single Flask app, blueprint boundaries, SQLAlchemy models, helper utilities) is already suitable for incremental hardening.
 
 To minimize regression risk:
+
 1. Introduce anti-spam through a dedicated policy/service layer that wraps current report submission flow.
 2. Add persistence for anti-spam telemetry in new tables and nullable columns only; do not mutate existing semantics first.
 3. Modernize UI through shared design tokens and page-by-page migration, preserving route names, template names, and form payload contracts.
@@ -44,6 +45,7 @@ Implication: architecture should add thin integration seams around existing func
 Use additive schema changes only (manual scripts in `database/`):
 
 1. `abuse_events`
+
 - `id`, `created_at`
 - `event_type` (report_submit, login_attempt, register_attempt)
 - `ip_hash`
@@ -53,14 +55,16 @@ Use additive schema changes only (manual scripts in `database/`):
 - `decision` (allow, challenge, block)
 - `risk_score`, `reason_codes` (json/text)
 
-2. `abuse_counters`
+1. `abuse_counters`
+
 - `id`, `window_start`, `window_end`
 - `scope_type` (ip, cookie, fingerprint, ip_cookie)
 - `scope_key_hash`
 - `event_type`
 - `count`
 
-3. Optional additive columns on `scammer_reports`
+1. Optional additive columns on `scammer_reports`
+
 - `submit_ip_hash` nullable
 - `submit_cookie_id` nullable
 - `spam_risk_score` nullable
@@ -75,12 +79,15 @@ All new fields default nullable to avoid write-path breakage.
 **What:** Keep existing route logic, but add one guard call at top of POST handlers.
 
 **How:**
+
 1. Build normalized request context (`ip`, `cookie_id`, `user/session`, `payload fingerprint`).
 2. Call `anti_spam_service.evaluate(context)`.
 3. Branch by decision:
+
 - `allow`: continue current flow unchanged.
 - `challenge`: force CAPTCHA regeneration and continue only after success.
 - `block`: return graceful error and log event.
+
 4. Write telemetry event for all outcomes.
 
 **Why low risk:** Existing validation/business logic remains intact; anti-spam is additive and removable by feature flag.
@@ -90,6 +97,7 @@ All new fields default nullable to avoid write-path breakage.
 **What:** Deploy policy in shadow mode first.
 
 **Stages:**
+
 1. `monitor`: evaluate + log only, never block.
 2. `soft_enforce`: block only clearly abusive thresholds.
 3. `strict_enforce`: full threshold policy.
@@ -101,6 +109,7 @@ All new fields default nullable to avoid write-path breakage.
 **What:** Introduce a design token layer while preserving existing template variables and route endpoints.
 
 **How:**
+
 1. Add token stylesheet and shared UI partials in `templates/partials/`.
 2. Migrate page CSS incrementally (`report_scammer`, `quiz`, `index`) without changing endpoint contracts.
 3. Keep form field names backward-compatible during migration.
@@ -114,15 +123,19 @@ All new fields default nullable to avoid write-path breakage.
 1. Browser submits `POST /scammer/report`.
 2. Route extracts anti-spam context (IP, cookie id, payload fingerprint, route metadata).
 3. `AntiSpamService.evaluate()` executes:
+
 - velocity checks (per IP, per cookie, per fingerprint windows)
 - duplicate-content checks
 - recent block/challenge history checks
+
 4. Decision returned:
+
 - allow -> existing CAPTCHA + report persistence path
 - challenge -> force CAPTCHA path and retry
 - block -> flash message + redirect, no report write
+
 5. Telemetry is stored in `abuse_events` and counters updated.
-6. Existing `ScammerReport` and leaderboard updates proceed only on allow/challenge pass.
+2. Existing `ScammerReport` and leaderboard updates proceed only on allow/challenge pass.
 
 ### Flow B: Login/Register Hardening (same pattern)
 
@@ -139,28 +152,34 @@ All new fields default nullable to avoid write-path breakage.
 ## Build Order for Roadmap Sequencing
 
 1. **Phase 1: Instrumentation Foundation (no user-facing behavior changes)**
+
 - Add anti-spam tables and migration scripts.
 - Add service/policy modules and logging hooks in report/login/register routes in monitor mode.
 - Add config flags: `ANTI_SPAM_MODE`, threshold defaults.
 
-2. **Phase 2: Report Flow Enforcement (soft)**
+1. **Phase 2: Report Flow Enforcement (soft)**
+
 - Enable `challenge` then limited `block` in `routes/scammer.py`.
 - Add admin diagnostics panel for abuse events.
 - Validate false-positive rate before expansion.
 
-3. **Phase 3: Auth Flow Enforcement**
+1. **Phase 3: Auth Flow Enforcement**
+
 - Reuse same service on login/register endpoints.
 - Add per-route threshold profiles.
 
-4. **Phase 4: UI Design System Foundation**
+1. **Phase 4: UI Design System Foundation**
+
 - Add tokenized CSS layer and base layout modernization (light-first).
 - No behavior changes; visual regression checks only.
 
-5. **Phase 5: Page-by-Page UX Modernization**
+1. **Phase 5: Page-by-Page UX Modernization**
+
 - Modernize report page and quiz one-question-per-page flow.
 - Preserve existing form contract and route names.
 
-6. **Phase 6: Tightening + Cleanup**
+1. **Phase 6: Tightening + Cleanup**
+
 - Remove dead CSS/JS after migration.
 - Promote strict anti-spam mode if metrics are healthy.
 
@@ -180,15 +199,19 @@ All new fields default nullable to avoid write-path breakage.
 ## Anti-Patterns to Avoid
 
 1. **Big-bang rewrite of `routes/scammer.py`**
+
 - High chance of breaking report creation, evidence upload, and leaderboard sync.
 
-2. **Hard blocking from day one**
+1. **Hard blocking from day one**
+
 - Causes false-positive lockouts without baseline telemetry.
 
-3. **Mixing anti-spam logic directly into templates/JS**
+1. **Mixing anti-spam logic directly into templates/JS**
+
 - Security decisions must remain server-side and auditable.
 
-4. **Replacing session identity model during same milestone**
+1. **Replacing session identity model during same milestone**
+
 - Separate concern; increases blast radius.
 
 ## Scalability Path
@@ -208,6 +231,7 @@ All new fields default nullable to avoid write-path breakage.
 ## Sources
 
 ### Codebase evidence (HIGH)
+
 - `app.py`
 - `routes/scammer.py`
 - `routes/auth.py`
@@ -218,6 +242,7 @@ All new fields default nullable to avoid write-path breakage.
 - `.planning/codebase/STRUCTURE.md`
 
 ### External references (MEDIUM)
-- Flask blueprints (official): https://flask.palletsprojects.com/en/stable/blueprints/
-- Flask sessions and request lifecycle (official): https://flask.palletsprojects.com/en/stable/quickstart/#sessions
-- Flask-Limiter docs (v4.1.1 page header observed): https://flask-limiter.readthedocs.io/en/stable/
+
+- Flask blueprints (official): <https://flask.palletsprojects.com/en/stable/blueprints/>
+- Flask sessions and request lifecycle (official): <https://flask.palletsprojects.com/en/stable/quickstart/#sessions>
+- Flask-Limiter docs (v4.1.1 page header observed): <https://flask-limiter.readthedocs.io/en/stable/>

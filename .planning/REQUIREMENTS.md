@@ -65,27 +65,27 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| UI-01 | Phase TBD | Pending |
-| UI-02 | Phase TBD | Pending |
-| UI-03 | Phase TBD | Pending |
-| QUIZ-01 | Phase TBD | Pending |
-| QUIZ-02 | Phase TBD | Pending |
-| QUIZ-03 | Phase TBD | Pending |
-| QUIZ-04 | Phase TBD | Pending |
-| PRIV-01 | Phase TBD | Pending |
-| PRIV-02 | Phase TBD | Pending |
-| PRIV-03 | Phase TBD | Pending |
-| ABUS-01 | Phase TBD | Pending |
-| ABUS-02 | Phase TBD | Pending |
-| ABUS-03 | Phase TBD | Pending |
-| ABUS-04 | Phase TBD | Pending |
-| LEAD-01 | Phase TBD | Pending |
-| LEAD-02 | Phase TBD | Pending |
+| UI-01 | Phase 3 | Pending |
+| UI-02 | Phase 3 | Pending |
+| UI-03 | Phase 3 | Pending |
+| QUIZ-01 | Phase 4 | Pending |
+| QUIZ-02 | Phase 4 | Pending |
+| QUIZ-03 | Phase 4 | Pending |
+| QUIZ-04 | Phase 4 | Pending |
+| PRIV-01 | Phase 1 | Pending |
+| PRIV-02 | Phase 1 | Pending |
+| PRIV-03 | Phase 1 | Pending |
+| ABUS-01 | Phase 2 | Pending |
+| ABUS-02 | Phase 2 | Pending |
+| ABUS-03 | Phase 2 | Pending |
+| ABUS-04 | Phase 2 | Pending |
+| LEAD-01 | Phase 5 | Pending |
+| LEAD-02 | Phase 5 | Pending |
 
 **Coverage:**
 - v1 requirements: 16 total
-- Mapped to phases: 0
-- Unmapped: 16 ⚠️
+- Mapped to phases: 16
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-03-19*

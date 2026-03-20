@@ -3,6 +3,7 @@ import random
 from datetime import datetime
 from functools import wraps
 from flask import session, redirect, url_for, flash, request
+from utils.privacy_policy import mask_identifier_keep_2_2, mask_phone_keep_last3
 
 def login_required(f):
     """
@@ -51,33 +52,20 @@ def mask_sensitive_data(data: str, data_type: str = 'auto') -> str:
     VD: 0912345678 -> 091***5678
         123456789012 -> 1234***9012
     """
-    if not data or len(data) < 4:
+    if not data:
         return data
-    
-    # Auto-detect type
+
     if data_type == 'auto':
         data_clean = data.replace(' ', '').replace('-', '')
-        if data_clean.isdigit():
-            if len(data_clean) == 10 and data_clean.startswith('0'):
-                data_type = 'phone'
-            elif len(data_clean) >= 10:
-                data_type = 'account'
-    
-    # Phone: 091***5678
+        if data_clean.isdigit() and len(data_clean) >= 9:
+            data_type = 'phone'
+        else:
+            data_type = 'account'
+
     if data_type == 'phone':
-        if len(data) >= 7:
-            return f"{data[:3]}***{data[-4:]}"
-    
-    # Account/STK: 1234***9012
-    if data_type == 'account':
-        if len(data) >= 8:
-            return f"{data[:4]}***{data[-4:]}"
-    
-    # Default: show first 4 and last 3
-    if len(data) >= 8:
-        return f"{data[:4]}***{data[-3:]}"
-    
-    return data[:2] + '***'
+        return mask_phone_keep_last3(data)
+
+    return mask_identifier_keep_2_2(data)
 
 def calculate_risk_score(report_count: int, confirmed_count: int = 0, 
                          has_evidence: bool = False, days_since_first: int = 0) -> int:

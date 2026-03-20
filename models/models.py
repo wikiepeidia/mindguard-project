@@ -119,3 +119,18 @@ class Subscription(db.Model):
     target_identifier = db.Column(db.String(200), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
+
+class SensitiveAccessLog(db.Model):
+    __tablename__ = 'sensitive_access_logs'
+
+    id = db.Column(db.Integer, primary_key=True)
+    actor_id = db.Column(db.Integer, db.ForeignKey('registrations.id'), nullable=True)
+    actor_email = db.Column(db.String(150), nullable=False)
+    action = db.Column(db.String(20), nullable=False)
+    object_type = db.Column(db.String(100), nullable=False)
+    object_id = db.Column(db.String(100), nullable=False)
+    reason = db.Column(db.Text, nullable=True)
+    ip_address = db.Column(db.String(45), nullable=True)
+    user_agent = db.Column(db.String(512), nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+

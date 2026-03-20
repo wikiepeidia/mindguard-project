@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+        <div>
+            <h2 class="fw-bold text-white mb-1">Nhat ky truy cap du lieu nhay cam</h2>
+            <p class="text-muted mb-0">Theo doi cac hanh dong full-data cua admin de phuc vu kiem toan.</p>
+        </div>
+        <a class="btn btn-outline-light" href="{{ url_for('admin.admin_dashboard') }}">Quay lai dashboard</a>
+    </div>
+
+    {% if high_frequency_actors or high_frequency_ips %}
+    <div class="alert alert-warning">
+        <h5 class="mb-2">Canh bao tan suat truy cap cao (nguong: {{ threshold }})</h5>
+        {% if high_frequency_actors %}
+            <div class="mb-1"><strong>Actor:</strong> {{ high_frequency_actors|join(', ') }}</div>
+        {% endif %}
+        {% if high_frequency_ips %}
+            <div><strong>IP:</strong> {{ high_frequency_ips|join(', ') }}</div>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <div class="card bg-dark border-secondary mb-3">
+        <div class="card-body">
+            <form method="GET" class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label text-light" for="actor">Actor</label>
+                    <input class="form-control" type="text" name="actor" id="actor" value="{{ filters.actor }}" placeholder="admin@example.com">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label text-light" for="action">Action</label>
+                    <select class="form-select" name="action" id="action">
+                        <option value="" {% if not filters.action %}selected{% endif %}>Tat ca</option>
+                        <option value="view" {% if filters.action == 'view' %}selected{% endif %}>view</option>
+                        <option value="export" {% if filters.action == 'export' %}selected{% endif %}>export</option>
+                        <option value="update" {% if filters.action == 'update' %}selected{% endif %}>update</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label text-light" for="start">Tu thoi gian</label>
+                    <input class="form-control" type="datetime-local" name="start" id="start" value="{{ filters.start }}">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label text-light" for="end">Den thoi gian</label>
+                    <input class="form-control" type="datetime-local" name="end" id="end" value="{{ filters.end }}">
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button class="btn btn-primary w-100" type="submit">Loc</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-dark table-striped align-middle">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Thoi gian</th>
+                    <th>Actor</th>
+                    <th>Action</th>
+                    <th>Doi tuong</th>
+                    <th>Reason</th>
+                    <th>IP</th>
+                    <th>User-Agent</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in logs %}
+                <tr>
+                    <td>{{ row.id }}</td>
+                    <td>{{ row.created_at.strftime('%Y-%m-%d %H:%M:%S') if row.created_at else '' }}</td>
+                    <td>{{ row.actor_email }}</td>
+                    <td><span class="badge bg-info text-dark">{{ row.action }}</span></td>
+                    <td>{{ row.object_type }}: {{ row.object_id }}</td>
+                    <td>{{ row.reason or '-' }}</td>
+                    <td>{{ row.ip_address or '-' }}</td>
+                    <td class="text-break" style="max-width: 280px;">{{ row.user_agent or '-' }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="8" class="text-center text-muted">Khong co du lieu phu hop bo loc.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,5 +1,5 @@
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash, send_file
 from functools import wraps
 from sqlalchemy import func
@@ -246,9 +246,10 @@ def sensitive_access_logs():
         end_time=end_time,
     )
 
-    threshold = int(request.args.get("threshold") or 10)
-    recent_window_start = datetime.utcnow().replace(microsecond=0)
-    recent_logs = query_sensitive_access_logs(start_time=recent_window_start.replace(hour=0, minute=0, second=0))
+    default_threshold = getattr(Config, "SENSITIVE_ACCESS_ALERT_THRESHOLD", 10)
+    threshold = int(request.args.get("threshold") or default_threshold)
+    recent_window_start = datetime.utcnow() - timedelta(hours=24)
+    recent_logs = query_sensitive_access_logs(start_time=recent_window_start)
 
     actor_counts = {}
     ip_counts = {}

@@ -74,7 +74,8 @@
                 <div class="row align-items-center">
                     <div class="col-auto">
                         <div class="position-relative d-inline-block">
-                            <div class="bg-{{ risk_info.color }} bg-opacity-20 d-flex align-items-center justify-content-center border border-{{ risk_info.color }} border-2 scammer-risk-circle">
+                            <div
+                                class="bg-{{ risk_info.color }} bg-opacity-20 d-flex align-items-center justify-content-center border border-{{ risk_info.color }} border-2 scammer-risk-circle">
                                 <h2 class="text-{{ risk_info.color }} fw-bold mb-0">{{ scammer.risk_score or 0 }}</h2>
                             </div>
                         </div>
@@ -208,8 +209,8 @@
                 <div class="row g-2">
                     {% for img in evidence_images %}
                     <div class="col-12">
-                        <img src="{{ img }}" class="img-fluid scammer-evidence-image"
-                            alt="Evidence" onclick="showImageModal(this.src)">
+                        <img src="{{ img }}" class="img-fluid scammer-evidence-image" alt="Evidence"
+                            onclick="showImageModal(this.src)">
                     </div>
                     {% endfor %}
                 </div>
@@ -270,8 +271,8 @@
 <script>
     window.SCAMMER_DATA = {
         originalIdentifier: {{ scammer.scammer_info_raw | tojson if can_view_full_sensitive else masked_identifier | tojson }},
-        maskedIdentifier: {{ masked_identifier | tojson }},
-        isLoggedIn: {{ 'true' if can_view_full_sensitive else 'false' }}
+    maskedIdentifier: { { masked_identifier | tojson } },
+    isLoggedIn: { { 'true' if can_view_full_sensitive else 'false' } }
     };
 </script>
 <script src="{{ url_for('static', filename='js/scammer_profile.js') }}"></script>

@@ -82,7 +82,13 @@ Plans:
 2. Tien do va trang thai bai lam duoc hien thi ro rang o moi buoc quiz.
 3. Neu refresh/back trong phien hop le, bai lam van giu duoc trang thai hop ly.
 4. Bo cau hoi bo sung theo chu de bao mat/lua dao da san sang de phu hop luong quiz moi.
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+
+- [ ] 04-01-PLAN.md - Session-backed one-question route flow + resume stability baseline tests.
+- [ ] 04-02-PLAN.md - Quiz progress/status UI contract and one-question interaction clarity.
+- [ ] 04-03-PLAN.md - Topic-expanded question bank and submit/result/certificate compatibility guards.
 
 ### Phase 5: Leaderboard Integrity
 

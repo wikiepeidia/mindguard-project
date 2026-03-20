@@ -19,18 +19,16 @@
 
     {% if top_3 %}
     <div class="mb-5">
-        <h5 class="fw-bold mb-4 leaderboard-section-title"><i class="fas fa-fire me-2"></i>MỨC ĐỘ NGUY HIỂM CAO NHẤT</h5>
+        <h5 class="fw-bold mb-4 leaderboard-section-title"><i class="fas fa-fire me-2"></i>MỨC ĐỘ NGUY HIỂM CAO NHẤT
+        </h5>
         <div class="row g-4">
             {% for entry in top_3 %}
             <div class="col-lg-4" data-aos="flip-up" data-aos-delay="{{ loop.index * 100 }}">
                 <div class="h-100 p-0 overflow-hidden position-relative leaderboard-top-card cursor-pointer"
-                    onclick="showDetail(this)"
-                    data-identifier="{{ entry.identifier }}"
-                    data-name="{{ entry.name }}" data-type="{{ entry.type }}"
-                    data-platform="{{ entry.platform }}" data-desc="{{ entry.description }}"
-                    data-reports="{{ entry.total_reports }}"
-                    data-date="{{ entry.updated_at }}"
-                    data-image='{{ entry.evidence_urls }}'>
+                    onclick="showDetail(this)" data-identifier="{{ entry.identifier }}" data-name="{{ entry.name }}"
+                    data-type="{{ entry.type }}" data-platform="{{ entry.platform }}"
+                    data-desc="{{ entry.description }}" data-reports="{{ entry.total_reports }}"
+                    data-date="{{ entry.updated_at }}" data-image='{{ entry.evidence_urls }}'>
 
                     <div class="position-absolute top-0 start-0 px-3 py-1 fw-bold leaderboard-top-rank">
                         TOP {{ loop.index }}
@@ -74,12 +72,10 @@
                 <tbody>
                     {% for entry in scammers %}
                     <tr class="cursor-pointer hover-highlight" onclick="showDetail(this)"
-                        data-identifier="{{ entry.identifier }}"
-                        data-name="{{ entry.name }}" data-type="{{ entry.type }}"
-                        data-platform="{{ entry.platform }}" data-desc="{{ entry.description }}"
-                        data-reports="{{ entry.total_reports }}"
-                        data-date="{{ entry.updated_at }}"
-                        data-image='{{ entry.evidence_urls }}'>
+                        data-identifier="{{ entry.identifier }}" data-name="{{ entry.name }}"
+                        data-type="{{ entry.type }}" data-platform="{{ entry.platform }}"
+                        data-desc="{{ entry.description }}" data-reports="{{ entry.total_reports }}"
+                        data-date="{{ entry.updated_at }}" data-image='{{ entry.evidence_urls }}'>
 
                         <td class="ps-4 py-3">
                             <div class="d-flex align-items-center">
@@ -178,7 +174,8 @@
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <div class="text-center mb-4">
-                            <div class="d-inline-block p-3 rounded-circle text-danger border border-danger border-opacity-25 mb-3">
+                            <div
+                                class="d-inline-block p-3 rounded-circle text-danger border border-danger border-opacity-25 mb-3">
                                 <i class="fas fa-exclamation-triangle fa-2x"></i>
                             </div>
                             <h3 class="fw-bold mb-1 text-break" id="detailId">...</h3>
@@ -203,8 +200,7 @@
 
                         <div class="mb-3">
                             <label class="text-secondary small fw-bold text-uppercase">Chi tiết thủ đoạn:</label>
-                            <p class="small fst-italic mt-1 p-2 leaderboard-detail-description"
-                                id="detailDesc">...</p>
+                            <p class="small fst-italic mt-1 p-2 leaderboard-detail-description" id="detailDesc">...</p>
                         </div>
                     </div>
 
@@ -212,7 +208,8 @@
                         <div id="evidenceSection" class="h-100 d-none d-flex flex-column">
                             <label class="text-secondary small fw-bold text-uppercase mb-2 text-center">Ảnh Bằng
                                 Chứng</label>
-                            <div class="rounded overflow-hidden flex-grow-1 d-flex align-items-center justify-content-center leaderboard-evidence-shell">
+                            <div
+                                class="rounded overflow-hidden flex-grow-1 d-flex align-items-center justify-content-center leaderboard-evidence-shell">
                                 <img src="" id="detailImage" class="img-fluid"
                                     style="max-height: 350px; max-width: 100%; object-fit: contain;">
                             </div>

@@ -46,7 +46,7 @@
                             <!-- Cột Đối tượng -->
                             <td>
                                 <div class="d-flex align-items-center">
-                                    <div class="bg-dark bg-opacity-50 p-2 rounded me-3 text-center d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                    <div class="bg-white border border-light-subtle p-2 rounded me-3 text-center d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
                                         {% if report.report_type == 'bank' %}
                                             <i class="fas fa-university text-success"></i>
                                         {% elif report.report_type == 'website' %}
@@ -56,7 +56,7 @@
                                         {% endif %}
                                     </div>
                                     <div>
-                                        <div class="fw-bold text-white">{{ report.scammer_info_raw }}</div>
+                                        <div class="fw-bold text-body">{{ report.scammer_info_raw }}</div>
                                         <small class="text-muted">{{ report.scam_type }}</small>
                                     </div>
                                 </div>
@@ -122,12 +122,12 @@
     {% if report.evidence_list and report.evidence_list|length > 0 %}
     <div class="modal fade" id="modalEvidence{{ report.id }}" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg"> <!-- modal-lg để ảnh to hơn -->
-            <div class="modal-content bg-dark border border-secondary shadow-lg">
-                <div class="modal-header border-secondary">
-                    <h5 class="modal-title text-white">Bằng chứng Tố cáo #{{ report.id }}</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            <div class="modal-content bg-white border border-light-subtle shadow-lg">
+                <div class="modal-header border-light-subtle">
+                    <h5 class="modal-title text-body">Bằng chứng Tố cáo #{{ report.id }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body p-0 bg-black">
+                <div class="modal-body p-0 bg-white">
                     <!-- Carousel Xem Ảnh -->
                     <div id="carousel{{ report.id }}" class="carousel slide" data-bs-ride="false">
                         <div class="carousel-inner">
@@ -142,15 +142,15 @@
                         
                         {% if report.evidence_list|length > 1 %}
                         <button class="carousel-control-prev" type="button" data-bs-target="#carousel{{ report.id }}" data-bs-slide="prev">
-                            <span class="carousel-control-prev-icon bg-dark rounded-circle p-2" aria-hidden="true"></span>
+                            <span class="carousel-control-prev-icon bg-secondary rounded-circle p-2" aria-hidden="true"></span>
                         </button>
                         <button class="carousel-control-next" type="button" data-bs-target="#carousel{{ report.id }}" data-bs-slide="next">
-                            <span class="carousel-control-next-icon bg-dark rounded-circle p-2" aria-hidden="true"></span>
+                            <span class="carousel-control-next-icon bg-secondary rounded-circle p-2" aria-hidden="true"></span>
                         </button>
                         {% endif %}
                     </div>
                 </div>
-                <div class="modal-footer border-secondary justify-content-center py-2">
+                <div class="modal-footer border-light-subtle justify-content-center py-2">
                     <small class="text-muted">Nhấn vào mũi tên để xem các ảnh tiếp theo</small>
                 </div>
             </div>

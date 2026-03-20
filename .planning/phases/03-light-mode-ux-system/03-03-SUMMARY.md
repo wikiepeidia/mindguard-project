@@ -49,6 +49,7 @@ completed: 2026-03-20
 - **Files modified:** 7
 
 ## Accomplishments
+
 - Migrated leaderboard and scammer profile templates to semantic light-mode classes and removed dark utility drift.
 - Rebuilt `leaderboard.css` and `scammer_profile.css` around mg token variables for surfaces, chips, modal, timeline, and evidence blocks.
 - Added UI guard tests for leaderboard/profile and phase-wide token coverage on priority templates.
@@ -61,6 +62,7 @@ Each task was committed atomically:
 2. **Task 2: Enforce phase-wide token coverage guards for priority templates** - `1b5d487` (test)
 
 ## Files Created/Modified
+
 - `static/css/leaderboard.css` - Tokenized leaderboard search, top cards, table, pagination, and modal surfaces.
 - `static/css/scammer_profile.css` - Tokenized scammer profile cards, timeline, evidence, and metadata labels.
 - `templates/leaderboard.html` - Migrated markup to semantic light classes and removed dark utility classes.
@@ -69,6 +71,7 @@ Each task was committed atomically:
 - `tests/ui/test_token_coverage.py` - Priority template token coverage and dark utility denylist enforcement.
 
 ## Decisions Made
+
 - Reused existing Flask/Jinja data bindings and route wiring while only changing presentation classes and CSS contracts.
 - Used strict static checks for token coverage to provide early failure messages by template when drift returns.
 
@@ -77,6 +80,7 @@ Each task was committed atomically:
 ### Auto-fixed Issues
 
 **1. [Rule 3 - Blocking] Added missing planned UI test files that did not exist in repository**
+
 - **Found during:** Task 1 and Task 2
 - **Issue:** `tests/ui/test_leaderboard_profile_light.py` and `tests/ui/test_token_coverage.py` were referenced by the plan but absent.
 - **Fix:** Created both test files and aligned them with existing `tests/ui` style and assertions.
@@ -90,12 +94,15 @@ Each task was committed atomically:
 **Impact on plan:** Required for planned verification commands; no scope creep.
 
 ## Issues Encountered
+
 - New UI test files are ignored by repository `.gitignore` defaults under `tests/*`; staging required `git add -f` for atomic task commits.
 
 ## User Setup Required
+
 None - no external service configuration required.
 
 ## Next Phase Readiness
+
 - UI-01/UI-02 coverage for priority pages is enforced by automated tests and ready for verify-work.
 - Phase 03 is ready for final docs/state updates and transition to Phase 4 planning/execution.
 
@@ -104,6 +111,7 @@ None - no external service configuration required.
 *Completed: 2026-03-20*
 
 ## Self-Check: PASSED
+
 - FOUND: .planning/phases/03-light-mode-ux-system/03-03-SUMMARY.md
 - FOUND: df7f452
 - FOUND: 1b5d487

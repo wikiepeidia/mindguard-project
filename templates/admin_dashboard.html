@@ -97,11 +97,11 @@
                                     <tr>
                                         <td class="ps-3">
                                             <div class="d-flex align-items-center">
-                                                <div class="bg-dark bg-opacity-50 rounded-circle me-2 d-flex align-items-center justify-content-center" style="width: 35px; height: 35px;">
+                                                <div class="bg-white border border-light-subtle rounded-circle me-2 d-flex align-items-center justify-content-center" style="width: 35px; height: 35px;">
                                                     <i class="fas fa-user text-muted"></i>
                                                 </div>
                                                 <div>
-                                                    <div class="fw-bold text-white">{{ user.name }}</div>
+                                                    <div class="fw-bold text-body">{{ user.name }}</div>
                                                     <div class="small text-muted">{{ user.email }}</div>
                                                 </div>
                                             </div>
@@ -143,10 +143,10 @@
                                                 <!-- MODAL SỬA USER -->
                                                 <div class="modal fade" id="editUserModal{{ user.id }}" tabindex="-1" aria-hidden="true">
                                                     <div class="modal-dialog modal-dialog-centered">
-                                                        <div class="modal-content bg-dark border border-secondary text-start">
-                                                            <div class="modal-header border-secondary">
-                                                                <h5 class="modal-title text-white">Sửa thành viên: {{ user.name }}</h5>
-                                                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                        <div class="modal-content bg-white border border-light-subtle text-start">
+                                                            <div class="modal-header border-light-subtle">
+                                                                <h5 class="modal-title text-body">Sửa thành viên: {{ user.name }}</h5>
+                                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                             </div>
                                                             <form action="{{ url_for('admin.edit_user', user_id=user.id) }}" method="POST">
                                                                 <div class="modal-body">
@@ -166,7 +166,7 @@
                                                                         <i class="fas fa-info-circle me-1"></i> Email không thể thay đổi để đảm bảo định danh.
                                                                     </div>
                                                                 </div>
-                                                                <div class="modal-footer border-secondary">
+                                                                <div class="modal-footer border-light-subtle">
                                                                     <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Hủy</button>
                                                                     <button type="submit" class="btn btn-primary btn-sm">Lưu thay đổi</button>
                                                                 </div>

@@ -44,6 +44,7 @@ completed: 2026-03-20
 - **Files modified:** 3
 
 ## Accomplishments
+
 - Added integration tests for monitor and soft_enforce behavior on `POST /scammer/report`.
 - Integrated anti-spam decision service as a pre-write gate in `report_scammer`.
 - Verified monitor logging path and soft_enforce cooldown blocking while keeping clean-account medium-risk flow non-blocking.
@@ -56,11 +57,13 @@ Each task was committed atomically:
 2. **Task 2: Tich hop anti-spam pre-write gate vao POST report flow** - `ffa379b` (feat)
 
 ## Files Created/Modified
+
 - `tests/antispam/test_monitor_mode.py` - Integration regression for monitor mode allowing submit while logging cooldown-triggered event.
 - `tests/antispam/test_soft_enforce.py` - Integration regressions for cooldown block path and clean-account medium-risk false-positive avoidance.
 - `routes/scammer.py` - Added anti-spam signal collection/evaluation before DB write and ABUS_MODE gate behavior.
 
 ## Decisions Made
+
 - Reused `AntiSpamDecisionService.evaluate_submission` directly in route flow so monitor and soft-enforce share one decision engine.
 - Derived per-signal risk inputs from recent `AntiSpamEvent` window counts to model noisy cookie/IP signals without hard-blocking clean accounts.
 
@@ -69,6 +72,7 @@ Each task was committed atomically:
 ### Auto-fixed Issues
 
 **1. [Rule 3 - Blocking] Test files are ignored by repository gitignore**
+
 - **Found during:** Task 1 (TDD test commit)
 - **Issue:** `tests/*` ignore pattern prevented new anti-spam test files from appearing in normal staging.
 - **Fix:** Force-staged only the intended files with `git add -f tests/antispam/test_monitor_mode.py tests/antispam/test_soft_enforce.py`.
@@ -77,6 +81,7 @@ Each task was committed atomically:
 - **Committed in:** `1fcee2c`
 
 **2. [Rule 3 - Blocking] gsd-tools state advance parser failed on legacy STATE format**
+
 - **Found during:** Plan metadata update after task execution
 - **Issue:** `state advance-plan` returned `Cannot parse Current Plan or Total Plans in Phase from STATE.md`.
 - **Fix:** Updated `STATE.md`, `ROADMAP.md`, and `REQUIREMENTS.md` manually to reflect 02-02 completion and ABUS-03 completion.
@@ -90,6 +95,7 @@ Each task was committed atomically:
 **Impact on plan:** Both fixes were required for commitability and state tracking; no scope increase.
 
 ## Issues Encountered
+
 - Initial RED run failed as expected because route integration was missing; route and fixtures were aligned to hashed reporter identity to reach GREEN.
 
 ## User Setup Required
@@ -97,6 +103,7 @@ Each task was committed atomically:
 None - no external service configuration required.
 
 ## Next Phase Readiness
+
 - Route-level anti-spam behavior is operationalized and validated for monitor-to-soft_enforce rollout.
 - Phase 02-03 can build on this with cooldown UX messaging/admin telemetry without changing decision logic.
 

@@ -1,7 +1,14 @@
+.report-card {
+    border-radius: var(--mg-radius-lg);
+    color: var(--mg-text-primary);
+    border: 1px solid var(--mg-border);
+    box-shadow: var(--mg-shadow-sm);
+}
+
 .nav-pills .nav-link {
-    color: #64748b;
+    color: var(--mg-text-secondary);
     background-color: transparent;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--mg-border);
     margin-right: 5px;
     border-radius: 12px;
 }
@@ -14,14 +21,14 @@
 
 .form-label {
     font-weight: 600;
-    color: #1f2937;
+    color: var(--mg-text-primary);
 }
 
 .glass-card {
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
+    background: var(--mg-surface);
+    border: 1px solid var(--mg-border);
     border-radius: 16px;
-    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+    box-shadow: var(--mg-shadow-sm);
 }
 
 .report-tabs {
@@ -36,8 +43,8 @@
 }
 
 .input-group-text {
-    background-color: #f8fafc;
-    border-color: #e2e8f0;
+    background-color: var(--mg-surface-soft);
+    border-color: var(--mg-border);
 }
 
 @media (max-width: 576px) {

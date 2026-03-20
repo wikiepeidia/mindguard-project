@@ -14,15 +14,18 @@ Phase nay tap trung trien khai luong quiz 1 cau hoi moi trang va dong bo UX lien
 ## Implementation Decisions
 
 ### Locked decision from user
+
 - Bat buoc: luong quiz theo kieu 1 cau hoi moi trang.
 
 ### Fast defaults (recommended)
+
 - Thanh tien do luon hien thi ro rang o moi buoc.
 - Giu trang thai bai lam hop ly khi refresh/back trong phien hop le.
 - Mobile-first behavior khong duoc giam so voi flow hien tai.
 - Bo cau hoi duoc bo sung theo chu de de phu hop flow moi.
 
 ### Claude's Discretion
+
 - Kieu transition giua cac cau hoi (instant/fade/stepper).
 - Hinh thuc luu state (session + guard rails) de tranh mat bai lam.
 - Muc do gom/phan trang cho navigation controls (next/back/submit) theo do ro rang UX.
@@ -39,17 +42,20 @@ Phase nay tap trung trien khai luong quiz 1 cau hoi moi trang va dong bo UX lien
 </specifics>
 
 <canonical_refs>
+
 ## Canonical References
 
 **Downstream agents MUST read these before planning or implementing.**
 
 ### Scope and requirements
+
 - `.planning/PROJECT.md`
 - `.planning/REQUIREMENTS.md` (QUIZ-01..04)
 - `.planning/ROADMAP.md`
 - `.planning/STATE.md`
 
 ### Existing quiz implementation
+
 - `routes/quiz.py`
 - `templates/quiz.html`
 - `templates/quiz_result.html`
@@ -61,17 +67,21 @@ Phase nay tap trung trien khai luong quiz 1 cau hoi moi trang va dong bo UX lien
 </canonical_refs>
 
 <code_context>
+
 ## Existing Code Insights
 
 ### Reusable Assets
+
 - Quiz route flow da ton tai trong `routes/quiz.py` va co output result/certificate.
 - CSS/JS quiz da tach rieng, phu hop rollout theo phase.
 
 ### Established Patterns
+
 - Session-backed state duoc dung rong rai trong app.
 - Template-driven rendering voi Bootstrap utility classes.
 
 ### Integration Points
+
 - Main integration nam o route quiz + template quiz + client-side handlers cho navigation/submit.
 - Ket noi du lieu cau hoi tu `utils/quiz_data.py`/AI question path can duoc giu on dinh khi doi flow.
 

@@ -148,7 +148,8 @@
                                 data-risk-level="{{ 'high' if entry.risk_score >= 60 else 'low' }}"
                                 data-verification="{{ entry.verification_status }}" data-scammer-id="{{ entry.id }}"
                                 data-report-type="{{ entry.report_type }}"
-                                onclick="window.location.href='{{ url_for('main.scammer_profile', scammer_id=entry.id) }}';"
+                                data-profile-url="{{ url_for('main.scammer_profile', scammer_id=entry.id) }}"
+                                onclick="window.location.href=this.dataset.profileUrl"
                                 data-identifier="{{ entry.identifier }}" data-name="{{ entry.name }}"
                                 data-type="{{ entry.type }}" data-platform="{{ entry.platform }}"
                                 data-desc="{{ entry.description }}" data-reports="{{ entry.total_reports }}"
@@ -298,7 +299,7 @@
             <!-- Step 1 -->
             <div class="col-md-4" data-aos="fade-up" data-aos-delay="100">
                 <div
-                    class="glass-card p-5 text-center h-100 hover-up position-relative overflow-hidden border-0 bg-gradient-to-br from-slate-900 to-slate-800">
+                    class="glass-card p-5 text-center h-100 hover-up position-relative overflow-hidden border-0">
                     <!-- Big Background Number -->
                     <h1 class="position-absolute top-0 end-0 me-3 mt-n2 fw-bold text-white display-1"
                         style="font-size: 6rem; z-index: 0; opacity: 0.07;">
@@ -310,7 +311,7 @@
                             <i class="fas fa-search fa-3x text-info"></i>
                         </div>
                         <h4 class="text-white fw-bold mb-3">Nhập thông tin</h4>
-                        <p class="text-light opacity-75 small mb-0 px-2" style="line-height: 1.6;">
+                        <p class="text-muted small mb-0 px-2" style="line-height: 1.6;">
                             Nhập SĐT, STK ngân hàng hoặc URL cần kiểm tra vào ô tìm kiếm.
                             Hệ thống sẽ tự động nhận diện loại dữ liệu.
                         </p>
@@ -321,7 +322,7 @@
             <!-- Step 2 -->
             <div class="col-md-4" data-aos="fade-up" data-aos-delay="200">
                 <div
-                    class="glass-card p-5 text-center h-100 hover-up position-relative overflow-hidden border-0 bg-gradient-to-br from-slate-900 to-slate-800">
+                    class="glass-card p-5 text-center h-100 hover-up position-relative overflow-hidden border-0">
                     <h1 class="position-absolute top-0 end-0 me-3 mt-n2 fw-bold text-white display-1"
                         style="font-size: 6rem; z-index: 0; opacity: 0.07;">
                         2
@@ -332,7 +333,7 @@
                             <i class="fas fa-brain fa-3x text-warning"></i>
                         </div>
                         <h4 class="text-white fw-bold mb-3">AI Phân tích</h4>
-                        <p class="text-light opacity-75 small mb-0 px-2" style="line-height: 1.6;">
+                        <p class="text-muted small mb-0 px-2" style="line-height: 1.6;">
                             Trí tuệ nhân tạo quét cơ sở dữ liệu lớn, đối chiếu hàng nghìn báo cáo
                             và tính toán điểm rủi ro theo thời gian thực.
                         </p>
@@ -343,7 +344,7 @@
             <!-- Step 3 -->
             <div class="col-md-4" data-aos="fade-up" data-aos-delay="300">
                 <div
-                    class="glass-card p-5 text-center h-100 hover-up position-relative overflow-hidden border-0 bg-gradient-to-br from-slate-900 to-slate-800">
+                    class="glass-card p-5 text-center h-100 hover-up position-relative overflow-hidden border-0">
                     <h1 class="position-absolute top-0 end-0 me-3 mt-n2 fw-bold text-white display-1"
                         style="font-size: 6rem; z-index: 0; opacity: 0.07;">
                         3
@@ -354,7 +355,7 @@
                             <i class="fas fa-shield-alt fa-3x text-success"></i>
                         </div>
                         <h4 class="text-white fw-bold mb-3">Nhận kết quả</h4>
-                        <p class="text-light opacity-75 small mb-0 px-2" style="line-height: 1.6;">
+                        <p class="text-muted small mb-0 px-2" style="line-height: 1.6;">
                             Nhận cảnh báo rủi ro (An toàn / Nguy hiểm) kèm theo gợi ý hành động
                             cụ thể để bảo vệ tài sản của bạn.
                         </p>
@@ -393,7 +394,7 @@
                             <span class="badge bg-danger mt-2" id="detailType">...</span>
                         </div>
 
-                        <div class="bg-black bg-opacity-20 rounded-xl p-3 mb-3 border border-white border-opacity-5">
+                        <div class="bg-white bg-opacity-75 rounded-xl p-3 mb-3 border border-white border-opacity-5">
                             <div class="d-flex justify-content-between mb-2">
                                 <span class="text-slate-400 small">Nền tảng:</span>
                                 <span class="text-white small fw-bold" id="detailPlatform">...</span>
@@ -419,7 +420,7 @@
                         <div id="evidenceSection" class="h-100 d-none d-flex flex-column">
                             <label class="text-slate-500 small fw-bold text-uppercase mb-2 text-center">Ảnh Bằng
                                 Chứng</label>
-                            <div class="rounded-xl overflow-hidden border border-white border-opacity-10 bg-black bg-opacity-50 flex-grow-1 d-flex align-items-center justify-content-center"
+                            <div class="rounded-xl overflow-hidden border border-white border-opacity-10 bg-white bg-opacity-75 flex-grow-1 d-flex align-items-center justify-content-center"
                                 style="min-height: 250px;">
                                 <img src="" id="detailImage" class="img-fluid"
                                     style="max-height: 350px; max-width: 100%; object-fit: contain;">
@@ -455,7 +456,7 @@
                 <p class="text-slate-400 mb-4" id="resultDesc">Vui lòng chờ giây lát trong khi hệ thống phân tích dữ
                     liệu.</p>
                 <div id="foundList"
-                    class="text-start bg-black bg-opacity-20 p-3 rounded-xl border border-white border-opacity-5 d-none custom-scrollbar"
+                    class="text-start bg-white bg-opacity-75 p-3 rounded-xl border border-white border-opacity-5 d-none custom-scrollbar"
                     style="max-height: 200px; overflow-y: auto;"></div>
             </div>
             <div class="modal-footer border-top border-white border-opacity-10 justify-content-center p-4 gap-3">

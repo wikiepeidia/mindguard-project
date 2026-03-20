@@ -6,14 +6,14 @@
     <div class="card shadow-sm border-0 rounded-4 text-center glass-card">
       <div class="card-body p-5">
         
-        <h3 class="fw-bold mb-4 text-white">Kết Quả Bài Test</h3>
+        <h3 class="fw-bold mb-4 text-body">Kết Quả Bài Test</h3>
         
         {% if score is not none %}
           <div class="mb-4">
               <!-- Vòng tròn điểm số -->
               <div class="d-inline-flex justify-content-center align-items-center rounded-circle border border-4 border-{{ 'success' if score/max_score >= 0.75 else 'warning' }} p-5 mb-3" style="width: 150px; height: 150px;">
                   <div>
-                      <span class="display-4 fw-bold text-white">{{ score }}</span>
+                      <span class="display-4 fw-bold text-body">{{ score }}</span>
                       <span class="text-muted fs-5">/{{ max_score }}</span>
                   </div>
               </div>
@@ -21,7 +21,7 @@
 
           {% if max_score and score / max_score >= 0.75 %}
             <h4 class="text-success fw-bold mb-3">Đạt Yêu Cầu!</h4>
-            <p class="text-white-50">Chúc mừng bạn đã có đủ kiến thức nền tảng về an toàn mạng.</p>
+            <p class="text-muted">Chúc mừng bạn đã có đủ kiến thức nền tảng về an toàn mạng.</p>
             
             {% if session.get('certificate_code') %}
             <div class="alert alert-success bg-opacity-10 border-success d-inline-block text-start mt-2">
@@ -31,7 +31,7 @@
           
           {% else %}
             <h4 class="text-warning fw-bold mb-3">Cần Cố Gắng Thêm</h4>
-            <p class="text-white-50">Bạn cần đạt ít nhất 75% số điểm để nhận chứng nhận MindGuard.</p>
+            <p class="text-muted">Bạn cần đạt ít nhất 75% số điểm để nhận chứng nhận MindGuard.</p>
             <p class="small text-muted">Gợi ý: Hãy đọc kỹ các cảnh báo trên trang chủ và thử lại.</p>
           {% endif %}
 

@@ -100,7 +100,7 @@
     border-color: color-mix(in srgb, var(--mg-accent) 42%, var(--mg-border));
 }
 
-.quiz-option-input:checked + .quiz-option-label {
+.quiz-option-input:checked+.quiz-option-label {
     border-color: color-mix(in srgb, var(--mg-accent) 60%, var(--mg-border));
     background: color-mix(in srgb, var(--mg-accent) 10%, var(--mg-surface));
     box-shadow: 0 0 0 2px var(--mg-focus);
@@ -120,7 +120,7 @@
     font-size: 0.86rem;
 }
 
-.quiz-option-input:checked + .quiz-option-label .quiz-option-badge {
+.quiz-option-input:checked+.quiz-option-label .quiz-option-badge {
     background: var(--mg-accent);
     border-color: var(--mg-accent);
     color: var(--mg-text-inverse);

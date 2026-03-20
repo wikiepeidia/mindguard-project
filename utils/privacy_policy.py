@@ -1,6 +1,6 @@
 """Centralized privacy policy for sensitive identifier display."""
 
-MASKED_DATA_NOTICE = "Du lieu da duoc che de bao mat"
+MASKED_DATA_NOTICE = "Dữ liệu đã được che để bảo mật"
 
 
 def can_view_full_sensitive(is_admin) -> bool:

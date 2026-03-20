@@ -49,6 +49,7 @@ completed: 2026-03-20
 - **Files modified:** 7
 
 ## Accomplishments
+
 - Added RED-to-GREEN antispam contract tests for cooldown behavior and risk-score tier mapping.
 - Implemented anti-spam models + migration for event telemetry and actor aggregate cooldown state.
 - Implemented decision service for canonical actor selection, sliding-window counting, and cooldown decisions.
@@ -61,6 +62,7 @@ Each task was committed atomically:
 2. **Task 2: Implement anti-spam schema, migration, va decision service core** - `14ef484` (feat)
 
 ## Files Created/Modified
+
 - `tests/antispam/test_decision_service.py` - Contract test for 10-minute window, 3-hit trigger, 15-minute cooldown.
 - `tests/antispam/test_signal_scoring.py` - Contract test for actor priority and score-tier mapping.
 - `services/anti_spam.py` - Decision service with canonicalization, scoring, and telemetry persistence.
@@ -69,6 +71,7 @@ Each task was committed atomically:
 - `config.py` - ABUS_* rollout and scoring settings.
 
 ## Decisions Made
+
 - Implemented one decision path for monitor and soft-enforce readiness so behavior stays consistent across rollout modes.
 - Stored both event-level and aggregate actor state to support deterministic cooldown checks and future analytics.
 
@@ -77,6 +80,7 @@ Each task was committed atomically:
 ### Auto-fixed Issues
 
 **1. [Rule 3 - Blocking] Override git ignore for required anti-spam tests**
+
 - **Found during:** Task 1 (TDD RED)
 - **Issue:** `.gitignore` had `tests/*`, so new antispam tests were hidden from `git status` and could not be committed atomically.
 - **Fix:** Force-staged only `tests/antispam/*` with `git add -f` for the task commit.
@@ -85,6 +89,7 @@ Each task was committed atomically:
 - **Committed in:** `7f992e6`
 
 **2. [Rule 3 - Blocking] GSD state updater could not parse legacy STATE format**
+
 - **Found during:** Plan metadata updates after Task 2
 - **Issue:** `gsd-tools state advance-plan` failed with parse error for Current Plan fields in existing `STATE.md` structure.
 - **Fix:** Applied manual updates to `STATE.md`, `ROADMAP.md`, and `REQUIREMENTS.md` to reflect completed plan progress and requirement status.
@@ -98,12 +103,15 @@ Each task was committed atomically:
 **Impact on plan:** Necessary to satisfy atomic commit requirements; no scope creep.
 
 ## Issues Encountered
+
 - Existing workspace had unrelated modified planning/docs files and ignored test patterns; handled by staging only task-related files.
 
 ## User Setup Required
+
 None - no external service configuration required.
 
 ## Next Phase Readiness
+
 - Anti-spam core contracts and persistence are ready to be wired into report submission flow in later plans.
 - ABUS thresholds are now configurable for monitor-first rollout tuning.
 

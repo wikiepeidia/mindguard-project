@@ -14,17 +14,20 @@ Phase nay dat muc tieu dong bo light mode, token hoa style, va mobile-first cho 
 ## Implementation Decisions
 
 ### Visual direction light mode (locked)
+
 - Palette: nen trang/xam sang, giu accent cyan de bao toan nhan dien san pham.
 - Contrast: uu tien readability dat muc WCAG AA.
 - Surface style: card/section nen trang, border mong, shadow nhe (khong glass-heavy).
 - Alert semantics: warning dung amber/vang, danger dung do.
 
 ### Fast defaults for remaining areas
+
 - Design token scope (default): uu tien token hoa `base.css`/`style.css` truoc, sau do apply vao `quiz`, `report_scammer`, `leaderboard`, `scammer_profile`.
 - Rollout order (default): base layout/nav -> report flow -> quiz flow -> leaderboard/profile.
 - Mobile-first baseline (default): optimized cho viewport pho bien 360-430px va breakpoint Bootstrap hien co.
 
 ### Claude's Discretion
+
 - Naming cu the cho token map (color, spacing, radius, typography).
 - Motion/transitions nhe de tang cam giac hien dai nhung khong gay roi.
 - Cach gop style duplicate giua `style.css`, `base.css`, va css page-level theo lo trinh an toan.
@@ -41,17 +44,20 @@ Phase nay dat muc tieu dong bo light mode, token hoa style, va mobile-first cho 
 </specifics>
 
 <canonical_refs>
+
 ## Canonical References
 
 **Downstream agents MUST read these before planning or implementing.**
 
 ### Scope and requirements
+
 - `.planning/PROJECT.md` - Product vision and constraints.
 - `.planning/REQUIREMENTS.md` - UI-01, UI-02, UI-03.
 - `.planning/ROADMAP.md` - Phase 3 goal and success criteria.
 - `.planning/STATE.md` - Current milestone position.
 
 ### Existing UI stack touchpoints
+
 - `templates/base.html` - Shared layout shell and global includes.
 - `static/css/style.css` - Global style layer with current dark-leaning tokens.
 - `static/css/base.css` - Shared base variables/utilities.
@@ -64,17 +70,21 @@ Phase nay dat muc tieu dong bo light mode, token hoa style, va mobile-first cho 
 </canonical_refs>
 
 <code_context>
+
 ## Existing Code Insights
 
 ### Reusable Assets
+
 - Bootstrap 5 utility classes da duoc dung rong rai, co the tiep tuc lam backbone layout.
 - `base.html` centralize static include, phu hop cho token rollout theo mot diem vao.
 
 ### Established Patterns
+
 - CSS hien tai chia theo page-level file + global file, co nhieu gia tri mau hardcode va dark-oriented class utility.
 - Theme consistency hien tai chua dong nhat giua pages (quiz/report co style light nhung base/style con dark-heavy).
 
 ### Integration Points
+
 - Global token injection: `static/css/style.css`, `static/css/base.css`.
 - High-impact pages: `templates/report_scammer.html`, `templates/quiz.html`, `templates/leaderboard.html`, `templates/scammer_profile.html`.
 - Mobile behavior verification via page-specific JS/CSS coupling o `static/js/*` + corresponding templates.

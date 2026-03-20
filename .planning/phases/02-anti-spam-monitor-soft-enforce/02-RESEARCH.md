@@ -5,34 +5,41 @@
 **Confidence:** HIGH
 
 <user_constraints>
+
 ## User Constraints (from CONTEXT.md)
 
 ### Locked Decisions
+
 ### Nguong va cua so rate-limit
+
 - Cua so kiem soat: 10 phut.
 - Nguong kich hoat cooldown: 3 lan gui trong cua so.
 - Cooldown mac dinh: 15 phut.
 - Scope ap nguong: uu tien theo account (neu da dang nhap).
 
 ### Chien luoc da tin hieu rui ro
+
 - Tin hieu uu tien cao nhat: account.
 - Khi chua dang nhap: cookie/session la tin hieu chinh, IP la tin hieu phu.
 - Co che danh gia rui ro theo 3 muc: low / medium / high.
 - Neu account sach nhung IP/cookie xau: tang rui ro nhung chua chuyen sang hard block ngay.
 
 ### Claude's Discretion
+
 - Rule chi tiet cho monitor -> soft-enforce transition thresholds theo tung route.
 - Noi dung thong diep UX cooldown/chuyen trang thai theo tone nhat quan he thong.
 - Cach tinh trong so cu the trong risk score (while preserving locked priorities).
 - Chien luoc retention va aggregate telemetry events phu hop SQLite hien tai.
 
 ### Deferred Ideas (OUT OF SCOPE)
+
 - Adaptive friction nang cao (ABUS-05) va ML anomaly detection (ABUS-06) de Phase v2.
 - Leaderboard integrity hardening thuoc Phase 5.
 - UI redesign tong the va design-token rollout thuoc Phase 3.
 </user_constraints>
 
 <phase_requirements>
+
 ## Phase Requirements
 
 | ID | Description | Research Support |
@@ -56,6 +63,7 @@ The strongest implementation path is: add anti-abuse models + service, call it f
 ## Standard Stack
 
 ### Core
+
 | Library | Version | Purpose | Why Standard |
 |---------|---------|---------|--------------|
 | Flask | 3.0.3 (current in repo), 3.1.3 (latest verified) | Request lifecycle, route hooks, session access | Existing platform; anti-abuse check naturally fits view pre-write stage. |
@@ -63,30 +71,36 @@ The strongest implementation path is: add anti-abuse models + service, call it f
 | SQLite | app DB at `database/mindguard_v2.db` | Persistent counters/decisions for monitor-first telemetry | Required for monitor observability and restart safety. |
 
 ### Supporting
+
 | Library | Version | Purpose | When to Use |
 |---------|---------|---------|-------------|
 | Flask-Limiter | 4.1.1 (latest verified, 3.5.1 installed) | Coarse route-level rate gates | Optional safety rail if you need declarative per-route cap while keeping custom risk engine. |
 | limits | 5.8.0 (latest verified) | Backend limiter strategies used by Flask-Limiter | Only when Flask-Limiter is enabled. |
 
 ### Alternatives Considered
+
 | Instead of | Could Use | Tradeoff |
 |------------|-----------|----------|
 | Pure DB custom counters | Flask-Limiter only | Faster to wire, but does not model multi-signal risk scoring or monitor telemetry richness by itself. |
 | Flask-Limiter memory storage | Redis-backed limiter storage | Better multi-instance correctness, but out-of-scope infra for this phase and current SQLite architecture. |
 
 **Installation:**
+
 ```bash
 pip install Flask-Limiter
 ```
 
 **Version verification:**
+
 ```bash
 python -m pip index versions Flask-Limiter
 python -m pip index versions limits
 python -m pip index versions Flask
 python -m pip index versions SQLAlchemy
 ```
+
 Verified today:
+
 - Flask-Limiter latest 4.1.1
 - limits latest 5.8.0
 - Flask latest 3.1.3
@@ -95,6 +109,7 @@ Verified today:
 ## Architecture Patterns
 
 ### Recommended Project Structure
+
 ```
 services/
   anti_spam.py                # Decision engine + scoring + cooldown calculation
@@ -114,9 +129,11 @@ tests/
 ```
 
 ### Pattern 1: Pre-write Decision Gate in Report Route
+
 **What:** Evaluate anti-abuse decision before report persistence.
 **When to use:** Every POST `/scammer/report` submission.
 **Example:**
+
 ```python
 # Source: existing route orchestration pattern in routes/scammer.py + Flask view decorators docs
 signals = anti_spam.collect_signals(session, request)  # account -> reporter_hash/cookie -> ip
@@ -129,9 +146,11 @@ if config.ABUS_MODE == "soft_enforce" and result.should_cooldown:
 ```
 
 ### Pattern 2: Actor Canonicalization With Locked Priority
+
 **What:** Build one canonical actor key from multi-signal input (account first).
 **When to use:** Every anti-abuse decision and aggregate query.
 **Example:**
+
 ```python
 # Priority from locked decisions
 if account_id:
@@ -143,9 +162,11 @@ else:
 ```
 
 ### Pattern 3: Monitor-first Feature Flagging
+
 **What:** Same decision engine in both modes; mode controls enforcement only.
 **When to use:** Phase rollout and threshold tuning.
 **Example:**
+
 ```python
 # monitor: always allow write, always log decision
 # soft_enforce: block/cooldown only when rule hit
@@ -155,6 +176,7 @@ if mode == "monitor":
 ```
 
 ### Anti-Patterns to Avoid
+
 - **Hard-block by IP only:** Violates ABUS-02 and creates false positives behind NAT/mobile networks.
 - **In-memory-only monitor counters:** Data resets on restart, breaking monitor-first learning.
 - **Divergent monitor vs enforce logic:** Creates rollout surprises; keep one decision function.
@@ -173,24 +195,28 @@ if mode == "monitor":
 ## Common Pitfalls
 
 ### Pitfall 1: Session Fragmentation
+
 **What goes wrong:** Anonymous users rotate sessions/cookies and bypass per-cookie counters.
 **Why it happens:** Sole reliance on session key without IP/account corroboration.
 **How to avoid:** Always capture all available signals and keep account > cookie > IP priority while storing secondary signals for escalation.
 **Warning signs:** Sudden spike of low-confidence events with many unique cookie IDs but same IP/User-Agent pattern.
 
 ### Pitfall 2: Wrong Client IP Attribution
+
 **What goes wrong:** All traffic appears from proxy IP or spoofed header value.
 **Why it happens:** Blind trust of `X-Forwarded-For` without deployment trust policy.
 **How to avoid:** Centralize IP extraction policy and document trusted proxy behavior.
 **Warning signs:** Nearly all events share one IP in production or show malformed header chains.
 
 ### Pitfall 3: Monitor Data Not Actionable
+
 **What goes wrong:** Events logged but no rollups/threshold visibility, delaying soft-enforce tuning.
 **Why it happens:** Storing raw events only, no actor state aggregates.
 **How to avoid:** Persist both event log and actor aggregate state (hit_count_window, last_seen, active_cooldown_until).
 **Warning signs:** Cannot answer "who would have been blocked" by query.
 
 ### Pitfall 4: UX Message Ambiguity
+
 **What goes wrong:** Users see generic failure instead of clear cooldown reason and time.
 **Why it happens:** Reusing generic validation flash messages.
 **How to avoid:** Define reason codes -> Vietnamese message map with explicit remaining time.
@@ -201,6 +227,7 @@ if mode == "monitor":
 Verified patterns from official sources and current codebase:
 
 ### Flask Decorator/Guard Pattern
+
 ```python
 # Source: https://flask.palletsprojects.com/en/stable/patterns/viewdecorators/
 from functools import wraps
@@ -215,6 +242,7 @@ def anti_abuse_required(f):
 ```
 
 ### Flask-Limiter Route Limit (Optional)
+
 ```python
 # Source: https://flask-limiter.readthedocs.io/en/stable/
 from flask_limiter import Limiter
@@ -229,6 +257,7 @@ def report_scammer():
 ```
 
 ### SQLite Upsert-style Aggregate Update (if needed)
+
 ```python
 # Source: https://docs.sqlalchemy.org/en/20/dialects/sqlite.html
 from sqlalchemy.dialects.sqlite import insert
@@ -250,6 +279,7 @@ db.session.execute(stmt)
 | In-memory counters only | Persistent telemetry + aggregate state | Standard for auditable abuse controls | Enables post-hoc analysis and deterministic cooldown behavior. |
 
 **Deprecated/outdated:**
+
 - IP-only trust decisions: high collateral damage in shared networks.
 - Non-persistent monitor telemetry: not enough for phase transition decisions.
 
@@ -268,6 +298,7 @@ db.session.execute(stmt)
 ## Validation Architecture
 
 ### Test Framework
+
 | Property | Value |
 |----------|-------|
 | Framework | unittest (stdlib) + Flask test client |
@@ -276,6 +307,7 @@ db.session.execute(stmt)
 | Full suite command | `python -m unittest discover -s tests -p "test*.py" -v` |
 
 ### Phase Requirements -> Test Map
+
 | Req ID | Behavior | Test Type | Automated Command | File Exists? |
 |--------|----------|-----------|-------------------|-------------|
 | ABUS-01 | 10-minute window, 3-hit trigger sets cooldown | unit/service + route integration | `python -m unittest tests.abuse.test_soft_enforce.TestSoftEnforce.test_trigger_cooldown_after_3_hits -v` | ❌ Wave 0 |
@@ -284,11 +316,13 @@ db.session.execute(stmt)
 | ABUS-04 | Cooldown/status UX message includes reason and remaining time | route/template integration | `python -m unittest tests.abuse.test_soft_enforce.TestSoftEnforce.test_user_receives_clear_cooldown_message -v` | ❌ Wave 0 |
 
 ### Sampling Rate
+
 - **Per task commit:** `python -m unittest discover -s tests/abuse -p "test_*.py" -v`
 - **Per wave merge:** `python -m unittest discover -s tests -p "test*.py" -v`
 - **Phase gate:** Full suite green before `/gsd-verify-work`
 
 ### Wave 0 Gaps
+
 - [ ] `tests/abuse/test_monitor_mode.py` - monitor-only decision behavior (ABUS-03)
 - [ ] `tests/abuse/test_soft_enforce.py` - cooldown triggering and UX reason payload (ABUS-01, ABUS-04)
 - [ ] `tests/abuse/test_actor_priority.py` - account/cookie/IP precedence and score tiering (ABUS-02)
@@ -297,23 +331,27 @@ db.session.execute(stmt)
 ## Sources
 
 ### Primary (HIGH confidence)
+
 - Repository code and context files:
   - `routes/scammer.py`, `utils/encryption.py`, `services/sensitive_access_log.py`, `models/models.py`, `templates/report_scammer.html`
   - `.planning/phases/02-anti-spam-monitor-soft-enforce/2-CONTEXT.md`
   - `.planning/REQUIREMENTS.md`
-- Flask-Limiter docs (stable): https://flask-limiter.readthedocs.io/en/stable/
-- Flask official docs (view decorators): https://flask.palletsprojects.com/en/stable/patterns/viewdecorators/
-- SQLAlchemy SQLite dialect docs (2.0): https://docs.sqlalchemy.org/en/20/dialects/sqlite.html
+- Flask-Limiter docs (stable): <https://flask-limiter.readthedocs.io/en/stable/>
+- Flask official docs (view decorators): <https://flask.palletsprojects.com/en/stable/patterns/viewdecorators/>
+- SQLAlchemy SQLite dialect docs (2.0): <https://docs.sqlalchemy.org/en/20/dialects/sqlite.html>
 
 ### Secondary (MEDIUM confidence)
-- limits docs (stable): https://limits.readthedocs.io/en/stable/
+
+- limits docs (stable): <https://limits.readthedocs.io/en/stable/>
 
 ### Tertiary (LOW confidence)
+
 - None
 
 ## Metadata
 
 **Confidence breakdown:**
+
 - Standard stack: HIGH - validated against current repo and official docs; versions checked via pip index.
 - Architecture: HIGH - directly mapped to existing `routes/scammer.py` orchestration and phase constraints.
 - Pitfalls: MEDIUM-HIGH - confirmed by current code patterns, with one deployment-specific uncertainty (proxy trust).

@@ -14,3 +14,9 @@ them cau hoi, ngoai bai test, tinh nang
 ve so do cac tinh nang (UML/latex)
 
 IP tracking va cookie tracking de phat hien SPAM va gian lan
+
+## GSD next task
+
+Khi bạn muốn tiếp tục, lệnh tiếp theo phù hợp là:
+
+`/gsd-execute-phase 1`

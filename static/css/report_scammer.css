@@ -89,7 +89,7 @@
     color: var(--mg-text-muted);
 }
 
-.btn-check:checked + .mode-label {
+.btn-check:checked+.mode-label {
     border-color: color-mix(in srgb, var(--mg-accent) 60%, var(--mg-border));
     background: color-mix(in srgb, var(--mg-accent) 10%, var(--mg-surface));
     box-shadow: 0 0 0 2px var(--mg-focus);

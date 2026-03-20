@@ -259,8 +259,12 @@ footer h5 {
     color: var(--mg-text-primary) !important;
 }
 
+footer h6 {
+    color: var(--mg-text-primary) !important;
+}
+
 footer .navbar-brand {
-    color: #334155 !important;
+    color: #0f766e !important;
 }
 
 footer .navbar-brand span {
@@ -460,9 +464,8 @@ footer .input-group .btn.btn-info {
 
 /* Thẻ thống kê (Stat Card) - Sửa lỗi hiện ô trắng */
 .stat-card-admin {
-    background: linear-gradient(145deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.95)) !important;
-    /* Màu tối */
-    border: 1px solid var(--glass-border);
+    background: linear-gradient(180deg, var(--mg-surface) 0%, var(--mg-surface-soft) 100%) !important;
+    border: 1px solid var(--mg-border);
     border-radius: 12px;
     padding: 1.5rem;
     position: relative;
@@ -470,13 +473,13 @@ footer .input-group .btn.btn-info {
     transition: 0.3s;
     min-height: 140px;
     /* Đảm bảo độ cao */
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    box-shadow: var(--mg-shadow-sm);
 }
 
 .stat-card-admin h3 {
     font-size: 2.5rem;
     margin-bottom: 0.5rem;
-    color: #fff !important;
+    color: var(--mg-text-primary) !important;
 }
 
 .stat-icon-bg {
@@ -485,7 +488,7 @@ footer .input-group .btn.btn-info {
     bottom: -10px;
     font-size: 5rem;
     opacity: 0.1;
-    color: white !important;
+    color: var(--mg-text-muted) !important;
     z-index: 0;
 }
 
@@ -496,9 +499,9 @@ footer .input-group .btn.btn-info {
 }
 
 .table-admin thead th {
-    background-color: rgba(15, 23, 42, 0.8) !important;
+    background-color: var(--mg-surface-soft) !important;
     color: var(--accent-color) !important;
-    border-bottom: 2px solid var(--glass-border);
+    border-bottom: 2px solid var(--mg-border);
     text-transform: uppercase;
     font-size: 0.8rem;
     letter-spacing: 1px;
@@ -506,14 +509,14 @@ footer .input-group .btn.btn-info {
 }
 
 .table-admin tbody td {
-    border-bottom: 1px solid var(--glass-border);
+    border-bottom: 1px solid var(--mg-border);
     background: transparent !important;
     padding: 1rem;
-    color: #f1f5f9 !important;
+    color: var(--mg-text-primary) !important;
 }
 
 .table-admin tr:hover td {
-    background-color: rgba(255, 255, 255, 0.05) !important;
+    background-color: rgba(14, 116, 144, 0.08) !important;
 }
 
 /* Animation nhấp nháy cho chữ LIVE */
@@ -549,11 +552,11 @@ footer .input-group .btn.btn-info {
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
-    background: rgba(0, 0, 0, 0.1);
+    background: rgba(14, 116, 144, 0.08);
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(14, 116, 144, 0.2);
     border-radius: 10px;
 }
 
@@ -585,8 +588,8 @@ footer .input-group .btn.btn-info {
     justify-content: center;
     width: 100px;
     height: 100px;
-    background: rgba(0, 0, 0, 0.3) !important;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: var(--mg-surface-soft) !important;
+    border: 1px solid var(--mg-border);
 }
 
 /* ADMIN SIDEBAR & STATS */
@@ -609,8 +612,8 @@ footer .input-group .btn.btn-info {
 }
 
 .stat-card-admin {
-    background: linear-gradient(145deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.95)) !important;
-    border: 1px solid var(--glass-border);
+    background: linear-gradient(180deg, var(--mg-surface) 0%, var(--mg-surface-soft) 100%) !important;
+    border: 1px solid var(--mg-border);
     border-radius: 12px;
     padding: 1.5rem;
     position: relative;
@@ -624,7 +627,7 @@ footer .input-group .btn.btn-info {
     bottom: -10px;
     font-size: 5rem;
     opacity: 0.1;
-    color: white !important;
+    color: var(--mg-text-muted) !important;
 }
 
 /* TABLE ADMIN */
@@ -633,20 +636,20 @@ footer .input-group .btn.btn-info {
 }
 
 .table-admin thead th {
-    background-color: rgba(15, 23, 42, 0.8) !important;
+    background-color: var(--mg-surface-soft) !important;
     color: var(--accent-color) !important;
-    border-bottom: 2px solid var(--glass-border);
+    border-bottom: 2px solid var(--mg-border);
     padding: 1rem;
 }
 
 .table-admin tbody td {
-    border-bottom: 1px solid var(--glass-border);
+    border-bottom: 1px solid var(--mg-border);
     background: transparent !important;
     padding: 1rem;
 }
 
 .table-admin tr:hover td {
-    background-color: rgba(255, 255, 255, 0.05) !important;
+    background-color: rgba(14, 116, 144, 0.08) !important;
 }
 
 /* CUSTOM SCROLLBAR FOR LIVE FEED */
@@ -655,11 +658,11 @@ footer .input-group .btn.btn-info {
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
-    background: rgba(0, 0, 0, 0.1);
+    background: rgba(14, 116, 144, 0.08);
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(14, 116, 144, 0.2);
     border-radius: 10px;
 }
 
@@ -677,10 +680,10 @@ footer .input-group .btn.btn-info {
 }
 
 .glass-card-new {
-    background: rgba(15, 23, 42, 0.65) !important;
+    background: var(--mg-surface-raised) !important;
     backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    border: 1px solid var(--mg-border);
+    box-shadow: var(--mg-shadow-md);
 }
 
 .compact-item-new {
@@ -715,7 +718,7 @@ input[type="file"]::file-selector-button {
 /* Keep homepage hero feed translucent without globally breaking Bootstrap light surfaces. */
 .hero-section .bg-white,
 .hero-section .bg-light {
-    background-color: rgba(255, 255, 255, 0.05) !important;
+    background-color: var(--mg-surface-soft) !important;
 }
 
 /* FIX RIÊNG CHO BADGE ĐỎ TRONG LIVE FEED */

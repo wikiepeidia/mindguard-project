@@ -67,6 +67,7 @@ metrics:
 ### Auto-fixed Issues
 
 1. **[Rule 3 - Blocking Issue] Report template became duplicated after initial patch application**
+
 - **Found during:** Task 1 verification
 - **Issue:** `templates/report_scammer.html` accidentally contained mixed old/new blocks, causing dark utility check failure.
 - **Fix:** Rewrote the file with a clean single-version template and re-ran tests.
@@ -83,6 +84,7 @@ metrics:
 - Phase 03 plan 03 can proceed with leaderboard/scammer-profile convergence and token coverage guards.
 
 ## Self-Check: PASSED
+
 - Found .planning/phases/03-light-mode-ux-system/03-02-SUMMARY.md on disk.
 - Verified task commit f213b45 exists in git history.
 - Verified task commit 2edd105 exists in git history.

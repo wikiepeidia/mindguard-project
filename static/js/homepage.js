@@ -15,8 +15,8 @@ function filterLive(button, filterType) {
             show = item.dataset.reportType === 'bank';
         } else if (filterType === 'website') {
             show = item.dataset.reportType === 'website';
-        } else if (filterType === 'general') {
-            show = item.dataset.reportType === 'general';
+        } else if (filterType === 'phone') {
+            show = item.dataset.reportType === 'phone' || item.dataset.reportType === 'general';
         }
         // 'all' shows everything
 

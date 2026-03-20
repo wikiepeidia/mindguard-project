@@ -5,22 +5,27 @@
 **Confidence:** HIGH
 
 <user_constraints>
+
 ## User Constraints (from CONTEXT.md)
 
 ### Locked Decisions
+
 - Bat buoc: luong quiz theo kieu 1 cau hoi moi trang.
 
 ### Claude's Discretion
+
 - Kieu transition giua cac cau hoi (instant/fade/stepper).
 - Hinh thuc luu state (session + guard rails) de tranh mat bai lam.
 - Muc do gom/phan trang cho navigation controls (next/back/submit) theo do ro rang UX.
 
 ### Deferred Ideas (OUT OF SCOPE)
+
 - Leaderboard integrity mechanics thuoc Phase 5.
 - Advanced adaptive quiz personalization ngoai scope v1.
 </user_constraints>
 
 <phase_requirements>
+
 ## Phase Requirements
 
 | ID | Description | Research Support |
@@ -44,6 +49,7 @@ Question set preparation should happen once per attempt: resolve static + option
 ## Standard Stack
 
 ### Core
+
 | Library | Version | Purpose | Why Standard |
 |---------|---------|---------|--------------|
 | Flask | 3.0.3 (pinned in requirements.txt) | Request routing, session management, flash messages, redirects | Native fit for existing blueprint app; official session + redirect patterns are documented and stable. |
@@ -51,29 +57,34 @@ Question set preparation should happen once per attempt: resolve static + option
 | Jinja2 templates | bundled with Flask 3.0.3 | Server-rendered one-question pages with progress state | Existing app is template-first; avoids SPA migration risk. |
 
 ### Supporting
+
 | Library | Version | Purpose | When to Use |
 |---------|---------|---------|-------------|
 | Bootstrap | 5.3.0 (CDN in base.html) | Layout and mobile-first controls for step UX | For consistent navigation, progress container, and responsive buttons. |
 | Browser sessionStorage (existing JS usage) | native browser API | Optional non-authoritative UX hints (timer, transient UI) | Only for convenience; do not rely on it as grading source of truth. |
 
 ### Alternatives Considered
+
 | Instead of | Could Use | Tradeoff |
 |------------|-----------|----------|
 | Flask session-backed attempt | DB-persisted in-progress attempt table | Better cross-device resume, but unnecessary schema/migration complexity for current requirements. |
 | Server-rendered PRG wizard | Client-only JS state wizard | Faster perceived transitions, but weaker refresh/back reliability and easier state desync. |
 
 **Installation:**
+
 ```bash
 pip install -r requirements.txt
 ```
 
 **Version verification notes:**
+
 - Python stack versions are pinned in requirements.txt.
 - UI framework version is pinned by CDN URL in base.html.
 
 ## Architecture Patterns
 
 ### Recommended Project Structure
+
 ```text
 routes/
 ├── quiz.py                  # quiz attempt lifecycle + result/certificate compatibility
@@ -89,9 +100,11 @@ static/
 ```
 
 ### Pattern 1: Session Attempt Envelope
+
 **What:** Store a compact server-side attempt envelope in Flask session.
 **When to use:** Immediately after starting/restarting quiz attempt.
 **Example:**
+
 ```python
 # Source: project pattern in routes/quiz.py + Flask session docs
 session["quiz_attempt"] = {
@@ -104,9 +117,11 @@ session["quiz_attempt"] = {
 ```
 
 ### Pattern 2: POST Redirect GET Per Step
+
 **What:** After handling answer submit, redirect to next step URL.
 **When to use:** Every answer submit and navigation action.
 **Example:**
+
 ```python
 # Source: Flask redirect/url_for pattern docs
 @app.post("/quiz/step")
@@ -116,9 +131,11 @@ def quiz_step_post():
 ```
 
 ### Pattern 3: Compatibility-Preserving Finalization
+
 **What:** Final step computes score once, writes QuizResult once, then redirects to existing result/certificate routes.
 **When to use:** Submit on final question.
 **Example:**
+
 ```python
 # Source: current routes/quiz.py persistence flow
 result = QuizResult(name=name, email=email, score=score, max_score=max_score)
@@ -132,6 +149,7 @@ return redirect(url_for("quiz.quiz_result"))
 ```
 
 ### Anti-Patterns to Avoid
+
 - **Client-only truth for answers:** Easy desync on refresh/back and vulnerable to DOM contract drift.
 - **Rebuilding random questions every GET:** Breaks answer index mapping and persistence consistency.
 - **Changing result/certificate route contracts in this phase:** High regression risk for profile/admin screens.
@@ -149,24 +167,28 @@ return redirect(url_for("quiz.quiz_result"))
 ## Common Pitfalls
 
 ### Pitfall 1: Question Identity Drift
+
 **What goes wrong:** Questions reshuffle between steps/reloads, causing answer-to-question mismatch.
 **Why it happens:** Random sampling on each request instead of once per attempt.
 **How to avoid:** Freeze sampled question list at attempt start in session.
 **Warning signs:** User answer map contains IDs that are not in currently rendered step.
 
 ### Pitfall 2: Stale JS Contract
+
 **What goes wrong:** JS expects elements (quizForm/question-block/nav-btn-*) absent in template.
 **Why it happens:** Legacy script retained while template evolved.
 **How to avoid:** Either realign template contract or reduce JS to progressive enhancement only.
 **Warning signs:** console errors on DOMContentLoaded and non-functional next/prev controls.
 
 ### Pitfall 3: Result/Certificate Regression
+
 **What goes wrong:** Score or certificate flow breaks downstream pages.
 **Why it happens:** Altered session keys or pass/fail criteria during refactor.
 **How to avoid:** Keep session keys last_quiz_score/max_quiz_score/certificate_code and QuizResult write semantics stable.
 **Warning signs:** profile page missing latest score, certificate redirect loops, admin quiz metrics anomalies.
 
 ### Pitfall 4: Session Payload Bloat
+
 **What goes wrong:** Session cookie approaches browser size limits.
 **Why it happens:** Storing excessive per-question text/explanations in session.
 **How to avoid:** Keep only minimum attempt data (IDs/options index/answer index/topic tags); avoid large explanation blobs.
@@ -177,6 +199,7 @@ return redirect(url_for("quiz.quiz_result"))
 Verified patterns from official sources and current codebase:
 
 ### One-question Step Render
+
 ```python
 # Source: Flask request/session pattern + current route style
 @app.get("/quiz")
@@ -198,6 +221,7 @@ def quiz_step():
 ```
 
 ### Safe Answer Save + Redirect
+
 ```python
 # Source: Flask form + redirect patterns
 @app.post("/quiz/step")
@@ -222,6 +246,7 @@ def quiz_step_submit():
 | Client-side navigation as primary state | Server-trusted state with optional client enhancement | Adopted broadly as reliability pattern in form workflows | Better refresh/back consistency and simpler testability |
 
 **Deprecated/outdated:**
+
 - Treating randomized question order as per-request behavior: replaced by per-attempt frozen ordering.
 
 ## Open Questions
@@ -239,6 +264,7 @@ def quiz_step_submit():
 ## Validation Architecture
 
 ### Test Framework
+
 | Property | Value |
 |----------|-------|
 | Framework | unittest (stdlib, Python 3.12) |
@@ -247,6 +273,7 @@ def quiz_step_submit():
 | Full suite command | python -m unittest discover -s tests -p "test_*.py" |
 
 ### Phase Requirements -> Test Map
+
 | Req ID | Behavior | Test Type | Automated Command | File Exists? |
 |--------|----------|-----------|-------------------|-------------|
 | QUIZ-01 | One-question-per-page flow and step navigation | integration (Flask test client) | python -m unittest tests.quiz.test_quiz_one_question_flow -v | ❌ Wave 0 |
@@ -255,12 +282,14 @@ def quiz_step_submit():
 | QUIZ-04 | Expanded topic-tagged question bank loads into attempt | unit + integration | python -m unittest tests.quiz.test_quiz_topic_bank -v | ❌ Wave 0 |
 
 ### Sampling Rate
+
 - **Per task commit:** python -m unittest tests.quiz.test_quiz_one_question_flow tests.quiz.test_quiz_progress_visibility -v
 - **Per wave merge:** python -m unittest discover -s tests -p "test_*.py"
 - **Phase gate:** Full suite green before /gsd-verify-work
 
 ### Wave 0 Gaps
-- [ ] tests/quiz/__init__.py - quiz phase test package scaffold
+
+- [ ] tests/quiz/**init**.py - quiz phase test package scaffold
 - [ ] tests/quiz/test_quiz_one_question_flow.py - covers QUIZ-01
 - [ ] tests/quiz/test_quiz_progress_visibility.py - covers QUIZ-02
 - [ ] tests/quiz/test_quiz_state_persistence.py - covers QUIZ-03
@@ -270,20 +299,24 @@ def quiz_step_submit():
 ## Sources
 
 ### Primary (HIGH confidence)
+
 - Workspace code: routes/quiz.py, templates/quiz.html, static/js/quiz.js, templates/quiz_result.html, templates/certificate.html, utils/quiz_data.py, models/models.py
-- Flask official docs (3.0.x): https://flask.palletsprojects.com/en/3.0.x/quickstart/#sessions
-- Flask official docs (3.0.x): https://flask.palletsprojects.com/en/3.0.x/patterns/flashing/
-- Flask official docs (3.0.x): https://flask.palletsprojects.com/en/3.0.x/testing/
+- Flask official docs (3.0.x): <https://flask.palletsprojects.com/en/3.0.x/quickstart/#sessions>
+- Flask official docs (3.0.x): <https://flask.palletsprojects.com/en/3.0.x/patterns/flashing/>
+- Flask official docs (3.0.x): <https://flask.palletsprojects.com/en/3.0.x/testing/>
 
 ### Secondary (MEDIUM confidence)
+
 - None
 
 ### Tertiary (LOW confidence)
+
 - None
 
 ## Metadata
 
 **Confidence breakdown:**
+
 - Standard stack: HIGH - all recommended tools already exist in repository and are version-pinned.
 - Architecture: HIGH - derived from concrete route/template mismatch analysis and official Flask session/redirect/testing patterns.
 - Pitfalls: HIGH - observed directly from current code contracts and validated by current test-command behavior.

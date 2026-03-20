@@ -24,6 +24,67 @@
 
     <div class="card bg-dark border-secondary mb-3">
         <div class="card-body">
+            <h5 class="text-white mb-3">Tong quan anti-spam {{ anti_spam_summary.window_hours }}h qua</h5>
+            <div class="row g-3 mb-2">
+                <div class="col-md-4">
+                    <div class="p-3 rounded border border-secondary h-100">
+                        <div class="text-muted small">Tong su kien</div>
+                        <div class="h4 text-info mb-0">{{ anti_spam_summary.total_events }}</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="p-3 rounded border border-secondary h-100">
+                        <div class="text-muted small">Su kien kich hoat cooldown</div>
+                        <div class="h4 text-warning mb-0">{{ anti_spam_summary.cooldown_events }}</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="p-3 rounded border border-secondary h-100">
+                        <div class="text-muted small">Ty le cooldown</div>
+                        <div class="h4 text-danger mb-0">
+                            {% if anti_spam_summary.total_events > 0 %}
+                                {{ ((anti_spam_summary.cooldown_events * 100) / anti_spam_summary.total_events)|round(1) }}%
+                            {% else %}
+                                0%
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <h6 class="text-light">Theo risk tier</h6>
+                    <ul class="list-group list-group-flush">
+                        {% for level, count in anti_spam_summary.risk_breakdown.items() %}
+                        <li class="list-group-item bg-dark text-light border-secondary d-flex justify-content-between">
+                            <span>{{ level }}</span>
+                            <strong>{{ count }}</strong>
+                        </li>
+                        {% else %}
+                        <li class="list-group-item bg-dark text-muted border-secondary">Chua co du lieu risk tier.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <h6 class="text-light">Theo actor type</h6>
+                    <ul class="list-group list-group-flush">
+                        {% for actor_type, count in anti_spam_summary.actor_breakdown.items() %}
+                        <li class="list-group-item bg-dark text-light border-secondary d-flex justify-content-between">
+                            <span>{{ actor_type }}</span>
+                            <strong>{{ count }}</strong>
+                        </li>
+                        {% else %}
+                        <li class="list-group-item bg-dark text-muted border-secondary">Chua co du lieu actor type.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card bg-dark border-secondary mb-3">
+        <div class="card-body">
             <form method="GET" class="row g-3">
                 <div class="col-md-3">
                     <label class="form-label text-light" for="actor">Actor</label>

@@ -10,6 +10,76 @@ from config import Config
 
 scammer_bp = Blueprint('scammer', __name__, url_prefix='/scammer')
 
+
+def _remaining_cooldown_minutes(cooldown_until, now=None):
+    if not cooldown_until:
+        return 0
+    now = now or datetime.utcnow()
+    delta = cooldown_until - now
+    seconds = int(delta.total_seconds())
+    if seconds <= 0:
+        return 0
+    return max(1, (seconds + 59) // 60)
+
+
+def _anti_spam_reason_code(decision, threshold_count, now=None):
+    now = now or datetime.utcnow()
+    if decision.cooldown_until and decision.cooldown_until > now and decision.window_count < threshold_count:
+        return "active_cooldown"
+    if decision.actor_type == "account":
+        return "acct_threshold"
+    if decision.actor_type == "cookie":
+        return "cookie_threshold"
+    return "ip_threshold"
+
+
+def anti_spam_reason_message(reason_code, remaining_minutes=0):
+    remaining_text = ""
+    if remaining_minutes > 0:
+        remaining_text = f" Thoi gian con lai: {remaining_minutes} phut."
+
+    message_map = {
+        "active_cooldown": (
+            "He thong dang tam cooldown vi ban da gui bao cao lien tuc."
+            " Ly do: cooldown van con hieu luc."
+            f"{remaining_text}"
+            " Vui long thu lai sau de dam bao chat luong du lieu."
+        ),
+        "acct_threshold": (
+            "He thong tam gioi han gui bao cao."
+            " Ly do: tai khoan vuot nguong tan suat trong cua so kiem tra."
+            f"{remaining_text}"
+            " Vui long cho va gui lai khi het cooldown."
+        ),
+        "cookie_threshold": (
+            "He thong tam gioi han gui bao cao."
+            " Ly do: thiet bi/phien dang co tan suat gui cao bat thuong."
+            f"{remaining_text}"
+            " Vui long doi trong it phut roi thu lai."
+        ),
+        "ip_threshold": (
+            "He thong tam gioi han gui bao cao."
+            " Ly do: mang ket noi hien tai co tan suat gui cao bat thuong."
+            f"{remaining_text}"
+            " Vui long doi trong it phut roi gui lai."
+        ),
+        "monitor_observe": (
+            "He thong dang giam sat anti-spam o che do monitor."
+            " Bao cao cua ban van duoc ghi nhan, khong chan du lieu."
+            " Neu tiep tuc gui lien tuc, he thong co the bat cooldown o che do enforce."
+        ),
+    }
+
+    return message_map.get(
+        reason_code,
+        (
+            "He thong anti-spam da kich hoat de bao ve du lieu."
+            " Ly do: tan suat gui dang cao hon muc thong thuong."
+            f"{remaining_text}"
+            " Vui long thu lai sau."
+        ),
+    )
+
 @scammer_bp.route("/report", methods=["GET", "POST"])
 # @login_required  <-- Removed to allow anonymous reporting
 def report_scammer():
@@ -164,9 +234,20 @@ def report_scammer():
         )
 
         abus_mode = str(current_app.config.get("ABUS_MODE", Config.ABUS_MODE)).lower()
+        threshold_count_cfg = int(current_app.config.get("ABUS_THRESHOLD_COUNT", Config.ABUS_THRESHOLD_COUNT))
+        reason_code = _anti_spam_reason_code(
+            anti_spam_decision,
+            threshold_count=threshold_count_cfg,
+            now=datetime.utcnow(),
+        )
+        remaining_minutes = _remaining_cooldown_minutes(anti_spam_decision.cooldown_until)
+
         if abus_mode == "soft_enforce" and anti_spam_decision.should_cooldown:
-            flash("Hệ thống đang tạm giới hạn gửi tố cáo. Vui lòng thử lại sau ít phút.", "warning")
+            flash(anti_spam_reason_message(reason_code, remaining_minutes), "warning")
             return redirect(url_for("scammer.report_scammer"))
+
+        if abus_mode == "monitor" and anti_spam_decision.should_cooldown:
+            flash(anti_spam_reason_message("monitor_observe", remaining_minutes), "info")
 
         encrypted_id = encrypt_scammer_info(scammer_identifier, Config.REPORT_ENCRYPTION_KEY)
         

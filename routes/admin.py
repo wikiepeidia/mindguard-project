@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash, send_file
 from functools import wraps
 from sqlalchemy import func
-from models import Registration, QuizResult, ScammerReport, ScammerLeaderboard, db
+from models import Registration, QuizResult, ScammerReport, ScammerLeaderboard, AntiSpamEvent, db
 from werkzeug.security import check_password_hash
 from config import Config
 from utils.helpers import calculate_danger_level
@@ -261,6 +261,37 @@ def sensitive_access_logs():
     high_frequency_actors = [k for k, v in actor_counts.items() if v >= threshold]
     high_frequency_ips = [k for k, v in ip_counts.items() if v >= threshold]
 
+    anti_spam_window_start = datetime.utcnow() - timedelta(hours=24)
+    anti_spam_total_events = (
+        AntiSpamEvent.query.filter(AntiSpamEvent.occurred_at >= anti_spam_window_start).count()
+    )
+    anti_spam_cooldown_events = (
+        AntiSpamEvent.query.filter(
+            AntiSpamEvent.occurred_at >= anti_spam_window_start,
+            AntiSpamEvent.triggered_cooldown.is_(True),
+        ).count()
+    )
+    risk_breakdown_rows = (
+        db.session.query(AntiSpamEvent.risk_level, func.count(AntiSpamEvent.id))
+        .filter(AntiSpamEvent.occurred_at >= anti_spam_window_start)
+        .group_by(AntiSpamEvent.risk_level)
+        .all()
+    )
+    actor_breakdown_rows = (
+        db.session.query(AntiSpamEvent.actor_type, func.count(AntiSpamEvent.id))
+        .filter(AntiSpamEvent.occurred_at >= anti_spam_window_start)
+        .group_by(AntiSpamEvent.actor_type)
+        .all()
+    )
+
+    anti_spam_summary = {
+        "window_hours": 24,
+        "total_events": anti_spam_total_events,
+        "cooldown_events": anti_spam_cooldown_events,
+        "risk_breakdown": {row[0] or "unknown": row[1] for row in risk_breakdown_rows},
+        "actor_breakdown": {row[0] or "unknown": row[1] for row in actor_breakdown_rows},
+    }
+
     return render_template(
         "admin_sensitive_access_logs.html",
         logs=logs,
@@ -268,4 +299,5 @@ def sensitive_access_logs():
         threshold=threshold,
         high_frequency_actors=high_frequency_actors,
         high_frequency_ips=high_frequency_ips,
+        anti_spam_summary=anti_spam_summary,
     )

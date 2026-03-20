@@ -606,38 +606,6 @@ footer h5 {
     padding: 10px;
 }
 
-/* --- FIX MÀU CHỮ BẢNG SỔ ĐEN --- */
-
-/* 1. Ép màu chữ trong các ô bảng thành màu trắng sáng */
-.table-admin tbody td {
-    color: #f8fafc !important;
-    /* Trắng sáng */
-    vertical-align: middle;
-    /* Căn giữa chiều dọc */
-    font-size: 0.95rem;
-    /* Chữ to hơn xíu cho dễ đọc */
-}
-
-/* 2. Ép các dòng chữ phụ (text-muted) sáng lên (màu xám bạc) */
-.table-admin tbody td .text-muted,
-.table-admin tbody td .small {
-    color: #cbd5e1 !important;
-    /* Xám bạc sáng, dễ đọc trên nền đen */
-}
-
-/* 3. Hiệu ứng khi di chuột vào dòng: Nền sáng lên, chữ trắng tinh */
-.table-admin tbody tr:hover td {
-    color: #ffffff !important;
-    background-color: rgba(6, 182, 212, 0.1) !important;
-    /* Highlight màu xanh nhẹ */
-}
-
-/* 4. Fix riêng cho cột Hình thức (tránh bị dính màu đen mặc định) */
-.table-admin tbody td:nth-child(2) {
-    font-weight: 500;
-    color: #e2e8f0 !important;
-}
-
 /* --- ĐỒNG BỘ GIAO DIỆN MỚI (SYNC CLASSES) --- */
 .glass-new {
     background: rgba(255, 255, 255, 0.03) !important;
@@ -681,10 +649,10 @@ input[type="file"]::file-selector-button {
     font-weight: bold;
 }
 
-/* === TRIỆT TIÊU KHỐI TRẮNG Ở HEADER VÀ LIVE FEED === */
-.bg-white,
-.bg-light {
-    background-color: transparent !important;
+/* Keep homepage hero feed translucent without globally breaking Bootstrap light surfaces. */
+.hero-section .bg-white,
+.hero-section .bg-light {
+    background-color: rgba(255, 255, 255, 0.05) !important;
 }
 
 /* FIX RIÊNG CHO BADGE ĐỎ TRONG LIVE FEED */

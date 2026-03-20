@@ -29,10 +29,12 @@
 
         <div class="row justify-content-center">
             <div class="col-xl-10">
-                <form class="report-shell" action="{{ url_for('scammer.report_scammer') }}" method="POST" enctype="multipart/form-data" id="reportForm">
+                <form class="report-shell" action="{{ url_for('scammer.report_scammer') }}" method="POST"
+                    enctype="multipart/form-data" id="reportForm">
                     <div class="report-mode-grid mb-4" data-aos="fade-up">
                         <div class="report-mode-item">
-                            <input type="radio" class="btn-check" name="report_mode" id="mode_scammer" value="person" checked onchange="toggleForm('person')">
+                            <input type="radio" class="btn-check" name="report_mode" id="mode_scammer" value="person"
+                                checked onchange="toggleForm('person')">
                             <label class="mode-label" for="mode_scammer" id="label_scammer">
                                 <i class="fas fa-user-secret report-mode-icon text-info"></i>
                                 <span class="report-mode-title">Tố cáo kẻ gian</span>
@@ -40,7 +42,8 @@
                             </label>
                         </div>
                         <div class="report-mode-item">
-                            <input type="radio" class="btn-check" name="report_mode" id="mode_website" value="website" onchange="toggleForm('website')">
+                            <input type="radio" class="btn-check" name="report_mode" id="mode_website" value="website"
+                                onchange="toggleForm('website')">
                             <label class="mode-label" for="mode_website" id="label_website">
                                 <i class="fas fa-globe-asia report-mode-icon text-warning"></i>
                                 <span class="report-mode-title">Báo cáo website</span>
@@ -61,61 +64,82 @@
                             <div class="row g-3 g-md-4 mb-3 mb-md-4">
                                 <div class="col-md-6">
                                     <label class="form-label-custom" for="person_type_select">Loại thông tin (*)</label>
-                                    <select class="form-select report-select" id="person_type_select" onchange="updatePersonType()">
+                                    <select class="form-select report-select" id="person_type_select"
+                                        onchange="updatePersonType()">
                                         <option value="general">Số điện thoại / Zalo / MXH</option>
                                         <option value="bank">Tài khoản ngân hàng (STK)</option>
                                     </select>
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="form-label-custom" id="label_identifier" for="input_identifier_person">Số điện thoại / ID (*)</label>
+                                    <label class="form-label-custom" id="label_identifier"
+                                        for="input_identifier_person">Số điện thoại / ID (*)</label>
                                     <div class="input-group">
-                                        <span class="input-group-text report-input-group-text"><i class="fas fa-id-badge"></i></span>
-                                        <input type="text" class="form-control report-input" name="identifier_person" id="input_identifier_person" placeholder="VD: 0912345678" required>
+                                        <span class="input-group-text report-input-group-text"><i
+                                                class="fas fa-id-badge"></i></span>
+                                        <input type="text" class="form-control report-input" name="identifier_person"
+                                            id="input_identifier_person" placeholder="VD: 0912345678" required>
                                     </div>
                                 </div>
 
                                 <div class="col-12" id="bank_name_div" style="display: none;">
                                     <label class="form-label-custom" for="input_bank_name">Tên ngân hàng</label>
                                     <div class="input-group">
-                                        <span class="input-group-text report-input-group-text"><i class="fas fa-university"></i></span>
-                                        <input type="text" class="form-control report-input" name="bank_name" id="input_bank_name" placeholder="VD: MBBank, Vietcombank...">
+                                        <span class="input-group-text report-input-group-text"><i
+                                                class="fas fa-university"></i></span>
+                                        <input type="text" class="form-control report-input" name="bank_name"
+                                            id="input_bank_name" placeholder="VD: MBBank, Vietcombank...">
                                     </div>
                                 </div>
 
                                 <div class="col-md-6">
-                                    <label class="form-label-custom" for="input_scammer_name">Tên chủ tài khoản / nickname</label>
+                                    <label class="form-label-custom" for="input_scammer_name">Tên chủ tài khoản /
+                                        nickname</label>
                                     <div class="input-group">
-                                        <span class="input-group-text report-input-group-text"><i class="fas fa-user-tag"></i></span>
-                                        <input type="text" class="form-control report-input" name="scammer_name" id="input_scammer_name" placeholder="VD: NGUYEN VAN A...">
+                                        <span class="input-group-text report-input-group-text"><i
+                                                class="fas fa-user-tag"></i></span>
+                                        <input type="text" class="form-control report-input" name="scammer_name"
+                                            id="input_scammer_name" placeholder="VD: NGUYEN VAN A...">
                                     </div>
                                 </div>
 
                                 <div class="col-md-6">
-                                    <label class="form-label-custom text-warning" for="input_scam_type_person">Loại lừa đảo (*)</label>
+                                    <label class="form-label-custom text-warning" for="input_scam_type_person">Loại lừa
+                                        đảo (*)</label>
                                     <div class="input-group">
-                                        <span class="input-group-text report-input-group-text"><i class="fas fa-list-ul"></i></span>
-                                        <select class="form-select report-select report-select-warning" name="scam_type_person" id="input_scam_type_person" required>
+                                        <span class="input-group-text report-input-group-text"><i
+                                                class="fas fa-list-ul"></i></span>
+                                        <select class="form-select report-select report-select-warning"
+                                            name="scam_type_person" id="input_scam_type_person" required>
                                             <option value="">-- Chọn loại lừa đảo --</option>
                                             <optgroup label="Lừa đảo tài chính">
                                                 <option value="Giả danh ngân hàng">Giả danh ngân hàng</option>
-                                                <option value="Cho vay trực tuyến lừa đảo">Cho vay trực tuyến lừa đảo</option>
+                                                <option value="Cho vay trực tuyến lừa đảo">Cho vay trực tuyến lừa đảo
+                                                </option>
                                                 <option value="Đầu tư chứng khoán ảo">Đầu tư chứng khoán ảo</option>
-                                                <option value="Tiền ảo / Crypto lừa đảo">Tiền ảo / Crypto lừa đảo</option>
+                                                <option value="Tiền ảo / Crypto lừa đảo">Tiền ảo / Crypto lừa đảo
+                                                </option>
                                             </optgroup>
                                             <optgroup label="Lừa đảo việc làm">
-                                                <option value="Tuyển cộng tác viên online">Tuyển cộng tác viên online</option>
-                                                <option value="Làm việc tại nhà lừa đảo">Làm việc tại nhà lừa đảo</option>
-                                                <option value="Kiếm tiền qua app/website">Kiếm tiền qua app/website</option>
+                                                <option value="Tuyển cộng tác viên online">Tuyển cộng tác viên online
+                                                </option>
+                                                <option value="Làm việc tại nhà lừa đảo">Làm việc tại nhà lừa đảo
+                                                </option>
+                                                <option value="Kiếm tiền qua app/website">Kiếm tiền qua app/website
+                                                </option>
                                             </optgroup>
                                             <optgroup label="Giả danh">
                                                 <option value="Giả danh công an">Giả danh công an</option>
-                                                <option value="Giả danh nhân viên giao hàng">Giả danh nhân viên giao hàng</option>
-                                                <option value="Giả danh ngân hàng/tổ chức">Giả danh ngân hàng/tổ chức</option>
+                                                <option value="Giả danh nhân viên giao hàng">Giả danh nhân viên giao
+                                                    hàng</option>
+                                                <option value="Giả danh ngân hàng/tổ chức">Giả danh ngân hàng/tổ chức
+                                                </option>
                                                 <option value="Giả danh người thân">Giả danh người thân</option>
                                             </optgroup>
                                             <optgroup label="Mua bán">
-                                                <option value="Bán hàng giả / kém chất lượng">Bán hàng giả / kém chất lượng</option>
-                                                <option value="Nhận tiền không giao hàng">Nhận tiền không giao hàng</option>
+                                                <option value="Bán hàng giả / kém chất lượng">Bán hàng giả / kém chất
+                                                    lượng</option>
+                                                <option value="Nhận tiền không giao hàng">Nhận tiền không giao hàng
+                                                </option>
                                                 <option value="Mua hàng rồi chiếm đoạt">Mua hàng rồi chiếm đoạt</option>
                                             </optgroup>
                                             <optgroup label="Khác">
@@ -140,15 +164,21 @@
 
                             <div class="row g-3 g-md-4 mb-3 mb-md-4">
                                 <div class="col-12">
-                                    <label class="form-label-custom text-warning" for="input_identifier_website">Đường dẫn website (URL) (*)</label>
+                                    <label class="form-label-custom text-warning" for="input_identifier_website">Đường
+                                        dẫn website (URL) (*)</label>
                                     <div class="input-group">
-                                        <span class="input-group-text report-input-group-text"><i class="fas fa-lock"></i></span>
-                                        <input type="text" class="form-control report-input" name="identifier_website" id="input_identifier_website" placeholder="VD: https://quatang-shopee-vip.com..." disabled required>
+                                        <span class="input-group-text report-input-group-text"><i
+                                                class="fas fa-lock"></i></span>
+                                        <input type="text" class="form-control report-input" name="identifier_website"
+                                            id="input_identifier_website"
+                                            placeholder="VD: https://quatang-shopee-vip.com..." disabled required>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="form-label-custom" for="select_scam_type_website">Loại hình lừa đảo</label>
-                                    <select class="form-select report-select" name="scam_type_website" id="select_scam_type_website" disabled>
+                                    <label class="form-label-custom" for="select_scam_type_website">Loại hình lừa
+                                        đảo</label>
+                                    <select class="form-select report-select" name="scam_type_website"
+                                        id="select_scam_type_website" disabled>
                                         <option value="Phishing Facebook">Giả mạo Facebook (Phishing)</option>
                                         <option value="Phishing Bank">Giả mạo ngân hàng</option>
                                         <option value="Fake Shop">Shop bán hàng lừa đảo</option>
@@ -157,8 +187,10 @@
                                     </select>
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="form-label-custom" for="input_platform_website">Nền tảng phát tán</label>
-                                    <input type="text" class="form-control report-input" name="platform_website" id="input_platform_website" placeholder="VD: Gửi qua SMS, Zalo..." disabled>
+                                    <label class="form-label-custom" for="input_platform_website">Nền tảng phát
+                                        tán</label>
+                                    <input type="text" class="form-control report-input" name="platform_website"
+                                        id="input_platform_website" placeholder="VD: Gửi qua SMS, Zalo..." disabled>
                                 </div>
                             </div>
                         </section>
@@ -167,13 +199,16 @@
 
                         <div class="mb-4">
                             <label class="form-label-custom" for="description">Mô tả chi tiết (*)</label>
-                            <textarea class="form-control report-input" id="description" name="description" rows="5" placeholder="Kể lại quá trình..." required></textarea>
+                            <textarea class="form-control report-input" id="description" name="description" rows="5"
+                                placeholder="Kể lại quá trình..." required></textarea>
                         </div>
 
                         <div class="mb-4 mb-md-5">
-                            <label class="form-label-custom mb-2" for="evidence_files">Bằng chứng (ảnh chụp màn hình)</label>
+                            <label class="form-label-custom mb-2" for="evidence_files">Bằng chứng (ảnh chụp màn
+                                hình)</label>
                             <label class="upload-zone" for="evidence_files">
-                                <input type="file" class="upload-input" id="evidence_files" name="evidence_files" multiple accept="image/*" onchange="previewFiles(this)">
+                                <input type="file" class="upload-input" id="evidence_files" name="evidence_files"
+                                    multiple accept="image/*" onchange="previewFiles(this)">
                                 <i class="fas fa-cloud-upload-alt upload-icon"></i>
                                 <h3 class="h6 mb-1">Kéo thả hoặc bấm để chọn ảnh</h3>
                                 <p class="small mb-0">Chấp nhận nhiều ảnh, định dạng phổ biến (JPG/PNG/WebP).</p>
@@ -183,15 +218,17 @@
 
                         <div class="report-consent mb-4">
                             <div class="alert alert-warning report-warning-note small mb-3">
-                                He thong anti-spam dang theo doi tan suat gui bao cao. Neu gui lien tuc trong thoi gian ngan,
-                                ban co the bi cooldown tam thoi va se nhan thong bao kem ly do va thoi gian cho con lai.
+                                Hệ thống anti-spam đang theo dõi tần suất gửi báo cáo. Nếu gửi liên tục trong thời gian
+                                ngắn,
+                                bạn có thể bị cooldown tạm thời và sẽ nhận thông báo kèm lý do và thời gian chờ còn lại.
                             </div>
                             <div class="form-check mb-2">
                                 <input class="form-check-input" type="checkbox" name="term_truth" id="term1" required>
                                 <label class="form-check-label" for="term1">Tôi cam kết thông tin đúng sự thật.</label>
                             </div>
                             <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="term_responsibility" id="term2" required>
+                                <input class="form-check-input" type="checkbox" name="term_responsibility" id="term2"
+                                    required>
                                 <label class="form-check-label" for="term2">Tôi chịu trách nhiệm về tố cáo này.</label>
                                 <input type="hidden" name="consent" value="on">
                             </div>
@@ -203,11 +240,15 @@
                         </div>
                         {% endif %}
 
-                        <div id="math-captcha-container" class="report-math-captcha mb-4 {% if site_key and not force_math %}d-none{% endif %}">
-                            <label class="form-label h6 mb-3" for="math_answer"><i class="fas fa-calculator me-2"></i>Xác thực bảo mật</label>
+                        <div id="math-captcha-container"
+                            class="report-math-captcha mb-4 {% if site_key and not force_math %}d-none{% endif %}">
+                            <label class="form-label h6 mb-3" for="math_answer"><i
+                                    class="fas fa-calculator me-2"></i>Xác thực bảo mật</label>
                             <div class="input-group">
-                                <span class="input-group-text report-input-group-text fw-bold">{{ math_question }}</span>
-                                <input type="number" class="form-control report-input" id="math_answer" name="math_answer" placeholder="Nhập kết quả phép tính...">
+                                <span class="input-group-text report-input-group-text fw-bold">{{ math_question
+                                    }}</span>
+                                <input type="number" class="form-control report-input" id="math_answer"
+                                    name="math_answer" placeholder="Nhập kết quả phép tính...">
                             </div>
                         </div>
 

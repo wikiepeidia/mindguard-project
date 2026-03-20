@@ -29,7 +29,7 @@
 - [x] **ABUS-01**: He thong ap dung rule tan suat gui to cao theo cua so thoi gian de chan spam.
 - [x] **ABUS-02**: He thong danh gia rui ro dua tren da tin hieu (IP + cookie + account).
 - [x] **ABUS-03**: Trien khai monitor mode truoc, sau do soft-enforce theo nguong duoc cau hinh.
-- [ ] **ABUS-04**: Nguoi dung nhan thong bao cooldown/chuyen trang thai voi ly do ro rang.
+- [x] **ABUS-04**: Nguoi dung nhan thong bao cooldown/chuyen trang thai voi ly do ro rang.
 
 ### Leaderboard
 
@@ -78,7 +78,7 @@
 | ABUS-01 | Phase 2 | Completed |
 | ABUS-02 | Phase 2 | Completed |
 | ABUS-03 | Phase 2 | Completed |
-| ABUS-04 | Phase 2 | Pending |
+| ABUS-04 | Phase 2 | Completed |
 | LEAD-01 | Phase 5 | Pending |
 | LEAD-02 | Phase 5 | Pending |
 
@@ -90,4 +90,4 @@
 
 ---
 *Requirements defined: 2026-03-19*
-*Last updated: 2026-03-19 after initial definition*
+*Last updated: 2026-03-20 after Phase 2 completion updates*

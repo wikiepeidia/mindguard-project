@@ -84,9 +84,17 @@ Each task was committed atomically:
 - **Verification:** `git commit` succeeded with all three new antispam test files in Task 1 commit.
 - **Committed in:** `7f992e6`
 
+**2. [Rule 3 - Blocking] GSD state updater could not parse legacy STATE format**
+- **Found during:** Plan metadata updates after Task 2
+- **Issue:** `gsd-tools state advance-plan` failed with parse error for Current Plan fields in existing `STATE.md` structure.
+- **Fix:** Applied manual updates to `STATE.md`, `ROADMAP.md`, and `REQUIREMENTS.md` to reflect completed plan progress and requirement status.
+- **Files modified:** `.planning/STATE.md`, `.planning/ROADMAP.md`, `.planning/REQUIREMENTS.md`
+- **Verification:** Files now contain Phase 2 in-progress status, 02-01 plan completion, and ABUS-01/ABUS-02 marked completed.
+- **Committed in:** `d51c620`
+
 ---
 
-**Total deviations:** 1 auto-fixed (1 blocking)
+**Total deviations:** 2 auto-fixed (2 blocking)
 **Impact on plan:** Necessary to satisfy atomic commit requirements; no scope creep.
 
 ## Issues Encountered

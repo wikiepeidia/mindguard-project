@@ -33,3 +33,13 @@ Resolved debug sessions. Used by `gsd-debugger` to surface known-pattern hypothe
 - **Files changed:** templates/index.html, static/css/homepage.css, static/js/homepage.js, utils/privacy_policy.py
 
 ---
+
+## light-mode-broad-regression-across-pages — Broad light-mode contrast drift across shared utility surfaces
+
+- **Date:** 2026-03-20
+- **Error patterns:** light mode, broad regression, contrast drift, hardcoded dark values, global override, white text on light background, bootstrap utility surfaces, anti-spam copy accents
+- **Root cause:** Legacy dark-theme compatibility rules in static/css/style.css globally overrode light utility classes and table text colors, causing cross-page contrast issues beyond homepage.
+- **Fix:** Removed unsafe global light-surface transparency override and forced white table text block; restored accented Vietnamese anti-spam warning copy in report template.
+- **Files changed:** static/css/style.css, templates/report_scammer.html
+
+---

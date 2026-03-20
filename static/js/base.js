@@ -23,13 +23,13 @@ document.addEventListener('DOMContentLoaded', function() {
         
         function animateCanvas() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = '#0284c7';
-            ctx.strokeStyle = 'rgba(2, 132, 199, 0.24)';
+            ctx.fillStyle = '#0ea5e9';
+            ctx.strokeStyle = 'rgba(14, 165, 233, 0.34)';
             particles.forEach((p, i) => {
                 p.x += p.vx; p.y += p.vy;
                 if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
                 if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
-                ctx.beginPath(); ctx.arc(p.x, p.y, 2, 0, Math.PI * 2); ctx.fill();
+                ctx.beginPath(); ctx.arc(p.x, p.y, 2.2, 0, Math.PI * 2); ctx.fill();
                 for (let j = i + 1; j < particles.length; j++) {
                     let p2 = particles[j];
                     let dist = Math.hypot(p.x - p2.x, p.y - p2.y);
@@ -55,7 +55,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 alertElement.classList.remove('show');
                 alertElement.remove();
             }
-        }, 5500);
+        }, 2800);
 
         alertElement.addEventListener('mouseenter', () => clearTimeout(timer), { once: true });
     });

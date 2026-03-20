@@ -28,18 +28,13 @@
 
                 <!-- Chips gợi ý -->
                 <div class="d-flex flex-wrap gap-2 mb-3" data-aos="fade-up">
-                    <span class="badge bg-dark bg-opacity-50 text-white border border-info border-opacity-25 px-3 py-2"
-                        style="font-size: 0.85rem;">
+                    <span class="badge hero-token-chip hero-token-phone px-3 py-2" style="font-size: 0.85rem;">
                         <i class="fas fa-phone-alt me-1 text-info"></i> SĐT
                     </span>
-                    <span
-                        class="badge bg-dark bg-opacity-50 text-white border border-success border-opacity-25 px-3 py-2"
-                        style="font-size: 0.85rem;">
+                    <span class="badge hero-token-chip hero-token-bank px-3 py-2" style="font-size: 0.85rem;">
                         <i class="fas fa-university me-1 text-success"></i> STK
                     </span>
-                    <span
-                        class="badge bg-dark bg-opacity-50 text-white border border-warning border-opacity-25 px-3 py-2"
-                        style="font-size: 0.85rem;">
+                    <span class="badge hero-token-chip hero-token-url px-3 py-2" style="font-size: 0.85rem;">
                         <i class="fas fa-link me-1 text-warning"></i> URL
                     </span>
                 </div>
@@ -134,17 +129,17 @@
                                 <i class="fas fa-university me-1"></i> STK
                             </button>
                             <button class="btn btn-sm btn-outline-warning px-2 py-1 filter-btn" data-filter="phone"
-                                style="font-size: 0.7rem;" onclick="filterLive(this, 'general')">
+                                style="font-size: 0.7rem;" onclick="filterLive(this, 'phone')">
                                 <i class="fas fa-phone-alt me-1"></i> SĐT
                             </button>
-                            <button class="btn btn-sm btn-outline-light px-2 py-1 filter-btn" data-filter="website"
+                            <button class="btn btn-sm btn-outline-primary px-2 py-1 filter-btn" data-filter="website"
                                 style="font-size: 0.7rem;" onclick="filterLive(this, 'website')">
                                 <i class="fas fa-globe me-1"></i> Link
                             </button>
                         </div>
                     </div>
 
-                    <div class="p-3 overflow-auto custom-scrollbar" style="flex: 1; background: rgba(0,0,0,0.1);"
+                    <div class="p-3 overflow-auto custom-scrollbar live-list-surface" style="flex: 1;"
                         id="liveScammerList">
                         {% if top_scammers %}
                         <div class="vstack gap-3">
@@ -154,11 +149,10 @@
                                 data-verification="{{ entry.verification_status }}" data-scammer-id="{{ entry.id }}"
                                 data-report-type="{{ entry.report_type }}"
                                 onclick="window.location.href='{{ url_for('main.scammer_profile', scammer_id=entry.id) }}';"
-                                data-identifier="{{ entry.identifier }}"
-                                data-name="{{ entry.name }}" data-type="{{ entry.type }}"
-                                data-platform="{{ entry.platform }}" data-desc="{{ entry.description }}"
-                                data-reports="{{ entry.total_reports }}" data-confirmed="{{ entry.confirmed_by_count }}"
-                                data-risk-score="{{ entry.risk_score }}"
+                                data-identifier="{{ entry.identifier }}" data-name="{{ entry.name }}"
+                                data-type="{{ entry.type }}" data-platform="{{ entry.platform }}"
+                                data-desc="{{ entry.description }}" data-reports="{{ entry.total_reports }}"
+                                data-confirmed="{{ entry.confirmed_by_count }}" data-risk-score="{{ entry.risk_score }}"
                                 data-verification-status="{{ entry.verification_status }}"
                                 data-date="{{ entry.updated_at }}" data-image="{{ entry.image }}">
 
@@ -234,8 +228,8 @@
                         {% endif %}
                     </div>
 
-                    <div class="p-2 bg-black bg-opacity-20 text-center border-top border-white border-opacity-5">
-                        <small class="text-slate-500" style="font-size: 0.65rem;">Dữ liệu cập nhật theo thời gian
+                    <div class="p-2 text-center border-top border-white border-opacity-5 live-subtitle-strip">
+                        <small class="text-slate-500 live-subtitle-text" style="font-size: 0.65rem;">Dữ liệu cập nhật theo thời gian
                             thực</small>
                     </div>
                 </div>
@@ -245,7 +239,7 @@
     </div>
 </section>
 
-<section class="py-5">
+<section class="py-5 home-tools-section">
     <div class="container">
         <div class="text-center mb-5" data-aos="fade-up">
             <h2 class="fw-bold text-white">Công cụ hỗ trợ toàn diện</h2>
@@ -288,7 +282,7 @@
 </section>
 
 <!-- Section: Cách hoạt động (Redesigned) -->
-<section class="py-5 bg-transparent">
+<section class="py-5 bg-transparent home-process-section">
     <div class="container">
         <div class="text-center mb-5" data-aos="fade-up">
             <span class="badge rounded-pill border border-info text-info px-3 py-2 mb-3 bg-info bg-opacity-10">

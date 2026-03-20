@@ -134,3 +134,37 @@ class SensitiveAccessLog(db.Model):
     user_agent = db.Column(db.String(512), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
+
+class AntiSpamEvent(db.Model):
+    __tablename__ = 'anti_spam_events'
+
+    id = db.Column(db.Integer, primary_key=True)
+    actor_key = db.Column(db.String(128), nullable=False, index=True)
+    actor_type = db.Column(db.String(20), nullable=False)
+    account_id = db.Column(db.String(64), nullable=True)
+    reporter_hash = db.Column(db.String(64), nullable=True)
+    ip_address = db.Column(db.String(45), nullable=True)
+    risk_score = db.Column(db.Integer, nullable=False, default=0)
+    risk_level = db.Column(db.String(10), nullable=False, default='low')
+    window_count = db.Column(db.Integer, nullable=False, default=1)
+    triggered_cooldown = db.Column(db.Boolean, nullable=False, default=False)
+    cooldown_until = db.Column(db.DateTime, nullable=True)
+    occurred_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
+
+class AntiSpamActorState(db.Model):
+    __tablename__ = 'anti_spam_actor_states'
+
+    id = db.Column(db.Integer, primary_key=True)
+    actor_key = db.Column(db.String(128), nullable=False, unique=True, index=True)
+    actor_type = db.Column(db.String(20), nullable=False)
+    account_id = db.Column(db.String(64), nullable=True)
+    reporter_hash = db.Column(db.String(64), nullable=True)
+    ip_address = db.Column(db.String(45), nullable=True)
+    window_started_at = db.Column(db.DateTime, nullable=True)
+    window_count = db.Column(db.Integer, nullable=False, default=0)
+    cooldown_until = db.Column(db.DateTime, nullable=True)
+    last_risk_score = db.Column(db.Integer, nullable=False, default=0)
+    last_risk_level = db.Column(db.String(10), nullable=False, default='low')
+    last_seen_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+

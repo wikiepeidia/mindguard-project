@@ -44,3 +44,12 @@ class Config:
     ADMIN_PASSWORD = "mindguard2025"
     QUIZ_PASS_PERCENTAGE = 0.75
     REPORT_ENCRYPTION_KEY = "mindguard-secret-key-2025"
+
+    # Anti-spam monitor/soft-enforce configuration
+    ABUS_MODE = os.environ.get("ABUS_MODE", "monitor")
+    ABUS_WINDOW_MINUTES = int(os.environ.get("ABUS_WINDOW_MINUTES", 10))
+    ABUS_THRESHOLD_COUNT = int(os.environ.get("ABUS_THRESHOLD_COUNT", 3))
+    ABUS_COOLDOWN_MINUTES = int(os.environ.get("ABUS_COOLDOWN_MINUTES", 15))
+    ABUS_ACCOUNT_WEIGHT = int(os.environ.get("ABUS_ACCOUNT_WEIGHT", 70))
+    ABUS_COOKIE_WEIGHT = int(os.environ.get("ABUS_COOKIE_WEIGHT", 20))
+    ABUS_IP_WEIGHT = int(os.environ.get("ABUS_IP_WEIGHT", 10))

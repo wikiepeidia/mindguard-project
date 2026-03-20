@@ -4,10 +4,32 @@ Resolved debug sessions. Used by `gsd-debugger` to surface known-pattern hypothe
 
 ---
 
+## light-mode-notification-footer-report-pixel-coverage — Light-mode footer, flash, and report disclaimer visual regression
+
+- **Date:** 2026-03-20
+- **Error patterns:** light mode, footer too dark, white text on light background, report disclaimer not adapted, notification compatibility, missing auto-hide, dim network pixels
+- **Root cause:** Legacy global dark-theme overrides in style.css stayed active during light mode and overrode tokenized component styling; base.js also lacked flash auto-hide and used low-contrast network-canvas colors.
+- **Fix:** Replaced dark global footer/dropdown/alert/select option styles with token-based light-friendly styles, increased network-canvas visibility, and added timed auto-hide for dismissible alerts.
+- **Files changed:** static/css/style.css, static/css/base.css, static/js/base.js
+
+---
+
 ## missing-scammer-reports-table-homepage — Homepage GET / crashed with missing scammer_reports table
+
 - **Date:** 2026-03-20
 - **Error patterns:** HTTP 500, GET /, sqlalchemy.exc.OperationalError, no such table, scammer_reports, homepage crash
 - **Root cause:** `db.create_all()` was only executed in the `__main__` block, so import-based startup paths (including `flask run`) skipped schema initialization and homepage query to `scammer_reports` crashed.
 - **Fix:** Run `db.create_all()` during app initialization (not only in `__main__`) so both `flask run` and `python app.py` have required tables.
 - **Files changed:** app.py
+
+---
+
+## light-mode-ui-inconsistencies-liveboard-vietnamese-accents — Homepage light-mode contrast and LIVE board filter mismatch
+
+- **Date:** 2026-03-20
+- **Error patterns:** light mode, poor readability, text-white on light background, LIVE board not working, filterLive general phone mismatch, missing Vietnamese accents, privacy text unaccented
+- **Root cause:** Light-mode rollout left dark-theme text/background classes in homepage template/styles, LIVE phone filter used wrong key mapping (`general` instead of `phone`), and privacy notice source text was unaccented.
+- **Fix:** Added section-scoped light-mode contrast overrides, corrected LIVE filter mapping in template/JS, and restored accented privacy copy in the source helper.
+- **Files changed:** templates/index.html, static/css/homepage.css, static/js/homepage.js, utils/privacy_policy.py
+
 ---

@@ -53,3 +53,13 @@ Resolved debug sessions. Used by `gsd-debugger` to surface known-pattern hypothe
 - **Files changed:** templates/index.html, static/css/homepage.css, static/css/style.css, static/css/base.css, static/js/base.js
 
 ---
+
+## homepage-overlay-hides-animation-and-board-all-zero — Homepage network canvas hidden and board appears all-zero
+
+- **Date:** 2026-03-20
+- **Error patterns:** homepage animation hidden until scroll, network canvas not visible on first paint, board all zero, stats all zero, no explicit traceback, light mode layering, empty local database
+- **Root cause:** The shared network canvas was stacked behind light-mode page paints, and homepage board/stats logic depended too strictly on approved leaderboard rows without robust fallback when leaderboard data was missing.
+- **Fix:** Raised network canvas layering above page backgrounds while preserving interaction behavior, added approved-report fallback in homepage data logic, and validated non-zero rendering with seeded local DB data.
+- **Files changed:** static/css/base.css, routes/main.py
+
+---

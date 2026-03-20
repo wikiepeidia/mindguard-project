@@ -1,51 +1,64 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="row justify-content-center">
-  <div class="col-lg-9">
-    <div class="card shadow-sm border-0 rounded-4 glass-card">
-      <div class="card-body p-4 p-md-5">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-          <h3 class="fw-bold text-white mb-0">Bài test nhận thức MindGuard</h3>
-          {% if quiz_title and quiz_title != "Học viên an ninh mạng" %}
-          <span class="badge bg-warning bg-opacity-20 text-warning border border-warning px-3 py-2">
-            <i class="fas fa-trophy me-2"></i> {{ quiz_title }}
-          </span>
-          {% endif %}
-        </div>
-
-        <p class="text-slate-400 mb-4 lead">
-          Trả lời 6 câu hỏi để kiểm tra mức độ cảnh giác và nhận danh hiệu bảo mật tương ứng.
-        </p>
-        <form method="post">
-
-          {% if ai_question %}
-          <input type="hidden" name="ai_q_id" value="{{ ai_question.id }}">
-          <input type="hidden" name="ai_correct_{{ ai_question.id }}" value="{{ ai_question.answer }}">
-          {% endif %}
-
-          {% for q in questions %}
-          <div class="mb-4">
-            <p class="fw-semibold">
-              {% if q.id > 9000 %}
-              <span class="badge bg-warning text-dark me-2">AI Generated</span>
-              {% endif %}
-              Câu {{ loop.index }}. {{ q.question | nl2br }}
-            </p>
-            {% for option in q.options %}
-            <div class="form-check">
-              <input class="form-check-input" type="radio" name="q{{ q.id }}" id="q{{ q.id }}_{{ loop.index0 }}"
-                value="{{ loop.index0 }}">
-              <label class="form-check-label" for="q{{ q.id }}_{{ loop.index0 }}">
-                {{ option }}
-              </label>
+<section class="quiz-page py-4 py-md-5">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-xl-9">
+        <div class="quiz-shell">
+          <header class="quiz-header mb-4">
+            <div>
+              <h1 class="quiz-title mb-2">Bài test nhận thức MindGuard</h1>
+              <p class="quiz-subtitle mb-0">Trả lời 6 câu hỏi để kiểm tra mức độ cảnh giác và nhận danh hiệu bảo mật tương ứng.</p>
             </div>
-            {% endfor %}
+            {% if quiz_title and quiz_title != "Học viên an ninh mạng" %}
+            <span class="badge quiz-rank-badge px-3 py-2 mt-3 mt-md-0">
+              <i class="fas fa-trophy me-2"></i>{{ quiz_title }}
+            </span>
+            {% endif %}
+          </header>
+
+          <div class="quiz-progress mb-4" role="status" aria-live="polite">
+            <span class="quiz-progress-label">Số câu hỏi: {{ questions|length }}</span>
           </div>
-          {% endfor %}
-          <button type="submit" class="btn btn-primary btn-lg">Nộp bài</button>
-        </form>
+
+          <form class="quiz-form" method="post">
+            {% if ai_question %}
+            <input type="hidden" name="ai_q_id" value="{{ ai_question.id }}">
+            <input type="hidden" name="ai_correct_{{ ai_question.id }}" value="{{ ai_question.answer }}">
+            {% endif %}
+
+            {% for q in questions %}
+            <article class="quiz-question-card mb-4">
+              <p class="quiz-question-text mb-3">
+                {% if q.id > 9000 %}
+                <span class="badge quiz-ai-badge me-2">AI Generated</span>
+                {% endif %}
+                Câu {{ loop.index }}. {{ q.question | nl2br }}
+              </p>
+
+              <div class="quiz-options-list">
+                {% for option in q.options %}
+                <div class="quiz-option-item">
+                  <input class="form-check-input quiz-option-input" type="radio" name="q{{ q.id }}" id="q{{ q.id }}_{{ loop.index0 }}" value="{{ loop.index0 }}">
+                  <label class="quiz-option-label" for="q{{ q.id }}_{{ loop.index0 }}">
+                    <span class="quiz-option-badge">{{ loop.index }}</span>
+                    <span>{{ option }}</span>
+                  </label>
+                </div>
+                {% endfor %}
+              </div>
+            </article>
+            {% endfor %}
+
+            <div class="quiz-actions d-grid d-md-flex justify-content-md-end">
+              <button type="submit" class="btn btn-primary btn-lg quiz-submit-btn">Nộp bài</button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   </div>
-</div>
+</section>
+
+<link rel="stylesheet" href="{{ url_for('static', filename='css/quiz.css') }}">
 {% endblock %}

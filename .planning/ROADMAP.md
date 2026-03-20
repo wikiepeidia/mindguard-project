@@ -6,7 +6,8 @@
 
 ## Phases
 
-- [x] **Phase 1: Privacy & Data Governance Foundation** - Chuan hoa masking du lieu nhay cam va audit truy cap de tao nen tang tin cay. (completed 2026-03-20)
+- [x] **Phase 1: Privacy & Data Governance Foundation** - Chuan hoa masking du lieu nhay cam va audit truy cap de tao nen tang tin cay.
+ (completed 2026-03-20)
 - [ ] **Phase 2: Anti-Spam Monitor & Soft Enforce** - Trien khai chong spam da tin hieu theo lo trinh monitor truoc, soft-enforce sau.
 - [ ] **Phase 3: Light Mode UX System** - Dong bo light mode, design tokens va mobile-first cho cac trang uu tien.
 - [ ] **Phase 4: Quiz One-Question Flow** - Chuyen quiz sang luong 1 cau hoi/trang voi tien do ro rang va trang thai on dinh.
@@ -42,7 +43,13 @@ Plans:
 2. Moi quyet dinh rui ro su dung ket hop IP, cookie va account thay vi mot tin hieu don le.
 3. Van hanh co monitor mode truoc, sau do chuyen sang soft-enforce theo nguong cau hinh.
 4. Khi bi cooldown hoac thay doi trang thai, nguoi dung nhan thong bao ly do ro rang va han cho.
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+
+- [ ] 02-01-PLAN.md - Anti-spam core service + telemetry schema + risk scoring tests.
+- [ ] 02-02-PLAN.md - Route integration monitor-first va soft-enforce gate cho report flow.
+- [ ] 02-03-PLAN.md - User cooldown/status messaging + admin anti-spam telemetry summary.
 
 ### Phase 3: Light Mode UX System
 

@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container py-5">
+<div class="container py-5 scammer-profile-page">
 
     <!-- Header -->
     <div class="text-center mb-4" data-aos="fade-down">
@@ -11,8 +11,8 @@
         <span class="badge rounded-pill border border-danger text-danger px-3 py-2 mb-3 bg-danger bg-opacity-10">
             <i class="fas fa-user-secret me-2"></i> HỒ SƠ ĐỐI TƯỢNG
         </span>
-        <h1 class="display-6 fw-bold text-white mb-2">Chi tiết cảnh báo</h1>
-        <p class="text-info small mb-0">{{ privacy_note }}</p>
+        <h1 class="display-6 fw-bold scammer-profile-title mb-2">Chi tiết cảnh báo</h1>
+        <p class="small mb-0 scammer-profile-note">{{ privacy_note }}</p>
     </div>
 
     <div class="row g-4">
@@ -21,11 +21,10 @@
         <div class="col-lg-8">
 
             <!-- Entity Card -->
-            <div class="glass-card p-4 mb-4" data-aos="fade-up">
+            <div class="scammer-profile-card p-4 mb-4" data-aos="fade-up">
                 <div class="row align-items-center">
                     <div class="col-auto">
-                        <div class="bg-danger bg-opacity-20 rounded-circle d-flex align-items-center justify-content-center border border-danger border-opacity-25"
-                            style="width: 80px; height: 80px;">
+                        <div class="d-flex align-items-center justify-content-center scammer-profile-avatar">
                             {% if scammer.report_type == 'bank' %}
                             <i class="fas fa-university fa-2x text-danger"></i>
                             {% elif scammer.report_type == 'website' %}
@@ -37,7 +36,7 @@
                     </div>
                     <div class="col">
                         <div class="d-flex align-items-center gap-2 mb-2">
-                            <h3 class="text-white fw-bold mb-0" id="identifierDisplay">
+                            <h3 class="fw-bold mb-0 scammer-identifier" id="identifierDisplay">
                                 {{ masked_identifier }}
                             </h3>
                             {% if can_view_full_sensitive %}
@@ -46,7 +45,7 @@
                             </button>
                             {% endif %}
                         </div>
-                        <p class="text-slate-400 mb-2">{{ scammer.scammer_name or 'Chưa rõ danh tính' }}</p>
+                        <p class="scammer-subtext mb-2">{{ scammer.scammer_name or 'Chưa rõ danh tính' }}</p>
                         <div class="d-flex gap-2 flex-wrap">
                             <span class="badge bg-danger bg-opacity-20 text-danger border border-danger">
                                 {{ scammer.report_count }} báo cáo
@@ -68,15 +67,14 @@
             </div>
 
             <!-- Risk Score -->
-            <div class="glass-card p-4 mb-4" data-aos="fade-up" data-aos-delay="100">
-                <h5 class="text-white fw-bold mb-3">
+            <div class="scammer-profile-card p-4 mb-4" data-aos="fade-up" data-aos-delay="100">
+                <h5 class="fw-bold mb-3 scammer-section-title">
                     <i class="fas fa-chart-line me-2 text-warning"></i> Điểm rủi ro
                 </h5>
                 <div class="row align-items-center">
                     <div class="col-auto">
                         <div class="position-relative d-inline-block">
-                            <div class="bg-{{ risk_info.color }} bg-opacity-20 rounded-circle d-flex align-items-center justify-content-center border border-{{ risk_info.color }} border-2"
-                                style="width: 100px; height: 100px;">
+                            <div class="bg-{{ risk_info.color }} bg-opacity-20 d-flex align-items-center justify-content-center border border-{{ risk_info.color }} border-2 scammer-risk-circle">
                                 <h2 class="text-{{ risk_info.color }} fw-bold mb-0">{{ scammer.risk_score or 0 }}</h2>
                             </div>
                         </div>
@@ -85,7 +83,7 @@
                         <h4 class="text-{{ risk_info.color }} fw-bold mb-2">
                             <i class="fas {{ risk_info.icon }} me-2"></i> {{ risk_info.text }}
                         </h4>
-                        <p class="text-slate-400 small mb-0">
+                        <p class="scammer-subtext small mb-0">
                             Điểm rủi ro được tính toán dựa trên số lượng báo cáo, số người xác nhận,
                             bằng chứng và thời gian hoạt động.
                         </p>
@@ -101,8 +99,8 @@
             </div>
 
             <!-- Timeline -->
-            <div class="glass-card p-4 mb-4" data-aos="fade-up" data-aos-delay="200">
-                <h5 class="text-white fw-bold mb-3">
+            <div class="scammer-profile-card p-4 mb-4" data-aos="fade-up" data-aos-delay="200">
+                <h5 class="fw-bold mb-3 scammer-timeline-title">
                     <i class="fas fa-history me-2 text-info"></i> Timeline
                 </h5>
 
@@ -112,11 +110,11 @@
                             <div class="timeline-marker bg-info me-3"></div>
                             <div class="flex-grow-1">
                                 <div class="d-flex justify-content-between align-items-start mb-1">
-                                    <h6 class="text-white fw-bold mb-0">Báo cáo đầu tiên</h6>
-                                    <small class="text-slate-500">{{ scammer.created_at.strftime('%d/%m/%Y %H:%M')
+                                    <h6 class="fw-bold mb-0 scammer-section-title">Báo cáo đầu tiên</h6>
+                                    <small class="scammer-subtext">{{ scammer.created_at.strftime('%d/%m/%Y %H:%M')
                                         }}</small>
                                 </div>
-                                <p class="text-slate-400 small mb-0">Hồ sơ được tạo trong hệ thống</p>
+                                <p class="scammer-subtext small mb-0">Hồ sơ được tạo trong hệ thống</p>
                             </div>
                         </div>
                     </div>
@@ -127,11 +125,11 @@
                             <div class="timeline-marker bg-warning me-3"></div>
                             <div class="flex-grow-1">
                                 <div class="d-flex justify-content-between align-items-start mb-1">
-                                    <h6 class="text-white fw-bold mb-0">Nhiều báo cáo</h6>
-                                    <small class="text-slate-500">{{ scammer.updated_at.strftime('%d/%m/%Y %H:%M')
+                                    <h6 class="fw-bold mb-0 scammer-section-title">Nhiều báo cáo</h6>
+                                    <small class="scammer-subtext">{{ scammer.updated_at.strftime('%d/%m/%Y %H:%M')
                                         }}</small>
                                 </div>
-                                <p class="text-slate-400 small mb-0">
+                                <p class="scammer-subtext small mb-0">
                                     Nhận thêm {{ scammer.report_count - 1 }} báo cáo từ cộng đồng
                                 </p>
                             </div>
@@ -144,11 +142,11 @@
                             <div class="timeline-marker bg-danger me-3"></div>
                             <div class="flex-grow-1">
                                 <div class="d-flex justify-content-between align-items-start mb-1">
-                                    <h6 class="text-white fw-bold mb-0">Cập nhật cuối</h6>
-                                    <small class="text-slate-500">{{ scammer.updated_at.strftime('%d/%m/%Y %H:%M')
+                                    <h6 class="fw-bold mb-0 scammer-section-title">Cập nhật cuối</h6>
+                                    <small class="scammer-subtext">{{ scammer.updated_at.strftime('%d/%m/%Y %H:%M')
                                         }}</small>
                                 </div>
-                                <p class="text-slate-400 small mb-0">Hoạt động ghi nhận gần nhất</p>
+                                <p class="scammer-subtext small mb-0">Hoạt động ghi nhận gần nhất</p>
                             </div>
                         </div>
                     </div>
@@ -156,12 +154,12 @@
             </div>
 
             <!-- Description -->
-            <div class="glass-card p-4" data-aos="fade-up" data-aos-delay="300">
-                <h5 class="text-white fw-bold mb-3">
+            <div class="scammer-profile-card p-4" data-aos="fade-up" data-aos-delay="300">
+                <h5 class="fw-bold mb-3 scammer-section-title">
                     <i class="fas fa-file-alt me-2 text-warning"></i> Mô tả chi tiết
                 </h5>
-                <div class="bg-dark bg-opacity-30 p-3 rounded border border-secondary border-opacity-25">
-                    <p class="text-slate-300 mb-0" style="white-space: pre-line;">{{ scammer.description }}</p>
+                <div class="scammer-surface-muted p-3">
+                    <p class="mb-0" style="white-space: pre-line;">{{ scammer.description }}</p>
                 </div>
             </div>
 
@@ -171,20 +169,20 @@
         <div class="col-lg-4">
 
             <!-- Category Info -->
-            <div class="glass-card p-4 mb-4" data-aos="fade-up">
-                <h6 class="text-white fw-bold mb-3">
+            <div class="scammer-profile-card p-4 mb-4" data-aos="fade-up">
+                <h6 class="fw-bold mb-3 scammer-section-title">
                     <i class="fas fa-tags me-2 text-info"></i> Thông tin
                 </h6>
 
                 <div class="mb-3">
-                    <small class="text-slate-500 d-block mb-1">Loại lừa đảo</small>
+                    <small class="d-block mb-1 scammer-info-label">Loại lừa đảo</small>
                     <span class="badge bg-danger bg-opacity-20 text-danger border border-danger px-3 py-2">
                         {{ scammer.scam_type }}
                     </span>
                 </div>
 
                 <div class="mb-3">
-                    <small class="text-slate-500 d-block mb-1">Nền tảng</small>
+                    <small class="d-block mb-1 scammer-info-label">Nền tảng</small>
                     <span class="badge bg-info bg-opacity-20 text-info border border-info px-3 py-2">
                         {{ scammer.platform or 'Không rõ' }}
                     </span>
@@ -192,7 +190,7 @@
 
                 {% if scammer.bank_name %}
                 <div class="mb-3">
-                    <small class="text-slate-500 d-block mb-1">Ngân hàng</small>
+                    <small class="d-block mb-1 scammer-info-label">Ngân hàng</small>
                     <span class="badge bg-success bg-opacity-20 text-success border border-success px-3 py-2">
                         {{ scammer.bank_name }}
                     </span>
@@ -201,8 +199,8 @@
             </div>
 
             <!-- Evidence -->
-            <div class="glass-card p-4 mb-4" data-aos="fade-up" data-aos-delay="100">
-                <h6 class="text-white fw-bold mb-3">
+            <div class="scammer-profile-card p-4 mb-4" data-aos="fade-up" data-aos-delay="100">
+                <h6 class="fw-bold mb-3 scammer-section-title">
                     <i class="fas fa-image me-2 text-warning"></i> Bằng chứng
                 </h6>
 
@@ -210,22 +208,22 @@
                 <div class="row g-2">
                     {% for img in evidence_images %}
                     <div class="col-12">
-                        <img src="{{ img }}" class="img-fluid rounded border border-secondary border-opacity-25"
+                        <img src="{{ img }}" class="img-fluid scammer-evidence-image"
                             alt="Evidence" onclick="showImageModal(this.src)">
                     </div>
                     {% endfor %}
                 </div>
                 {% else %}
-                <div class="text-center py-4 bg-dark bg-opacity-30 rounded">
-                    <i class="fas fa-image fa-3x text-slate-600 mb-2"></i>
-                    <p class="text-slate-500 small mb-0">Chưa có bằng chứng</p>
+                <div class="text-center py-4 scammer-evidence-empty">
+                    <i class="fas fa-image fa-3x mb-2"></i>
+                    <p class="small mb-0">Chưa có bằng chứng</p>
                 </div>
                 {% endif %}
             </div>
 
             <!-- Action Buttons -->
-            <div class="glass-card p-4" data-aos="fade-up" data-aos-delay="200">
-                <h6 class="text-white fw-bold mb-3">
+            <div class="scammer-profile-card p-4" data-aos="fade-up" data-aos-delay="200">
+                <h6 class="fw-bold mb-3 scammer-section-title">
                     <i class="fas fa-shield-alt me-2 text-success"></i> Hành động
                 </h6>
 
@@ -259,7 +257,7 @@
 <!-- Image Modal -->
 <div class="modal fade" id="imageModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content bg-dark">
+        <div class="modal-content scammer-profile-card">
             <div class="modal-body p-0">
                 <img src="" id="modalImage" class="img-fluid w-100">
             </div>

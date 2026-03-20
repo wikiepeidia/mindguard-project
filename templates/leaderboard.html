@@ -1,30 +1,30 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container py-5" style="margin-top: 60px;">
+<div class="container py-5 leaderboard-page">
 
     <div class="text-center mb-5" data-aos="fade-down">
-        <h1 class="display-4 fw-bold text-white mb-2">SỔ ĐEN CẢNH BÁO</h1>
+        <h1 class="display-4 fw-bold leaderboard-title mb-2">SỔ ĐEN CẢNH BÁO</h1>
         <p class="text-muted">Danh sách các đối tượng lừa đảo đã được xác thực</p>
-        <p class="text-info small">{{ privacy_note }}</p>
+        <p class="leaderboard-note small">{{ privacy_note }}</p>
 
-        <div class="mx-auto mt-4" style="max-width: 500px;">
-            <div class="input-group shadow-sm rounded-pill overflow-hidden border border-secondary border-opacity-50">
-                <input type="text" id="localSearch" class="form-control bg-dark border-0 text-white ps-4"
+        <div class="mx-auto mt-4 leaderboard-search-shell">
+            <div class="input-group leaderboard-search-group">
+                <input type="text" id="localSearch" class="form-control leaderboard-search-input ps-4"
                     placeholder="Tìm nhanh SĐT, Tên trong trang này...">
-                <span class="input-group-text bg-dark border-0 text-secondary"><i class="fas fa-search"></i></span>
+                <span class="input-group-text leaderboard-search-icon"><i class="fas fa-search"></i></span>
             </div>
         </div>
     </div>
 
     {% if top_3 %}
     <div class="mb-5">
-        <h5 class="text-danger fw-bold mb-4"><i class="fas fa-fire me-2"></i>MỨC ĐỘ NGUY HIỂM CAO NHẤT</h5>
+        <h5 class="fw-bold mb-4 leaderboard-section-title"><i class="fas fa-fire me-2"></i>MỨC ĐỘ NGUY HIỂM CAO NHẤT</h5>
         <div class="row g-4">
             {% for entry in top_3 %}
             <div class="col-lg-4" data-aos="flip-up" data-aos-delay="{{ loop.index * 100 }}">
-                <div class="glass-card h-100 p-0 overflow-hidden position-relative border-danger hover-up cursor-pointer"
-                    style="border-width: 1px;" onclick="showDetail(this)"
+                <div class="h-100 p-0 overflow-hidden position-relative leaderboard-top-card cursor-pointer"
+                    onclick="showDetail(this)"
                     data-identifier="{{ entry.identifier }}"
                     data-name="{{ entry.name }}" data-type="{{ entry.type }}"
                     data-platform="{{ entry.platform }}" data-desc="{{ entry.description }}"
@@ -32,25 +32,22 @@
                     data-date="{{ entry.updated_at }}"
                     data-image='{{ entry.evidence_urls }}'>
 
-                    <div class="position-absolute top-0 start-0 bg-danger text-white px-3 py-1 fw-bold"
-                        style="border-bottom-right-radius: 10px;">
+                    <div class="position-absolute top-0 start-0 px-3 py-1 fw-bold leaderboard-top-rank">
                         TOP {{ loop.index }}
                     </div>
 
                     <div class="p-4 text-center">
-                        <div
-                            class="mb-3 d-inline-block p-3 rounded-circle bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25">
+                        <div class="mb-3 d-inline-block p-3 rounded-circle text-danger leaderboard-top-icon">
                             <i class="fas fa-skull-crossbones fa-3x"></i>
                         </div>
-                        <h4 class="text-white fw-bold mb-1 text-truncate">
+                        <h4 class="fw-bold mb-1 text-truncate leaderboard-top-identifier">
                             {{ entry.identifier }}
                         </h4>
                         <p class="text-muted small mb-3">{{ entry.name or 'Ẩn danh' }}</p>
 
-                        <div
-                            class="d-flex justify-content-center gap-3 border-top border-secondary border-opacity-25 pt-3">
-                            <span class="badge bg-danger">{{ entry.total_reports }} Tố cáo</span>
-                            <span class="badge bg-dark border border-secondary">{{ entry.type[:20]
+                        <div class="d-flex justify-content-center gap-3 pt-3 leaderboard-meta-row">
+                            <span class="badge bg-danger leaderboard-chip">{{ entry.total_reports }} Tố cáo</span>
+                            <span class="badge leaderboard-chip leaderboard-chip-muted">{{ entry.type[:20]
                                 }}...</span>
                         </div>
                     </div>
@@ -61,7 +58,7 @@
     </div>
     {% endif %}
 
-    <div class="glass-card p-0 overflow-hidden" data-aos="fade-up">
+    <div class="leaderboard-table-shell p-0" data-aos="fade-up">
         <div class="table-responsive">
             <table class="table table-admin mb-0 align-middle w-100" id="blacklistTable">
                 <thead>
@@ -74,7 +71,7 @@
                         <th class="text-end pe-4">Cập nhật</th>
                     </tr>
                 </thead>
-                <tbody class="text-white">
+                <tbody>
                     {% for entry in scammers %}
                     <tr class="cursor-pointer hover-highlight" onclick="showDetail(this)"
                         data-identifier="{{ entry.identifier }}"
@@ -96,7 +93,7 @@
                                     {% endif %}
                                 </div>
                                 <div>
-                                    <div class="fw-bold text-info">
+                                    <div class="fw-bold leaderboard-identifier">
                                         {{ entry.identifier }}
                                     </div>
                                     <div class="small text-muted">{{ entry.name or '' }}</div>
@@ -104,8 +101,7 @@
                             </div>
                         </td>
                         <td>{{ entry.type }}</td>
-                        <td><span
-                                class="badge bg-secondary bg-opacity-25 text-secondary border border-secondary border-opacity-25">{{
+                        <td><span class="badge leaderboard-platform">{{
                                 entry.platform or 'N/A' }}</span></td>
                         <td>
                             {% set badge = get_verification_badge(entry.verification_status) %}
@@ -122,7 +118,7 @@
                             <span class="badge bg-warning text-dark">{{ entry.total_reports }}</span>
                             {% endif %}
                         </td>
-                        <td class="text-end pe-4 text-muted small">
+                        <td class="text-end pe-4 small leaderboard-updated">
                             {{ entry.updated_date }}
                         </td>
                     </tr>
@@ -131,8 +127,7 @@
             </table>
         </div>
 
-        <div
-            class="p-3 border-top border-secondary border-opacity-25 d-flex justify-content-between align-items-center bg-dark bg-opacity-50">
+        <div class="p-3 d-flex justify-content-between align-items-center leaderboard-footer">
             <small class="text-muted">
                 Hiển thị trang <b>{{ pagination.page }}</b> / {{ pagination.pages }}. Tổng <b>{{ pagination.total }}</b>
                 hồ sơ.
@@ -141,7 +136,7 @@
             <nav>
                 <ul class="pagination pagination-sm mb-0">
                     <li class="page-item {{ 'disabled' if not pagination.has_prev }}">
-                        <a class="page-link bg-dark border-secondary text-white"
+                        <a class="page-link leaderboard-page-link"
                             href="{{ url_for('main.leaderboard', page=pagination.prev_num) }}">
                             <i class="fas fa-chevron-left"></i>
                         </a>
@@ -150,18 +145,17 @@
                     %}
                     {% if page_num %}
                     <li class="page-item {{ 'active' if page_num == pagination.page }}">
-                        <a class="page-link {{ 'bg-info border-info' if page_num == pagination.page else 'bg-dark border-secondary text-white' }}"
+                        <a class="page-link leaderboard-page-link"
                             href="{{ url_for('main.leaderboard', page=page_num) }}">
                             {{ page_num }}
                         </a>
                     </li>
                     {% else %}
-                    <li class="page-item disabled"><span
-                            class="page-link bg-dark border-secondary text-muted">...</span></li>
+                    <li class="page-item disabled"><span class="page-link leaderboard-page-link">...</span></li>
                     {% endif %}
                     {% endfor %}
                     <li class="page-item {{ 'disabled' if not pagination.has_next }}">
-                        <a class="page-link bg-dark border-secondary text-white"
+                        <a class="page-link leaderboard-page-link"
                             href="{{ url_for('main.leaderboard', page=pagination.next_num) }}">
                             <i class="fas fa-chevron-right"></i>
                         </a>
@@ -172,31 +166,30 @@
     </div>
 </div>
 
-<div class="modal fade" id="scammerDetailModal" tabindex="-1" aria-hidden="true">
+<div class="modal fade leaderboard-modal" id="scammerDetailModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content bg-dark border border-secondary shadow-lg">
-            <div class="modal-header border-bottom border-secondary border-opacity-25">
-                <h5 class="modal-title text-white fw-bold"><i class="fas fa-file-alt me-2 text-warning"></i>Hồ sơ Cảnh
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold"><i class="fas fa-file-alt me-2 text-warning"></i>Hồ sơ Cảnh
                     báo</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <div class="text-center mb-4">
-                            <div
-                                class="d-inline-block p-3 rounded-circle bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 mb-3">
+                            <div class="d-inline-block p-3 rounded-circle text-danger border border-danger border-opacity-25 mb-3">
                                 <i class="fas fa-exclamation-triangle fa-2x"></i>
                             </div>
-                            <h3 class="text-white fw-bold mb-1 text-break" id="detailId">...</h3>
-                            <p class="text-info fw-bold mb-0" id="detailName">...</p>
+                            <h3 class="fw-bold mb-1 text-break" id="detailId">...</h3>
+                            <p class="leaderboard-note fw-bold mb-0" id="detailName">...</p>
                             <span class="badge bg-danger mt-2" id="detailType">...</span>
                         </div>
 
-                        <div class="bg-black bg-opacity-25 rounded p-3 mb-3 border border-secondary border-opacity-25">
+                        <div class="leaderboard-detail-box p-3 mb-3">
                             <div class="d-flex justify-content-between mb-2">
                                 <span class="text-muted small">Nền tảng:</span>
-                                <span class="text-white small fw-bold" id="detailPlatform">...</span>
+                                <span class="small fw-bold" id="detailPlatform">...</span>
                             </div>
                             <div class="d-flex justify-content-between mb-2">
                                 <span class="text-muted small">Số lượt báo cáo:</span>
@@ -204,13 +197,13 @@
                             </div>
                             <div class="d-flex justify-content-between">
                                 <span class="text-muted small">Cập nhật:</span>
-                                <span class="text-white small" id="detailDate">...</span>
+                                <span class="small" id="detailDate">...</span>
                             </div>
                         </div>
 
                         <div class="mb-3">
                             <label class="text-secondary small fw-bold text-uppercase">Chi tiết thủ đoạn:</label>
-                            <p class="text-white small fst-italic mt-1 p-2 bg-dark rounded border border-secondary border-opacity-10"
+                            <p class="small fst-italic mt-1 p-2 leaderboard-detail-description"
                                 id="detailDesc">...</p>
                         </div>
                     </div>
@@ -219,16 +212,14 @@
                         <div id="evidenceSection" class="h-100 d-none d-flex flex-column">
                             <label class="text-secondary small fw-bold text-uppercase mb-2 text-center">Ảnh Bằng
                                 Chứng</label>
-                            <div class="rounded overflow-hidden border border-secondary border-opacity-25 bg-black flex-grow-1 d-flex align-items-center justify-content-center"
-                                style="min-height: 250px;">
+                            <div class="rounded overflow-hidden flex-grow-1 d-flex align-items-center justify-content-center leaderboard-evidence-shell">
                                 <img src="" id="detailImage" class="img-fluid"
                                     style="max-height: 350px; max-width: 100%; object-fit: contain;">
                             </div>
                         </div>
 
                         <div id="noEvidenceSection"
-                            class="h-100 d-flex flex-column align-items-center justify-content-center text-muted opacity-50 border border-secondary border-opacity-25 rounded border-dashed bg-dark bg-opacity-25"
-                            style="min-height: 250px;">
+                            class="h-100 d-flex flex-column align-items-center justify-content-center text-muted opacity-75 leaderboard-no-evidence">
                             <div class="mb-3 p-4 rounded-circle bg-secondary bg-opacity-10">
                                 <i class="fas fa-user-secret fa-4x text-muted opacity-50"></i>
                             </div>
@@ -237,7 +228,7 @@
                     </div>
                 </div>
             </div>
-            <div class="modal-footer border-top border-secondary border-opacity-25 justify-content-center">
+            <div class="modal-footer justify-content-center">
                 <button type="button" class="btn btn-outline-light rounded-pill px-4"
                     data-bs-dismiss="modal">Đóng</button>
             </div>

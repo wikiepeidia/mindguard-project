@@ -1,3 +1,73 @@
+.scammer-profile-page {
+    margin-top: 60px;
+}
+
+.scammer-profile-title {
+    color: var(--mg-text-primary) !important;
+}
+
+.scammer-profile-note {
+    color: var(--mg-accent);
+    font-weight: 500;
+}
+
+.scammer-profile-card {
+    border: 1px solid var(--mg-border);
+    border-radius: var(--mg-radius-lg);
+    background: var(--mg-surface);
+    box-shadow: var(--mg-shadow-sm);
+}
+
+.scammer-profile-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 1px solid color-mix(in srgb, var(--mg-danger) 20%, white);
+    background: color-mix(in srgb, var(--mg-danger) 12%, white);
+}
+
+.scammer-identifier {
+    color: var(--mg-text-primary);
+}
+
+.scammer-subtext {
+    color: var(--mg-text-muted);
+}
+
+.scammer-risk-circle {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+}
+
+.scammer-timeline-title,
+.scammer-section-title {
+    color: var(--mg-text-primary) !important;
+}
+
+.scammer-surface-muted {
+    background: var(--mg-surface-soft);
+    border: 1px solid var(--mg-border);
+    border-radius: var(--mg-radius-md);
+    color: var(--mg-text-secondary);
+}
+
+.scammer-info-label {
+    color: var(--mg-text-muted);
+    font-size: 0.8rem;
+}
+
+.scammer-evidence-empty {
+    border-radius: var(--mg-radius-md);
+    background: var(--mg-surface-soft);
+    color: var(--mg-text-muted);
+}
+
+.scammer-evidence-image {
+    border: 1px solid var(--mg-border);
+    border-radius: var(--mg-radius-md);
+}
+
 .timeline-marker {
     width: 12px;
     height: 12px;
@@ -6,7 +76,7 @@
 }
 
 .filter-btn.active {
-    background-color: rgba(34, 211, 238, 0.2) !important;
-    border-color: var(--accent-cyan) !important;
-    color: var(--accent-cyan) !important;
+    background-color: color-mix(in srgb, var(--mg-accent) 20%, white) !important;
+    border-color: var(--mg-accent) !important;
+    color: var(--mg-accent) !important;
 }

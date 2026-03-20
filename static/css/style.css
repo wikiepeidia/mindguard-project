@@ -1,45 +1,20 @@
 /* static/css/style.css */
 
+@import url('/static/css/tokens.css');
+
 /* IMPORT FONT */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 :root {
-    /* --- BẢNG MÀU GIAO DIỆN TỐI (CYBER SECURITY THEME) --- */
-    --primary-bg: #0f172a;
-    /* Nền chính: Xanh than đậm */
-    --secondary-bg: #1e293b;
-    /* Nền phụ: Xanh xám */
-
-    /* Màu chữ đã chỉnh sửa cho dễ đọc */
-    --text-main: #f1f5f9;
-    /* Chữ chính: Trắng kem (Slate 100) */
-    --text-secondary: #cbd5e1;
-    /* Chữ phụ: Xám bạc (Slate 300) */
-    --text-muted: #94a3b8;
-    /* Chữ mờ: Xám sáng (Slate 400) - Sửa lỗi khó đọc */
-
-    --accent-color: #06b6d4;
-    /* Điểm nhấn: Xanh Neon (Cyan) */
-    --accent-hover: #22d3ee;
-
-    --danger: #ef4444;
-    /* Đỏ cảnh báo */
-    --success: #10b981;
-    /* Xanh thành công */
-    --warning: #f59e0b;
-    /* Vàng cảnh báo */
-
-    /* Hiệu ứng kính */
-    --glass-bg: rgba(30, 41, 59, 0.75);
-    --glass-border: rgba(255, 255, 255, 0.12);
+    color-scheme: light;
 }
 
 /* --- CẤU HÌNH CHUNG --- */
 body {
     font-family: 'Inter', sans-serif;
     background-color: var(--primary-bg);
+    background-image: radial-gradient(circle at 12% 0%, #e7f8fb 0%, var(--mg-canvas) 55%);
     color: var(--text-main) !important;
-    /* Áp dụng màu chữ sáng cho toàn web */
     line-height: 1.6;
     overflow-x: hidden;
     min-height: 100vh;
@@ -59,7 +34,7 @@ h3,
 h4,
 h5,
 h6 {
-    color: #ffffff !important;
+    color: var(--mg-text-primary) !important;
     font-weight: 700;
     letter-spacing: -0.5px;
 }
@@ -77,12 +52,10 @@ a:hover {
 /* Ghi đè màu chữ của Bootstrap */
 .text-muted {
     color: var(--text-muted) !important;
-    /* Quan trọng: Làm sáng chữ muted */
 }
 
 .text-dark {
-    color: var(--text-main) !important;
-    /* Đổi text-dark thành sáng trong nền tối */
+    color: var(--mg-text-primary) !important;
 }
 
 .text-secondary {
@@ -95,44 +68,16 @@ a:hover {
 }
 
 ::-webkit-scrollbar-track {
-    background: var(--primary-bg);
+    background: var(--mg-surface-soft);
 }
 
 ::-webkit-scrollbar-thumb {
-    background: #334155;
+    background: var(--mg-border-strong);
     border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
     background: var(--accent-color);
-}
-
-/* --- NAVBAR --- */
-.navbar {
-    background: rgba(15, 23, 42, 0.9) !important;
-    backdrop-filter: blur(12px);
-    border-bottom: 1px solid var(--glass-border);
-    padding: 1rem 0;
-}
-
-.navbar-brand {
-    font-weight: 800;
-    color: #fff !important;
-    font-size: 1.6rem;
-}
-
-.navbar-brand span {
-    color: var(--accent-color);
-}
-
-.nav-link {
-    color: var(--text-secondary) !important;
-    font-weight: 500;
-}
-
-.nav-link:hover,
-.nav-link.active {
-    color: var(--accent-color) !important;
 }
 
 /* --- BUTTONS --- */
@@ -155,16 +100,17 @@ a:hover {
 }
 
 .btn-outline-light {
-    border: 2px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid var(--mg-border-strong);
     border-radius: 50px;
     font-weight: 600;
-    color: var(--text-main) !important;
+    color: var(--mg-text-primary) !important;
+    background: var(--mg-surface);
 }
 
 .btn-outline-light:hover {
-    background: #fff;
-    color: var(--primary-bg) !important;
-    border-color: #fff;
+    background: var(--mg-surface-soft);
+    color: var(--mg-text-primary) !important;
+    border-color: var(--mg-accent);
 }
 
 /* --- GLASS CARDS (Khung nội dung kính mờ) --- */
@@ -176,26 +122,24 @@ a:hover {
     padding: 2rem;
     box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
     color: var(--text-main) !important;
-    /* Đảm bảo chữ trong card màu trắng */
 }
 
 /* --- FORM INPUTS (Sửa lỗi chữ đen trong ô nhập) --- */
 .form-control,
 .form-select {
-    background-color: rgba(255, 255, 255, 0.05) !important;
+    background-color: var(--mg-surface) !important;
     border: 1px solid var(--glass-border) !important;
-    color: #fff !important;
-    /* Chữ khi gõ vào là màu trắng */
+    color: var(--mg-text-primary) !important;
     border-radius: 10px;
     padding: 0.8rem 1rem;
 }
 
 .form-control:focus,
 .form-select:focus {
-    background-color: rgba(255, 255, 255, 0.1) !important;
+    background-color: var(--mg-surface-raised) !important;
     border-color: var(--accent-color) !important;
-    box-shadow: 0 0 0 4px rgba(6, 182, 212, 0.15);
-    color: #fff !important;
+    box-shadow: 0 0 0 4px var(--mg-focus);
+    color: var(--mg-text-primary) !important;
 }
 
 .form-control::placeholder {

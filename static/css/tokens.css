@@ -1,0 +1,58 @@
+:root,
+[data-bs-theme="light"] {
+    --mg-canvas: #f4f7fb;
+    --mg-surface: #ffffff;
+    --mg-surface-soft: #eef4fb;
+    --mg-surface-raised: #f8fbff;
+
+    --mg-text-primary: #0f172a;
+    --mg-text-secondary: #475569;
+    --mg-text-muted: #64748b;
+    --mg-text-inverse: #ffffff;
+
+    --mg-border: #d9e2ee;
+    --mg-border-strong: #bfccde;
+
+    --mg-accent: #06b6d4;
+    --mg-accent-hover: #0891b2;
+    --mg-focus: rgba(6, 182, 212, 0.25);
+
+    --mg-success: #16a34a;
+    --mg-warning: #d97706;
+    --mg-danger: #dc2626;
+
+    --mg-space-1: 0.25rem;
+    --mg-space-2: 0.5rem;
+    --mg-space-3: 0.75rem;
+    --mg-space-4: 1rem;
+    --mg-space-5: 1.5rem;
+    --mg-space-6: 2rem;
+
+    --mg-radius-sm: 0.5rem;
+    --mg-radius-md: 0.75rem;
+    --mg-radius-lg: 1rem;
+    --mg-radius-pill: 999px;
+
+    --mg-shadow-sm: 0 4px 16px rgba(15, 23, 42, 0.06);
+    --mg-shadow-md: 0 10px 28px rgba(15, 23, 42, 0.12);
+
+    /* Backward-compatible aliases during migration. */
+    --primary-bg: var(--mg-canvas);
+    --secondary-bg: var(--mg-surface-soft);
+    --text-main: var(--mg-text-primary);
+    --text-secondary: var(--mg-text-secondary);
+    --text-muted: var(--mg-text-muted);
+    --accent-color: var(--mg-accent);
+    --accent-hover: var(--mg-accent-hover);
+    --danger: var(--mg-danger);
+    --success: var(--mg-success);
+    --warning: var(--mg-warning);
+    --glass-bg: rgba(255, 255, 255, 0.92);
+    --glass-border: var(--mg-border);
+
+    --bs-body-bg: var(--mg-canvas);
+    --bs-body-color: var(--mg-text-primary);
+    --bs-border-color: var(--mg-border);
+    --bs-primary: var(--mg-accent);
+    --bs-secondary-color: var(--mg-text-secondary);
+}

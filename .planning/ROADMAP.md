@@ -10,7 +10,8 @@
  (completed 2026-03-20)
 - [x] **Phase 2: Anti-Spam Monitor & Soft Enforce** - Trien khai chong spam da tin hieu theo lo trinh monitor truoc, soft-enforce sau.
  (completed 2026-03-20)
-- [ ] **Phase 3: Light Mode UX System** - Dong bo light mode, design tokens va mobile-first cho cac trang uu tien.
+- [x] **Phase 3: Light Mode UX System** - Dong bo light mode, design tokens va mobile-first cho cac trang uu tien.
+ (completed 2026-03-20)
 - [ ] **Phase 4: Quiz One-Question Flow** - Chuyen quiz sang luong 1 cau hoi/trang voi tien do ro rang va trang thai on dinh.
 - [ ] **Phase 5: Leaderboard Integrity** - Ra mat bang vinh danh nguoi to cao nhieu nhat kem luat giam gian lan.
 
@@ -68,7 +69,7 @@ Plans:
 
 - [x] 03-01-PLAN.md - Light token foundation + base/auth/profile migration.
 - [x] 03-02-PLAN.md - Report + quiz mobile-first light-mode rollout.
-- [ ] 03-03-PLAN.md - Leaderboard/scammer-profile convergence + token coverage guard.
+- [x] 03-03-PLAN.md - Leaderboard/scammer-profile convergence + token coverage guard.
 
 ### Phase 4: Quiz One-Question Flow
 
@@ -101,6 +102,6 @@ Plans:
 |-------|----------------|--------|-----------|
 | 1. Privacy & Data Governance Foundation | 0/2 | Complete    | 2026-03-20 |
 | 2. Anti-Spam Monitor & Soft Enforce | 3/3 | Complete    | 2026-03-20 |
-| 3. Light Mode UX System | 2/3 | In progress | - |
+| 3. Light Mode UX System | 3/3 | Complete | 2026-03-20 |
 | 4. Quiz One-Question Flow | 0/3 | Not started | - |
 | 5. Leaderboard Integrity | 0/2 | Not started | - |

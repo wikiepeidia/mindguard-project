@@ -1,7 +1,9 @@
 import os, uuid, requests
+from datetime import datetime, timedelta
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, current_app
 from werkzeug.utils import secure_filename
-from models import db, ScammerReport, ScammerLeaderboard, Subscription, Registration
+from models import db, AntiSpamEvent, ScammerReport, ScammerLeaderboard, Subscription, Registration
+from services.anti_spam import AntiSpamDecisionService
 from utils.encryption import hash_reporter_id, encrypt_scammer_info, validate_evidence, serialize_evidence
 from utils.helpers import calculate_danger_level, login_required
 from config import Config
@@ -107,6 +109,65 @@ def report_scammer():
 
         if not session.get('reporter_id'): session['reporter_id'] = str(uuid.uuid4())
         reporter_hash = hash_reporter_id(session['reporter_id'])
+        client_ip = request.headers.get("X-Forwarded-For", request.remote_addr or "unknown").split(",")[0].strip()
+
+        account_id = None
+        registration_email = session.get("registration_email")
+        if registration_email:
+            user = Registration.query.filter_by(email=registration_email).first()
+            if user:
+                account_id = user.id
+
+        window_minutes = int(current_app.config.get("ABUS_WINDOW_MINUTES", Config.ABUS_WINDOW_MINUTES))
+        threshold_count = int(current_app.config.get("ABUS_THRESHOLD_COUNT", Config.ABUS_THRESHOLD_COUNT))
+        window_start = datetime.utcnow() - timedelta(minutes=window_minutes)
+
+        account_signal = 0
+        cookie_signal = 0
+        ip_signal = 0
+
+        if account_id:
+            account_signal = int(
+                AntiSpamEvent.query.filter(
+                    AntiSpamEvent.actor_key == f"acct:{account_id}",
+                    AntiSpamEvent.occurred_at >= window_start,
+                ).count()
+                >= threshold_count
+            )
+        if reporter_hash:
+            cookie_signal = int(
+                AntiSpamEvent.query.filter(
+                    AntiSpamEvent.actor_key == f"cookie:{reporter_hash}",
+                    AntiSpamEvent.occurred_at >= window_start,
+                ).count()
+                >= threshold_count
+            )
+        if client_ip:
+            ip_signal = int(
+                AntiSpamEvent.query.filter(
+                    AntiSpamEvent.actor_key == f"ip:{client_ip}",
+                    AntiSpamEvent.occurred_at >= window_start,
+                ).count()
+                >= threshold_count
+            )
+
+        anti_spam_service = AntiSpamDecisionService()
+        anti_spam_decision = anti_spam_service.evaluate_submission(
+            account_id=account_id,
+            reporter_hash=reporter_hash,
+            ip_address=client_ip,
+            signal_inputs={
+                "account": account_signal,
+                "cookie": cookie_signal,
+                "ip": ip_signal,
+            },
+        )
+
+        abus_mode = str(current_app.config.get("ABUS_MODE", Config.ABUS_MODE)).lower()
+        if abus_mode == "soft_enforce" and anti_spam_decision.should_cooldown:
+            flash("Hệ thống đang tạm giới hạn gửi tố cáo. Vui lòng thử lại sau ít phút.", "warning")
+            return redirect(url_for("scammer.report_scammer"))
+
         encrypted_id = encrypt_scammer_info(scammer_identifier, Config.REPORT_ENCRYPTION_KEY)
         
         # 4. Lưu DB

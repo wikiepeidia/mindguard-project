@@ -7,9 +7,9 @@
 
 ### UI/UX
 
-- [ ] **UI-01**: Nguoi dung thay light mode dong bo tren cac trang chinh (auth, quiz, report, profile, leaderboard).
-- [ ] **UI-02**: He thong su dung design tokens thong nhat (mau, font, spacing) cho cac trang uu tien.
-- [ ] **UI-03**: Trang quiz va report dam bao trai nghiem mobile-first o kich thuoc man hinh pho bien.
+- [x] **UI-01**: Nguoi dung thay light mode dong bo tren cac trang chinh (auth, quiz, report, profile, leaderboard).
+- [x] **UI-02**: He thong su dung design tokens thong nhat (mau, font, spacing) cho cac trang uu tien.
+- [x] **UI-03**: Trang quiz va report dam bao trai nghiem mobile-first o kich thuoc man hinh pho bien.
 
 ### Quiz
 
@@ -65,9 +65,9 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| UI-01 | Phase 3 | Pending |
-| UI-02 | Phase 3 | Pending |
-| UI-03 | Phase 3 | Pending |
+| UI-01 | Phase 3 | Complete |
+| UI-02 | Phase 3 | Complete |
+| UI-03 | Phase 3 | Complete |
 | QUIZ-01 | Phase 4 | Pending |
 | QUIZ-02 | Phase 4 | Pending |
 | QUIZ-03 | Phase 4 | Pending |
@@ -90,4 +90,4 @@
 
 ---
 *Requirements defined: 2026-03-19*
-*Last updated: 2026-03-20 after Phase 2 completion updates*
+*Last updated: 2026-03-20 after Phase 3 plan 02 completion updates*

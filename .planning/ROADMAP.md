@@ -66,8 +66,8 @@ Plans:
 
 Plans:
 
-- [ ] 03-01-PLAN.md - Light token foundation + base/auth/profile migration.
-- [ ] 03-02-PLAN.md - Report + quiz mobile-first light-mode rollout.
+- [x] 03-01-PLAN.md - Light token foundation + base/auth/profile migration.
+- [x] 03-02-PLAN.md - Report + quiz mobile-first light-mode rollout.
 - [ ] 03-03-PLAN.md - Leaderboard/scammer-profile convergence + token coverage guard.
 
 ### Phase 4: Quiz One-Question Flow
@@ -101,6 +101,6 @@ Plans:
 |-------|----------------|--------|-----------|
 | 1. Privacy & Data Governance Foundation | 0/2 | Complete    | 2026-03-20 |
 | 2. Anti-Spam Monitor & Soft Enforce | 3/3 | Complete    | 2026-03-20 |
-| 3. Light Mode UX System | 0/3 | Not started | - |
+| 3. Light Mode UX System | 2/3 | In progress | - |
 | 4. Quiz One-Question Flow | 0/3 | Not started | - |
 | 5. Leaderboard Integrity | 0/2 | Not started | - |

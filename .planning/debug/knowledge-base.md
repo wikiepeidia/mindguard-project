@@ -43,3 +43,13 @@ Resolved debug sessions. Used by `gsd-debugger` to surface known-pattern hypothe
 - **Files changed:** static/css/style.css, templates/report_scammer.html
 
 ---
+
+## lightmode-remaining-notification-footer-live-badges — Remaining homepage light-mode chips, LIVE strip, footer, and notification timing regressions
+
+- **Date:** 2026-03-20
+- **Error patterns:** light mode, remaining dark styles, SĐT STK URL controls, LIVE subtitle strip dark, footer too dark, notification contrast, notification auto-hide 2-3s, dim moving blue effect
+- **Root cause:** Residual hardcoded dark classes/inline styles in homepage template (chips and LIVE subtitle strip), plus missing footer/flash fine-tuning in light mode and dim network-canvas color values left from earlier dark-leaning defaults.
+- **Fix:** Updated homepage template/class hooks and light-mode CSS overrides for chips/LIVE strip/filter controls, improved footer visual hierarchy and alert contrast styles, and tuned base canvas + alert auto-hide timing to light-mode expectations.
+- **Files changed:** templates/index.html, static/css/homepage.css, static/css/style.css, static/css/base.css, static/js/base.js
+
+---

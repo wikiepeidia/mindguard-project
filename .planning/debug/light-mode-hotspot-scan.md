@@ -13,25 +13,30 @@ Mục tiêu: tìm vị trí có nguy cơ xung đột Light mode do class màu c�
 ## Hotspot ưu tiên kiểm tra thủ công
 
 1. Homepage
+
 - templates/index.html
 - static/css/homepage.css
 - static/css/style.css
 
-2. Footer + flash + dropdown toàn cục
+1. Footer + flash + dropdown toàn cục
+
 - templates/base.html
 - static/css/style.css
 - static/js/base.js
 
-3. Report scammer
+1. Report scammer
+
 - templates/report_scammer.html
 - static/css/report_scammer.css
 
-4. Nhóm trang nội dung có nhiều text-white
+1. Nhóm trang nội dung có nhiều text-white
+
 - templates/library.html
 - templates/library_detail.html
 - templates/quiz_result.html
 
-5. Admin (không tự động đổi trong pass này)
+1. Admin (không tự động đổi trong pass này)
+
 - templates/admin_dashboard.html
 - templates/admin_scammer_reports.html
 - templates/admin_sensitive_access_logs.html

@@ -29,19 +29,19 @@ started: Residual after recent light mode migration.
 <!-- APPEND only - facts discovered -->
 
 - timestamp: 2026-03-20T10:19:40+07:00
-	checked: .planning/debug/knowledge-base.md
-	found: Matched known-pattern candidate `light-mode-broad-regression-across-pages` with overlap on `light mode`, `white text on light background`, and global/dark utility conflicts.
-	implication: Prioritize removal of residual dark/white utility usage in templates and avoid broad global overrides.
+ checked: .planning/debug/knowledge-base.md
+ found: Matched known-pattern candidate `light-mode-broad-regression-across-pages` with overlap on `light mode`, `white text on light background`, and global/dark utility conflicts.
+ implication: Prioritize removal of residual dark/white utility usage in templates and avoid broad global overrides.
 
 - timestamp: 2026-03-20T10:19:40+07:00
-	checked: templates/library.html, templates/library_detail.html, templates/quiz_result.html
-	found: All three templates contain multiple hardcoded dark-oriented classes (`text-white`, `text-white-50`, `alert-dark`, `btn-outline-light`, `bg-dark`) in headings/body/cards/meta.
-	implication: Readability regressions in light mode are likely template-level and can be fixed with page-scoped class substitutions.
+ checked: templates/library.html, templates/library_detail.html, templates/quiz_result.html
+ found: All three templates contain multiple hardcoded dark-oriented classes (`text-white`, `text-white-50`, `alert-dark`, `btn-outline-light`, `bg-dark`) in headings/body/cards/meta.
+ implication: Readability regressions in light mode are likely template-level and can be fixed with page-scoped class substitutions.
 
 - timestamp: 2026-03-20T10:22:10+07:00
-	checked: routes/library.py and routes/quiz.py
-	found: `/quiz/result` is protected by `@login_required`, while `/library` and `/library/<id>` are publicly rendered from ScamReport data.
-	implication: Smoke checks must include login session simulation for `/quiz/result` and article-id fallback handling for `/library/<id>`.
+ checked: routes/library.py and routes/quiz.py
+ found: `/quiz/result` is protected by `@login_required`, while `/library` and `/library/<id>` are publicly rendered from ScamReport data.
+ implication: Smoke checks must include login session simulation for `/quiz/result` and article-id fallback handling for `/library/<id>`.
 
 ## Resolution
 <!-- OVERWRITE as understanding evolves -->

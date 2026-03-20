@@ -80,7 +80,7 @@ function performSearch() {
     // For now assuming the path is /search_scammer or we pass it via data attribute in HB later.
     // Ideally we should keep the URL generation in template or pass it to a init function.
     // Let's assume '/search_scammer' for now, or use a variable SEARCH_URL if defined.
-    const searchUrl = window.SEARCH_URL || '/search_scammer'; 
+    const searchUrl = window.SEARCH_URL || '/search_scammer';
 
     fetch(searchUrl, {
         method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ query: query })
@@ -103,9 +103,9 @@ function performSearch() {
     });
 }
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const searchInput = document.getElementById('searchInput');
-    if(searchInput) {
+    if (searchInput) {
         searchInput.addEventListener('keypress', function (e) {
             if (e.key === 'Enter') performSearch();
         });

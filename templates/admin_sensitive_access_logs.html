@@ -57,12 +57,14 @@
                     <h6 class="text-body">Theo risk tier</h6>
                     <ul class="list-group list-group-flush">
                         {% for level, count in anti_spam_summary.risk_breakdown.items() %}
-                        <li class="list-group-item bg-transparent text-body border-light-subtle d-flex justify-content-between">
+                        <li
+                            class="list-group-item bg-transparent text-body border-light-subtle d-flex justify-content-between">
                             <span>{{ level }}</span>
                             <strong>{{ count }}</strong>
                         </li>
                         {% else %}
-                        <li class="list-group-item bg-transparent text-muted border-light-subtle">Chưa có dữ liệu risk tier.</li>
+                        <li class="list-group-item bg-transparent text-muted border-light-subtle">Chưa có dữ liệu risk
+                            tier.</li>
                         {% endfor %}
                     </ul>
                 </div>
@@ -70,12 +72,14 @@
                     <h6 class="text-body">Theo actor type</h6>
                     <ul class="list-group list-group-flush">
                         {% for actor_type, count in anti_spam_summary.actor_breakdown.items() %}
-                        <li class="list-group-item bg-transparent text-body border-light-subtle d-flex justify-content-between">
+                        <li
+                            class="list-group-item bg-transparent text-body border-light-subtle d-flex justify-content-between">
                             <span>{{ actor_type }}</span>
                             <strong>{{ count }}</strong>
                         </li>
                         {% else %}
-                        <li class="list-group-item bg-transparent text-muted border-light-subtle">Chưa có dữ liệu actor type.</li>
+                        <li class="list-group-item bg-transparent text-muted border-light-subtle">Chưa có dữ liệu actor
+                            type.</li>
                         {% endfor %}
                     </ul>
                 </div>

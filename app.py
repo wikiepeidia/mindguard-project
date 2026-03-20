@@ -28,6 +28,9 @@ def mask_filter(s, data_type='auto'):
 db.init_app(app)
 mail.init_app(app)
 
+with app.app_context():
+    db.create_all()
+
 # Đăng ký Blueprints
 app.register_blueprint(main_bp)
 app.register_blueprint(scammer_bp)
@@ -50,10 +53,6 @@ def admin_redirect():
     return redirect(url_for('admin.admin_login'))
 
 if __name__ == "__main__":
-    with app.app_context():
-        db.create_all()
-        # print("✅ Database tables checked/created.") # Silenced for clean output
-    
     # --- NGROK INTEGRATION ---
     # CHỈ CHẠY Ở PROCESS GỐC (Tránh khởi động 2 lần khi reload)
     import os

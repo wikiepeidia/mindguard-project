@@ -3,10 +3,27 @@ import json
 from flask import Blueprint, render_template, request, jsonify, session
 from sqlalchemy import func, or_
 from models import ScamReport, Registration, ScammerLeaderboard, ScammerReport, Subscription, db
-from utils.helpers import mask_sensitive_data, calculate_risk_score, get_verification_badge, get_risk_level_info
+from utils.helpers import calculate_risk_score, get_verification_badge, get_risk_level_info
+from utils.privacy_policy import MASKED_DATA_NOTICE, to_display_identifier
 from datetime import datetime
 
 main_bp = Blueprint('main', __name__)
+
+
+def serialize_public_search_result(raw_result: dict, is_admin: bool = False) -> dict:
+    """Serialize search response with role-safe identifier masking."""
+    identifier = to_display_identifier(
+        raw_result.get("identifier", ""),
+        raw_result.get("report_type", "general"),
+        is_admin=is_admin,
+    )
+    return {
+        "identifier": identifier,
+        "type": raw_result.get("type"),
+        "reports": raw_result.get("reports", 0),
+        "platform": raw_result.get("platform"),
+        "report_type": raw_result.get("report_type", "general"),
+    }
 
 @main_bp.route("/")
 def index():
@@ -36,6 +53,8 @@ def index():
 
     # --- [KHẮC PHỤC LỖI ẢNH] ---
     # Chuyển đổi sang list Dictionary để dữ liệu cố định, không bị DB reset
+    is_admin = bool(session.get('is_admin'))
+
     top_scammers = []
     for entry in raw_scammers:
         # Xử lý ảnh
@@ -51,7 +70,11 @@ def index():
         # Đóng gói dữ liệu
         item = {
             "id": entry.scammer.id,  # Thêm ID
-            "identifier": entry.scammer.scammer_info_raw,
+            "identifier": to_display_identifier(
+                entry.scammer.scammer_info_raw,
+                entry.scammer.report_type,
+                is_admin=is_admin,
+            ),
             "name": entry.scammer.scammer_name or 'Chưa rõ danh tính',
             "type": entry.scammer.scam_type,
             "platform": entry.scammer.platform,
@@ -68,7 +91,12 @@ def index():
         top_scammers.append(item)
     # ---------------------------
 
-    return render_template("index.html", stats=stats, top_scammers=top_scammers)
+    return render_template(
+        "index.html",
+        stats=stats,
+        top_scammers=top_scammers,
+        privacy_note=MASKED_DATA_NOTICE,
+    )
 
 # ... (Các hàm leaderboard và search giữ nguyên) ...
 # Bạn chỉ cần copy đè hàm index() ở trên, hoặc copy cả file nếu muốn chắc chắn.
@@ -79,9 +107,52 @@ def leaderboard():
     page = request.args.get('page', 1, type=int)
     per_page = 20
     base_query = ScammerLeaderboard.query.join(ScammerReport).filter(ScammerReport.status == 'approved').order_by(ScammerLeaderboard.total_reports.desc())
+    is_admin = bool(session.get('is_admin'))
+
     top_3 = base_query.limit(3).all() if page == 1 else []
     pagination = base_query.paginate(page=page, per_page=per_page, error_out=False)
-    return render_template("leaderboard.html", top_3=top_3, pagination=pagination, scammers=pagination.items)
+
+    top_3_payload = []
+    for entry in top_3:
+        top_3_payload.append({
+            "id": entry.scammer.id,
+            "identifier": to_display_identifier(entry.scammer.scammer_info_raw, entry.scammer.report_type, is_admin=is_admin),
+            "name": entry.scammer.scammer_name,
+            "type": entry.scammer.scam_type,
+            "platform": entry.scammer.platform,
+            "description": entry.scammer.description,
+            "total_reports": entry.total_reports,
+            "updated_at": entry.scammer.updated_at.strftime('%H:%M %d/%m/%Y'),
+            "updated_date": entry.scammer.updated_at.strftime('%d/%m/%Y'),
+            "report_type": entry.scammer.report_type,
+            "verification_status": entry.scammer.verification_status or 'unverified',
+            "evidence_urls": entry.scammer.evidence_urls,
+        })
+
+    scammers_payload = []
+    for entry in pagination.items:
+        scammers_payload.append({
+            "id": entry.scammer.id,
+            "identifier": to_display_identifier(entry.scammer.scammer_info_raw, entry.scammer.report_type, is_admin=is_admin),
+            "name": entry.scammer.scammer_name,
+            "type": entry.scammer.scam_type,
+            "platform": entry.scammer.platform,
+            "description": entry.scammer.description,
+            "total_reports": entry.total_reports,
+            "updated_at": entry.scammer.updated_at.strftime('%H:%M %d/%m/%Y'),
+            "updated_date": entry.scammer.updated_at.strftime('%d/%m/%Y'),
+            "report_type": entry.scammer.report_type,
+            "verification_status": entry.scammer.verification_status or 'unverified',
+            "evidence_urls": entry.scammer.evidence_urls,
+        })
+
+    return render_template(
+        "leaderboard.html",
+        top_3=top_3_payload,
+        pagination=pagination,
+        scammers=scammers_payload,
+        privacy_note=MASKED_DATA_NOTICE,
+    )
 
 @main_bp.route("/api/search", methods=["POST"])
 def search_scammer():
@@ -91,9 +162,22 @@ def search_scammer():
     clean_query = query.replace("https://", "").replace("http://", "").replace("www.", "").strip("/")
     results = ScammerReport.query.filter(ScammerReport.status == 'approved', or_(ScammerReport.scammer_info_raw.contains(query), ScammerReport.scammer_info_raw.contains(clean_query), ScammerReport.scammer_name.contains(query))).all()
     if results:
+        is_admin = bool(session.get('is_admin'))
         total = sum(r.report_count for r in results)
-        lst = [{"identifier": r.scammer_info_raw, "type": r.scam_type, "reports": r.report_count, "platform": r.platform, "report_type": r.report_type} for r in results]
-        return jsonify({"status": "danger", "total_reports": total, "data": lst})
+        lst = [
+            serialize_public_search_result(
+                {
+                    "identifier": r.scammer_info_raw,
+                    "type": r.scam_type,
+                    "reports": r.report_count,
+                    "platform": r.platform,
+                    "report_type": r.report_type,
+                },
+                is_admin=is_admin,
+            )
+            for r in results
+        ]
+        return jsonify({"status": "danger", "total_reports": total, "data": lst, "privacy_note": MASKED_DATA_NOTICE})
     return jsonify({"status": "safe"})
 
 @main_bp.route("/scammer/<int:scammer_id>")
@@ -110,9 +194,12 @@ def scammer_profile(scammer_id):
             if sub:
                 is_following = True
 
-    # Mask sensitive data by default
-    data_type = 'phone' if scammer.report_type == 'general' else 'account'
-    masked_identifier = mask_sensitive_data(scammer.scammer_info_raw, data_type)
+    is_admin = bool(session.get('is_admin'))
+    masked_identifier = to_display_identifier(
+        scammer.scammer_info_raw,
+        scammer.report_type,
+        is_admin=is_admin,
+    )
     
     # Calculate risk score if not set
     if not scammer.risk_score:
@@ -147,5 +234,7 @@ def scammer_profile(scammer_id):
         verification_badge=verification_badge,
         risk_info=risk_info,
         evidence_images=evidence_images,
-        is_following=is_following
+        is_following=is_following,
+        privacy_note=MASKED_DATA_NOTICE,
+        can_view_full_sensitive=is_admin,
     )

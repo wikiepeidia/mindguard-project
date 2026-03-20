@@ -12,6 +12,7 @@
             <i class="fas fa-user-secret me-2"></i> HỒ SƠ ĐỐI TƯỢNG
         </span>
         <h1 class="display-6 fw-bold text-white mb-2">Chi tiết cảnh báo</h1>
+        <p class="text-info small mb-0">{{ privacy_note }}</p>
     </div>
 
     <div class="row g-4">
@@ -37,15 +38,13 @@
                     <div class="col">
                         <div class="d-flex align-items-center gap-2 mb-2">
                             <h3 class="text-white fw-bold mb-0" id="identifierDisplay">
-                                {% if session.get('registration_email') or session.get('is_admin') %}
-                                {{ scammer.scammer_info_raw }}
-                                {% else %}
                                 {{ masked_identifier }}
-                                {% endif %}
                             </h3>
+                            {% if can_view_full_sensitive %}
                             <button class="btn btn-sm btn-outline-info" onclick="toggleMask()" id="maskToggle">
                                 <i class="fas fa-eye"></i> Xem đầy đủ
                             </button>
+                            {% endif %}
                         </div>
                         <p class="text-slate-400 mb-2">{{ scammer.scammer_name or 'Chưa rõ danh tính' }}</p>
                         <div class="d-flex gap-2 flex-wrap">
@@ -272,9 +271,9 @@
 
 <script>
     window.SCAMMER_DATA = {
-        originalIdentifier: {{ scammer.scammer_info_raw | tojson if (session.get('registration_email') or session.get('is_admin')) else masked_identifier | tojson }},
-    maskedIdentifier: { { masked_identifier | tojson } },
-    isLoggedIn: { { 'true' if (session.get('registration_email') or session.get('is_admin')) else 'false' } }
+        originalIdentifier: {{ scammer.scammer_info_raw | tojson if can_view_full_sensitive else masked_identifier | tojson }},
+        maskedIdentifier: {{ masked_identifier | tojson }},
+        isLoggedIn: {{ 'true' if can_view_full_sensitive else 'false' }}
     };
 </script>
 <script src="{{ url_for('static', filename='js/scammer_profile.js') }}"></script>

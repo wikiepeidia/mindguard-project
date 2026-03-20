@@ -110,6 +110,7 @@
                                 class="text-info small text-decoration-none hover:text-white transition">Xem tất cả <i
                                     class="fas fa-arrow-right"></i></a>
                         </div>
+                        <p class="text-info small mb-2">{{ privacy_note }}</p>
                         <!-- Filter nhanh -->
                         <div class="d-flex gap-2 flex-wrap mt-2">
                             <button class="btn btn-sm btn-outline-secondary px-2 py-1 filter-btn active"
@@ -153,7 +154,7 @@
                                 data-verification="{{ entry.verification_status }}" data-scammer-id="{{ entry.id }}"
                                 data-report-type="{{ entry.report_type }}"
                                 onclick="window.location.href='{{ url_for('main.scammer_profile', scammer_id=entry.id) }}';"
-                                data-identifier="{% if session.get('registration_email') or session.get('is_admin') %}{{ entry.identifier }}{% else %}{{ entry.identifier | mask }}{% endif %}"
+                                data-identifier="{{ entry.identifier }}"
                                 data-name="{{ entry.name }}" data-type="{{ entry.type }}"
                                 data-platform="{{ entry.platform }}" data-desc="{{ entry.description }}"
                                 data-reports="{{ entry.total_reports }}" data-confirmed="{{ entry.confirmed_by_count }}"
@@ -185,11 +186,7 @@
                                         <div class="d-flex justify-content-between align-items-center mb-1">
                                             <h6 class="text-white fw-bold mb-0 text-truncate me-2"
                                                 style="font-size: 1rem;">
-                                                {% if session.get('registration_email') or session.get('is_admin') %}
                                                 {{ entry.identifier }}
-                                                {% else %}
-                                                {{ entry.identifier | mask }}
-                                                {% endif %}
                                             </h6>
                                             <span
                                                 class="badge bg-danger bg-opacity-20 text-danger border border-danger border-opacity-20 rounded-pill">

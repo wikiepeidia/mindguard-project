@@ -6,6 +6,7 @@
     <div class="text-center mb-5" data-aos="fade-down">
         <h1 class="display-4 fw-bold text-white mb-2">SỔ ĐEN CẢNH BÁO</h1>
         <p class="text-muted">Danh sách các đối tượng lừa đảo đã được xác thực</p>
+        <p class="text-info small">{{ privacy_note }}</p>
 
         <div class="mx-auto mt-4" style="max-width: 500px;">
             <div class="input-group shadow-sm rounded-pill overflow-hidden border border-secondary border-opacity-50">
@@ -24,12 +25,12 @@
             <div class="col-lg-4" data-aos="flip-up" data-aos-delay="{{ loop.index * 100 }}">
                 <div class="glass-card h-100 p-0 overflow-hidden position-relative border-danger hover-up cursor-pointer"
                     style="border-width: 1px;" onclick="showDetail(this)"
-                    data-identifier="{% if session.get('registration_email') or session.get('is_admin') %}{{ entry.scammer.scammer_info_raw }}{% else %}{{ entry.scammer.scammer_info_raw | mask }}{% endif %}"
-                    data-name="{{ entry.scammer.scammer_name }}" data-type="{{ entry.scammer.scam_type }}"
-                    data-platform="{{ entry.scammer.platform }}" data-desc="{{ entry.scammer.description }}"
+                    data-identifier="{{ entry.identifier }}"
+                    data-name="{{ entry.name }}" data-type="{{ entry.type }}"
+                    data-platform="{{ entry.platform }}" data-desc="{{ entry.description }}"
                     data-reports="{{ entry.total_reports }}"
-                    data-date="{{ entry.scammer.updated_at.strftime('%H:%M %d/%m/%Y') }}"
-                    data-image='{{ entry.scammer.evidence_urls }}'>
+                    data-date="{{ entry.updated_at }}"
+                    data-image='{{ entry.evidence_urls }}'>
 
                     <div class="position-absolute top-0 start-0 bg-danger text-white px-3 py-1 fw-bold"
                         style="border-bottom-right-radius: 10px;">
@@ -42,18 +43,14 @@
                             <i class="fas fa-skull-crossbones fa-3x"></i>
                         </div>
                         <h4 class="text-white fw-bold mb-1 text-truncate">
-                            {% if session.get('registration_email') or session.get('is_admin') %}
-                            {{ entry.scammer.scammer_info_raw }}
-                            {% else %}
-                            {{ entry.scammer.scammer_info_raw | mask }}
-                            {% endif %}
+                            {{ entry.identifier }}
                         </h4>
-                        <p class="text-muted small mb-3">{{ entry.scammer.scammer_name or 'Ẩn danh' }}</p>
+                        <p class="text-muted small mb-3">{{ entry.name or 'Ẩn danh' }}</p>
 
                         <div
                             class="d-flex justify-content-center gap-3 border-top border-secondary border-opacity-25 pt-3">
                             <span class="badge bg-danger">{{ entry.total_reports }} Tố cáo</span>
-                            <span class="badge bg-dark border border-secondary">{{ entry.scammer.scam_type[:20]
+                            <span class="badge bg-dark border border-secondary">{{ entry.type[:20]
                                 }}...</span>
                         </div>
                     </div>
@@ -80,12 +77,12 @@
                 <tbody class="text-white">
                     {% for entry in scammers %}
                     <tr class="cursor-pointer hover-highlight" onclick="showDetail(this)"
-                        data-identifier="{% if session.get('registration_email') or session.get('is_admin') %}{{ entry.scammer.scammer_info_raw }}{% else %}{{ entry.scammer.scammer_info_raw | mask }}{% endif %}"
-                        data-name="{{ entry.scammer.scammer_name }}" data-type="{{ entry.scammer.scam_type }}"
-                        data-platform="{{ entry.scammer.platform }}" data-desc="{{ entry.scammer.description }}"
+                        data-identifier="{{ entry.identifier }}"
+                        data-name="{{ entry.name }}" data-type="{{ entry.type }}"
+                        data-platform="{{ entry.platform }}" data-desc="{{ entry.description }}"
                         data-reports="{{ entry.total_reports }}"
-                        data-date="{{ entry.scammer.updated_at.strftime('%H:%M %d/%m/%Y') }}"
-                        data-image='{{ entry.scammer.evidence_urls }}'>
+                        data-date="{{ entry.updated_at }}"
+                        data-image='{{ entry.evidence_urls }}'>
 
                         <td class="ps-4 py-3">
                             <div class="d-flex align-items-center">
@@ -100,22 +97,18 @@
                                 </div>
                                 <div>
                                     <div class="fw-bold text-info">
-                                        {% if session.get('registration_email') or session.get('is_admin') %}
-                                        {{ entry.scammer.scammer_info_raw }}
-                                        {% else %}
-                                        {{ entry.scammer.scammer_info_raw | mask }}
-                                        {% endif %}
+                                        {{ entry.identifier }}
                                     </div>
-                                    <div class="small text-muted">{{ entry.scammer.scammer_name or '' }}</div>
+                                    <div class="small text-muted">{{ entry.name or '' }}</div>
                                 </div>
                             </div>
                         </td>
-                        <td>{{ entry.scammer.scam_type }}</td>
+                        <td>{{ entry.type }}</td>
                         <td><span
                                 class="badge bg-secondary bg-opacity-25 text-secondary border border-secondary border-opacity-25">{{
-                                entry.scammer.platform or 'N/A' }}</span></td>
+                                entry.platform or 'N/A' }}</span></td>
                         <td>
-                            {% set badge = get_verification_badge(entry.scammer.verification_status) %}
+                            {% set badge = get_verification_badge(entry.verification_status) %}
                             <span
                                 class="badge bg-{{ badge.class }} bg-opacity-20 text-{{ badge.class }} border border-{{ badge.class }} rounded-pill"
                                 style="font-size: 0.75rem;">
@@ -130,7 +123,7 @@
                             {% endif %}
                         </td>
                         <td class="text-end pe-4 text-muted small">
-                            {{ entry.scammer.updated_at.strftime('%d/%m/%Y') }}
+                            {{ entry.updated_date }}
                         </td>
                     </tr>
                     {% endfor %}

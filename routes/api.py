@@ -1,8 +1,26 @@
 from flask import Blueprint, jsonify, request
 from models import ScammerReport, ScamReport, ScammerLeaderboard
 from sqlalchemy import or_
+from utils.privacy_policy import MASKED_DATA_NOTICE, to_display_identifier
 
 api_bp = Blueprint('api', __name__, url_prefix='/api/v1')
+
+
+def serialize_public_check_result(raw_result: dict, is_admin: bool = False) -> dict:
+    """Serialize check endpoint payload using shared privacy policy."""
+    risk_score = raw_result.get("risk_score", 0) or 0
+    return {
+        "identifier": to_display_identifier(
+            raw_result.get("identifier", ""),
+            raw_result.get("report_type", "general"),
+            is_admin=is_admin,
+        ),
+        "risk_score": risk_score,
+        "reports_count": raw_result.get("reports_count", 0),
+        "type": raw_result.get("type"),
+        "verification_status": raw_result.get("verification_status") or "unverified",
+        "danger_level": "High" if risk_score > 70 else "Medium" if risk_score > 40 else "Low",
+    }
 
 @api_bp.route('/check', methods=['GET'])
 def check_scammer():
@@ -32,16 +50,21 @@ def check_scammer():
 
     if results:
         top_match = results[0]
-        return jsonify({
-            "found": True,
-            "data": {
+        payload = serialize_public_check_result(
+            {
                 "identifier": top_match.scammer_info_raw,
-                "risk_score": top_match.risk_score or 0,
+                "report_type": top_match.report_type,
+                "risk_score": top_match.risk_score,
                 "reports_count": top_match.report_count,
                 "type": top_match.scam_type,
-                "verification_status": top_match.verification_status or "unverified",
-                "danger_level": "High" if (top_match.risk_score or 0) > 70 else "Medium" if (top_match.risk_score or 0) > 40 else "Low"
-            }
+                "verification_status": top_match.verification_status,
+            },
+            is_admin=False,
+        )
+        return jsonify({
+            "found": True,
+            "data": payload,
+            "privacy_note": MASKED_DATA_NOTICE,
         })
     else:
         return jsonify({

@@ -247,16 +247,16 @@ a:hover {
 
 /* --- FOOTER --- */
 footer {
-    background: #020617;
-    border-top: 1px solid var(--glass-border);
+    background: linear-gradient(180deg, var(--mg-surface) 0%, var(--mg-surface-soft) 100%);
+    border-top: 1px solid var(--mg-border);
     padding-top: 4rem;
     padding-bottom: 2rem;
     margin-top: 5rem;
-    color: var(--text-secondary) !important;
+    color: var(--mg-text-secondary) !important;
 }
 
 footer h5 {
-    color: #fff !important;
+    color: var(--mg-text-primary) !important;
 }
 
 .hover-link {
@@ -270,36 +270,36 @@ footer h5 {
 
 /* --- DROPDOWN MENU --- */
 .dropdown-menu {
-    background: #1e293b !important;
-    border: 1px solid var(--glass-border);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+    background: var(--mg-surface) !important;
+    border: 1px solid var(--mg-border);
+    box-shadow: var(--mg-shadow-sm);
 }
 
 .dropdown-item {
-    color: var(--text-secondary) !important;
+    color: var(--mg-text-secondary) !important;
     padding: 0.7rem 1.2rem;
 }
 
 .dropdown-item:hover {
-    background: rgba(255, 255, 255, 0.05);
-    color: #fff !important;
+    background: var(--mg-surface-soft);
+    color: var(--mg-text-primary) !important;
 }
 
 .dropdown-divider {
-    border-top-color: var(--glass-border);
+    border-top-color: var(--mg-border);
 }
 
 /* --- ALERT / FLASH MESSAGES --- */
 .alert {
-    background: var(--secondary-bg) !important;
-    border: none;
-    border-left: 4px solid var(--accent-color);
-    color: #fff !important;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    background: var(--mg-surface) !important;
+    border: 1px solid var(--mg-border);
+    border-left: 4px solid var(--mg-accent);
+    color: var(--mg-text-primary) !important;
+    box-shadow: var(--mg-shadow-sm);
 }
 
 .btn-close {
-    filter: invert(1) grayscale(100%) brightness(200%);
+    filter: none;
 }
 
 /* --- REPORT PAGE STYLING --- */
@@ -601,10 +601,8 @@ footer h5 {
 }
 
 .form-select option {
-    background-color: #1e293b !important;
-    /* Màu nền xanh đen (khớp giao diện) */
-    color: #f1f5f9 !important;
-    /* Màu chữ trắng sáng */
+    background-color: var(--mg-surface) !important;
+    color: var(--mg-text-primary) !important;
     padding: 10px;
 }
 

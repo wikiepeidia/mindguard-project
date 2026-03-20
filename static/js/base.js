@@ -23,8 +23,8 @@ document.addEventListener('DOMContentLoaded', function() {
         
         function animateCanvas() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = '#06b6d4';
-            ctx.strokeStyle = 'rgba(6, 182, 212, 0.15)';
+            ctx.fillStyle = '#0284c7';
+            ctx.strokeStyle = 'rgba(2, 132, 199, 0.24)';
             particles.forEach((p, i) => {
                 p.x += p.vx; p.y += p.vy;
                 if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
@@ -45,6 +45,20 @@ document.addEventListener('DOMContentLoaded', function() {
         animateCanvas();
         window.onresize = initCanvas;
     }
+
+    // Auto-hide flash alerts after a short delay for cleaner UX.
+    document.querySelectorAll('.alert.alert-dismissible').forEach((alertElement) => {
+        const timer = setTimeout(() => {
+            if (window.bootstrap && window.bootstrap.Alert) {
+                window.bootstrap.Alert.getOrCreateInstance(alertElement).close();
+            } else {
+                alertElement.classList.remove('show');
+                alertElement.remove();
+            }
+        }, 5500);
+
+        alertElement.addEventListener('mouseenter', () => clearTimeout(timer), { once: true });
+    });
 
     // --- CHATBOT LOGIC (Giữ nguyên 100% của bạn) ---
     const chatInput = document.getElementById("chatInput");

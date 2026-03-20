@@ -76,10 +76,18 @@ Each task was committed atomically:
 - **Verification:** Task test commit created with both new files tracked.
 - **Committed in:** `1fcee2c`
 
+**2. [Rule 3 - Blocking] gsd-tools state advance parser failed on legacy STATE format**
+- **Found during:** Plan metadata update after task execution
+- **Issue:** `state advance-plan` returned `Cannot parse Current Plan or Total Plans in Phase from STATE.md`.
+- **Fix:** Updated `STATE.md`, `ROADMAP.md`, and `REQUIREMENTS.md` manually to reflect 02-02 completion and ABUS-03 completion.
+- **Files modified:** `.planning/STATE.md`, `.planning/ROADMAP.md`, `.planning/REQUIREMENTS.md`
+- **Verification:** Metadata docs commit contains all expected updates and new summary file.
+- **Committed in:** `8bda4c7`
+
 ---
 
-**Total deviations:** 1 auto-fixed (1 blocking)
-**Impact on plan:** Required for atomic task commit compliance; no scope increase.
+**Total deviations:** 2 auto-fixed (2 blocking)
+**Impact on plan:** Both fixes were required for commitability and state tracking; no scope increase.
 
 ## Issues Encountered
 - Initial RED run failed as expected because route integration was missing; route and fixtures were aligned to hashed reporter identity to reach GREEN.

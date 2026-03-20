@@ -8,6 +8,7 @@ body {
     color: var(--mg-text-primary);
     overflow-x: hidden;
     font-family: 'Inter', sans-serif;
+    position: relative;
 }
 
 /* Hiệu ứng hạt mạng lưới nền */
@@ -17,9 +18,14 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: -1;
+    z-index: 0;
     opacity: 0.56;
     pointer-events: none;
+}
+
+body > :not(#network-canvas) {
+    position: relative;
+    z-index: 1;
 }
 
 /* Nâng cấp Navbar của bạn */

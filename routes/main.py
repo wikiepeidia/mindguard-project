@@ -31,65 +31,85 @@ def index():
     
     # 1. Đếm số liệu
     approved_scammers_count = ScammerReport.query.filter_by(status='approved').count()
-    articles_count = ScamReport.query.count() 
-    total_cases = articles_count + approved_scammers_count
+    total_scammer_reports_count = ScammerReport.query.count()
+    articles_count = ScamReport.query.count()
+    visible_scammer_count = approved_scammers_count or total_scammer_reports_count
+    total_cases = articles_count + visible_scammer_count
     registration_count = Registration.query.filter_by(role='user').count()
 
     stats = {
         "scam_count": total_cases,
         "registration_count": registration_count,
-        "scammer_reports_count": approved_scammers_count, 
+        "scammer_reports_count": visible_scammer_count,
     }
-    
+
     # 2. Lấy danh sách từ DB
-    raw_scammers = (
+    raw_leaderboard_entries = (
         ScammerLeaderboard.query
         .join(ScammerReport)
         .filter(ScammerReport.status == 'approved')
-        .order_by(ScammerLeaderboard.last_reported.desc()) 
+        .order_by(ScammerLeaderboard.last_reported.desc())
         .limit(20)
         .all()
     )
 
-    # --- [KHẮC PHỤC LỖI ẢNH] ---
-    # Chuyển đổi sang list Dictionary để dữ liệu cố định, không bị DB reset
+    # Fallback: nếu leaderboard chưa đồng bộ nhưng có dữ liệu đã duyệt,
+    # vẫn hiển thị từ bảng scammer_reports để tránh trang chủ bị trống.
+    approved_report_fallback = []
+    if not raw_leaderboard_entries:
+        approved_report_fallback = (
+            ScammerReport.query
+            .filter_by(status='approved')
+            .order_by(ScammerReport.updated_at.desc())
+            .limit(20)
+            .all()
+        )
+
     is_admin = bool(session.get('is_admin'))
 
     top_scammers = []
-    for entry in raw_scammers:
+    use_leaderboard_source = bool(raw_leaderboard_entries)
+    data_source = raw_leaderboard_entries if use_leaderboard_source else approved_report_fallback
+
+    for entry in data_source:
+        scammer = entry.scammer if use_leaderboard_source else entry
+        total_reports = entry.total_reports if use_leaderboard_source else int(scammer.report_count or 0)
+
         # Xử lý ảnh
         img_url = ""
-        if entry.scammer.evidence_urls:
+        if scammer.evidence_urls:
             try:
-                imgs = json.loads(entry.scammer.evidence_urls)
+                imgs = json.loads(scammer.evidence_urls)
                 if imgs and len(imgs) > 0:
                     img_url = imgs[0]
             except:
                 img_url = ""
-        
+
+        updated_at_display = datetime.utcnow().strftime('%H:%M %d/%m/%Y')
+        if scammer.updated_at:
+            updated_at_display = scammer.updated_at.strftime('%H:%M %d/%m/%Y')
+
         # Đóng gói dữ liệu
         item = {
-            "id": entry.scammer.id,  # Thêm ID
+            "id": scammer.id,
             "identifier": to_display_identifier(
-                entry.scammer.scammer_info_raw,
-                entry.scammer.report_type,
+                scammer.scammer_info_raw,
+                scammer.report_type,
                 is_admin=is_admin,
             ),
-            "name": entry.scammer.scammer_name or 'Chưa rõ danh tính',
-            "type": entry.scammer.scam_type,
-            "platform": entry.scammer.platform,
-            "description": entry.scammer.description,
-            "total_reports": entry.total_reports,
-            "updated_at": entry.scammer.updated_at.strftime('%H:%M %d/%m/%Y'),
-            "report_type": entry.scammer.report_type,
-            "image": img_url,  # Link ảnh chuẩn
-            # Thêm các trường mới
-            "verification_status": entry.scammer.verification_status or 'unverified',
-            "risk_score": entry.scammer.risk_score or 0,
-            "confirmed_by_count": entry.scammer.confirmed_by_count or 0
+            "name": scammer.scammer_name or 'Chưa rõ danh tính',
+            "type": scammer.scam_type,
+            "platform": scammer.platform,
+            "description": scammer.description,
+            "total_reports": total_reports,
+            "updated_at": updated_at_display,
+            "report_type": scammer.report_type,
+            "image": img_url,
+            "verification_status": scammer.verification_status or 'unverified',
+            "risk_score": scammer.risk_score or 0,
+            "confirmed_by_count": scammer.confirmed_by_count or 0
         }
         top_scammers.append(item)
-    # ---------------------------
 
     return render_template(
         "index.html",

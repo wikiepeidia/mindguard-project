@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash, send_file
 from functools import wraps
 from sqlalchemy import func
@@ -6,9 +7,17 @@ from models import Registration, QuizResult, ScammerReport, ScammerLeaderboard, 
 from werkzeug.security import check_password_hash
 from config import Config
 from utils.helpers import calculate_danger_level
+from utils.privacy_policy import to_display_identifier
+from services.sensitive_access_log import log_sensitive_access, query_sensitive_access_logs
 import os
 import csv
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
+
+
+def _get_admin_actor():
+    actor_id = session.get("admin_id")
+    actor_email = session.get("admin_email") or session.get("admin_name") or "unknown-admin"
+    return actor_id, actor_email
 
 def admin_required(f):
     @wraps(f)
@@ -27,6 +36,8 @@ def admin_login():
             session.permanent = True
             session["is_admin"] = True
             session["admin_name"] = user.name
+            session["admin_email"] = user.email
+            session["admin_id"] = user.id
             return redirect(url_for("admin.admin_dashboard"))
         flash("Đăng nhập thất bại.", "danger")
     return render_template("admin_login.html")
@@ -99,6 +110,17 @@ def scammer_reports():
             try: r.evidence_list = json.loads(r.evidence_urls)
             except: r.evidence_list = []
         else: r.evidence_list = []
+
+    actor_id, actor_email = _get_admin_actor()
+    log_sensitive_access(
+        actor_id=actor_id,
+        actor_email=actor_email,
+        action="view",
+        object_type="scammer_reports",
+        object_id=f"status:{status};count:{len(reports)}",
+        reason="admin_full_view",
+    )
+
     return render_template("admin_scammer_reports.html", reports=reports, status_filter=status)
 
 @admin_bp.route("/approve-report/<int:report_id>", methods=["POST"])
@@ -114,6 +136,17 @@ def approve_report(report_id):
     else:
         db.session.add(ScammerLeaderboard(scammer_id=report.id, total_reports=report.report_count, danger_level=calculate_danger_level(report.report_count)))
     db.session.commit()
+
+    actor_id, actor_email = _get_admin_actor()
+    log_sensitive_access(
+        actor_id=actor_id,
+        actor_email=actor_email,
+        action="update",
+        object_type="scammer_report",
+        object_id=str(report.id),
+        reason="approve_report",
+    )
+
     flash("Đã duyệt.", "success")
     return redirect(request.referrer)
 
@@ -123,12 +156,29 @@ def reject_report(report_id):
     report = ScammerReport.query.get_or_404(report_id)
     report.status = 'rejected'
     db.session.commit()
+
+    actor_id, actor_email = _get_admin_actor()
+    log_sensitive_access(
+        actor_id=actor_id,
+        actor_email=actor_email,
+        action="update",
+        object_type="scammer_report",
+        object_id=str(report.id),
+        reason="reject_report",
+    )
+
     flash("Đã từ chối.", "warning")
     return redirect(request.referrer)
 
 @admin_bp.route("/export-dataset")
 @admin_required
 def export_dataset():
+    full_data_requested = request.args.get("full_data", "0").lower() in {"1", "true", "yes"}
+    reason = (request.args.get("reason") or "").strip()
+
+    if full_data_requested and not reason:
+        return "Ly do bat buoc khi xuat full-data.", 400
+
     dataset_dir = os.path.join(Config.BASE_DIR, 'datasets')
     if not os.path.exists(dataset_dir): os.makedirs(dataset_dir)
     filename = "scam_dataset_export.csv"
@@ -139,13 +189,82 @@ def export_dataset():
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writeheader()
         for report in reports:
+            if full_data_requested:
+                identifier_value = report.scammer_info_raw or 'Hidden'
+            else:
+                identifier_value = to_display_identifier(report.scammer_info_raw, report.report_type, is_admin=False)
+
             writer.writerow({
                 'id': report.id,
-                'identifier': report.scammer_info_raw or 'Hidden',
+                'identifier': identifier_value,
                 'scam_type': report.scam_type,
                 'platform': report.platform,
                 'description': report.description,
                 'report_count': report.report_count,
                 'date': report.created_at.strftime('%Y-%m-%d')
             })
+
+    if full_data_requested:
+        actor_id, actor_email = _get_admin_actor()
+        log_sensitive_access(
+            actor_id=actor_id,
+            actor_email=actor_email,
+            action="export",
+            object_type="dataset",
+            object_id="approved_scam_reports",
+            reason=reason,
+        )
+
     return send_file(filepath, as_attachment=True, download_name=filename)
+
+
+@admin_bp.route("/sensitive-access-logs")
+@admin_required
+def sensitive_access_logs():
+    actor = (request.args.get("actor") or "").strip()
+    action = (request.args.get("action") or "").strip().lower()
+    start_raw = (request.args.get("start") or "").strip()
+    end_raw = (request.args.get("end") or "").strip()
+
+    start_time = None
+    end_time = None
+    if start_raw:
+        try:
+            start_time = datetime.fromisoformat(start_raw)
+        except ValueError:
+            start_time = None
+    if end_raw:
+        try:
+            end_time = datetime.fromisoformat(end_raw)
+        except ValueError:
+            end_time = None
+
+    logs = query_sensitive_access_logs(
+        actor_email=actor or None,
+        action=action or None,
+        start_time=start_time,
+        end_time=end_time,
+    )
+
+    threshold = int(request.args.get("threshold") or 10)
+    recent_window_start = datetime.utcnow().replace(microsecond=0)
+    recent_logs = query_sensitive_access_logs(start_time=recent_window_start.replace(hour=0, minute=0, second=0))
+
+    actor_counts = {}
+    ip_counts = {}
+    for row in recent_logs:
+        actor_counts[row.actor_email] = actor_counts.get(row.actor_email, 0) + 1
+        if row.ip_address:
+            ip_counts[row.ip_address] = ip_counts.get(row.ip_address, 0) + 1
+
+    high_frequency_actors = [k for k, v in actor_counts.items() if v >= threshold]
+    high_frequency_ips = [k for k, v in ip_counts.items() if v >= threshold]
+
+    return render_template(
+        "admin_sensitive_access_logs.html",
+        logs=logs,
+        filters={"actor": actor, "action": action, "start": start_raw, "end": end_raw},
+        threshold=threshold,
+        high_frequency_actors=high_frequency_actors,
+        high_frequency_ips=high_frequency_ips,
+    )

@@ -11,6 +11,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/tokens.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <!-- Custom Base CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
@@ -27,7 +28,7 @@
             </a>
             <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse"
                 data-bs-target="#navbarNav">
-                <i class="fas fa-bars text-white"></i>
+                <i class="fas fa-bars text-body"></i>
             </button>
 
             <div class="collapse navbar-collapse" id="navbarNav">
@@ -54,15 +55,15 @@
                             onclick="document.body.classList.toggle('show-chatbot'); return false;">AI Chat</a></li>
 
                     <li class="nav-item dropdown ms-3">
-                        <a class="nav-link dropdown-toggle btn btn-outline-light rounded-pill px-4 py-1 text-white border-opacity-25"
+                        <a class="nav-link dropdown-toggle btn btn-outline-light rounded-pill px-4 py-1 border-opacity-25"
                             href="#" data-bs-toggle="dropdown">
                             {{ session.get('registration_name') }}
                         </a>
-                        <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 bg-dark mt-2 p-2">
-                            <li><a class="dropdown-item rounded text-white" href="{{ url_for('auth.profile') }}"><i
+                        <ul class="dropdown-menu dropdown-menu-end shadow-lg border mt-2 p-2">
+                            <li><a class="dropdown-item rounded" href="{{ url_for('auth.profile') }}"><i
                                         class="fas fa-id-card me-2 text-info"></i> Hồ sơ</a></li>
                             <li>
-                                <hr class="dropdown-divider bg-secondary opacity-25">
+                                <hr class="dropdown-divider opacity-25">
                             </li>
                             <li><a class="dropdown-item rounded text-danger" href="{{ url_for('auth.logout') }}"><i
                                         class="fas fa-power-off me-2"></i> Đăng xuất</a></li>
@@ -70,7 +71,7 @@
                     </li>
                     {% else %}
                     <li class="nav-item"><a class="nav-link" href="{{ url_for('main.leaderboard') }}">Cảnh báo</a></li>
-                    <li class="nav-item ms-2"><a class="nav-link fw-bold text-white"
+                        <li class="nav-item ms-2"><a class="nav-link fw-bold"
                             href="{{ url_for('auth.login') }}">Đăng nhập</a></li>
                     <li class="nav-item ms-3"><a class="btn btn-info fw-bold px-4 rounded-pill text-dark shadow-sm"
                             href="{{ url_for('auth.register') }}">Tham gia ngay</a></li>
@@ -82,14 +83,14 @@
 
     <div style="height: 80px;"></div>
 
-    <div class="container mt-3" style="position: absolute; top: 90px; right: 20px; z-index: 9999; max-width: 400px;">
+    <div class="container mt-3 position-absolute top-0 end-0" style="z-index: 9999; max-width: 400px; margin-top: 90px; margin-right: 20px;">
         {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
         {% for category, message in messages %}
-        <div class="alert alert-{{ category }} alert-dismissible fade show shadow glass-card p-3 mb-2 text-white"
+        <div class="alert alert-{{ category }} alert-dismissible fade show shadow glass-card p-3 mb-2"
             role="alert">
             <i class="fas fa-info-circle me-2 text-info"></i> {{ message }}
-            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
         {% endfor %}
         {% endif %}
@@ -102,13 +103,13 @@
     <button class="chatbot-toggler d-flex align-items-center justify-content-center"
         onclick="document.body.classList.toggle('show-chatbot')">
         <span class="icon-chat position-absolute d-flex align-items-center justify-content-center w-100 h-100"><i
-                class="fas fa-robot fa-lg text-white"></i></span>
+                class="fas fa-robot fa-lg text-light"></i></span>
         <span class="icon-close position-absolute d-flex align-items-center justify-content-center w-100 h-100"
-            style="opacity: 0;"><i class="fas fa-times fa-lg text-white"></i></span>
+            style="opacity: 0;"><i class="fas fa-times fa-lg text-light"></i></span>
     </button>
 
     <div class="chatbot-window">
-        <div class="chat-header text-white">
+        <div class="chat-header text-light">
             <div class="d-flex align-items-center">
                 <i class="fas fa-robot me-2 fs-4"></i>
                 <div>
@@ -131,51 +132,51 @@
         </div>
     </div>
 
-    <footer class="mt-auto border-top border-white border-opacity-10 bg-black bg-opacity-20 pt-5 pb-4">
+    <footer class="mt-auto border-top pt-5 pb-4">
         <div class="container">
             <div class="row g-4 mb-4">
                 <div class="col-lg-5">
                     <a class="navbar-brand d-block mb-3" href="{{ url_for('main.index') }}">
                         <i class="fas fa-shield-alt text-info me-2"></i>Mind<span>Guard</span>
                     </a>
-                    <p class="text-slate-400 small mb-3">
+                    <p class="text-muted small mb-3">
                         Hệ thống cảnh báo và phòng chống lừa đảo trực tuyến dựa trên sức mạnh cộng đồng và trí tuệ nhân
                         tạo.
                     </p>
                     <div class="d-flex gap-2">
                         <a href="https://github.com/wikiepeidia/mindguard-project" target="_blank"
-                            class="btn btn-outline-light btn-sm rounded-circle border-opacity-25"
+                            class="btn btn-outline-light btn-sm rounded-circle"
                             style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;"
                             title="View Source Code"><i class="fab fa-github"></i></a>
                     </div>
                 </div>
                 <div class="col-lg-3 col-6">
-                    <h6 class="text-white fw-bold mb-3">Liên kết</h6>
+                    <h6 class="fw-bold mb-3">Liên kết</h6>
                     <ul class="list-unstyled small">
                         <li class="mb-2"><a href="{{ url_for('main.index') }}"
-                                class="text-slate-400 text-decoration-none hover:text-info">Trang chủ</a></li>
+                                class="text-muted text-decoration-none hover-link">Trang chủ</a></li>
                         <li class="mb-2"><a href="{{ url_for('scammer.report_scammer') }}"
-                                class="text-slate-400 text-decoration-none hover:text-info">Tố cáo</a></li>
+                                class="text-muted text-decoration-none hover-link">Tố cáo</a></li>
                         <li class="mb-2"><a href="{{ url_for('main.leaderboard') }}"
-                                class="text-slate-400 text-decoration-none hover:text-info">Cảnh báo</a></li>
+                                class="text-muted text-decoration-none hover-link">Cảnh báo</a></li>
                         <li class="mb-2"><a href="{{ url_for('quiz.quiz') }}"
-                                class="text-slate-400 text-decoration-none hover:text-info">Kiểm tra IQ</a></li>
+                                class="text-muted text-decoration-none hover-link">Kiểm tra IQ</a></li>
                     </ul>
                 </div>
                 <div class="col-lg-4">
-                    <h6 class="text-white fw-bold mb-3">Đăng ký nhận tin</h6>
-                    <p class="text-slate-400 small mb-3">Nhận cảnh báo mới nhất qua email.</p>
+                    <h6 class="fw-bold mb-3">Đăng ký nhận tin</h6>
+                    <p class="text-muted small mb-3">Nhận cảnh báo mới nhất qua email.</p>
                     <div class="input-group">
-                        <input type="email" class="form-control bg-dark border-secondary text-white"
+                        <input type="email" class="form-control"
                             placeholder="Email của bạn">
-                        <button class="btn btn-info text-white" type="button"><i
+                        <button class="btn btn-info" type="button"><i
                                 class="fas fa-paper-plane"></i></button>
                     </div>
                 </div>
             </div>
-            <div class="text-center border-top border-white border-opacity-10 pt-4">
+            <div class="text-center border-top pt-4">
                 <p class="text-secondary small mb-0">&copy; 2025 MindGuard Community Project. <span
-                        class="text-slate-400">Bảo mật & Minh bạch.</span></p>
+                        class="text-muted">Bảo mật & Minh bạch.</span></p>
             </div>
         </div>
     </footer>

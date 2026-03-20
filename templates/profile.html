@@ -7,7 +7,7 @@
             
             <!-- Header -->
             <div class="text-center mb-5" data-aos="fade-down">
-                <h2 class="fw-bold text-white">Hồ sơ cá nhân</h2>
+                <h2 class="fw-bold">Hồ sơ cá nhân</h2>
                 <p class="text-muted">Quản lý thông tin và kết quả đánh giá năng lực</p>
             </div>
 
@@ -17,28 +17,28 @@
                     <div class="glass-card h-100 text-center">
                         <div class="position-relative d-inline-block mb-3">
                             <div class="bg-gradient-primary rounded-circle p-1">
-                                <img src="https://ui-avatars.com/api/?name={{ user.name }}&background=06b6d4&color=fff&size=128" class="rounded-circle border border-4 border-dark" alt="Avatar">
+                                <img src="https://ui-avatars.com/api/?name={{ user.name }}&background=06b6d4&color=fff&size=128" class="rounded-circle border border-4" alt="Avatar">
                             </div>
-                            <span class="position-absolute bottom-0 end-0 bg-success border border-dark rounded-circle p-2"></span>
+                            <span class="position-absolute bottom-0 end-0 bg-success border rounded-circle p-2"></span>
                         </div>
                         
-                        <h4 class="text-white fw-bold mb-1">{{ user.name }}</h4>
+                        <h4 class="fw-bold mb-1">{{ user.name }}</h4>
                         <p class="text-info small mb-3">{{ user.email }}</p>
                         
-                        <hr class="border-secondary opacity-25 my-4">
+                        <hr class="opacity-25 my-4">
                         
                         <div class="text-start px-3">
                             <div class="mb-3">
                                 <label class="text-muted small fw-bold text-uppercase">Ngày tham gia</label>
-                                <div class="text-white">{{ user.created_at.strftime('%d/%m/%Y') }}</div>
+                                <div>{{ user.created_at.strftime('%d/%m/%Y') }}</div>
                             </div>
                             <div class="mb-3">
                                 <label class="text-muted small fw-bold text-uppercase">Nghề nghiệp</label>
-                                <div class="text-white">{{ user.occupation or 'Chưa cập nhật' }}</div>
+                                <div>{{ user.occupation or 'Chưa cập nhật' }}</div>
                             </div>
                             <div class="mb-3">
                                 <label class="text-muted small fw-bold text-uppercase">Thành phố</label>
-                                <div class="text-white">{{ user.city or 'Chưa cập nhật' }}</div>
+                                <div>{{ user.city or 'Chưa cập nhật' }}</div>
                             </div>
                         </div>
 
@@ -54,7 +54,7 @@
                 <div class="col-md-7" data-aos="fade-left">
                     <div class="glass-card h-100">
                         <div class="d-flex justify-content-between align-items-center mb-4">
-                            <h5 class="text-white fw-bold mb-0"><i class="fas fa-award me-2 text-warning"></i>Kết quả Test IQ Lừa đảo</h5>
+                            <h5 class="fw-bold mb-0"><i class="fas fa-award me-2 text-warning"></i>Kết quả Test IQ Lừa đảo</h5>
                             
                             {% if quiz_result %}
                                 <span class="badge bg-success bg-opacity-20 text-success border border-success px-3">Đã hoàn thành</span>
@@ -65,10 +65,10 @@
 
                         {% if quiz_result %}
                             <div class="text-center py-4">
-                                <div class="display-1 fw-bold text-white mb-2">{{ quiz_result.score }}<span class="fs-4 text-muted">/{{ quiz_result.max_score }}</span></div>
+                                <div class="display-1 fw-bold mb-2">{{ quiz_result.score }}<span class="fs-4 text-muted">/{{ quiz_result.max_score }}</span></div>
                                 <p class="text-muted">Điểm số an toàn của bạn</p>
                                 
-                                <div class="progress bg-dark mb-4" style="height: 10px;">
+                                <div class="progress mb-4" style="height: 10px;">
                                     {% set percent = (quiz_result.score / quiz_result.max_score) * 100 %}
                                     <div class="progress-bar bg-gradient-{{ 'success' if percent >= 80 else 'warning' if percent >= 50 else 'danger' }}" 
                                          role="progressbar" style="width: {{ percent }}%"></div>
@@ -78,7 +78,7 @@
                                     <div class="alert alert-success bg-success bg-opacity-10 border-success d-flex align-items-center mb-4 text-start">
                                         <i class="fas fa-certificate fa-2x me-3 text-success"></i>
                                         <div>
-                                            <div class="fw-bold text-white">Chứng nhận An toàn</div>
+                                            <div class="fw-bold">Chứng nhận An toàn</div>
                                             <div class="small text-success-emphasis">Mã số: {{ quiz_result.certificate_code }}</div>
                                         </div>
                                     </div>
@@ -100,7 +100,7 @@
                         {% else %}
                             <div class="text-center py-5">
                                 <i class="fas fa-clipboard-list fa-4x text-muted mb-3 opacity-50"></i>
-                                <h5 class="text-white">Bạn chưa thực hiện bài kiểm tra nào</h5>
+                                <h5>Bạn chưa thực hiện bài kiểm tra nào</h5>
                                 <p class="text-muted mb-4">Hãy kiểm tra kiến thức để biết mình có an toàn trên mạng không nhé!</p>
                                 <a href="{{ url_for('quiz.quiz') }}" class="btn btn-primary px-5 rounded-pill">
                                     Bắt đầu ngay <i class="fas fa-arrow-right ms-2"></i>
@@ -117,10 +117,10 @@
 <!-- Modal Chỉnh sửa -->
 <div class="modal fade" id="editProfileModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content bg-dark border border-secondary">
-            <div class="modal-header border-secondary">
-                <h5 class="modal-title text-white">Cập nhật thông tin</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="modal-content border">
+            <div class="modal-header">
+                <h5 class="modal-title">Cập nhật thông tin</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form action="{{ url_for('auth.edit_profile') }}" method="POST">
                 <div class="modal-body">
@@ -130,7 +130,7 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label text-muted small">Ngày sinh</label>
-                        <input type="date" class="form-control" name="date_of_birth" value="{{ user.date_of_birth }}" style="color-scheme: dark;">
+                        <input type="date" class="form-control" name="date_of_birth" value="{{ user.date_of_birth }}">
                     </div>
                     <div class="mb-3">
                         <label class="form-label text-muted small">Thành phố</label>
@@ -145,7 +145,7 @@
                         <textarea class="form-control" name="bio" rows="3">{{ user.bio or '' }}</textarea>
                     </div>
                 </div>
-                <div class="modal-footer border-secondary">
+                <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
                     <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
                 </div>

@@ -1,7 +1,7 @@
 /* Homepage specific styles (light-mode aligned) */
 
 .hero-section {
-    background: linear-gradient(180deg, #f3f9ff 0%, #f8fbff 65%, transparent 100%);
+    background: transparent;
     border-bottom: 1px solid var(--mg-border);
 }
 

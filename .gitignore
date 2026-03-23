@@ -7,6 +7,9 @@ test/
 tests/*
 !tests/privacy/
 !tests/privacy/test_*.py
+!tests/quizflow/
+!tests/quizflow/__init__.py
+!tests/quizflow/test_*.py
 # C extensions
 token.json
 .github/agents

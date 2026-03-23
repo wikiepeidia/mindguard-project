@@ -8,10 +8,10 @@
           <header class="quiz-header mb-4">
             <div>
               <h1 class="quiz-title mb-2">Bài test nhận thức MindGuard</h1>
-              <p class="quiz-subtitle mb-0">Trả lời 6 câu hỏi để kiểm tra mức độ cảnh giác và nhận danh hiệu bảo mật
+              <p class="quiz-subtitle mb-0">Trả lời từng câu hỏi để kiểm tra mức độ cảnh giác và nhận danh hiệu bảo mật
                 tương ứng.</p>
             </div>
-            {% if quiz_title and quiz_title != "Học viên an ninh mạng" %}
+            {% if quiz_title and quiz_title != "Học viên an ninh mạng" %}
             <span class="badge quiz-rank-badge px-3 py-2 mt-3 mt-md-0">
               <i class="fas fa-trophy me-2"></i>{{ quiz_title }}
             </span>
@@ -19,30 +19,41 @@
           </header>
 
           <div class="quiz-progress mb-4" role="status" aria-live="polite">
-            <span class="quiz-progress-label">Số câu hỏi: {{ questions|length }}</span>
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <span class="quiz-progress-label">Câu {{ current_index + 1 }} / {{ total_questions }}</span>
+              <span class="quiz-progress-label text-muted">Đã trả lời: {{ answered_count }}</span>
+            </div>
+            <div class="progress" style="height: 8px;">
+              <div class="progress-bar" role="progressbar"
+                   style="width: {{ ((current_index + 1) / total_questions * 100) | int }}%"
+                   aria-valuenow="{{ current_index + 1 }}"
+                   aria-valuemin="1"
+                   aria-valuemax="{{ total_questions }}">
+              </div>
+            </div>
           </div>
 
-          <form class="quiz-form" method="post">
-            {% if ai_question %}
-            <input type="hidden" name="ai_q_id" value="{{ ai_question.id }}">
-            <input type="hidden" name="ai_correct_{{ ai_question.id }}" value="{{ ai_question.answer }}">
-            {% endif %}
+          <form class="quiz-form" method="post"
+                action="{{ url_for('quiz.quiz_step', idx=current_index) }}">
 
-            {% for q in questions %}
             <article class="quiz-question-card mb-4">
               <p class="quiz-question-text mb-3">
-                {% if q.id > 9000 %}
+                {% if current_question.is_ai %}
                 <span class="badge quiz-ai-badge me-2">AI Generated</span>
                 {% endif %}
-                Câu {{ loop.index }}. {{ q.question | nl2br }}
+                Câu {{ current_index + 1 }}. {{ current_question.question | nl2br }}
               </p>
 
               <div class="quiz-options-list">
-                {% for option in q.options %}
+                {% for option in current_question.options %}
                 <div class="quiz-option-item">
-                  <input class="form-check-input quiz-option-input" type="radio" name="q{{ q.id }}"
-                    id="q{{ q.id }}_{{ loop.index0 }}" value="{{ loop.index0 }}">
-                  <label class="quiz-option-label" for="q{{ q.id }}_{{ loop.index0 }}">
+                  <input class="form-check-input quiz-option-input"
+                         type="radio"
+                         name="q{{ current_question.id }}"
+                         id="q{{ current_question.id }}_{{ loop.index0 }}"
+                         value="{{ loop.index0 }}"
+                         {% if selected_answer == loop.index0 %}checked{% endif %}>
+                  <label class="quiz-option-label" for="q{{ current_question.id }}_{{ loop.index0 }}">
                     <span class="quiz-option-badge">{{ loop.index }}</span>
                     <span>{{ option }}</span>
                   </label>
@@ -50,10 +61,24 @@
                 {% endfor %}
               </div>
             </article>
-            {% endfor %}
 
-            <div class="quiz-actions d-grid d-md-flex justify-content-md-end">
-              <button type="submit" class="btn btn-primary btn-lg quiz-submit-btn">Nộp bài</button>
+            <div class="quiz-actions d-flex justify-content-between align-items-center gap-2">
+              {% if current_index > 0 %}
+              <a href="{{ url_for('quiz.quiz_step', idx=current_index - 1) }}"
+                 class="btn btn-outline-secondary btn-lg quiz-back-btn">
+                <i class="fas fa-arrow-left me-2"></i>Câu trước
+              </a>
+              {% else %}
+              <span></span>
+              {% endif %}
+
+              <button type="submit" class="btn btn-primary btn-lg quiz-submit-btn">
+                {% if current_index + 1 == total_questions %}
+                Nộp bài <i class="fas fa-check ms-2"></i>
+                {% else %}
+                Tiếp theo <i class="fas fa-arrow-right ms-2"></i>
+                {% endif %}
+              </button>
             </div>
           </form>
         </div>

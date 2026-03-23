@@ -6,9 +6,9 @@ status: in_progress
 last_updated: "2026-03-23T00:00:00.000Z"
 progress:
   total_phases: 5
-  completed_phases: 3
-  total_plans: 10
-  completed_plans: 10
+  completed_phases: 4
+  total_plans: 13
+  completed_plans: 13
 ---
 
 # STATE - MindGuard v2
@@ -21,10 +21,10 @@ progress:
 ## Current Position
 
 - **Current Phase**: Phase 4 - Quiz One-Question Flow
-- **Current Plan**: 2/2 completed (04-01 backend, 04-02 frontend)
-- **Status**: Phase 4 complete, ready for Phase 5
-- **Progress**: 3/5 phases completed, 10/10 planned items completed
-- **Progress Bar**: [██████████] 100%
+- **Current Plan**: 3/3 completed (04-01 backend, 04-02 frontend, 04-03 question bank)
+- **Status**: Phase 4 COMPLETE, ready for Phase 5
+- **Progress**: 4/5 phases completed, 13/13 planned items completed
+- **Progress Bar**: [████████████] 100%
 
 ## Performance Metrics
 
@@ -52,6 +52,8 @@ progress:
 - Added static UI contract tests to prevent report/quiz dark utility regressions and enforce light-mode breakpoints.
 - Migrated leaderboard and scammer profile to tokenized light-mode classes with semantic page contracts.
 - Added priority-template token coverage tests to block reintroduction of dark utility fragments.
+- Expanded quiz bank to 25 questions with topic metadata (04-03); wrong-answer helper (correct+1)%4 avoids answer=0 false-positives.
+- Normalized topic field in _create_attempt (AI q) and _get_question (static fallback) for future-proof contract.
 
 ### Open Todos
 
@@ -64,5 +66,5 @@ progress:
 ## Session Continuity
 
 - **Last Updated**: 2026-03-23
-- **Stopped at**: Completed 04-02-PLAN.md
-- **Resume file**: .planning/phases/04-quiz-one-question-flow/04-02-SUMMARY.md
+- **Stopped at**: Completed 04-03-PLAN.md — Phase 4 fully complete
+- **Resume file**: .planning/phases/04-quiz-one-question-flow/04-03-SUMMARY.md

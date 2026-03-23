@@ -10,6 +10,13 @@ tests/*
 !tests/quizflow/
 !tests/quizflow/__init__.py
 !tests/quizflow/test_*.py
+!tests/leaderboard/
+!tests/leaderboard/__init__.py
+!tests/leaderboard/test_*.py
+
+# One-time patch/write scripts (generated during development)
+patch_*.py
+write_*.py
 # C extensions
 token.json
 .github/agents

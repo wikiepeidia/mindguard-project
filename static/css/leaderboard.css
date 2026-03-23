@@ -98,6 +98,55 @@
     border-bottom: 1px solid var(--mg-border);
 }
 
+/* ── Reporter Honor Roll Section ─────────────────────────────────── */
+
+.leaderboard-reporter-title {
+    color: var(--mg-text-primary);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+}
+
+.leaderboard-reporter-shell {
+    border: 1px solid var(--mg-border);
+    border-radius: var(--mg-radius-lg);
+    box-shadow: var(--mg-shadow-sm);
+    overflow: hidden;
+    background: var(--mg-surface);
+}
+
+.leaderboard-reporter-shell thead th {
+    background: var(--mg-surface-soft) !important;
+    color: var(--mg-text-secondary) !important;
+    border-bottom: 1px solid var(--mg-border);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.reporter-rank {
+    font-weight: 700;
+    color: var(--mg-accent);
+    font-size: 0.95rem;
+}
+
+.reporter-id {
+    font-family: monospace;
+    color: var(--mg-text-secondary);
+    font-size: 0.9rem;
+}
+
+.reporter-score {
+    font-weight: 600;
+    color: var(--mg-text-primary);
+}
+
+.reporter-integrity-badge {
+    font-size: 0.75rem;
+    border-radius: var(--mg-radius-pill);
+    font-weight: 600;
+    white-space: nowrap;
+}
+
 .table-admin tbody td {
     color: var(--mg-text-primary) !important;
     border-bottom: 1px solid var(--mg-border) !important;

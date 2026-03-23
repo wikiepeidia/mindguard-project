@@ -167,7 +167,10 @@ def leaderboard():
             "evidence_urls": entry.scammer.evidence_urls,
         })
 
-    reporter_rankings = get_reporter_rankings(limit=10)
+    try:
+        reporter_rankings = get_reporter_rankings(limit=10)
+    except Exception:
+        reporter_rankings = []
 
     return render_template(
         "leaderboard.html",

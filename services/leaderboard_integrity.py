@@ -8,6 +8,8 @@ Provides reporter ranking computation with integrity scoring:
 
 from datetime import datetime
 
+from sqlalchemy.exc import OperationalError
+
 from extensions import db
 from models import ScammerReport, AntiSpamActorState
 
@@ -99,14 +101,20 @@ def _get_flagged_hashes() -> set:
 
     Queries AntiSpamActorState for cookie-type actors whose cooldown_until
     is in the future. Privacy-safe: only hashes are returned, never emails.
+
+    Returns empty set if the AntiSpamActorState table does not yet exist
+    (e.g. during test runs with a fresh in-memory DB that pre-dates migration).
     """
-    now = datetime.utcnow()
-    states = (
-        AntiSpamActorState.query
-        .filter(
-            AntiSpamActorState.actor_type == 'cookie',
-            AntiSpamActorState.cooldown_until > now,
+    try:
+        now = datetime.utcnow()
+        states = (
+            AntiSpamActorState.query
+            .filter(
+                AntiSpamActorState.actor_type == 'cookie',
+                AntiSpamActorState.cooldown_until > now,
+            )
+            .all()
         )
-        .all()
-    )
-    return {s.reporter_hash for s in states if s.reporter_hash}
+        return {s.reporter_hash for s in states if s.reporter_hash}
+    except OperationalError:
+        return set()

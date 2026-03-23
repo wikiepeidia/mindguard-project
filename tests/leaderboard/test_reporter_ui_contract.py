@@ -10,11 +10,27 @@ Tests follow RED-GREEN TDD pattern:
 """
 
 import unittest
+from extensions import db
+from models import ScammerReport
 from tests.leaderboard import LeaderboardTestBase
 
 
 class TestReporterUiContract(LeaderboardTestBase):
     """DOM contract: reporter honor roll section must exist on /leaderboard."""
+
+    def setUp(self):
+        super().setUp()
+        # Seed one approved+verified reporter so the tbody loop renders
+        report = ScammerReport(
+            scammer_identifier='test-scammer-ui',
+            scam_type='Lừa đảo',
+            description='Test description',
+            reporter_hash='abcdef1234567890',
+            status='approved',
+            verification_status='verified',
+        )
+        db.session.add(report)
+        db.session.commit()
 
     def _get_leaderboard_html(self) -> str:
         """Fetch /leaderboard and return decoded HTML body."""

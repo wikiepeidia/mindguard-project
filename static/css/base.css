@@ -23,7 +23,7 @@ body {
     pointer-events: none;
 }
 
-body > :not(#network-canvas) {
+body> :not(#network-canvas) {
     position: relative;
     z-index: 1;
 }
@@ -60,7 +60,7 @@ body > :not(#network-canvas) {
 
 /* Nút tròn nổi Chatbot */
 .chatbot-toggler {
-    position: fixed;
+    position: fixed !important;
     bottom: 30px;
     right: 30px;
     width: 60px;
@@ -99,7 +99,7 @@ body.show-chatbot .chatbot-toggler .icon-close {
 
 /* Cửa sổ Chat Glassmorphism */
 .chatbot-window {
-    position: fixed;
+    position: fixed !important;
     right: 35px;
     bottom: 100px;
     width: 380px;

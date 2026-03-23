@@ -37,7 +37,9 @@ body {
 
 /* Hide standard footer and floating widget on this specific page */
 footer,
-.chatbot-widget {
+.chatbot-widget,
+.chatbot-toggler,
+.chatbot-window {
   display: none !important;
 }
 

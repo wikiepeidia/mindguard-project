@@ -15,6 +15,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <!-- Custom Base CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+    {% block head_css %}{% endblock %}
 </head>
 
 <body>
@@ -51,8 +52,7 @@
                     <li class="nav-item"><a class="nav-link" href="{{ url_for('scammer.report_scammer') }}">Tố cáo</a>
                     </li>
                     <li class="nav-item"><a class="nav-link" href="{{ url_for('main.leaderboard') }}">Sổ đen</a></li>
-                    <li class="nav-item"><a class="nav-link text-info fw-bold" href="#"
-                            onclick="document.body.classList.toggle('show-chatbot'); return false;">AI Chat</a></li>
+                    <li class="nav-item"><a class="nav-link text-info fw-bold" href="{{ url_for('chatbot.chatbot_page') }}">AI Chat</a></li>
 
                     <li class="nav-item dropdown ms-3">
                         <a class="nav-link dropdown-toggle btn btn-outline-light rounded-pill px-4 py-1 border-opacity-25"
@@ -97,7 +97,9 @@
         {% endwith %}
     </div>
 
+    {% block main_wrapper %}
     {% block content %}{% endblock %}
+    {% endblock %}
 
     <!-- Chatbot Widget: Always available (Anonymous or Logged In) -->
     <button class="chatbot-toggler d-flex align-items-center justify-content-center"
@@ -185,6 +187,7 @@
         window.CHATBOT_API_URL = "{{ url_for('chatbot.chatbot_api') }}";
     </script>
     <script src="{{ url_for('static', filename='js/base.js') }}"></script>
+    {% block scripts %}{% endblock %}
 </body>
 
 </html>

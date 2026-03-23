@@ -33,8 +33,8 @@
 
 ### Leaderboard
 
-- [ ] **LEAD-01**: Hien thi bang vinh danh nguoi to cao nhieu nhat.
-- [ ] **LEAD-02**: Ap dung integrity rule de giam gian lan tren leaderboard.
+- [x] **LEAD-01**: Hien thi bang vinh danh nguoi to cao nhieu nhat.
+- [x] **LEAD-02**: Ap dung integrity rule de giam gian lan tren leaderboard.
 
 ## v2 Requirements
 
@@ -79,8 +79,8 @@
 | ABUS-02 | Phase 2 | Completed |
 | ABUS-03 | Phase 2 | Completed |
 | ABUS-04 | Phase 2 | Completed |
-| LEAD-01 | Phase 5 | Pending |
-| LEAD-02 | Phase 5 | Pending |
+| LEAD-01 | Phase 5 | Complete |
+| LEAD-02 | Phase 5 | Complete |
 
 **Coverage:**
 

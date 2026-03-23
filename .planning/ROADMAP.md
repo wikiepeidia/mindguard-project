@@ -111,4 +111,4 @@ Plans:
 | 2. Anti-Spam Monitor & Soft Enforce | 3/3 | Complete    | 2026-03-20 |
 | 3. Light Mode UX System | 3/3 | Complete    | 2026-03-20 |
 | 4. Quiz One-Question Flow | 3/3 | Complete    | 2026-03-23 |
-| 5. Leaderboard Integrity | 1/1 | Complete    | 2026-03-23 |
+| 5. Leaderboard Integrity | 2/2 | Complete   | 2026-03-23 |

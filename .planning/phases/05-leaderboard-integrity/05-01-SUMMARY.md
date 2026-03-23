@@ -54,7 +54,7 @@ A complete backend data layer for the reporter leaderboard:
 
 | Task | Name | Commit | Files |
 |------|------|--------|-------|
-| 1 | TDD RED — failing ranking tests | 80e8922 | tests/leaderboard/__init__.py, test_reporter_ranking.py, .gitignore |
+| 1 | TDD RED — failing ranking tests | 80e8922 | tests/leaderboard/**init**.py, test_reporter_ranking.py, .gitignore |
 | 2 | Implement integrity service (GREEN) | a15731e | services/leaderboard_integrity.py |
 | 3 | Update leaderboard route | 9a2822d | routes/main.py |
 | 4 | TDD route context tests | 15491e5 | tests/leaderboard/test_leaderboard_route.py |
@@ -69,6 +69,7 @@ OK
 ```
 
 All tests pass:
+
 - `test_reporter_ranking_empty_db` ✓
 - `test_reporter_ranking_ordered_by_approved` ✓
 - `test_reporter_ranking_excludes_cooldown_actor` ✓
@@ -81,6 +82,7 @@ All tests pass:
 ### Auto-fixed Issues
 
 **1. [Rule 3 - Blocking] .gitignore blocked tests/leaderboard/ from being committed**
+
 - **Found during:** Task 1 commit attempt
 - **Issue:** `.gitignore` had `tests/*` with only `tests/quizflow/` and `tests/privacy/` exceptions
 - **Fix:** Added `!tests/leaderboard/`, `!tests/leaderboard/__init__.py`, `!tests/leaderboard/test_*.py` to `.gitignore`
@@ -88,6 +90,7 @@ All tests pass:
 - **Commit:** 80e8922
 
 **2. [Plan clarification] Task 4 tests were not "failing" — route already updated in Task 3**
+
 - The plan described Task 4 as "failing tests" but since Task 3 had already updated the route, all tests passed immediately. This is a plan sequencing inconsistency. Both route tests pass correctly.
 
 ## Self-Check

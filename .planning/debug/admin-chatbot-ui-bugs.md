@@ -15,6 +15,7 @@ next_action: User verifies
 ## Symptoms
 
 expected:
+
 1. Admin panel uses light-mode consistent with rest of app (Phase 3 design tokens)
 2. Page scroll stops when content ends — no excessive empty scroll space
 3. Chatbot logo/icon positioned in bottom-right corner
@@ -22,6 +23,7 @@ expected:
 5. No Jinja2 crash: 'dict object' has no attribute 'scammer'
 
 actual:
+
 1. Admin panel: many text elements still white/unstyled, dark background — not synced with light mode
 2. Admin pages: content ends but page keeps scrolling (empty space below content)
 3. Chatbot UI: logo is misaligned, not in bottom-right corner
@@ -29,9 +31,11 @@ actual:
 5. Jinja2 crash: "jinja2.exceptions.UndefinedError: 'dict object' has no attribute 'scammer'"
 
 errors:
+
 - jinja2.exceptions.UndefinedError: 'dict object' has no attribute 'scammer'
 
 reproduction:
+
 1. Admin: log in as admin, browse any admin page
 2. Chatbot: go to /chatbot page
 3. Jinja2 error: leaderboard page with scammer data
@@ -80,6 +84,7 @@ root_cause:
   Bug 5 (chatbot page empty): base.html missing {% block head_css %}, {% block main_wrapper %}, {% block scripts %} blocks that chatbot.html depends on
 
 fix:
+
   1. leaderboard.html: `entry.scammer.report_type` → `entry.report_type` (2 occurrences)
   2. admin_dashboard.html: 6x `text-white` → `text-body` on headings
   3. admin_scammer_reports.html: 1x `text-white` → `text-body` on h2
@@ -89,17 +94,18 @@ fix:
 
 verification: Awaiting user confirmation
 files_changed:
-  - templates/leaderboard.html
-  - templates/admin_dashboard.html
-  - templates/admin_scammer_reports.html
-  - static/css/base.css
-  - templates/base.html
-  - static/css/chatbot.css
 
+- templates/leaderboard.html
+- templates/admin_dashboard.html
+- templates/admin_scammer_reports.html
+- static/css/base.css
+- templates/base.html
+- static/css/chatbot.css
 
 ## Symptoms
 
 expected:
+
 1. Admin panel uses light-mode consistent with rest of app (Phase 3 design tokens)
 2. Page scroll stops when content ends — no excessive empty scroll space
 3. Chatbot logo/icon positioned in bottom-right corner
@@ -107,6 +113,7 @@ expected:
 5. No Jinja2 crash: 'dict object' has no attribute 'scammer'
 
 actual:
+
 1. Admin panel: many text elements still white/unstyled, dark background — not synced with light mode
 2. Admin pages: content ends but page keeps scrolling (empty space below content)
 3. Chatbot UI: logo is misaligned, not in bottom-right corner
@@ -114,9 +121,11 @@ actual:
 5. Jinja2 crash: "jinja2.exceptions.UndefinedError: 'dict object' has no attribute 'scammer'"
 
 errors:
+
 - jinja2.exceptions.UndefinedError: 'dict object' has no attribute 'scammer'
 
 reproduction:
+
 1. Admin: log in as admin, browse any admin page
 2. Chatbot: go to /chatbot page
 3. Jinja2 error: likely on scammer_profile or leaderboard detail page

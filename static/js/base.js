@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     AOS.init({ duration: 800, once: true });
 
     // --- JS CHO HIỆU ỨNG HẠT NỀN (Áo mới) ---
@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (canvas) {
         const ctx = canvas.getContext('2d');
         let particles = [];
-        
+
         function initCanvas() {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
             }
         }
-        
+
         function animateCanvas() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.fillStyle = '#0ea5e9';
@@ -40,8 +40,8 @@ document.addEventListener('DOMContentLoaded', function() {
             });
             requestAnimationFrame(animateCanvas);
         }
-        
-        initCanvas(); 
+
+        initCanvas();
         animateCanvas();
         window.onresize = initCanvas;
     }

@@ -38,6 +38,7 @@ requirements: [QUIZ-04, QUIZ-01, QUIZ-02, QUIZ-03]
 ### Task 1 — TDD Regression Tests (RED → committed, then GREEN after Task 2)
 
 **`tests/quizflow/test_question_set_stability.py`** (5 tests):
+
 - `test_question_ids_frozen_across_refresh` — verifies session question_ids are unchanged across GET /quiz/step/0 calls
 - `test_all_questions_have_required_fields` — asserts every question has `id, question, options, answer, topic` (TDD RED driver)
 - `test_questions_have_at_least_four_options` — asserts ≥ 4 options per question
@@ -45,6 +46,7 @@ requirements: [QUIZ-04, QUIZ-01, QUIZ-02, QUIZ-03]
 - `test_question_ids_are_unique` — asserts no duplicate IDs
 
 **`tests/quizflow/test_quiz_submission_contract.py`** (6 tests):
+
 - `test_finalize_creates_exactly_one_quiz_result` — DB row count = 1 after full walk
 - `test_finalize_refresh_does_not_duplicate_db_row` — second GET /quiz/finalize does not add second row
 - `test_fail_path_sets_score_session_keys` — score=0, max_score>0, no certificate_code in session
@@ -55,6 +57,7 @@ requirements: [QUIZ-04, QUIZ-01, QUIZ-02, QUIZ-03]
 ### Task 2 — Quiz Bank Expansion + Route Normalization (GREEN)
 
 **`utils/quiz_data.py`:**
+
 - Added `"topic"` field to all 20 existing questions
 - Topics assigned: `phishing` (Q2, Q6, Q16, Q19), `scam_awareness` (Q1, Q3, Q7, Q10, Q12, Q15, Q18, Q20), `social_engineering` (Q4, Q5, Q8, Q17), `data_privacy` (Q9, Q13, Q14), `password_security` (Q11)
 - Added 5 new questions (IDs 21-25):
@@ -66,6 +69,7 @@ requirements: [QUIZ-04, QUIZ-01, QUIZ-02, QUIZ-03]
 - **Total: 25 questions**, all normalized with required fields
 
 **`routes/quiz.py`:**
+
 - `_create_attempt()`: AI question payload now stores `'topic': ai_q.get('topic', 'general')`
 - `_get_question()`: static question return includes `'topic': q.get('topic', 'general')` as safety net
 
@@ -74,6 +78,7 @@ requirements: [QUIZ-04, QUIZ-01, QUIZ-02, QUIZ-03]
 ### Auto-fixed Issues
 
 **1. [Rule 1 - Bug] Fail-path test `answer_fn` triggered false correct answer on Q8**
+
 - **Found during:** Task 1 test authoring
 - **Issue:** `lambda qid: 0` submitted option index 0, but Q8 has `"answer": 0`, scoring 1 point on the "all wrong" pass. This made `test_fail_path_sets_score_session_keys` fail for the wrong reason.
 - **Fix:** Introduced `_wrong_answer(qid)` helper using `(correct + 1) % 4`, guaranteeing a wrong answer regardless of which index is correct.

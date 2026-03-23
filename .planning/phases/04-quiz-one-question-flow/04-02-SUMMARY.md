@@ -64,6 +64,7 @@ Added `.quiz-progress-track { height: 8px; }` to replace the `style="height: 8px
 ### JS Rewrite (quiz.js)
 
 **Removed (~230 lines):**
+
 - Multi-question nav: `goToQuestion()`, `changeQuestion()`, `updateNavState()`, `getTotalQuestions()`, `markAnswered()`, `markAnsweredInNav()`
 - Timer: 15-min countdown, `updateTimer()`, `submitQuiz()`
 - Exit modal: Bootstrap modal init, `#exitModal` / `#confirmExitBtn` listeners
@@ -71,6 +72,7 @@ Added `.quiz-progress-track { height: 8px; }` to replace the `style="height: 8px
 - `sessionStorage` start-time management
 
 **Kept / Added (~65 lines):**
+
 - Progress bar fill: reads `data-pct` → sets `fill.style.width` via `requestAnimationFrame`
 - Option keyboard nav: `tabindex=0` + Enter/Space → `label.click()`
 - Submit guard: warns if no radio selected; restores button label after 1.8s
@@ -99,6 +101,7 @@ Combined with Plan 04-01 tests: **11/11 PASS** in 0.42s
 ### Auto-fixed Issues
 
 **1. [Rule 1 - Bug] Test regex did not account for HTML tags around progress numbers**
+
 - **Found during:** Task 2 GREEN verification
 - **Issue:** Test regex `r'Câu\s+1\s*/\s*\d+'` failed because the current step number is wrapped in `<span id="progress-current">` in the rendered HTML
 - **Fix:** Updated regex pattern to match `id="progress-current"[^>]*>\s*1\s*</span>` — verifies both the ID contract and the value

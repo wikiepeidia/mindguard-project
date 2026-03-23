@@ -63,6 +63,7 @@ OK
 ```
 
 All tests pass:
+
 - `test_leaderboard_route_passes_reporter_rankings` ✓
 - `test_reporter_rankings_is_list` ✓
 - `test_reporter_ranking_empty_db` ✓
@@ -80,6 +81,7 @@ All tests pass:
 ### Auto-fixed Issues
 
 **1. [Rule 2 - Missing error handling] OperationalError guard missing in _get_flagged_hashes()**
+
 - **Found during:** Task 2 (noted in project context)
 - **Issue:** `_get_flagged_hashes()` would raise `OperationalError` if `anti_spam_actor_states` table missing (e.g. fresh DB before migration)
 - **Fix:** Added `try/except OperationalError: return set()` around the query
@@ -87,6 +89,7 @@ All tests pass:
 - **Commit:** 97bbbd1
 
 **2. [Rule 2 - Missing error handling] No fallback in leaderboard route for get_reporter_rankings() exception**
+
 - **Found during:** Task 2 (noted in project context)
 - **Issue:** Route would 500 if any service exception occurred
 - **Fix:** Wrapped call in try/except, passes `reporter_rankings=[]` as fallback
@@ -94,6 +97,7 @@ All tests pass:
 - **Commit:** 97bbbd1
 
 **3. [Rule 1 - Bug] DOM contract tests used wrong ScammerReport field**
+
 - **Found during:** Task 4 (first GREEN run)
 - **Issue:** Used `scammer_info_raw` instead of required NOT NULL `scammer_identifier`; caused IntegrityError on all 5 tests
 - **Fix:** Corrected field name to `scammer_identifier='test-scammer-ui'`, removed non-existent kwargs
@@ -101,6 +105,7 @@ All tests pass:
 - **Commit:** 97bbbd1
 
 **4. [Rule 1 - Bug] DOM contract tests failed with empty DB (tbody loop never rendered)**
+
 - **Found during:** Task 4 (initial run showed 3/5 FAIL)
 - **Issue:** `reporter-rank`, `reporter-score`, `reporter-integrity-badge` classes only in loop body; empty DB → `{% else %}` branch → no class markers in HTML
 - **Fix:** Added `setUp` that seeds one `ScammerReport(status='approved')` so loop renders

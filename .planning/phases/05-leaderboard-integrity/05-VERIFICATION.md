@@ -83,6 +83,7 @@ OK
 ```
 
 All 11 tests passed:
+
 - `test_leaderboard_route_passes_reporter_rankings` ✓
 - `test_reporter_rankings_is_list` ✓
 - `test_reporter_ranking_empty_db` ✓

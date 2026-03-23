@@ -100,7 +100,8 @@ Plans:
 1. Nguoi dung co the xem bang vinh danh nguoi to cao nhieu nhat tren giao dien.
 2. Bang xep hang khong chi dua vao dem tho, ma co luat integrity de giam thao tung/gian lan.
 3. Ket qua xep hang duoc cap nhat o muc chap nhan duoc va phan anh dung luat da cong bo.
-**Plans**: 
+**Plans**:
+
 - [x] 05-01-PLAN.md - Reporter leaderboard data layer and integrity service.
 
 ## Progress Table

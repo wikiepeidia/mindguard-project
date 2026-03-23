@@ -18,28 +18,24 @@
             {% endif %}
           </header>
 
-          <div id="quiz-progress" class="quiz-progress mb-4"
-               role="status" aria-live="polite" aria-atomic="false"
-               data-answered="{{ answered_count }}"
-               data-total="{{ total_questions }}">
+          <div id="quiz-progress" class="quiz-progress mb-4" role="status" aria-live="polite" aria-atomic="false"
+            data-answered="{{ answered_count }}" data-total="{{ total_questions }}">
             <div class="d-flex justify-content-between align-items-center mb-2">
               <span class="quiz-progress-label">
-                Câu <span id="progress-current">{{ current_index + 1 }}</span> / <span id="progress-total">{{ total_questions }}</span>
+                Câu <span id="progress-current">{{ current_index + 1 }}</span> / <span id="progress-total">{{
+                  total_questions }}</span>
               </span>
               <span class="quiz-progress-label text-muted">Đã trả lời: {{ answered_count }}</span>
             </div>
             <div class="progress quiz-progress-track">
               <div id="progress-bar-fill" class="progress-bar" role="progressbar"
-                   data-pct="{{ ((answered_count / total_questions) * 100) | int }}"
-                   aria-valuenow="{{ answered_count }}"
-                   aria-valuemin="0"
-                   aria-valuemax="{{ total_questions }}">
+                data-pct="{{ ((answered_count / total_questions) * 100) | int }}" aria-valuenow="{{ answered_count }}"
+                aria-valuemin="0" aria-valuemax="{{ total_questions }}">
               </div>
             </div>
           </div>
 
-          <form class="quiz-form" method="post"
-                action="{{ url_for('quiz.quiz_step', idx=current_index) }}">
+          <form class="quiz-form" method="post" action="{{ url_for('quiz.quiz_step', idx=current_index) }}">
 
             <article class="quiz-question-card mb-4">
               <p class="quiz-question-text mb-3">
@@ -52,12 +48,9 @@
               <div class="quiz-options-list">
                 {% for option in current_question.options %}
                 <div class="quiz-option-item">
-                  <input class="form-check-input quiz-option-input"
-                         type="radio"
-                         name="q{{ current_question.id }}"
-                         id="q{{ current_question.id }}_{{ loop.index0 }}"
-                         value="{{ loop.index0 }}"
-                         {% if selected_answer == loop.index0 %}checked{% endif %}>
+                  <input class="form-check-input quiz-option-input" type="radio" name="q{{ current_question.id }}"
+                    id="q{{ current_question.id }}_{{ loop.index0 }}" value="{{ loop.index0 }}" {% if
+                    selected_answer==loop.index0 %}checked{% endif %}>
                   <label class="quiz-option-label" for="q{{ current_question.id }}_{{ loop.index0 }}">
                     <span class="quiz-option-badge">{{ loop.index }}</span>
                     <span>{{ option }}</span>
@@ -70,7 +63,7 @@
             <div class="quiz-actions d-flex justify-content-between align-items-center gap-2">
               {% if current_index > 0 %}
               <a href="{{ url_for('quiz.quiz_step', idx=current_index - 1) }}"
-                 class="btn btn-outline-secondary btn-lg quiz-back-btn">
+                class="btn btn-outline-secondary btn-lg quiz-back-btn">
                 <i class="fas fa-arrow-left me-2"></i>Câu trước
               </a>
               {% else %}
@@ -78,7 +71,7 @@
               {% endif %}
 
               <button type="submit" class="btn btn-primary btn-lg quiz-submit-btn"
-                      data-is-last="{{ '1' if current_index + 1 == total_questions else '0' }}">
+                data-is-last="{{ '1' if current_index + 1 == total_questions else '0' }}">
                 {% if current_index + 1 == total_questions %}
                 Nộp bài <i class="fas fa-check ms-2"></i>
                 {% else %}

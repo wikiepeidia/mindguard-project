@@ -265,8 +265,8 @@
                     <h4 class="text-white fw-bold mb-3">Chatbot AI 24/7</h4>
                     <p class="text-slate-400 small mb-4 flex-grow-1">Nghi ngờ một tin nhắn lạ? Copy và gửi ngay cho AI.
                         Hệ thống sẽ phân tích ngôn ngữ, kiểm tra đường link và đưa ra cảnh báo trong 3 giây.</p>
-                    <button onclick="document.body.classList.toggle('show-chatbot')"
-                        class="btn btn-outline-warning rounded-pill px-4">Chat với AI</button>
+                    <a href="{{ url_for('chatbot.chatbot_page') }}"
+                        class="btn btn-outline-warning rounded-pill px-4">Chat với AI</a>
                 </div>
             </div>
             <div class="col-md-4" data-aos="fade-up" data-aos-delay="300">

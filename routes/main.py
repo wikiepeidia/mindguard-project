@@ -6,6 +6,7 @@ from models import ScamReport, Registration, ScammerLeaderboard, ScammerReport, 
 from utils.helpers import calculate_risk_score, get_verification_badge, get_risk_level_info
 from utils.privacy_policy import MASKED_DATA_NOTICE, to_display_identifier
 from datetime import datetime
+from services.leaderboard_integrity import get_reporter_rankings
 
 main_bp = Blueprint('main', __name__)
 
@@ -166,12 +167,15 @@ def leaderboard():
             "evidence_urls": entry.scammer.evidence_urls,
         })
 
+    reporter_rankings = get_reporter_rankings(limit=10)
+
     return render_template(
         "leaderboard.html",
         top_3=top_3_payload,
         pagination=pagination,
         scammers=scammers_payload,
         privacy_note=MASKED_DATA_NOTICE,
+        reporter_rankings=reporter_rankings,
     )
 
 @main_bp.route("/api/search", methods=["POST"])

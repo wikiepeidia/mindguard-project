@@ -11,6 +11,7 @@ quiz_questions = [
             "Nhắn lại hỏi thêm thông tin cá nhân của họ",
         ],
         "answer": 1,
+        "topic": "scam_awareness",
     },
     {
         "id": 2,
@@ -22,6 +23,7 @@ quiz_questions = [
             "Cơ hội hiếm có, nên thử",
         ],
         "answer": 2,
+        "topic": "phishing",
     },
     {
         "id": 3,
@@ -33,6 +35,7 @@ quiz_questions = [
             "Luôn có chữ ký điện tử và con dấu đỏ",
         ],
         "answer": 1,
+        "topic": "scam_awareness",
     },
     {
         "id": 4,
@@ -44,6 +47,7 @@ quiz_questions = [
             "Im lặng vì đó là chuyện riêng",
         ],
         "answer": 2,
+        "topic": "social_engineering",
     },
     {
         "id": 5,
@@ -55,6 +59,7 @@ quiz_questions = [
             "Nhắn lại xin thêm hình ảnh",
         ],
         "answer": 2,
+        "topic": "social_engineering",
     },
     {
         "id": 6,
@@ -66,6 +71,7 @@ quiz_questions = [
             "Luôn xuất hiện logo của Bộ Công an",
         ],
         "answer": 1,
+        "topic": "phishing",
     },
     {
         "id": 7,
@@ -77,6 +83,7 @@ quiz_questions = [
             "Rút tiền lãi liên tục để an toàn",
         ],
         "answer": 2,
+        "topic": "scam_awareness",
     },
     {
         "id": 8,
@@ -88,6 +95,7 @@ quiz_questions = [
             "Chỉ dùng các lập luận logic, không gây áp lực",
         ],
         "answer": 0,
+        "topic": "social_engineering",
     },
     {
         "id": 9,
@@ -99,6 +107,7 @@ quiz_questions = [
             "Luôn làm theo lời người có nhiều follower nhất",
         ],
         "answer": 1,
+        "topic": "data_privacy",
     },
     {
         "id": 10,
@@ -110,6 +119,7 @@ quiz_questions = [
             "Chia sẻ lên Facebook để hỏi ý kiến rồi chuyển tiền sau",
         ],
         "answer": 1,
+        "topic": "scam_awareness",
     },
     {
         "id": 11,
@@ -121,6 +131,7 @@ quiz_questions = [
             "Chỉ toàn số cho dễ nhập",
         ],
         "answer": 2,
+        "topic": "password_security",
     },
     {
         "id": 12,
@@ -132,6 +143,7 @@ quiz_questions = [
             "Lấy điện thoại, tự mình làm giúp cho an toàn",
         ],
         "answer": 2,
+        "topic": "scam_awareness",
     },
     {
         "id": 13,
@@ -143,6 +155,7 @@ quiz_questions = [
             "Tin mọi thông tin được bạn bè share lại",
         ],
         "answer": 1,
+        "topic": "data_privacy",
     },
     {
         "id": 14,
@@ -154,6 +167,7 @@ quiz_questions = [
             "Nhấn vào tất cả các file đính kèm để cập nhật thông tin",
         ],
         "answer": 2,
+        "topic": "data_privacy",
     },
     {
         "id": 15,
@@ -165,6 +179,7 @@ quiz_questions = [
             "Chỉ kể lại với bạn bè cho đỡ buồn",
         ],
         "answer": 2,
+        "topic": "scam_awareness",
     },
     {
         "id": 16,
@@ -176,6 +191,7 @@ quiz_questions = [
             "Chỉ qua gặp mặt trực tiếp",
         ],
         "answer": 1,
+        "topic": "phishing",
     },
     {
         "id": 17,
@@ -187,6 +203,7 @@ quiz_questions = [
             "Công cụ bảo mật của ngân hàng",
         ],
         "answer": 1,
+        "topic": "social_engineering",
     },
     {
         "id": 18,
@@ -198,6 +215,7 @@ quiz_questions = [
             "Công ty có tên nước ngoài",
         ],
         "answer": 1,
+        "topic": "scam_awareness",
     },
     {
         "id": 19,
@@ -209,6 +227,7 @@ quiz_questions = [
             "Trả lời email hỏi thêm chi tiết",
         ],
         "answer": 1,
+        "topic": "phishing",
     },
     {
         "id": 20,
@@ -220,5 +239,66 @@ quiz_questions = [
             "Không dùng mạng xã hội, Không dùng internet banking, Không nghe điện thoại lạ",
         ],
         "answer": 2,
+        "topic": "scam_awareness",
+    },
+    {
+        "id": 21,
+        "question": "Điều gì có thể xảy ra khi bạn đăng nhập tài khoản ngân hàng qua mạng Wi-Fi công cộng không có mật khẩu?",
+        "options": [
+            "Không có rủi ro gì vì ngân hàng tự bảo vệ",
+            "Kẻ tấn công cùng mạng có thể nghe lén và đánh cắp thông tin đăng nhập của bạn",
+            "Kết nối sẽ nhanh hơn và bảo mật hơn",
+            "Chỉ bị giới hạn tốc độ, không mất thông tin",
+        ],
+        "answer": 1,
+        "topic": "network_security",
+    },
+    {
+        "id": 22,
+        "question": "Xác thực hai yếu tố (2FA) giúp bảo vệ tài khoản bằng cách nào?",
+        "options": [
+            "Chỉ yêu cầu mật khẩu dài hơn",
+            "Yêu cầu thêm một bước xác minh thứ hai (mã OTP, sinh trắc học) ngoài mật khẩu, giúp kẻ tấn công không thể đăng nhập dù biết mật khẩu",
+            "Tự động đổi mật khẩu mỗi ngày",
+            "Cho phép đăng nhập không cần mật khẩu",
+        ],
+        "answer": 1,
+        "topic": "password_security",
+    },
+    {
+        "id": 23,
+        "question": "VPN (Mạng riêng ảo) có lợi ích gì trong việc bảo vệ dữ liệu cá nhân khi dùng internet?",
+        "options": [
+            "Làm chậm kết nối internet của bạn một cách không cần thiết",
+            "Tự động cài đặt phần mềm diệt virus trên thiết bị",
+            "Mã hóa lưu lượng mạng và ẩn địa chỉ IP, giúp bảo vệ dữ liệu khỏi bị nghe lén trên mạng công cộng",
+            "Cho phép truy cập vào tài khoản ngân hàng mà không cần mật khẩu",
+        ],
+        "answer": 2,
+        "topic": "network_security",
+    },
+    {
+        "id": 24,
+        "question": "Thông tin nào sau đây KHÔNG nên đăng công khai trên mạng xã hội?",
+        "options": [
+            "Sở thích cá nhân như âm nhạc, phim ảnh",
+            "Địa chỉ nhà, ngày sinh đầy đủ, số điện thoại và ảnh chụp giấy tờ tùy thân",
+            "Hình ảnh phong cảnh du lịch từ kỳ nghỉ",
+            "Bài viết chia sẻ về ẩm thực yêu thích",
+        ],
+        "answer": 1,
+        "topic": "data_privacy",
+    },
+    {
+        "id": 25,
+        "question": "Phần mềm quản lý mật khẩu (password manager) mang lại lợi ích gì cho bảo mật?",
+        "options": [
+            "Tự động xóa các tài khoản cũ không còn sử dụng",
+            "Lưu trữ và tạo ra các mật khẩu mạnh, duy nhất cho từng tài khoản, giúp bạn không cần nhớ nhiều mật khẩu",
+            "Chia sẻ mật khẩu của bạn với bạn bè một cách được mã hóa",
+            "Chặn tất cả các cuộc tấn công mạng một cách tự động",
+        ],
+        "answer": 1,
+        "topic": "password_security",
     },
 ]

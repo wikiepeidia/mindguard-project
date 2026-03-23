@@ -65,6 +65,7 @@ def _create_attempt():
             'question': ai_q['question'],
             'options': list(ai_q['options']),
             'answer': int(ai_q['answer']),
+            'topic': ai_q.get('topic', 'general'),
             'is_ai': True,
         }
         question_ids = [ai_q['id']] + question_ids
@@ -91,7 +92,7 @@ def _get_question(attempt, idx):
     q = _static_by_id.get(q_id)
     if q is None:
         return None
-    return {**q, 'is_ai': False}
+    return {**q, 'is_ai': False, 'topic': q.get('topic', 'general')}
 
 
 def _compute_score(attempt):

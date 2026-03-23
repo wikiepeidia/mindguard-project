@@ -52,11 +52,17 @@ class TestQuizProgressVisibility(QuizFlowTestBase):
             'id="progress-total"', body,
             "Must have id='progress-total' element for total question count",
         )
-        # Rendered text must match Vietnamese progress pattern "Câu 1 / <N>"
+        # The progress-current span must hold "1" and progress-total must hold a number.
+        # Pattern matches: Câu ...<span id="progress-current">1</span>.../<span id="progress-total">N</span>
         self.assertRegex(
             body,
-            r'Câu\s+1\s*/\s*\d+',
-            "Rendered page must show 'Câu 1 / <N>' progress label",
+            r'id="progress-current"[^>]*>\s*1\s*</span>',
+            "progress-current must contain '1' for step 0",
+        )
+        self.assertRegex(
+            body,
+            r'id="progress-total"[^>]*>\s*\d+\s*</span>',
+            "progress-total must contain the total question count",
         )
 
     # ------------------------------------------------------------------ #

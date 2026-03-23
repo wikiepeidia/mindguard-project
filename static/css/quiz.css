@@ -46,6 +46,10 @@
     font-weight: 600;
 }
 
+.quiz-progress-track {
+    height: 8px;
+}
+
 .quiz-question-card {
     border: 1px solid var(--mg-border);
     border-radius: var(--mg-radius-md);

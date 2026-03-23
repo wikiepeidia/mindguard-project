@@ -18,16 +18,21 @@
             {% endif %}
           </header>
 
-          <div class="quiz-progress mb-4" role="status" aria-live="polite">
+          <div id="quiz-progress" class="quiz-progress mb-4"
+               role="status" aria-live="polite" aria-atomic="false"
+               data-answered="{{ answered_count }}"
+               data-total="{{ total_questions }}">
             <div class="d-flex justify-content-between align-items-center mb-2">
-              <span class="quiz-progress-label">Câu {{ current_index + 1 }} / {{ total_questions }}</span>
+              <span class="quiz-progress-label">
+                Câu <span id="progress-current">{{ current_index + 1 }}</span> / <span id="progress-total">{{ total_questions }}</span>
+              </span>
               <span class="quiz-progress-label text-muted">Đã trả lời: {{ answered_count }}</span>
             </div>
-            <div class="progress" style="height: 8px;">
-              <div class="progress-bar" role="progressbar"
-                   style="width: {{ ((current_index + 1) / total_questions * 100) | int }}%"
-                   aria-valuenow="{{ current_index + 1 }}"
-                   aria-valuemin="1"
+            <div class="progress quiz-progress-track">
+              <div id="progress-bar-fill" class="progress-bar" role="progressbar"
+                   data-pct="{{ ((answered_count / total_questions) * 100) | int }}"
+                   aria-valuenow="{{ answered_count }}"
+                   aria-valuemin="0"
                    aria-valuemax="{{ total_questions }}">
               </div>
             </div>
@@ -72,7 +77,8 @@
               <span></span>
               {% endif %}
 
-              <button type="submit" class="btn btn-primary btn-lg quiz-submit-btn">
+              <button type="submit" class="btn btn-primary btn-lg quiz-submit-btn"
+                      data-is-last="{{ '1' if current_index + 1 == total_questions else '0' }}">
                 {% if current_index + 1 == total_questions %}
                 Nộp bài <i class="fas fa-check ms-2"></i>
                 {% else %}
@@ -88,4 +94,5 @@
 </section>
 
 <link rel="stylesheet" href="{{ url_for('static', filename='css/quiz.css') }}">
+<script src="{{ url_for('static', filename='js/quiz.js') }}"></script>
 {% endblock %}

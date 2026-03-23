@@ -12,8 +12,8 @@
  (completed 2026-03-20)
 - [x] **Phase 3: Light Mode UX System** - Dong bo light mode, design tokens va mobile-first cho cac trang uu tien.
  (completed 2026-03-20)
-- [ ] **Phase 4: Quiz One-Question Flow** - Chuyen quiz sang luong 1 cau hoi/trang voi tien do ro rang va trang thai on dinh.
-- [ ] **Phase 5: Leaderboard Integrity** - Ra mat bang vinh danh nguoi to cao nhieu nhat kem luat giam gian lan.
+- [x] **Phase 4: Quiz One-Question Flow** - Chuyen quiz sang luong 1 cau hoi/trang voi tien do ro rang va trang thai on dinh.
+- [x] **Phase 5: Leaderboard Integrity** - Ra mat bang vinh danh nguoi to cao nhieu nhat kem luat giam gian lan.
 
 ## Phase Details
 
@@ -100,7 +100,8 @@ Plans:
 1. Nguoi dung co the xem bang vinh danh nguoi to cao nhieu nhat tren giao dien.
 2. Bang xep hang khong chi dua vao dem tho, ma co luat integrity de giam thao tung/gian lan.
 3. Ket qua xep hang duoc cap nhat o muc chap nhan duoc va phan anh dung luat da cong bo.
-**Plans**: TBD
+**Plans**: 
+- [x] 05-01-PLAN.md - Reporter leaderboard data layer and integrity service.
 
 ## Progress Table
 
@@ -109,5 +110,5 @@ Plans:
 | 1. Privacy & Data Governance Foundation | 0/2 | Complete    | 2026-03-20 |
 | 2. Anti-Spam Monitor & Soft Enforce | 3/3 | Complete    | 2026-03-20 |
 | 3. Light Mode UX System | 3/3 | Complete    | 2026-03-20 |
-| 4. Quiz One-Question Flow | 0/3 | Not started | - |
-| 5. Leaderboard Integrity | 0/2 | Not started | - |
+| 4. Quiz One-Question Flow | 3/3 | Complete    | 2026-03-23 |
+| 5. Leaderboard Integrity | 1/1 | Complete    | 2026-03-23 |

@@ -20,11 +20,11 @@ progress:
 
 ## Current Position
 
-- **Current Phase**: Phase 4 - Quiz One-Question Flow
-- **Current Plan**: 3/3 completed (04-01 backend, 04-02 frontend, 04-03 question bank)
-- **Status**: Phase 4 COMPLETE, ready for Phase 5
-- **Progress**: 4/5 phases completed, 13/13 planned items completed
-- **Progress Bar**: [████████████] 100%
+- **Current Phase**: Phase 5 - Leaderboard Integrity
+- **Current Plan**: 1/1 completed (05-01 reporter leaderboard data layer)
+- **Status**: Phase 5 Plan 1 COMPLETE
+- **Progress**: 5/5 phases completed, 14/14 planned items completed
+- **Progress Bar**: [████████████████] 100%
 
 ## Performance Metrics
 
@@ -54,6 +54,8 @@ progress:
 - Added priority-template token coverage tests to block reintroduction of dark utility fragments.
 - Expanded quiz bank to 25 questions with topic metadata (04-03); wrong-answer helper (correct+1)%4 avoids answer=0 false-positives.
 - Normalized topic field in _create_attempt (AI q) and _get_question (static fallback) for future-proof contract.
+- Python-level aggregation over SQLAlchemy case() to avoid version-specific syntax differences (05-01).
+- Exclude cooldown reporters entirely for predictable test behavior; reporter_hash_display = first 8 chars only (05-01).
 
 ### Open Todos
 
@@ -66,5 +68,5 @@ progress:
 ## Session Continuity
 
 - **Last Updated**: 2026-03-23
-- **Stopped at**: Completed 04-03-PLAN.md — Phase 4 fully complete
-- **Resume file**: .planning/phases/04-quiz-one-question-flow/04-03-SUMMARY.md
+- **Stopped at**: Completed 05-01-PLAN.md — Phase 5 Plan 1 complete (reporter leaderboard data layer)
+- **Resume file**: .planning/phases/05-leaderboard-integrity/05-01-SUMMARY.md

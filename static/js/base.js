@@ -48,16 +48,19 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Auto-hide flash alerts after a short delay for cleaner UX.
     document.querySelectorAll('.alert.alert-dismissible').forEach((alertElement) => {
-        const timer = setTimeout(() => {
+        let timer = null;
+        const dismiss = () => {
             if (window.bootstrap && window.bootstrap.Alert) {
                 window.bootstrap.Alert.getOrCreateInstance(alertElement).close();
             } else {
                 alertElement.classList.remove('show');
                 alertElement.remove();
             }
-        }, 2800);
-
-        alertElement.addEventListener('mouseenter', () => clearTimeout(timer), { once: true });
+        };
+        const startTimer = () => { timer = setTimeout(dismiss, 2000); };
+        startTimer();
+        alertElement.addEventListener('mouseenter', () => clearTimeout(timer));
+        alertElement.addEventListener('mouseleave', startTimer);
     });
 
     // --- CHATBOT LOGIC (Giữ nguyên 100% của bạn) ---

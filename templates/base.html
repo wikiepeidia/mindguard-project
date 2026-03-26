@@ -18,7 +18,7 @@
     {% block head_css %}{% endblock %}
 </head>
 
-<body>
+<body class="{% block body_class %}{% endblock %}">
 
     <canvas id="network-canvas"></canvas>
 
@@ -82,8 +82,11 @@
         </div>
     </nav>
 
+    {% block navbar_spacer %}
     <div style="height: 80px;"></div>
+    {% endblock %}
 
+    {% block global_flash %}
     <div class="container mt-3 position-absolute top-0 end-0"
         style="z-index: 9999; max-width: 400px; margin-top: 90px; margin-right: 20px;">
         {% with messages = get_flashed_messages(with_categories=true) %}
@@ -97,6 +100,7 @@
         {% endif %}
         {% endwith %}
     </div>
+    {% endblock %}
 
     {% block main_wrapper %}
     {% block content %}{% endblock %}

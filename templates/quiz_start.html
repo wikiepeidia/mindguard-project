@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block head_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/quiz.css') }}">
+{% endblock %}
+
+{% block content %}
+<section class="quiz-page quiz-start-page py-4 py-md-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-xl-10">
+                <div class="quiz-start-shell">
+                    <div class="quiz-start-hero glass-card mb-4" data-aos="fade-up">
+                        <div class="row g-4 align-items-start">
+                            <div class="col-lg-7">
+                                <span class="quiz-start-eyebrow">MindGuard Quiz</span>
+                                <h1 class="quiz-title quiz-start-title mb-3">Sẵn sàng kiểm tra mức độ cảnh giác của bạn?
+                                </h1>
+                                <p class="quiz-subtitle quiz-start-subtitle mb-4">
+                                    Bài test đưa bạn qua các tình huống lừa đảo, bảo mật tài khoản và phản ứng an toàn
+                                    trên môi trường số.
+                                    Hãy dành vài phút tập trung để nhận kết quả phản ánh đúng nhất năng lực hiện tại của
+                                    bạn.
+                                </p>
+
+                                <div class="quiz-start-tags">
+                                    <span class="quiz-start-tag"><i class="fas fa-shield-halved me-2"></i>Tình huống
+                                        thực tế</span>
+                                    <span class="quiz-start-tag"><i class="fas fa-clock me-2"></i>Một lượt làm liên
+                                        tục</span>
+                                    <span class="quiz-start-tag"><i class="fas fa-certificate me-2"></i>Chứng nhận khi
+                                        đạt chuẩn</span>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-5">
+                                <div class="quiz-start-scorecard">
+                                    <span class="quiz-start-score-label">Thành tích trước đây</span>
+                                    {% if previous_result %}
+                                    <div class="quiz-start-score-value">
+                                        {{ previous_result.score }}<span>/{{ previous_result.max_score }}</span>
+                                    </div>
+                                    <p class="quiz-start-score-note mb-2">
+                                        Danh hiệu gần nhất: <strong>{{ previous_title }}</strong>
+                                    </p>
+                                    {% if previous_result.certificate_code %}
+                                    <p class="quiz-start-score-note mb-0">
+                                        Mã chứng nhận gần nhất: <strong>{{ previous_result.certificate_code }}</strong>
+                                    </p>
+                                    {% endif %}
+                                    {% else %}
+                                    <div class="quiz-start-score-value quiz-start-score-empty">--</div>
+                                    <p class="quiz-start-score-note mb-0">
+                                        Bạn chưa có lượt làm trước đó. Đây là thời điểm tốt để thiết lập mốc đánh giá
+                                        đầu tiên.
+                                    </p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-4">
+                        <div class="col-lg-7" data-aos="fade-up" data-aos-delay="60">
+                            <div class="quiz-start-card">
+                                <h2 class="quiz-start-card-title">Trước khi bắt đầu</h2>
+                                <div class="quiz-start-list">
+                                    <div class="quiz-start-list-item">
+                                        <span class="quiz-start-list-icon text-info"><i
+                                                class="fas fa-list-check"></i></span>
+                                        <div>
+                                            <strong>Mỗi lượt là một phiên riêng.</strong>
+                                            <p class="mb-0">Hệ thống sẽ tạo bộ câu hỏi mới khi bạn nhấn bắt đầu. Một số
+                                                lượt có thể xuất hiện câu hỏi AI.</p>
+                                        </div>
+                                    </div>
+                                    <div class="quiz-start-list-item">
+                                        <span class="quiz-start-list-icon text-warning"><i
+                                                class="fas fa-triangle-exclamation"></i></span>
+                                        <div>
+                                            <strong>Rời khỏi trang sẽ xóa lượt hiện tại.</strong>
+                                            <p class="mb-0">Nếu bạn tải lại trang, đóng tab hoặc rời khỏi luồng làm bài,
+                                                tiến trình hiện tại sẽ bị hủy và cần bắt đầu lại từ đầu.</p>
+                                        </div>
+                                    </div>
+                                    <div class="quiz-start-list-item">
+                                        <span class="quiz-start-list-icon text-success"><i
+                                                class="fas fa-award"></i></span>
+                                        <div>
+                                            <strong>Cần đạt ít nhất {{ pass_percentage }}% để nhận chứng nhận.</strong>
+                                            <p class="mb-0">Kết quả được lưu sau khi bạn hoàn thành lượt làm và nộp bài
+                                                ở câu cuối cùng.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-5" data-aos="fade-up" data-aos-delay="120">
+                            <div class="quiz-start-card quiz-start-cta">
+                                <h2 class="quiz-start-card-title">Bắt đầu khi bạn đã sẵn sàng</h2>
+                                <p class="quiz-start-cta-copy">
+                                    Chỉ nên bắt đầu khi bạn có thể hoàn thành liền mạch. Điều này giúp điểm số phản ánh
+                                    đúng khả năng nhận diện lừa đảo của bạn.
+                                </p>
+
+                                <form method="post" action="{{ url_for('quiz.quiz_start') }}" class="d-grid gap-3">
+                                    <button type="submit" class="btn btn-primary btn-lg quiz-start-btn">
+                                        {% if force_retake or previous_result %}
+                                        Bắt đầu lượt mới <i class="fas fa-arrow-right ms-2"></i>
+                                        {% else %}
+                                        Vào bài test <i class="fas fa-arrow-right ms-2"></i>
+                                        {% endif %}
+                                    </button>
+                                    <a href="{{ url_for('main.index') }}" class="btn btn-outline-secondary btn-lg">
+                                        Để sau <i class="fas fa-clock ms-2"></i>
+                                    </a>
+                                </form>
+
+                                {% if previous_result %}
+                                <div class="quiz-start-footnote mt-3">
+                                    <i class="fas fa-circle-info me-2 text-info"></i>
+                                    Điểm tốt nhất trước đây được dùng làm mốc tham chiếu, không ảnh hưởng đến lượt làm
+                                    mới này.
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

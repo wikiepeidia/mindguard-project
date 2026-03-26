@@ -29,10 +29,11 @@ class Config:
     # Cấu hình AI (OpenRouter)
     OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY") or ai_config.get("OPENROUTER_API_KEY") or "sk-or-v1-..." 
     OPENROUTER_MODELS = [
-        "liquid/lfm-2.5-1.2b-instruct:free",
-        "liquid/lfm-2.5-1.2b-thinking:free",
-        "allenai/molmo-2-8b:free",
-        "google/gemini-2.0-flash-lite-preview-02-05:free"
+        "mistralai/mistral-small-3.1-24b-instruct:free",
+        "qwen/qwen3-next-80b-a3b-instruct:free",
+        "meta-llama/llama-3.3-70b-instruct:free",
+        "qwen/qwen3-4b:free",
+        "nousresearch/hermes-3-llama-3.1-405b:free"
     ]
     
     # Cloudflare Turnstile

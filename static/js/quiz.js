@@ -14,6 +14,9 @@
  */
 
 document.addEventListener('DOMContentLoaded', () => {
+    const quizRoot = document.querySelector('[data-quiz-attempt-active="1"]');
+    const abandonUrl = quizRoot?.dataset.abandonUrl || '';
+    let allowNavigation = false;
 
     // ── Progress bar ──────────────────────────────────────────────── //
     const fill = document.getElementById('progress-bar-fill');
@@ -57,7 +60,52 @@ document.addEventListener('DOMContentLoaded', () => {
                             : 'Tiếp theo <i class="fas fa-arrow-right ms-2"></i>';
                     }, 1800);
                 }
+                return;
             }
+
+            allowNavigation = true;
+        });
+    }
+
+    document.querySelectorAll('.quiz-back-btn, .quiz-quit-btn').forEach(button => {
+        button.addEventListener('click', () => {
+            allowNavigation = true;
+        });
+    });
+
+    // Warn before a user leaves the quiz flow; the abandon endpoint clears the attempt.
+    if (quizRoot && abandonUrl) {
+        window.addEventListener('beforeunload', event => {
+            if (allowNavigation) {
+                return;
+            }
+            event.preventDefault();
+            event.returnValue = '';
+        });
+
+        window.addEventListener('pagehide', () => {
+            if (allowNavigation) {
+                return;
+            }
+
+            if (navigator.sendBeacon) {
+                const payload = new Blob(['reason=pagehide'], {
+                    type: 'application/x-www-form-urlencoded; charset=UTF-8',
+                });
+                navigator.sendBeacon(abandonUrl, payload);
+                return;
+            }
+
+            fetch(abandonUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                },
+                body: 'reason=pagehide',
+                keepalive: true,
+            }).catch(() => {
+                // Best effort only.
+            });
         });
     }
 

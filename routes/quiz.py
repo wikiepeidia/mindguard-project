@@ -70,6 +70,9 @@ def _create_attempt():
         }
         question_ids = [ai_q['id']] + question_ids
 
+    for key in ('certificate_code', 'quiz_rank_title', 'last_quiz_result_id'):
+        session.pop(key, None)
+
     session['quiz_attempt'] = {
         'question_ids': question_ids,
         'ai_q': ai_q_stored,
@@ -123,6 +126,18 @@ def _quiz_title_for_score(score, max_score):
     return 'Học viên an ninh mạng'
 
 
+def _best_previous_result(email):
+    """Return the user's strongest previous quiz result, if any."""
+    if not email:
+        return None
+    return (
+        QuizResult.query
+        .filter_by(email=email)
+        .order_by(QuizResult.score.desc(), QuizResult.max_score.desc(), QuizResult.created_at.desc())
+        .first()
+    )
+
+
 # ------------------------------------------------------------------ #
 # Entry point
 # ------------------------------------------------------------------ #
@@ -130,39 +145,64 @@ def _quiz_title_for_score(score, max_score):
 @quiz_bp.route('/quiz')
 @login_required
 def quiz():
-    """Start or resume a quiz attempt; redirect to current step."""
+    """Show intro gate for a new attempt or resume an in-progress quiz."""
     force_retake = request.args.get('force')
-
-    # If user already passed, redirect to result unless forcing a retake
-    if not force_retake:
-        email = session.get('registration_email')
-        if email:
-            passed = (
-                QuizResult.query
-                .filter_by(email=email)
-                .filter(QuizResult.certificate_code.isnot(None))
-                .order_by(QuizResult.created_at.desc())
-                .first()
-            )
-            if passed:
-                session['last_quiz_score'] = passed.score
-                session['max_quiz_score'] = passed.max_score
-                session['certificate_code'] = passed.certificate_code
-                flash(
-                    f'Bạn đã có chứng chỉ với kết quả {passed.score}/{passed.max_score} điểm.'
-                    ' Bạn có muốn làm lại không?',
-                    'info',
-                )
-                return redirect(url_for('quiz.quiz_result'))
-
-    # Resume an in-progress attempt (unless force retake)
     existing = session.get('quiz_attempt')
+
+    if force_retake and existing and not existing.get('finalized'):
+        session.pop('quiz_attempt', None)
+        session.modified = True
+        existing = None
+
+    # Resume an in-progress attempt unless the user explicitly forces a retake.
     if existing and not existing.get('finalized') and not force_retake:
+        flash('Bạn đang có lượt làm bài dở dang. Hệ thống sẽ đưa bạn quay lại câu đang làm.', 'info')
         return redirect(url_for('quiz.quiz_step', idx=existing.get('current_index', 0)))
 
-    # Start fresh
+    email = session.get('registration_email')
+    previous_result = _best_previous_result(email)
+    previous_title = None
+    if previous_result:
+        session['last_quiz_score'] = previous_result.score
+        session['max_quiz_score'] = previous_result.max_score
+        previous_title = _quiz_title_for_score(previous_result.score, previous_result.max_score)
+
+    return render_template(
+        'quiz_start.html',
+        previous_result=previous_result,
+        previous_title=previous_title,
+        force_retake=bool(force_retake),
+        pass_percentage=int(Config.QUIZ_PASS_PERCENTAGE * 100),
+    )
+
+
+@quiz_bp.route('/quiz/start', methods=['POST'])
+@login_required
+def quiz_start():
+    """Create a fresh quiz attempt after the user passes the intro gate."""
+    existing = session.get('quiz_attempt')
+    if existing and not existing.get('finalized'):
+        session.pop('quiz_attempt', None)
+        session.modified = True
+
     _create_attempt()
     return redirect(url_for('quiz.quiz_step', idx=0))
+
+
+@quiz_bp.route('/quiz/abandon', methods=['POST'])
+@login_required
+def quiz_abandon():
+    """Discard the current in-progress attempt."""
+    attempt = session.get('quiz_attempt')
+    if attempt and not attempt.get('finalized'):
+        session.pop('quiz_attempt', None)
+        session.modified = True
+
+    if request.form.get('redirect_to') == 'quiz-home':
+        flash('Lượt làm bài hiện tại đã được hủy. Bạn có thể bắt đầu lại khi sẵn sàng.', 'info')
+        return redirect(url_for('quiz.quiz'))
+
+    return ('', 204)
 
 
 # ------------------------------------------------------------------ #
@@ -175,7 +215,11 @@ def quiz_step(idx):
     """Render a single question (GET) or save answer and redirect (POST)."""
     attempt = session.get('quiz_attempt')
     if not attempt or not attempt.get('question_ids'):
-        flash('Phiên làm bài không hợp lệ. Vui lòng bắt đầu lại.', 'warning')
+        flash('Bạn cần bắt đầu từ màn hình giới thiệu trước khi vào bài test.', 'warning')
+        return redirect(url_for('quiz.quiz'))
+
+    if attempt.get('finalized'):
+        flash('Lượt làm bài trước đã hoàn thành. Hãy bắt đầu lượt mới nếu bạn muốn làm lại.', 'info')
         return redirect(url_for('quiz.quiz'))
 
     total = attempt['total_questions']
@@ -233,6 +277,7 @@ def quiz_step(idx):
         answered_count=answered_count,
         selected_answer=selected_answer,
         quiz_title=quiz_title,
+        abandon_url=url_for('quiz.quiz_abandon'),
     )
 
 

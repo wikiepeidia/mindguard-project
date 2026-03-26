@@ -52,10 +52,20 @@
 
 - **ARCH-01**: Dinh nghia tieu chi kich hoat migration SQLite -> PostgreSQL theo nguong tai va SLO.
 
+### Documentation & Operations
+
+- **DOC-01**: Admin co tai lieu SOP bang tieng Viet cho luong kiem duyet bao cao, duyet/tu choi va xuat dataset an toan.
+- **DOC-02**: Nguoi dung co tai lieu huong dan bang tieng Viet de gui bao cao dung cach, kem bang chung va hieu trang thai xu ly.
+
+### ML Readiness
+
+- **ML-01**: Team co schema du lieu/gan nhan va quy tac an danh de thu thap du lieu moderation trong 1 thang truoc khi train model.
+- **ML-02**: Team co lo trinh offline-first cho baseline ML/DL, evaluation va human-in-the-loop rollout sau v1.
+
 ## Out of Scope
 
 | Feature | Reason |
-|---------|--------|
+| ------- | ------ |
 | Dark mode trong v1 | Uu tien chinh hien tai la light mode de de nhin va dong bo UX |
 | Replatform sang SPA/microservices | Rui ro hoi quy cao, khong can thiet cho muc tieu v1 |
 | Hard-block chi dua tren IP | De false-positive cao va khong dap ung yeu cau da tin hieu |
@@ -64,7 +74,7 @@
 ## Traceability
 
 | Requirement | Phase | Status |
-|-------------|-------|--------|
+| ----------- | ----- | ------ |
 | UI-01 | Phase 3 | Complete |
 | UI-02 | Phase 3 | Complete |
 | UI-03 | Phase 3 | Complete |
@@ -81,6 +91,10 @@
 | ABUS-04 | Phase 2 | Completed |
 | LEAD-01 | Phase 5 | Complete |
 | LEAD-02 | Phase 5 | Complete |
+| DOC-01 | Phase 6 | Complete |
+| DOC-02 | Phase 6 | Complete |
+| ML-01 | Phase 6 | Complete |
+| ML-02 | Phase 6 | Complete |
 
 **Coverage:**
 
@@ -90,4 +104,4 @@
 
 ---
 *Requirements defined: 2026-03-19*
-*Last updated: 2026-03-20 after Phase 3 completion (03-03) updates*
+*Last updated: 2026-03-26 after Phase 6 documentation execution*

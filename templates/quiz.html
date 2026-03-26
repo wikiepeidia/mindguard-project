@@ -1,6 +1,11 @@
 {% extends "base.html" %}
+
+{% block head_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/quiz.css') }}">
+{% endblock %}
+
 {% block content %}
-<section class="quiz-page py-4 py-md-5">
+<section class="quiz-page py-4 py-md-5" data-quiz-attempt-active="1" data-abandon-url="{{ abandon_url }}">
   <div class="container">
     <div class="row justify-content-center">
       <div class="col-xl-9">
@@ -11,12 +16,30 @@
               <p class="quiz-subtitle mb-0">Trả lời từng câu hỏi để kiểm tra mức độ cảnh giác và nhận danh hiệu bảo mật
                 tương ứng.</p>
             </div>
-            {% if quiz_title and quiz_title != "Học viên an ninh mạng" %}
-            <span class="badge quiz-rank-badge px-3 py-2 mt-3 mt-md-0">
-              <i class="fas fa-trophy me-2"></i>{{ quiz_title }}
-            </span>
-            {% endif %}
+            <div class="quiz-header-side">
+              {% if quiz_title and quiz_title != "Học viên an ninh mạng" %}
+              <span class="badge quiz-rank-badge px-3 py-2 mt-3 mt-md-0">
+                <i class="fas fa-trophy me-2"></i>{{ quiz_title }}
+              </span>
+              {% endif %}
+            </div>
           </header>
+
+          <div class="quiz-attempt-warning mb-4">
+            <div>
+              <p class="quiz-attempt-warning-title mb-1">Lưu ý trước khi rời trang</p>
+              <p class="quiz-attempt-warning-text mb-0">
+                Nếu bạn tải lại, đóng tab hoặc chuyển sang trang khác trong lúc làm bài, lượt hiện tại sẽ bị hủy và bạn
+                cần bắt đầu lại từ đầu.
+              </p>
+            </div>
+            <form method="post" action="{{ abandon_url }}" class="quiz-abandon-form">
+              <input type="hidden" name="redirect_to" value="quiz-home">
+              <button type="submit" class="btn btn-outline-danger quiz-quit-btn">
+                <i class="fas fa-door-open me-2"></i>Thoát bài test
+              </button>
+            </form>
+          </div>
 
           <div id="quiz-progress" class="quiz-progress mb-4" role="status" aria-live="polite" aria-atomic="false"
             data-answered="{{ answered_count }}" data-total="{{ total_questions }}">
@@ -85,7 +108,8 @@
     </div>
   </div>
 </section>
+{% endblock %}
 
-<link rel="stylesheet" href="{{ url_for('static', filename='css/quiz.css') }}">
+{% block scripts %}
 <script src="{{ url_for('static', filename='js/quiz.js') }}"></script>
 {% endblock %}

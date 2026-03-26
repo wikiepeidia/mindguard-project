@@ -8,15 +8,14 @@ còn user chỉ xem đọc đc bài viết
 
 # bugs
 
-Chatbot icon: when the Footer is shown, chatbot icon is overlapped, it should stay highest layer of the whole page and be fixed at the bottom-right corner.
-
-Chatbot AI 24/7
-Nghi ngờ một tin nhắn lạ? Copy và gửi ngay cho AI. Hệ thống sẽ phân tích ngôn ngữ, kiểm tra đường link và đưa ra cảnh báo trong 3 giây. should direct to /chatbot, not the chatbot icon.
-<http://127.0.0.1:5000/login> : should have a button to Admin login for simple access to admin accounts during development.
+<http://127.0.0.1:5000/leaderboard> check Trang thai (all are in  Chưa xác minh, check lại với database xem có lỗi gì ko)
+ Cac thong bao nhu Mã OTP đã được gửi đến email của bạn. (Demo: 123456) van chua tu an sau 2 giay.
+chatbot Method Not Allowed
+The method is not allowed for the requested URL.
 
 # bao cao
 
-viet tai lieu SOP bao cao, huong dan nguoi dung
+viet tai lieu SOP bao cao, huong dan nguoi dung (if images are needed,give placeholder and i will put in)
 
 # ML model
 

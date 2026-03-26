@@ -4,146 +4,231 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='css/chatbot.css') }}">
 {% endblock %}
 
-{% block main_wrapper %}
-<div class="full-screen-wrapper">
+{% block body_class %}chatbot-page{% endblock %}
 
-  <!-- Flash messages integrated into the top of the view -->
-  {% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-  <div class="px-4 pt-3">
-    {% for category, message in messages %}
-    <div class="alert alert-{{ category }} alert-dismissible fade show shadow-sm" role="alert">
-      {{ message }}
-      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-    {% endfor %}
-  </div>
-  {% endif %}
-  {% endwith %}
+{% block content %}
+<section class="chatbot-page-shell py-4 py-lg-5" id="chatbotApp" data-send-url="{{ url_for('chatbot.send_message') }}"
+  data-page-url="{{ url_for('chatbot.chatbot_page') }}" data-current-session-id="{{ current_session_id or '' }}">
+  <div class="container">
+    <div class="chatbot-hero glass-card mb-4" data-aos="fade-up">
+      <div class="row g-4 align-items-start">
+        <div class="col-lg-7">
+          <span class="chatbot-eyebrow">MindGuard AI</span>
+          <h1 class="chatbot-title mt-3 mb-3">Không gian trò chuyện bảo mật, liền mạch với toàn bộ hệ sinh thái
+            MindGuard</h1>
+          <p class="chatbot-subtitle mb-4">
+            Hỏi về tin nhắn đáng ngờ, website lạ, dấu hiệu lừa đảo tuyển dụng hoặc cách xử lý khi đã trót cung cấp thông
+            tin.
+            Mọi cuộc trò chuyện vẫn được giữ trong lịch sử để bạn có thể quay lại đối chiếu bất kỳ lúc nào.
+          </p>
 
-  <!-- Chat Header/Toolbar -->
-  <div
-    class="bg-white border-bottom px-4 py-3 d-flex align-items-center justify-content-between flex-shrink-0 shadow-sm"
-    style="z-index: 10;">
-    <div class="d-flex align-items-center gap-3">
-      <div class="bg-primary bg-opacity-10 p-2 rounded-circle">
-        <i class="fas fa-robot fa-lg text-primary"></i>
-      </div>
-      <div>
-        <h6 class="fw-bold mb-0 text-dark">MindGuard Assistant</h6>
-        <div class="d-flex align-items-center">
-          <span class="badge bg-success rounded-pill me-2" style="width: 8px; height: 8px; padding: 0;"></span>
-          <small class="text-muted" style="font-size: 0.8rem;">Luôn sẵn sàng hỗ trợ</small>
-        </div>
-      </div>
-    </div>
-    <div class="d-flex gap-2">
-      <button class="btn btn-light btn-sm text-secondary border" onclick="location.reload()" title="Bắt đầu lại">
-        <i class="fas fa-redo-alt me-1"></i> Làm mới
-      </button>
-    </div>
-  </div>
-
-  <!-- Main Chat History Area -->
-  <div class="chat-container px-4 py-4" id="chatHistoryContainer">
-    {% if history %}
-    {% for msg in history %}
-    <div class="d-flex mb-4 {% if msg.sender == 'Bạn' %}justify-content-end{% endif %}">
-
-      {% if msg.sender == 'MindGuard Bot' %}
-      <div class="flex-shrink-0 me-3">
-        <div class="bg-white border rounded-circle d-flex align-items-center justify-content-center shadow-sm"
-          style="width: 40px; height: 40px;">
-          <i class="fas fa-robot text-primary"></i>
-        </div>
-      </div>
-      {% endif %}
-
-      <div class="d-flex flex-column {% if msg.sender == 'Bạn' %}align-items-end{% endif %}" style="max-width: 80%;">
-        <div
-          class="px-4 py-3 rounded-4 shadow-sm {% if msg.sender == 'MindGuard Bot' %}bg-white border text-dark{% else %}bg-primary text-white{% endif %}">
-          {{ msg.text | nl2br }}
-        </div>
-        <small class="text-muted mt-1 px-1" style="font-size: 0.75rem;">
-          {{ msg.sender }}
-        </small>
-      </div>
-    </div>
-    {% endfor %}
-    {% else %}
-    <!-- Empty State / Welcome Screen -->
-    <div class="h-100 d-flex flex-column align-items-center justify-content-center text-center">
-      <div class="bg-white p-5 rounded-4 shadow-sm border" style="max-width: 700px;">
-        <div class="mb-4">
-          <div class="bg-primary bg-opacity-10 p-4 rounded-circle d-inline-block">
-            <i class="fas fa-robot fa-3x text-primary"></i>
+          <div class="chatbot-feature-row">
+            <span class="chatbot-feature-pill"><i class="fas fa-lock me-2"></i>Bảo mật nội dung trao đổi</span>
+            <span class="chatbot-feature-pill"><i class="fas fa-clock-rotate-left me-2"></i>Lưu lịch sử theo
+              phiên</span>
+            <span class="chatbot-feature-pill"><i class="fas fa-bolt me-2"></i>Hỗ trợ 24/7</span>
           </div>
         </div>
-        <h4 class="fw-bold text-dark mb-3">Xin chào! Tôi có thể giúp gì cho bạn?</h4>
-        <p class="text-muted mb-5">MindGuard AI sẵn sàng hỗ trợ bạn nhận diện lừa đảo, kiểm tra độ tin cậy và tư vấn an
-          toàn trực tuyến.</p>
 
-        <div class="row g-3">
-          <div class="col-md-6">
-            <form method="post" class="h-100">
-              <button name="message" value="Cách nhận biết lừa đảo tuyển dụng?"
-                class="btn btn-outline-light text-dark border p-3 w-100 h-100 rounded-3 text-start hover-shadow transition-all">
-                <i class="fas fa-briefcase text-primary me-2"></i> Lừa đảo tuyển dụng
-              </button>
+        <div class="col-lg-5">
+          <div class="chatbot-stat-grid">
+            <div class="chatbot-stat-card">
+              <span class="chatbot-stat-label">Tổng phiên đã lưu</span>
+              <strong class="chatbot-stat-value" id="chatSessionCount">{{ sessions|length }}</strong>
+            </div>
+            <div class="chatbot-stat-card">
+              <span class="chatbot-stat-label">Trạng thái hiện tại</span>
+              <strong class="chatbot-stat-value chatbot-stat-value-small" id="chatStatusValue">
+                {% if active_session %}
+                Đang xem lịch sử
+                {% else %}
+                Sẵn sàng trao đổi mới
+                {% endif %}
+              </strong>
+            </div>
+            <div class="chatbot-stat-card chatbot-stat-card-accent">
+              <span class="chatbot-stat-label">Gợi ý nhanh</span>
+              <strong class="chatbot-stat-value chatbot-stat-value-small">Phân tích link, SMS, tuyển dụng, chuyển
+                khoản</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-4 align-items-stretch">
+      <div class="col-xl-4" data-aos="fade-up" data-aos-delay="40">
+        <aside class="chatbot-sidebar glass-card h-100">
+          <div class="chatbot-sidebar-header">
+            <div>
+              <h2 class="chatbot-sidebar-title mb-1"><i class="fas fa-clock-rotate-left me-2 text-info"></i>Lịch sử trò
+                chuyện</h2>
+              <p class="chatbot-sidebar-copy mb-0">Chọn lại một phiên để xem toàn bộ nội dung đã trao đổi.</p>
+            </div>
+            <a href="{{ url_for('chatbot.chatbot_page') }}" class="btn btn-primary btn-sm rounded-pill px-3"
+              title="Cuộc trò chuyện mới">
+              <i class="fas fa-plus me-1"></i>Mới
+            </a>
+          </div>
+
+          <div class="chatbot-sidebar-body">
+            <div id="chatSessionList" {% if not sessions %}class="d-none" {% endif %}>
+              {% for s in sessions %}
+              <a href="{{ url_for('chatbot.chatbot_page', session_id=s.id) }}"
+                class="chatbot-session-item {% if current_session_id|string == s.id|string %}active{% endif %}"
+                data-session-id="{{ s.id }}">
+                <div class="chatbot-session-icon"><i class="fas fa-message"></i></div>
+                <div class="chatbot-session-content">
+                  <span class="chatbot-session-title">{{ s.title or 'Cuộc trò chuyện' }}</span>
+                  <span class="chatbot-session-time">{{ s.updated_at.strftime('%d/%m/%Y') if s.updated_at else 'Không rõ
+                    thời gian' }}</span>
+                </div>
+              </a>
+              {% endfor %}
+            </div>
+
+            <div id="chatEmptySidebar" class="chatbot-empty-sidebar text-center {% if sessions %}d-none{% endif %}">
+              <div class="chatbot-empty-sidebar-icon"><i class="fas fa-inbox"></i></div>
+              <p class="mb-2">Bạn chưa có phiên trò chuyện nào được lưu.</p>
+              <small>Bắt đầu đặt câu hỏi để tạo lịch sử cá nhân hóa.</small>
+            </div>
+          </div>
+        </aside>
+      </div>
+
+      <div class="col-xl-8" data-aos="fade-up" data-aos-delay="100">
+        <div class="chatbot-panel glass-card">
+          <div class="chatbot-panel-header">
+            <div class="chatbot-panel-heading">
+              <div class="chatbot-panel-icon"><i class="fas fa-robot"></i></div>
+              <div>
+                <h2 class="chatbot-panel-title mb-1" id="chatbotPanelTitle">
+                  {% if active_session %}
+                  {{ active_session.title or 'Cuộc trò chuyện đã lưu' }}
+                  {% else %}
+                  MindGuard Assistant
+                  {% endif %}
+                </h2>
+                <p class="chatbot-panel-copy mb-0" id="chatbotPanelCopy">
+                  {% if active_session %}
+                  Bạn đang xem lại nội dung của một phiên đã lưu.
+                  {% else %}
+                  Đặt câu hỏi để nhận phân tích về scam, phishing và rủi ro an toàn số.
+                  {% endif %}
+                </p>
+              </div>
+            </div>
+
+            <button class="btn btn-outline-secondary btn-sm rounded-pill px-3" onclick="location.reload()"
+              title="Làm mới giao diện">
+              <i class="fas fa-rotate-right me-1"></i>Làm mới
+            </button>
+          </div>
+
+          <div class="chatbot-messages" id="chatHistoryContainer"
+            data-initial-scroll="{{ 'true' if active_session and messages else 'false' }}">
+            <div id="chatMessageList" {% if not (active_session and messages) %}class="d-none" {% endif %}>
+              {% for msg in messages %}
+              <div class="chatbot-message-row {% if msg.sender == 'user' %}is-user{% else %}is-bot{% endif %}">
+                {% if msg.sender == 'bot' %}
+                <div class="chatbot-avatar"><i class="fas fa-robot"></i></div>
+                {% endif %}
+
+                <div class="chatbot-message-stack {% if msg.sender == 'user' %}align-end{% endif %}">
+                  <div
+                    class="chatbot-bubble {% if msg.sender == 'user' %}chatbot-bubble-user{% else %}chatbot-bubble-bot{% endif %}">
+                    {{ msg.content | nl2br }}
+                  </div>
+                  <small class="chatbot-message-meta">
+                    {% if msg.sender == 'bot' %}MindGuard Bot{% else %}Bạn{% endif %}
+                  </small>
+                </div>
+
+                {% if msg.sender == 'user' %}
+                <div class="chatbot-avatar chatbot-avatar-user"><i class="fas fa-user"></i></div>
+                {% endif %}
+              </div>
+              {% endfor %}
+            </div>
+
+            <div id="chatEmptyState" class="chatbot-empty-state {% if active_session and messages %}d-none{% endif %}">
+              <div class="chatbot-empty-orb"><i class="fas fa-shield-heart"></i></div>
+              <h3 class="chatbot-empty-title">Xin chào, bạn muốn kiểm tra rủi ro nào?</h3>
+              <p class="chatbot-empty-copy">
+                Bắt đầu với một chủ đề phổ biến bên dưới hoặc nhập câu hỏi của riêng bạn để nhận phân tích chi tiết.
+              </p>
+
+              <div class="row g-3 chatbot-suggestion-grid">
+                <div class="col-md-6">
+                  <form method="post" class="h-100 chatbot-suggestion-form">
+                    <button name="message" value="Cách nhận biết lừa đảo tuyển dụng?"
+                      class="chatbot-suggestion-card h-100">
+                      <span class="chatbot-suggestion-icon text-info"><i class="fas fa-briefcase"></i></span>
+                      <span class="chatbot-suggestion-title">Lừa đảo tuyển dụng</span>
+                      <span class="chatbot-suggestion-copy">Các dấu hiệu của offer việc nhẹ lương cao, phí đặt cọc và
+                        Telegram tuyển dụng.</span>
+                    </button>
+                  </form>
+                </div>
+                <div class="col-md-6">
+                  <form method="post" class="h-100 chatbot-suggestion-form">
+                    <button name="message" value="Kiểm tra độ tin cậy của website/SMS"
+                      class="chatbot-suggestion-card h-100">
+                      <span class="chatbot-suggestion-icon text-success"><i class="fas fa-link"></i></span>
+                      <span class="chatbot-suggestion-title">Kiểm tra link hoặc SMS</span>
+                      <span class="chatbot-suggestion-copy">Đánh giá độ đáng ngờ của đường link, tên miền, OTP hoặc lời
+                        mời chuyển tiền.</span>
+                    </button>
+                  </form>
+                </div>
+                <div class="col-md-6">
+                  <form method="post" class="h-100 chatbot-suggestion-form">
+                    <button name="message" value="Tôi đã bị lừa tiền, phải làm sao?"
+                      class="chatbot-suggestion-card h-100">
+                      <span class="chatbot-suggestion-icon text-danger"><i class="fas fa-siren-on"></i></span>
+                      <span class="chatbot-suggestion-title">Khẩn cấp: vừa bị lừa tiền</span>
+                      <span class="chatbot-suggestion-copy">Các bước khóa tài khoản, lưu bằng chứng, liên hệ ngân hàng
+                        và cơ quan chức năng.</span>
+                    </button>
+                  </form>
+                </div>
+                <div class="col-md-6">
+                  <form method="post" class="h-100 chatbot-suggestion-form">
+                    <button name="message" value="Báo cáo số điện thoại lừa đảo" class="chatbot-suggestion-card h-100">
+                      <span class="chatbot-suggestion-icon text-secondary"><i class="fas fa-phone-slash"></i></span>
+                      <span class="chatbot-suggestion-title">Báo cáo đầu mối spam</span>
+                      <span class="chatbot-suggestion-copy">Hỏi cách tổng hợp số điện thoại, tài khoản hoặc đường link
+                        để gửi tố cáo hiệu quả hơn.</span>
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="chatbot-composer">
+            <form method="post" class="chatbot-composer-form" id="chatbotComposerForm">
+              <input type="hidden" name="session_id" id="chatbotSessionId" value="{{ current_session_id or '' }}">
+              <label for="chatbot-message" class="visually-hidden">Tin nhắn gửi cho MindGuard AI</label>
+              <div class="chatbot-input-shell">
+                <span class="chatbot-input-icon"><i class="fas fa-keyboard"></i></span>
+                <input id="chatbot-message" type="text" class="chatbot-input" name="message"
+                  placeholder="Nhập câu hỏi, đường link hoặc mô tả tình huống nghi ngờ..." autofocus autocomplete="off">
+                <button type="submit" class="btn btn-primary chatbot-send-btn">
+                  <i class="fas fa-paper-plane me-2"></i>Gửi
+                </button>
+              </div>
             </form>
-          </div>
-          <div class="col-md-6">
-            <form method="post" class="h-100">
-              <button name="message" value="Kiểm tra độ tin cậy của website/SMS"
-                class="btn btn-outline-light text-dark border p-3 w-100 h-100 rounded-3 text-start hover-shadow transition-all">
-                <i class="fas fa-search-dollar text-success me-2"></i> Kiểm tra tin nhắn lạ
-              </button>
-            </form>
-          </div>
-          <div class="col-md-6">
-            <form method="post" class="h-100">
-              <button name="message" value="Tôi đã bị lừa tiền, phải làm sao?"
-                class="btn btn-outline-light text-dark border p-3 w-100 h-100 rounded-3 text-start hover-shadow transition-all">
-                <i class="fas fa-exclamation-triangle text-danger me-2"></i> <strong>Khẩn cấp: Vừa bị lừa tiền</strong>
-              </button>
-            </form>
-          </div>
-          <div class="col-md-6">
-            <form method="post" class="h-100">
-              <button name="message" value="Báo cáo số điện thoại lừa đảo"
-                class="btn btn-outline-light text-dark border p-3 w-100 h-100 rounded-3 text-start hover-shadow transition-all">
-                <i class="fas fa-phone-slash text-secondary me-2"></i> Báo cáo SĐT Spam
-              </button>
-            </form>
+            <p class="chatbot-composer-note mb-0">
+              <i class="fas fa-lock me-2 text-info"></i>Nội dung trao đổi được giữ trong khu vực trò chuyện của tài
+              khoản bạn.
+            </p>
           </div>
         </div>
       </div>
     </div>
-    {% endif %}
   </div>
-
-  <!-- Input Area -->
-  <div class="input-area p-3 bg-light">
-    <div class="container-fluid" style="max-width: 1000px;"> <!-- Limit width for better readability on huge screens -->
-      <form method="post" class="d-flex gap-3 align-items-center">
-        <div class="input-group input-group-lg shadow-sm rounded-pill overflow-hidden border bg-white">
-          <span class="input-group-text bg-white border-0 ps-4"><i class="fas fa-keyboard text-muted"></i></span>
-          <input type="text" class="form-control border-0 shadow-none ps-2" name="message"
-            placeholder="Nhập câu hỏi hoặc mô tả tình huống..." autofocus autocomplete="off">
-          <button type="submit" class="btn btn-primary px-4 fw-bold">
-            <i class="fas fa-paper-plane me-2"></i> Gửi
-          </button>
-        </div>
-      </form>
-      <div class="text-center mt-2">
-        <small class="text-muted" style="font-size: 0.75rem;">
-          <i class="fas fa-lock me-1"></i> Nội dung đoạn chat được bảo mật.
-        </small>
-      </div>
-    </div>
-  </div>
-
-</div>
+</section>
 {% endblock %}
 
 {% block scripts %}

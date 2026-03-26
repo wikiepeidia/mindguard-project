@@ -128,6 +128,7 @@ def scammer_reports():
 def approve_report(report_id):
     report = ScammerReport.query.get_or_404(report_id)
     report.status = 'approved'
+    report.verification_status = 'verified'
     lb = ScammerLeaderboard.query.filter_by(scammer_id=report.id).first()
     if lb:
         lb.total_reports = report.report_count

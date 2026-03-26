@@ -14,6 +14,8 @@
  (completed 2026-03-20)
 - [x] **Phase 4: Quiz One-Question Flow** - Chuyen quiz sang luong 1 cau hoi/trang voi tien do ro rang va trang thai on dinh.
 - [x] **Phase 5: Leaderboard Integrity** - Ra mat bang vinh danh nguoi to cao nhieu nhat kem luat giam gian lan.
+- [x] **Phase 6: Reporting SOP & ML Readiness** - Chuan hoa tai lieu van hanh bao cao va dinh nghia lo trinh du lieu/ML cho giai doan sau v1.
+ (completed 2026-03-26)
 
 ## Phase Details
 
@@ -107,9 +109,27 @@ Plans:
 ## Progress Table
 
 | Phase | Plans Complete | Status | Completed |
-|-------|----------------|--------|-----------|
-| 1. Privacy & Data Governance Foundation | 0/2 | Complete    | 2026-03-20 |
-| 2. Anti-Spam Monitor & Soft Enforce | 3/3 | Complete    | 2026-03-20 |
-| 3. Light Mode UX System | 3/3 | Complete    | 2026-03-20 |
-| 4. Quiz One-Question Flow | 3/3 | Complete    | 2026-03-23 |
-| 5. Leaderboard Integrity | 2/2 | Complete   | 2026-03-23 |
+| ----- | -------------- | ------ | --------- |
+| 1. Privacy & Data Governance Foundation | 0/2 | Complete | 2026-03-20 |
+| 2. Anti-Spam Monitor & Soft Enforce | 3/3 | Complete | 2026-03-20 |
+| 3. Light Mode UX System | 3/3 | Complete | 2026-03-20 |
+| 4. Quiz One-Question Flow | 3/3 | Complete | 2026-03-23 |
+| 5. Leaderboard Integrity | 2/2 | Complete | 2026-03-23 |
+| 6. Reporting SOP & ML Readiness | 2/2 | Complete | 2026-03-26 |
+
+### Phase 6: Reporting SOP & ML Readiness
+
+**Goal**: Team van hanh duoc quy trinh bao cao mot cach nhat quan ngay trong v1, dong thoi co lo trinh du lieu/ML ro rang cho giai doan sau ma khong dua auto-moderation vao production som.
+**Depends on**: Phase 1, Phase 2, Phase 5
+**Requirements**: DOC-01, DOC-02, ML-01, ML-02
+**Success Criteria** (what must be TRUE):
+
+1. Co tai lieu SOP bang tieng Viet cho admin duyet/tu choi/xuat du lieu bao cao, co luu y privacy va placeholder anh minh hoa.
+2. Co huong dan nguoi dung bang tieng Viet cho luong gui bao cao, bang chung, trang thai va cac canh bao can biet.
+3. Co tai lieu readiness cho du lieu/ML mo ta 1 thang thu thap du lieu, schema gan nhan, quy tac an danh, offline evaluation va human-in-the-loop rollout sau v1.
+**Plans**: 2 plans
+
+Plans:
+
+- [x] 06-01-PLAN.md - Reporting SOP va huong dan nguoi dung cho luong bao cao hien tai.
+- [x] 06-02-PLAN.md - Data collection + ML moderation readiness roadmap (khong implement model trong v1).

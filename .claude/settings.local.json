@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cp .claude/templates/docs/technical/ARCHITECTURE.md docs/technical/ARCHITECTURE.md)",
+      "Bash(cp .claude/templates/docs/technical/DECISIONS.md docs/technical/DECISIONS.md)",
+      "Bash(cp .claude/templates/docs/technical/API.md docs/technical/API.md)",
+      "Bash(cp .claude/templates/docs/technical/DATABASE.md docs/technical/DATABASE.md)",
+      "Bash(cp .claude/templates/docs/user/USER_GUIDE.md docs/user/USER_GUIDE.md)"
+    ]
+  }
+}

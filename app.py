@@ -10,6 +10,7 @@ from routes.auth import auth_bp
 from routes.admin import admin_bp
 from utils.helpers import mask_sensitive_data, get_verification_badge
 from models import ScammerReport
+import os
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -31,6 +32,12 @@ mail.init_app(app)
 
 with app.app_context():
     db.create_all()
+
+    # On Vercel, /tmp is ephemeral — seed data on every cold start
+    if Config.IS_VERCEL:
+        from database.seed_all import run_seed
+        run_seed()
+
     # Fix legacy data: approved reports must have verification_status='verified'
     _stale = ScammerReport.query.filter(
         ScammerReport.status == 'approved',

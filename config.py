@@ -18,11 +18,16 @@ ai_config = load_local_env('chatbot.json')
 
 class Config:
     BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+    IS_VERCEL = bool(os.environ.get("VERCEL"))
     # Thay đổi SECRET_KEY nếu cần bảo mật hơn
     SECRET_KEY = os.environ.get("SECRET_KEY") or "dev-secret-key-mindguard-2025-secure"
-    PERMANENT_SESSION_LIFETIME = 86400 * 7 
-    
-    DB_PATH = os.path.join(BASE_DIR, 'database', 'mindguard_v2.db')
+    PERMANENT_SESSION_LIFETIME = 86400 * 7
+
+    # Vercel has a read-only filesystem — SQLite must write to /tmp
+    if IS_VERCEL:
+        DB_PATH = '/tmp/mindguard_v2.db'
+    else:
+        DB_PATH = os.path.join(BASE_DIR, 'database', 'mindguard_v2.db')
     SQLALCHEMY_DATABASE_URI = f"sqlite:///{DB_PATH}"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     

@@ -22,7 +22,6 @@ import os
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from app import app
 from extensions import db
 from models import (
     Registration,
@@ -963,30 +962,37 @@ def seed_quiz_results():
 # Main
 # ---------------------------------------------------------------------------
 
+def run_seed():
+    """Run all seed functions. Must be called inside an app context."""
+    admin = seed_admin()
+    db.session.commit()
+
+    users = seed_users()
+    db.session.commit()
+
+    reports = seed_scammers()
+    db.session.commit()
+
+    seed_leaderboard(reports)
+    db.session.commit()
+
+    seed_articles()
+    db.session.commit()
+
+    seed_quiz_results()
+    db.session.commit()
+
+
 def main():
+    # Standalone mode: create app and run inside its context
+    from app import app
     with app.app_context():
         print("=" * 55)
         print("  MindGuard Database Seeder")
         print("  Populating all tables with realistic Vietnamese data")
         print("=" * 55)
 
-        admin = seed_admin()
-        db.session.commit()
-
-        users = seed_users()
-        db.session.commit()
-
-        reports = seed_scammers()
-        db.session.commit()
-
-        seed_leaderboard(reports)
-        db.session.commit()
-
-        seed_articles()
-        db.session.commit()
-
-        seed_quiz_results()
-        db.session.commit()
+        run_seed()
 
         # Summary
         print("\n" + "=" * 55)

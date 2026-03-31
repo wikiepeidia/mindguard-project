@@ -1,11 +1,10 @@
-document.addEventListener('DOMContentLoaded', function() {
-    // Only attach if element exists
+document.addEventListener('DOMContentLoaded', function () {
     const searchInput = document.getElementById('localSearch');
     if (searchInput) {
-        searchInput.addEventListener('keyup', function() {
+        searchInput.addEventListener('keyup', function () {
             let input = this.value.toLowerCase();
             let rows = document.querySelectorAll('#blacklistTable tbody tr');
-            
+
             rows.forEach(row => {
                 let text = row.innerText.toLowerCase();
                 row.style.display = text.includes(input) ? '' : 'none';
@@ -15,6 +14,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function showDetail(element) {
+    const id = element.getAttribute('data-id');
     const identifier = element.getAttribute('data-identifier');
     const name = element.getAttribute('data-name');
     const type = element.getAttribute('data-type');
@@ -32,10 +32,16 @@ function showDetail(element) {
     document.getElementById('detailDate').innerText = date;
     document.getElementById('detailDesc').innerText = desc;
 
+    // Set profile link
+    const detailLink = document.getElementById('detailLink');
+    if (detailLink && id) {
+        detailLink.href = '/scammer/' + id;
+    }
+
     const evidenceSec = document.getElementById('evidenceSection');
     const noEvidenceSec = document.getElementById('noEvidenceSection');
     const evidenceImg = document.getElementById('detailImage');
-    
+
     let imageUrl = '';
     if (imageRaw && imageRaw !== 'None') {
         try {
@@ -50,7 +56,7 @@ function showDetail(element) {
 
     if (imageUrl && imageUrl.length > 5) {
         evidenceImg.src = imageUrl;
-        evidenceSec.classList.remove('d-none'); 
+        evidenceSec.classList.remove('d-none');
         evidenceSec.classList.add('d-flex');
         noEvidenceSec.classList.add('d-none');
         noEvidenceSec.classList.remove('d-flex');

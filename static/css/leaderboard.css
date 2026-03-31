@@ -1,5 +1,22 @@
 .leaderboard-page {
-    margin-top: 60px;
+    /* margin-top removed — base.html navbar spacer (80px) handles top spacing */
+}
+
+/* Fix Bootstrap .badge overriding text-* color classes */
+.leaderboard-page .badge.text-danger {
+    color: var(--bs-danger) !important;
+}
+
+.leaderboard-page .badge.text-success {
+    color: var(--bs-success) !important;
+}
+
+.leaderboard-page .badge.text-info {
+    color: var(--bs-info) !important;
+}
+
+.leaderboard-page .badge.text-warning {
+    color: var(--bs-warning) !important;
 }
 
 .leaderboard-title {

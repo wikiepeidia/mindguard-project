@@ -79,16 +79,25 @@ def new_chat():
     return redirect(url_for('chatbot.chatbot_page'))
 
 # 2. API Chat chính (Lưu DB - Dùng cho trang Chatbot Full)
-@chatbot_bp.route("/send", methods=["POST"])
+@chatbot_bp.route("/send", methods=["GET", "POST"])
 @login_required
 def send_message():
+    # GET requests redirect to the chatbot page (prevents 405 on direct navigation
+    # or post-login redirect chains)
+    if request.method == "GET":
+        return redirect(url_for('chatbot.chatbot_page'))
+
     data = request.get_json() or {}
     user_message = data.get("message", "").strip()
     session_id = data.get("session_id")
-    
-    if not user_message: return jsonify({"error": "Empty message"}), 400
+
+    if not user_message:
+        return jsonify({"error": "Empty message"}), 400
 
     user = _get_current_user()
+    if not user:
+        return jsonify({"error": "Phiên đăng nhập không hợp lệ.", "code": "UNAUTHENTICATED"}), 401
+
     chat_session, ai_reply, reply_meta, is_new_session = _persist_chat_exchange(user, user_message, session_id=session_id)
 
     return jsonify({
@@ -102,8 +111,15 @@ def send_message():
 
 # 3. API cho Widget (Nhanh, không cần lưu session)
 # QUAN TRỌNG: Tên hàm phải là 'chatbot_api' để khớp với url_for('chatbot.chatbot_api') trong HTML
-@chatbot_bp.route("/api", methods=["POST"])
+@chatbot_bp.route("/api", methods=["GET", "POST"])
 def chatbot_api():
+    # GET requests return usage instructions (prevents 405 on direct navigation)
+    if request.method == "GET":
+        return jsonify({
+            "error": "Gửi tin nhắn bằng phương thức POST với JSON body: {\"message\": \"...\"}",
+            "code": "METHOD_HINT",
+        }), 200
+
     data = request.get_json() or {}
     message = data.get("message", "")
     

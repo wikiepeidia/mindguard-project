@@ -26,7 +26,7 @@ document.addEventListener("DOMContentLoaded", function () {
     appendMessage(text, "user");
     input.value = "";
     try {
-      const res = await fetch("/api/chatbot", {
+      const res = await fetch("/chatbot/api", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -1,5 +1,9 @@
 document.addEventListener('DOMContentLoaded', function () {
-    AOS.init({ duration: 800, once: true });
+    try {
+        AOS.init({ duration: 800, once: true });
+    } catch (e) {
+        // AOS library may fail to load from CDN — do not crash the rest of the handler.
+    }
 
     // --- JS CHO HIỆU ỨNG HẠT NỀN (Áo mới) ---
     const canvas = document.getElementById('network-canvas');
@@ -47,19 +51,39 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Auto-hide flash alerts after a short delay for cleaner UX.
-    document.querySelectorAll('.alert.alert-dismissible').forEach((alertElement) => {
-        let timer = null;
-        const dismiss = () => {
-            if (window.bootstrap && window.bootstrap.Alert) {
-                window.bootstrap.Alert.getOrCreateInstance(alertElement).close();
-            } else {
-                alertElement.classList.remove('show');
+    // Error (danger) alerts are excluded — users need time to read them.
+    document.querySelectorAll('.alert.alert-dismissible').forEach(function (alertElement) {
+        // Skip auto-dismiss for error/danger alerts — they require user acknowledgment.
+        var isError = alertElement.classList.contains('alert-danger') ||
+            alertElement.classList.contains('alert-error');
+        if (isError) return;
+
+        var timer = null;
+
+        var dismiss = function () {
+            // Add the fade-out class for a smooth CSS transition.
+            alertElement.classList.add('alert-auto-dismiss');
+            // After the CSS transition completes (500ms), remove the element from the DOM.
+            alertElement.addEventListener('transitionend', function handler() {
+                alertElement.removeEventListener('transitionend', handler);
                 alertElement.remove();
-            }
+            });
+            // Fallback removal in case transitionend does not fire (e.g., display:none ancestor).
+            setTimeout(function () {
+                if (alertElement.parentNode) {
+                    alertElement.remove();
+                }
+            }, 600);
         };
-        const startTimer = () => { timer = setTimeout(dismiss, 2000); };
+
+        var startTimer = function () {
+            timer = setTimeout(dismiss, 2000);
+        };
+
         startTimer();
-        alertElement.addEventListener('mouseenter', () => clearTimeout(timer));
+
+        // Pause the timer while the user hovers over the alert.
+        alertElement.addEventListener('mouseenter', function () { clearTimeout(timer); });
         alertElement.addEventListener('mouseleave', startTimer);
     });
 

@@ -228,21 +228,64 @@ a:hover {
 
 /* Badges */
 .badge-danger {
-    background: rgba(239, 68, 68, 0.2);
-    color: #fca5a5 !important;
+    background: rgba(239, 68, 68, 0.15);
+    color: #dc2626 !important;
     border: 1px solid rgba(239, 68, 68, 0.3);
 }
 
 .badge-warning {
-    background: rgba(245, 158, 11, 0.2);
-    color: #fcd34d !important;
+    background: rgba(245, 158, 11, 0.15);
+    color: #b45309 !important;
     border: 1px solid rgba(245, 158, 11, 0.3);
 }
 
 .badge-tech {
-    background: rgba(6, 182, 212, 0.2);
-    color: #67e8f9 !important;
+    background: rgba(6, 182, 212, 0.15);
+    color: #0891b2 !important;
     border: 1px solid rgba(6, 182, 212, 0.3);
+}
+
+/* Bootstrap 5.3.0 only ships bg-opacity-10/25/50/75/100 and
+   border-opacity-10/25/50/75/100. Templates use non-standard
+   values (5, 15, 20), so we polyfill them here.
+   Without bg-opacity-20, bg-danger renders at FULL opacity →
+   text-danger (same red) becomes invisible on the solid background. */
+.bg-opacity-5 {
+    --bs-bg-opacity: 0.05 !important;
+}
+
+.bg-opacity-15 {
+    --bs-bg-opacity: 0.15 !important;
+}
+
+.bg-opacity-20 {
+    --bs-bg-opacity: 0.2 !important;
+}
+
+.border-opacity-5 {
+    --bs-border-opacity: 0.05 !important;
+}
+
+.border-opacity-20 {
+    --bs-border-opacity: 0.2 !important;
+}
+
+/* Fix: Bootstrap .badge forces white text via --bs-badge-color.
+   Override so .text-* utility classes actually apply. */
+.badge.text-danger {
+    color: var(--bs-danger) !important;
+}
+
+.badge.text-success {
+    color: var(--bs-success) !important;
+}
+
+.badge.text-info {
+    color: var(--bs-info) !important;
+}
+
+.badge.text-warning {
+    color: var(--bs-warning) !important;
 }
 
 /* --- FOOTER --- */
@@ -363,6 +406,13 @@ footer .input-group .btn.btn-info {
 
 .alert.alert-warning {
     border-left-color: var(--mg-warning) !important;
+}
+
+/* Auto-dismiss fade-out transition for flash alerts */
+.alert.alert-auto-dismiss {
+    opacity: 0 !important;
+    transform: translateY(-10px);
+    transition: opacity 0.5s ease, transform 0.5s ease !important;
 }
 
 .btn-close {
@@ -592,79 +642,7 @@ footer .input-group .btn.btn-info {
     border: 1px solid var(--mg-border);
 }
 
-/* ADMIN SIDEBAR & STATS */
-.admin-sidebar-link {
-    display: block;
-    padding: 1rem;
-    color: var(--text-secondary) !important;
-    border-radius: 10px;
-    margin-bottom: 0.5rem;
-    transition: 0.3s;
-    font-weight: 600;
-    text-decoration: none;
-}
-
-.admin-sidebar-link:hover,
-.admin-sidebar-link.active {
-    background: rgba(6, 182, 212, 0.15) !important;
-    color: var(--accent-color) !important;
-    padding-left: 1.5rem;
-}
-
-.stat-card-admin {
-    background: linear-gradient(180deg, var(--mg-surface) 0%, var(--mg-surface-soft) 100%) !important;
-    border: 1px solid var(--mg-border);
-    border-radius: 12px;
-    padding: 1.5rem;
-    position: relative;
-    overflow: hidden;
-    min-height: 140px;
-}
-
-.stat-icon-bg {
-    position: absolute;
-    right: -10px;
-    bottom: -10px;
-    font-size: 5rem;
-    opacity: 0.1;
-    color: var(--mg-text-muted) !important;
-}
-
-/* TABLE ADMIN */
-.table-admin {
-    color: var(--text-main) !important;
-}
-
-.table-admin thead th {
-    background-color: var(--mg-surface-soft) !important;
-    color: var(--accent-color) !important;
-    border-bottom: 2px solid var(--mg-border);
-    padding: 1rem;
-}
-
-.table-admin tbody td {
-    border-bottom: 1px solid var(--mg-border);
-    background: transparent !important;
-    padding: 1rem;
-}
-
-.table-admin tr:hover td {
-    background-color: rgba(14, 116, 144, 0.08) !important;
-}
-
-/* CUSTOM SCROLLBAR FOR LIVE FEED */
-.custom-scrollbar::-webkit-scrollbar {
-    width: 5px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-track {
-    background: rgba(14, 116, 144, 0.08);
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb {
-    background: rgba(14, 116, 144, 0.2);
-    border-radius: 10px;
-}
+/* (Duplicate admin styles removed — defined above) */
 
 .form-select option {
     background-color: var(--mg-surface) !important;
@@ -734,7 +712,25 @@ input[type="file"]::file-selector-button {
     border-radius: 4px;
 }
 
-/* Triệt tiêu màu đỏ đặc của Bootstrap */
-.bg-danger {
+/* Soft danger variant for badges — use .badge-danger-soft instead of overriding .bg-danger globally */
+.badge-danger-soft {
     background-color: rgba(239, 68, 68, 0.2) !important;
+}
+
+/* Accessibility: respect user motion preferences */
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* Utility: thin progress bar */
+.progress-thin {
+    height: 10px;
 }

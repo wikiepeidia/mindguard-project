@@ -1,57 +1,62 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="row justify-content-center">
-  <div class="col-lg-5">
-    <div class="card shadow-sm border-0 rounded-4 glass-card" data-aos="fade-up" data-aos-duration="1000">
-      <div class="card-body p-5">
-        <h3 class="fw-bold mb-3 text-center">Đăng nhập</h3>
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+      <div class="card shadow-sm border-0 rounded-4 glass-card" data-aos="fade-up" data-aos-duration="1000">
+        <div class="card-body p-4 p-md-5">
+          <h3 class="fw-bold mb-3 text-center">Đăng nhập</h3>
 
-        <form method="post" action="{{ url_for('auth.login') }}">
-          <div class="mb-3">
-            <label class="form-label">Email</label>
-            <input type="email" class="form-control" name="login_email" placeholder="tenban@gmail.com" required>
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Mật khẩu</label>
-            <input type="password" class="form-control" name="login_password" placeholder="Nhập mật khẩu" required>
-          </div>
-
-          <!-- Cloudflare Turnstile -->
-          {% if site_key %}
-          <div class="mb-3 d-flex justify-content-center" id="turnstile-container">
-            <div class="cf-turnstile" data-sitekey="{{ site_key }}" data-theme="light"></div>
-          </div>
-          {% endif %}
-
-          <!-- Math Captcha Fallback (shown if Turnstile missing or via JS fallback) -->
-          <div id="math-captcha-container" class="mb-3 {% if site_key and not force_math %}d-none{% endif %}">
-            <label class="form-label text-warning"><i class="fas fa-calculator me-2"></i>Câu hỏi bảo mật (Không dùng
-              Cloudflare)</label>
-            <div class="input-group">
-              <span class="input-group-text fw-bold">{{ math_question }}</span>
-              <input type="number" class="form-control" name="math_answer" placeholder="Kết quả?">
+          <form method="post" action="{{ url_for('auth.login') }}">
+            <div class="mb-3">
+              <label class="form-label" for="login_email">Email</label>
+              <input type="email" class="form-control" name="login_email" id="login_email"
+                placeholder="tenban@gmail.com" required>
             </div>
-            <small class="text-muted d-block mt-1">* Nhập kết quả phép tính trên để xác thực.</small>
+            <div class="mb-3">
+              <label class="form-label" for="login_password">Mật khẩu</label>
+              <input type="password" class="form-control" name="login_password" id="login_password"
+                placeholder="Nhập mật khẩu" required>
+            </div>
+
+            <!-- Cloudflare Turnstile -->
+            {% if site_key %}
+            <div class="mb-3 d-flex justify-content-center" id="turnstile-container">
+              <div class="cf-turnstile" data-sitekey="{{ site_key }}" data-theme="light"></div>
+            </div>
+            {% endif %}
+
+            <!-- Math Captcha Fallback (shown if Turnstile missing or via JS fallback) -->
+            <div id="math-captcha-container" class="mb-3 {% if site_key and not force_math %}d-none{% endif %}">
+              <label class="form-label text-warning"><i class="fas fa-calculator me-2"></i>Câu hỏi bảo mật (Không dùng
+                Cloudflare)</label>
+              <div class="input-group">
+                <span class="input-group-text fw-bold">{{ math_question }}</span>
+                <input type="number" class="form-control" name="math_answer" placeholder="Kết quả?">
+              </div>
+              <small class="text-muted d-block mt-1">* Nhập kết quả phép tính trên để xác thực.</small>
+            </div>
+
+            <div class="d-grid mb-3">
+              <button type="submit" class="btn btn-primary btn-lg rounded-pill fw-bold">Đăng nhập</button>
+            </div>
+          </form>
+
+          <div class="text-center mt-3">
+            <p class="small text-muted mb-0">Chưa có tài khoản?</p>
+            <a href="{{ url_for('auth.register') }}" class="small fw-bold text-decoration-none">Đăng ký tại đây</a>
           </div>
 
-          <div class="d-grid mb-3">
-            <button type="submit" class="btn btn-primary btn-lg rounded-pill fw-bold">Đăng nhập</button>
+          <div class="text-center mt-4 border-top pt-3">
+            <a href="{{ url_for('admin.admin_login') }}" class="small text-muted text-decoration-none">Đăng nhập Admin
+              →</a>
           </div>
-        </form>
 
-        <div class="text-center mt-3">
-          <p class="small text-muted mb-0">Chưa có tài khoản?</p>
-          <a href="{{ url_for('auth.register') }}" class="small fw-bold text-decoration-none">Đăng ký tại đây</a>
         </div>
-
-        <div class="text-center mt-4 border-top pt-3">
-          <a href="{{ url_for('admin.admin_login') }}" class="small text-muted text-decoration-none">Đăng nhập Admin
-            →</a>
-        </div>
-
       </div>
     </div>
   </div>
+</div>
 </div>
 
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>

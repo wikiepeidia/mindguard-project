@@ -11,6 +11,22 @@ from services.leaderboard_integrity import get_reporter_rankings
 main_bp = Blueprint('main', __name__)
 
 
+def _resolve_verification_status(scammer_report):
+    """Derive the correct verification status for display.
+
+    If a report has been approved but its verification_status column was
+    never updated (e.g. legacy data, seed scripts), we treat it as
+    'verified' rather than showing a misleading 'unverified' badge.
+    """
+    status = scammer_report.verification_status
+    if status and status != 'unverified':
+        return status
+    # Approved reports should always show at least 'verified'
+    if scammer_report.status == 'approved':
+        return 'verified'
+    return status or 'unverified'
+
+
 def serialize_public_search_result(raw_result: dict, is_admin: bool = False) -> dict:
     """Serialize search response with role-safe identifier masking."""
     identifier = to_display_identifier(
@@ -106,7 +122,7 @@ def index():
             "updated_at": updated_at_display,
             "report_type": scammer.report_type,
             "image": img_url,
-            "verification_status": scammer.verification_status or 'unverified',
+            "verification_status": _resolve_verification_status(scammer),
             "risk_score": scammer.risk_score or 0,
             "confirmed_by_count": scammer.confirmed_by_count or 0
         }
@@ -146,7 +162,7 @@ def leaderboard():
             "updated_at": entry.scammer.updated_at.strftime('%H:%M %d/%m/%Y'),
             "updated_date": entry.scammer.updated_at.strftime('%d/%m/%Y'),
             "report_type": entry.scammer.report_type,
-            "verification_status": entry.scammer.verification_status or 'unverified',
+            "verification_status": _resolve_verification_status(entry.scammer),
             "evidence_urls": entry.scammer.evidence_urls,
         })
 
@@ -163,7 +179,7 @@ def leaderboard():
             "updated_at": entry.scammer.updated_at.strftime('%H:%M %d/%m/%Y'),
             "updated_date": entry.scammer.updated_at.strftime('%d/%m/%Y'),
             "report_type": entry.scammer.report_type,
-            "verification_status": entry.scammer.verification_status or 'unverified',
+            "verification_status": _resolve_verification_status(entry.scammer),
             "evidence_urls": entry.scammer.evidence_urls,
         })
 
@@ -241,7 +257,7 @@ def scammer_profile(scammer_id):
         db.session.commit()
     
     # Get verification badge
-    verification_badge = get_verification_badge(scammer.verification_status or 'unverified')
+    verification_badge = get_verification_badge(_resolve_verification_status(scammer))
     
     # Get risk level info
     risk_info = get_risk_level_info(scammer.risk_score or 0)

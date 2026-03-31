@@ -222,6 +222,11 @@ document.addEventListener('DOMContentLoaded', function () {
             })
             .then(function (result) {
                 if (!result.ok) {
+                    // Handle authentication errors specifically
+                    if (result.payload && result.payload.code === 'UNAUTHENTICATED') {
+                        var loginUrl = result.payload.login_url || '/login';
+                        throw new Error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
+                    }
                     throw new Error(result.payload.error || 'Gửi tin nhắn thất bại.');
                 }
 

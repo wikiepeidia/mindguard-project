@@ -23,6 +23,7 @@ Read by: @frontend-developer (to know what endpoints to call and their contracts
 [Describe the authentication mechanism — e.g.:]
 
 Include the session token in every request:
+
 ```
 Authorization: Bearer <token>
 ```
@@ -52,6 +53,7 @@ All error responses follow this structure:
 ```
 
 **Common error codes**:
+
 | HTTP Status | Code | Meaning |
 |-------------|------|---------|
 | 400 | `VALIDATION_ERROR` | Request body or params failed validation |
@@ -87,6 +89,7 @@ All error responses follow this structure:
 **Description**: Create a new user account.
 
 **Request body**:
+
 ```json
 {
   "email": "string — valid email address",
@@ -96,6 +99,7 @@ All error responses follow this structure:
 ```
 
 **Response 201**:
+
 ```json
 {
   "user": {
@@ -117,6 +121,7 @@ All error responses follow this structure:
 **Description**: Authenticate with email and password. Returns a session token.
 
 **Request body**:
+
 ```json
 {
   "email": "string",
@@ -125,6 +130,7 @@ All error responses follow this structure:
 ```
 
 **Response 200**:
+
 ```json
 {
   "token": "string — JWT or session token",
@@ -158,6 +164,7 @@ All error responses follow this structure:
 **Description**: Send a password reset email to the specified address.
 
 **Request body**:
+
 ```json
 {
   "email": "string"
@@ -165,6 +172,7 @@ All error responses follow this structure:
 ```
 
 **Response 200**: Always returns 200 to prevent email enumeration.
+
 ```json
 {
   "message": "If an account exists, a reset email has been sent."
@@ -181,6 +189,7 @@ All error responses follow this structure:
 **Description**: Return the authenticated user's profile.
 
 **Response 200**:
+
 ```json
 {
   "id": "uuid",
@@ -200,6 +209,7 @@ All error responses follow this structure:
 **Description**: Update the authenticated user's profile fields.
 
 **Request body** (all fields optional):
+
 ```json
 {
   "name": "string"
@@ -216,8 +226,126 @@ All error responses follow this structure:
 
 ---
 
+### Chatbot
+
+#### POST /chatbot/send
+
+**Auth required**: Yes (session cookie). Returns JSON 401 for AJAX requests when unauthenticated.
+**Description**: Send a message to the AI chatbot. Persists the message and AI reply in the user's chat session. GET requests redirect to the chatbot page.
+
+**Request body**:
+
+```json
+{
+  "message": "string — the user's message",
+  "session_id": "integer | null — existing chat session ID, or null for new session"
+}
+```
+
+**Response 200**:
+
+```json
+{
+  "reply": "string — AI-generated reply text",
+  "session_id": "integer — the chat session ID (new or existing)",
+  "reply_source": "string — 'openrouter' or 'fallback'",
+  "reply_model": "string | null — AI model used",
+  "is_new_session": "boolean — whether a new session was created",
+  "session": {
+    "id": "integer",
+    "title": "string",
+    "updated_at": "string — DD/MM/YYYY",
+    "url": "string — URL to view session"
+  }
+}
+```
+
+**Error codes**:
+
+- `400` — Empty message
+- `401` — Not authenticated (JSON response for AJAX, redirect for browser)
+
+---
+
+#### POST /chatbot/api
+
+**Auth required**: No
+**Description**: Quick AI chat for the floating widget. Does not persist messages. GET requests return usage hint.
+
+**Request body**:
+
+```json
+{
+  "message": "string — the user's message"
+}
+```
+
+**Response 200**:
+
+```json
+{
+  "reply": "string — AI-generated reply text",
+  "reply_source": "string — 'openrouter' or 'fallback'",
+  "reply_model": "string | null — AI model used"
+}
+```
+
+---
+
+#### POST /chatbot/support
+
+**Auth required**: No
+**Description**: AI support chat for the scammer report page. Uses a specialized system prompt for report assistance.
+
+**Request body**:
+
+```json
+{
+  "message": "string — the user's support question"
+}
+```
+
+**Response 200**:
+
+```json
+{
+  "reply": "string — AI-generated support reply",
+  "reply_source": "string — 'openrouter' or 'fallback'",
+  "reply_model": "string | null — AI model used"
+}
+```
+
+---
+
+#### POST /chatbot/rename
+
+**Auth required**: Yes
+**Description**: Rename an existing chat session.
+
+**Request body**:
+
+```json
+{
+  "session_id": "integer — the session to rename",
+  "title": "string — new title"
+}
+```
+
+**Response 200**:
+
+```json
+{
+  "success": true
+}
+```
+
+**Error codes**: `400` — Session not found or not owned by user
+
+---
+
 ## Changelog
 
 | Date | Change |
 |------|--------|
+| 2026-03-31 | Document chatbot endpoints (send, api, support, rename). Fix 405 errors on GET requests. |
 | [YYYY-MM-DD] | Initial API definition — auth endpoints |

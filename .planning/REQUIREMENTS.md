@@ -124,27 +124,23 @@ Requirements for PostgreSQL migration and Vercel deployment fix.
 | DOC-02 | Phase 6 | Complete |
 | ML-01 | Phase 6 | Complete |
 | ML-02 | Phase 6 | Complete |
-| DBCFG-01 | TBD | Pending |
-| DBCFG-02 | TBD | Pending |
-| DBCFG-03 | TBD | Pending |
-| DBCFG-04 | TBD | Pending |
-| START-01 | TBD | Pending |
-| START-02 | TBD | Pending |
-| START-03 | TBD | Pending |
-| SEED-01 | TBD | Pending |
-| VDEP-01 | TBD | Pending |
-| VDEP-02 | TBD | Pending |
+| DBCFG-01 | Phase 7 | Pending |
+| DBCFG-02 | Phase 7 | Pending |
+| DBCFG-03 | Phase 7 | Pending |
+| DBCFG-04 | Phase 7 | Pending |
+| START-01 | Phase 8 | Pending |
+| START-02 | Phase 7 | Pending |
+| START-03 | Phase 8 | Pending |
+| SEED-01 | Phase 8 | Pending |
+| VDEP-01 | Phase 9 | Pending |
+| VDEP-02 | Phase 9 | Pending |
 
 **Coverage:**
 - v1.0 requirements: 20 total — all complete
-- v1.1 requirements: 10 total
-- Mapped to phases: 0
-- Unmapped: 10 ⚠️
-
-- v1 requirements: 16 total
-- Mapped to phases: 16
+- v1.1 requirements: 10 total — all mapped ✓
+- Mapped to phases: 10/10
 - Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-03-19*
-*Last updated: 2026-03-26 after Phase 6 documentation execution*
+*Last updated: 2026-04-03 after v1.1 roadmap creation*

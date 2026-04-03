@@ -2,9 +2,11 @@
 
 **Created:** 2026-03-19
 **Granularity:** standard
-**Coverage:** 16/16 v1 requirements mapped
+**Coverage:** 16/16 v1.0 requirements mapped · 10/10 v1.1 requirements mapped
 
 ## Phases
+
+### v1.0 — Core Platform (Completed)
 
 - [x] **Phase 1: Privacy & Data Governance Foundation** - Chuan hoa masking du lieu nhay cam va audit truy cap de tao nen tang tin cay.
  (completed 2026-03-20)
@@ -13,9 +15,17 @@
 - [x] **Phase 3: Light Mode UX System** - Dong bo light mode, design tokens va mobile-first cho cac trang uu tien.
  (completed 2026-03-20)
 - [x] **Phase 4: Quiz One-Question Flow** - Chuyen quiz sang luong 1 cau hoi/trang voi tien do ro rang va trang thai on dinh.
+ (completed 2026-03-23)
 - [x] **Phase 5: Leaderboard Integrity** - Ra mat bang vinh danh nguoi to cao nhieu nhat kem luat giam gian lan.
+ (completed 2026-03-23)
 - [x] **Phase 6: Reporting SOP & ML Readiness** - Chuan hoa tai lieu van hanh bao cao va dinh nghia lo trinh du lieu/ML cho giai doan sau v1.
  (completed 2026-03-26)
+
+### v1.1 — PostgreSQL & Vercel Deployment
+
+- [ ] **Phase 7: PostgreSQL Configuration & Connection** - Fix config, them driver, chuyen URI sang NeonDB PostgreSQL va xac nhan ket noi local.
+- [ ] **Phase 8: App Startup Cleanup & Data Seeding** - Xoa seed-on-cold-start, xac nhan create_all va chay seed 1 lan tren NeonDB.
+- [ ] **Phase 9: Vercel Deployment & Verification** - Cau hinh env vars tren Vercel va xac nhan deployment tra ve 200.
 
 ## Phase Details
 
@@ -106,17 +116,6 @@ Plans:
 
 - [x] 05-01-PLAN.md - Reporter leaderboard data layer and integrity service.
 
-## Progress Table
-
-| Phase | Plans Complete | Status | Completed |
-| ----- | -------------- | ------ | --------- |
-| 1. Privacy & Data Governance Foundation | 0/2 | Complete | 2026-03-20 |
-| 2. Anti-Spam Monitor & Soft Enforce | 3/3 | Complete | 2026-03-20 |
-| 3. Light Mode UX System | 3/3 | Complete | 2026-03-20 |
-| 4. Quiz One-Question Flow | 3/3 | Complete | 2026-03-23 |
-| 5. Leaderboard Integrity | 2/2 | Complete | 2026-03-23 |
-| 6. Reporting SOP & ML Readiness | 2/2 | Complete | 2026-03-26 |
-
 ### Phase 6: Reporting SOP & ML Readiness
 
 **Goal**: Team van hanh duoc quy trinh bao cao mot cach nhat quan ngay trong v1, dong thoi co lo trinh du lieu/ML ro rang cho giai doan sau ma khong dua auto-moderation vao production som.
@@ -133,3 +132,56 @@ Plans:
 
 - [x] 06-01-PLAN.md - Reporting SOP va huong dan nguoi dung cho luong bao cao hien tai.
 - [x] 06-02-PLAN.md - Data collection + ML moderation readiness roadmap (khong implement model trong v1).
+
+### Phase 7: PostgreSQL Configuration & Connection
+
+**Goal**: Flask app ket noi thanh cong toi NeonDB PostgreSQL thay vi SQLite, xac nhan local.
+**Depends on**: Phase 6 (v1.0 complete)
+**Requirements**: DBCFG-01, DBCFG-02, DBCFG-03, DBCFG-04, START-02
+**Success Criteria** (what must be TRUE):
+
+1. Flask app khoi dong local khong loi va ket noi duoc toi NeonDB PostgreSQL (SELECT 1 thanh cong).
+2. `.env/prosgressql_neondb.json` la file JSON hop le, `json.load()` parse duoc va chua key `DATABASE_URL`.
+3. `config.py` khong con bat ky logic SQLite hoac `IS_VERCEL` `/tmp` path nao.
+4. Connection su dung NeonDB pooler endpoint voi `pool_pre_ping=True`, `sslmode=require` va pool tuning phu hop serverless.
+**Plans**: TBD
+
+### Phase 8: App Startup Cleanup & Data Seeding
+
+**Goal**: App startup sach (khong seed moi cold start) va NeonDB co day du tables + seed data.
+**Depends on**: Phase 7
+**Requirements**: START-01, START-03, SEED-01
+**Success Criteria** (what must be TRUE):
+
+1. `app.py` khong con chay bat ky seed logic nao khi import hoac cold start.
+2. `db.create_all()` tao thanh cong tat ca tables trong NeonDB (xac nhan bang query).
+3. Seed data (quiz questions, scam types, admin user) ton tai trong NeonDB sau khi chay script 1 lan.
+4. App khoi dong va serve pages voi du lieu tu NeonDB (cac trang quiz, leaderboard, report tra ve ket qua).
+**Plans**: TBD
+
+### Phase 9: Vercel Deployment & Verification
+
+**Goal**: MindGuard deploy thanh cong tren Vercel va phuc vu tat ca cac trang khong con 500 errors.
+**Depends on**: Phase 8
+**Requirements**: VDEP-01, VDEP-02
+**Success Criteria** (what must be TRUE):
+
+1. Tat ca environment variables can thiet (DATABASE_URL, SECRET_KEY, API keys) duoc cau hinh trong Vercel dashboard.
+2. Vercel deployment hoan tat khong co build errors.
+3. Homepage, quiz, report va auth pages deu tra ve HTTP 200 tren production URL.
+4. Cold start hoan thanh trong gioi han 10s cua Vercel hobby tier.
+**Plans**: TBD
+
+## Progress Table
+
+| Phase | Plans Complete | Status | Completed |
+| ----- | -------------- | ------ | --------- |
+| 1. Privacy & Data Governance Foundation | 0/2 | Complete | 2026-03-20 |
+| 2. Anti-Spam Monitor & Soft Enforce | 3/3 | Complete | 2026-03-20 |
+| 3. Light Mode UX System | 3/3 | Complete | 2026-03-20 |
+| 4. Quiz One-Question Flow | 3/3 | Complete | 2026-03-23 |
+| 5. Leaderboard Integrity | 2/2 | Complete | 2026-03-23 |
+| 6. Reporting SOP & ML Readiness | 2/2 | Complete | 2026-03-26 |
+| 7. PostgreSQL Configuration & Connection | 0/0 | Not started | - |
+| 8. App Startup Cleanup & Data Seeding | 0/0 | Not started | - |
+| 9. Vercel Deployment & Verification | 0/0 | Not started | - |

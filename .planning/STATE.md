@@ -5,7 +5,7 @@ milestone_name: PostgreSQL & Vercel Deployment
 status: in_progress
 last_updated: "2026-04-03"
 progress:
-  total_phases: 0
+  total_phases: 3
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -20,16 +20,16 @@ progress:
 
 ## Current Position
 
-- **Current Phase**: Not started (defining requirements)
-- **Current Plan**: —
-- **Status**: Defining requirements
+- **Current Phase**: Phase 7 — PostgreSQL Configuration & Connection
+- **Current Plan**: — (not yet planned)
+- **Status**: Ready for planning
 - **Progress Bar**: [░░░░░░░░░░░░░░░░] 0%
 
 ## Performance Metrics
 
-- **v1.1 requirements total**: TBD
-- **Mapped to phases**: TBD
-- **Coverage**: TBD
+- **v1.1 requirements total**: 10
+- **Mapped to phases**: 10
+- **Coverage**: 100% ✓
 - **Open blockers**: 0
 
 ## Accumulated Context
@@ -46,17 +46,20 @@ progress:
 
 - Migrate toan bo sang NeonDB PostgreSQL (khong giu SQLite cho local).
 - Postgres truoc, Vercel fix sau — DB on dinh la tien quyet.
+- NeonDB cho ca local va production — cung connection string.
+- Fresh seed only — khong can migrate user data tu SQLite.
+- Dung `-pooler` endpoint de tranh connection exhaustion tren serverless.
 
 ### Open Todos
 
-(None — starting fresh milestone)
+(None — starting Phase 7)
 
 ### Blockers
 
-- Vercel deployment hien tai bi 500 errors — can debug sau khi Postgres on dinh.
+- Vercel deployment hien tai bi 500 errors — root cause: SQLite ephemeral + seed-on-cold-start.
 
 ## Session Continuity
 
 - **Last Updated**: 2026-04-03
-- **Stopped at**: Milestone v1.1 initialization — defining requirements
-- **Resume file**: .planning/PROJECT.md
+- **Stopped at**: Roadmap created — ready to plan Phase 7
+- **Resume file**: .planning/ROADMAP.md

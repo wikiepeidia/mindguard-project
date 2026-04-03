@@ -3,7 +3,7 @@
 **Defined:** 2026-03-19
 **Core Value:** Nguoi dung co the hoc, kiem tra nhan thuc va gui bao cao lua dao mot cach de dung, an toan, va dang tin cay.
 
-## v1 Requirements
+## v1.0 Requirements (Completed)
 
 ### UI/UX
 
@@ -13,16 +13,16 @@
 
 ### Quiz
 
-- [ ] **QUIZ-01**: Nguoi dung lam bai quiz theo luong 1 cau hoi moi trang.
-- [ ] **QUIZ-02**: Nguoi dung thay thanh tien do va trang thai ro rang trong suot bai quiz.
-- [ ] **QUIZ-03**: Trang thai bai lam duoc giu on dinh khi refresh/back trong phien hop le.
-- [ ] **QUIZ-04**: He thong bo sung bo cau hoi theo chu de bao mat/lua dao de phu hop luong quiz moi.
+- [x] **QUIZ-01**: Nguoi dung lam bai quiz theo luong 1 cau hoi moi trang.
+- [x] **QUIZ-02**: Nguoi dung thay thanh tien do va trang thai ro rang trong suot bai quiz.
+- [x] **QUIZ-03**: Trang thai bai lam duoc giu on dinh khi refresh/back trong phien hop le.
+- [x] **QUIZ-04**: He thong bo sung bo cau hoi theo chu de bao mat/lua dao de phu hop luong quiz moi.
 
 ### Privacy
 
-- [ ] **PRIV-01**: So dien thoai duoc che, chi hien 3 so cuoi o tat ca diem hien thi.
-- [ ] **PRIV-02**: Quy tac masking du lieu nhay cam duoc ap dung nhat quan trong toan he thong.
-- [ ] **PRIV-03**: Admin co nhat ky truy cap du lieu nhay cam de phuc vu kiem toan.
+- [x] **PRIV-01**: So dien thoai duoc che, chi hien 3 so cuoi o tat ca diem hien thi.
+- [x] **PRIV-02**: Quy tac masking du lieu nhay cam duoc ap dung nhat quan trong toan he thong.
+- [x] **PRIV-03**: Admin co nhat ky truy cap du lieu nhay cam de phuc vu kiem toan.
 
 ### Anti-Spam
 
@@ -36,7 +36,43 @@
 - [x] **LEAD-01**: Hien thi bang vinh danh nguoi to cao nhieu nhat.
 - [x] **LEAD-02**: Ap dung integrity rule de giam gian lan tren leaderboard.
 
-## v2 Requirements
+### Documentation & Operations
+
+- [x] **DOC-01**: Admin co tai lieu SOP bang tieng Viet cho luong kiem duyet bao cao.
+- [x] **DOC-02**: Nguoi dung co tai lieu huong dan bang tieng Viet de gui bao cao dung cach.
+
+### ML Readiness
+
+- [x] **ML-01**: Team co schema du lieu/gan nhan va quy tac an danh de thu thap du lieu moderation.
+- [x] **ML-02**: Team co lo trinh offline-first cho baseline ML/DL va human-in-the-loop rollout.
+
+## v1.1 Requirements
+
+Requirements for PostgreSQL migration and Vercel deployment fix.
+
+### Database Configuration
+
+- [ ] **DBCFG-01**: `.env/prosgressql_neondb.json` duoc cau truc lai thanh JSON hop le voi key `DATABASE_URL`
+- [ ] **DBCFG-02**: `config.py` chuyen `SQLALCHEMY_DATABASE_URI` tu SQLite sang NeonDB PostgreSQL
+- [ ] **DBCFG-03**: `psycopg2-binary` duoc them vao `requirements.txt`
+- [ ] **DBCFG-04**: SQLAlchemy engine duoc cau hinh `pool_pre_ping=True` va NeonDB pooler endpoint
+
+### App Startup
+
+- [ ] **START-01**: Cold-start seeding bi xoa khoi `app.py` (khong chay `seed_all.py` moi Vercel invocation)
+- [ ] **START-02**: Logic `IS_VERCEL` SQLite `/tmp` path bi xoa khoi `config.py`
+- [ ] **START-03**: `db.create_all()` duoc xac nhan hoat dong voi NeonDB pooler connection
+
+### Data Seeding
+
+- [ ] **SEED-01**: Seed scripts chay 1 lan duy nhat de tao du lieu ban dau tren NeonDB
+
+### Vercel Deployment
+
+- [ ] **VDEP-01**: `DATABASE_URL` va cac secrets hien co duoc cau hinh trong Vercel environment variables
+- [ ] **VDEP-02**: Vercel deployment tra ve 200 (khong con 500 errors)
+
+## v2 Requirements (Deferred)
 
 ### Anti-Fraud Nang Cao
 
@@ -48,28 +84,21 @@
 - **LEAD-03**: Co che diem co trong so chat luong (khong chi dem so luong).
 - **LEAD-04**: Giai thich minh bach ve cach tinh diem va dieu kien xep hang.
 
-### Mo Rong Nen Tang
+### Platform
 
-- **ARCH-01**: Dinh nghia tieu chi kich hoat migration SQLite -> PostgreSQL theo nguong tai va SLO.
-
-### Documentation & Operations
-
-- **DOC-01**: Admin co tai lieu SOP bang tieng Viet cho luong kiem duyet bao cao, duyet/tu choi va xuat dataset an toan.
-- **DOC-02**: Nguoi dung co tai lieu huong dan bang tieng Viet de gui bao cao dung cach, kem bang chung va hieu trang thai xu ly.
-
-### ML Readiness
-
-- **ML-01**: Team co schema du lieu/gan nhan va quy tac an danh de thu thap du lieu moderation trong 1 thang truoc khi train model.
-- **ML-02**: Team co lo trinh offline-first cho baseline ML/DL, evaluation va human-in-the-loop rollout sau v1.
+- **ARCH-01**: Cloud storage cho file uploads (evidence images) thay cho local disk.
+- **ARCH-02**: NeonDB branching cho Vercel preview deployments.
 
 ## Out of Scope
 
 | Feature | Reason |
 | ------- | ------ |
-| Dark mode trong v1 | Uu tien chinh hien tai la light mode de de nhin va dong bo UX |
-| Replatform sang SPA/microservices | Rui ro hoi quy cao, khong can thiet cho muc tieu v1 |
-| Hard-block chi dua tren IP | De false-positive cao va khong dap ung yeu cau da tin hieu |
-| Big-bang redesign toan bo IA/navigation | Vuot scope, de lam cham tien do va tang rui ro |
+| File upload cloud storage | Deferred — evidence images khong critical cho deploy fix |
+| NeonDB branching for preview deploys | Complexity khong can thiet cho initial deployment |
+| Alembic/flask-migrate | Project dung manual migration scripts theo conventions |
+| Auto-scaling/multi-region | v1.1 chi can 1 region on dinh |
+| Dark mode | Uu tien infrastructure stability |
+| SPA/microservices replatform | Rui ro hoi quy cao, khong can thiet |
 
 ## Traceability
 
@@ -78,25 +107,39 @@
 | UI-01 | Phase 3 | Complete |
 | UI-02 | Phase 3 | Complete |
 | UI-03 | Phase 3 | Complete |
-| QUIZ-01 | Phase 4 | Pending |
-| QUIZ-02 | Phase 4 | Pending |
-| QUIZ-03 | Phase 4 | Pending |
-| QUIZ-04 | Phase 4 | Pending |
-| PRIV-01 | Phase 1 | Pending |
-| PRIV-02 | Phase 1 | Pending |
-| PRIV-03 | Phase 1 | Pending |
-| ABUS-01 | Phase 2 | Completed |
-| ABUS-02 | Phase 2 | Completed |
-| ABUS-03 | Phase 2 | Completed |
-| ABUS-04 | Phase 2 | Completed |
+| QUIZ-01 | Phase 4 | Complete |
+| QUIZ-02 | Phase 4 | Complete |
+| QUIZ-03 | Phase 4 | Complete |
+| QUIZ-04 | Phase 4 | Complete |
+| PRIV-01 | Phase 1 | Complete |
+| PRIV-02 | Phase 1 | Complete |
+| PRIV-03 | Phase 1 | Complete |
+| ABUS-01 | Phase 2 | Complete |
+| ABUS-02 | Phase 2 | Complete |
+| ABUS-03 | Phase 2 | Complete |
+| ABUS-04 | Phase 2 | Complete |
 | LEAD-01 | Phase 5 | Complete |
 | LEAD-02 | Phase 5 | Complete |
 | DOC-01 | Phase 6 | Complete |
 | DOC-02 | Phase 6 | Complete |
 | ML-01 | Phase 6 | Complete |
 | ML-02 | Phase 6 | Complete |
+| DBCFG-01 | TBD | Pending |
+| DBCFG-02 | TBD | Pending |
+| DBCFG-03 | TBD | Pending |
+| DBCFG-04 | TBD | Pending |
+| START-01 | TBD | Pending |
+| START-02 | TBD | Pending |
+| START-03 | TBD | Pending |
+| SEED-01 | TBD | Pending |
+| VDEP-01 | TBD | Pending |
+| VDEP-02 | TBD | Pending |
 
 **Coverage:**
+- v1.0 requirements: 20 total — all complete
+- v1.1 requirements: 10 total
+- Mapped to phases: 0
+- Unmapped: 10 ⚠️
 
 - v1 requirements: 16 total
 - Mapped to phases: 16

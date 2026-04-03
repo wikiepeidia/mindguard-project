@@ -1,248 +1,399 @@
-# Architecture Integration Strategy
-
-**Domain:** Cybersecurity education + anti-scam reporting platform (Flask monolith)
-**Researched:** 2026-03-19
-**Research mode:** Ecosystem + brownfield integration
-**Overall confidence:** HIGH
-
-## Executive Recommendation
-
-Integrate new capabilities as **additive slices** around existing blueprints, not by rewriting the request handlers. The current structure (single Flask app, blueprint boundaries, SQLAlchemy models, helper utilities) is already suitable for incremental hardening.
-
-To minimize regression risk:
-
-1. Introduce anti-spam through a dedicated policy/service layer that wraps current report submission flow.
-2. Add persistence for anti-spam telemetry in new tables and nullable columns only; do not mutate existing semantics first.
-3. Modernize UI through shared design tokens and page-by-page migration, preserving route names, template names, and form payload contracts.
-4. Roll out in observe -> enforce phases (log-only first, then soft blocks, then strict limits).
-
-## Current Architecture Constraints (from codebase)
-
-- Composition root is `app.py` with blueprint registration for `main`, `scammer`, `chatbot`, `quiz`, `auth`, `admin`.
-- Critical report path is `routes/scammer.py::report_scammer()` and currently mixes validation, CAPTCHA checks, file upload, encryption, and DB writes in one function.
-- Identity context is session-based (`session['registration_email']`, `session['is_admin']`, `session['reporter_id']`).
-- Existing anti-abuse is CAPTCHA-only (Cloudflare + math fallback) and does not include rate limits or behavior scoring.
-- UI is server-rendered Jinja + static CSS/JS and can be modernized without API re-platforming.
-
-Implication: architecture should add thin integration seams around existing functions before any deeper refactor.
-
-## Target Integration Architecture
-
-### Component Boundaries
-
-| Component | Responsibility | Communicates With | Change Type |
-|-----------|----------------|-------------------|-------------|
-| Flask App Assembly (`app.py`) | Register extensions/blueprints and global middleware hooks | Blueprints, extensions | Small update |
-| Routes (`routes/*.py`) | Request parsing, response rendering, orchestration | Services, models, utils | Minimal edits |
-| Anti-Spam Service (`services/anti_spam_service.py`) | Risk evaluation, decision (allow/challenge/block), reason codes | Policy engine, telemetry repo, config | New |
-| Policy Engine (`utils/anti_spam_rules.py`) | Deterministic rules: velocity, IP/cookie reputation, duplicate fingerprinting | Request metadata + historical counters | New |
-| Telemetry Repository (`services/abuse_repository.py`) | Query/write anti-spam events and counters | New abuse tables + existing report tables | New |
-| Privacy Utility (`utils/privacy.py`) | Canonical masking and hashing for display + storage-safe logs | Routes, templates, helpers | New (or merge into helpers) |
-| UI Design System (`static/css/tokens.css`, shared partials) | Color/type/spacing/motion tokens for modernized light UI | All page-level CSS files, base template | New + incremental adoption |
-
-### Data Model Additions (manual migration scripts)
-
-Use additive schema changes only (manual scripts in `database/`):
-
-1. `abuse_events`
-
-- `id`, `created_at`
-- `event_type` (report_submit, login_attempt, register_attempt)
-- `ip_hash`
-- `cookie_id`
-- `fingerprint_hash`
-- `route_name`
-- `decision` (allow, challenge, block)
-- `risk_score`, `reason_codes` (json/text)
-
-1. `abuse_counters`
-
-- `id`, `window_start`, `window_end`
-- `scope_type` (ip, cookie, fingerprint, ip_cookie)
-- `scope_key_hash`
-- `event_type`
-- `count`
-
-1. Optional additive columns on `scammer_reports`
-
-- `submit_ip_hash` nullable
-- `submit_cookie_id` nullable
-- `spam_risk_score` nullable
-- `spam_flags` nullable text/json
-
-All new fields default nullable to avoid write-path breakage.
-
-## Integration Patterns to Use
-
-### Pattern 1: Route-Guard Wrapper (recommended)
-
-**What:** Keep existing route logic, but add one guard call at top of POST handlers.
-
-**How:**
-
-1. Build normalized request context (`ip`, `cookie_id`, `user/session`, `payload fingerprint`).
-2. Call `anti_spam_service.evaluate(context)`.
-3. Branch by decision:
-
-- `allow`: continue current flow unchanged.
-- `challenge`: force CAPTCHA regeneration and continue only after success.
-- `block`: return graceful error and log event.
-
-4. Write telemetry event for all outcomes.
-
-**Why low risk:** Existing validation/business logic remains intact; anti-spam is additive and removable by feature flag.
-
-### Pattern 2: Observe-Then-Enforce Rollout
-
-**What:** Deploy policy in shadow mode first.
-
-**Stages:**
-
-1. `monitor`: evaluate + log only, never block.
-2. `soft_enforce`: block only clearly abusive thresholds.
-3. `strict_enforce`: full threshold policy.
-
-**Why low risk:** Prevents accidental user lockout from incorrect thresholds.
-
-### Pattern 3: Feature-Flagged UI Contract Preservation
-
-**What:** Introduce a design token layer while preserving existing template variables and route endpoints.
-
-**How:**
-
-1. Add token stylesheet and shared UI partials in `templates/partials/`.
-2. Migrate page CSS incrementally (`report_scammer`, `quiz`, `index`) without changing endpoint contracts.
-3. Keep form field names backward-compatible during migration.
-
-**Why low risk:** Frontend appearance can evolve independently from backend behavior.
-
-## End-to-End Data Flow (target)
-
-### Flow A: Report Submission with Anti-Spam
-
-1. Browser submits `POST /scammer/report`.
-2. Route extracts anti-spam context (IP, cookie id, payload fingerprint, route metadata).
-3. `AntiSpamService.evaluate()` executes:
-
-- velocity checks (per IP, per cookie, per fingerprint windows)
-- duplicate-content checks
-- recent block/challenge history checks
-
-4. Decision returned:
-
-- allow -> existing CAPTCHA + report persistence path
-- challenge -> force CAPTCHA path and retry
-- block -> flash message + redirect, no report write
-
-5. Telemetry is stored in `abuse_events` and counters updated.
-2. Existing `ScammerReport` and leaderboard updates proceed only on allow/challenge pass.
-
-### Flow B: Login/Register Hardening (same pattern)
-
-1. `POST /login` or `POST /register` calls anti-spam evaluation before credential/account checks.
-2. High-risk actors receive challenge/block based on stage.
-3. Telemetry retained for correlation with report abuse.
-
-### Flow C: Privacy-Safe Display
-
-1. Routes pass canonical masked values from `utils/privacy.py`.
-2. Templates render masked phone/account identifiers consistently.
-3. Raw sensitive values are never logged in anti-spam telemetry.
-
-## Build Order for Roadmap Sequencing
-
-1. **Phase 1: Instrumentation Foundation (no user-facing behavior changes)**
-
-- Add anti-spam tables and migration scripts.
-- Add service/policy modules and logging hooks in report/login/register routes in monitor mode.
-- Add config flags: `ANTI_SPAM_MODE`, threshold defaults.
-
-1. **Phase 2: Report Flow Enforcement (soft)**
-
-- Enable `challenge` then limited `block` in `routes/scammer.py`.
-- Add admin diagnostics panel for abuse events.
-- Validate false-positive rate before expansion.
-
-1. **Phase 3: Auth Flow Enforcement**
-
-- Reuse same service on login/register endpoints.
-- Add per-route threshold profiles.
-
-1. **Phase 4: UI Design System Foundation**
-
-- Add tokenized CSS layer and base layout modernization (light-first).
-- No behavior changes; visual regression checks only.
-
-1. **Phase 5: Page-by-Page UX Modernization**
-
-- Modernize report page and quiz one-question-per-page flow.
-- Preserve existing form contract and route names.
-
-1. **Phase 6: Tightening + Cleanup**
-
-- Remove dead CSS/JS after migration.
-- Promote strict anti-spam mode if metrics are healthy.
-
-## Regression Control Plan
-
-- Keep all existing route URLs and HTTP methods unchanged.
-- Keep existing form field names while introducing new UI components.
-- Use additive DB migrations only; no destructive schema edits in same milestone.
-- Gate anti-spam decisions behind environment/config flags.
-- Add route-level smoke tests for:
-  - `GET/POST /scammer/report`
-  - `GET/POST /login`
-  - `GET/POST /register`
-  - leaderboard and profile rendering
-- Add golden-path snapshots for modernized templates (desktop + mobile breakpoints).
+# Architecture Patterns
+
+**Domain:** SQLite → NeonDB PostgreSQL migration + Vercel deployment fix for Flask app
+**Researched:** 2026-04-03
+**Confidence:** HIGH (verified via Neon official docs, SQLAlchemy docs, codebase analysis)
+
+---
+
+## Current Architecture (Broken)
+
+```
+Browser → Vercel Edge → @vercel/python (app.py)
+                              │
+                              ├─ db.create_all()         ← creates tables in /tmp
+                              ├─ run_seed()               ← seeds on EVERY cold start
+                              ├─ SQLite at /tmp/mindguard_v2.db  ← ephemeral, lost on cold restart
+                              └─ 500 errors               ← likely: /tmp race, slow cold start, seed failures
+```
+
+**Root cause of 500 errors (diagnosis):**
+1. Vercel's `/tmp` is ephemeral — data lost between function invocations
+2. `db.create_all()` + `run_seed()` run on every cold start → slow, may timeout
+3. SQLite on `/tmp` is not shared across function instances → each instance has different data
+4. Concurrent function instances may race on SQLite file creation
+
+---
+
+## Target Architecture (NeonDB PostgreSQL)
+
+```
+Browser → Vercel Edge → @vercel/python (app.py)
+                              │
+                              ├─ SQLAlchemy (psycopg2-binary)
+                              │       │
+                              │       └─ TCP + SSL → NeonDB Pooler (PgBouncer)
+                              │                          │
+                              │                          └─ NeonDB PostgreSQL
+                              │                             (ap-southeast-1)
+                              │                             Persistent storage
+                              │                             Shared across ALL instances
+                              └─ No cold-start seed
+                                 No /tmp dependency
+                                 No IS_VERCEL branching
+```
+
+**Key properties:**
+- All Vercel function instances connect to the **same** NeonDB PostgreSQL database
+- Data persists across cold starts — no re-seeding needed
+- Connection pooling via NeonDB's built-in PgBouncer (add `-pooler` to hostname)
+- `pool_pre_ping=True` handles Neon's scale-to-zero (compute may suspend after idle)
+
+---
+
+## Component Boundaries
+
+| Component | Current Responsibility | Change Required | Effort |
+|-----------|----------------------|-----------------|--------|
+| `config.py` | SQLite URI, IS_VERCEL branching, .env JSON loading | **MODIFY** — PostgreSQL URI, remove IS_VERCEL/DB_PATH, fix JSON config | Medium |
+| `extensions.py` | Bare `SQLAlchemy()` init | **MODIFY** — No change to file, but engine_options set via config | Minimal |
+| `app.py` | `db.create_all()`, cold-start seed, legacy fix | **MODIFY** — Remove IS_VERCEL seed block, keep create_all (safe for Postgres) | Medium |
+| `models/models.py` | 13 SQLAlchemy models | **NO CHANGE** — All types are PostgreSQL-compatible | None |
+| `models/__init__.py` | Re-export `from .models import *` | **NO CHANGE** | None |
+| `vercel.json` | @vercel/python build config | **MODIFY** — Add env var config, possibly adjust build | Low |
+| `requirements.txt` | Flask + SQLAlchemy deps | **MODIFY** — Add `psycopg2-binary` | Minimal |
+| `.env/prosgressql_neondb.json` | Malformed — raw connection string, not valid JSON | **REWRITE** — Proper JSON structure | Low |
+| `database/seed_all.py` | Seeds data (called on cold start for Vercel) | **MODIFY** — Run once via CLI, not on cold start | Low |
+| `database/migrate_*.py` | Raw SQL with SQLite syntax (AUTOINCREMENT) | **OBSOLETE** — Not needed; `db.create_all()` creates Postgres schema | None |
+| `routes/*.py` | Blueprint handlers | **NO CHANGE** — Use ORM, no raw SQLite SQL | None |
+| `services/*.py` | Business logic (anti_spam, leaderboard) | **NO CHANGE** — Use ORM | None |
+| `tests/**/*.py` | Unit tests using `sqlite:///:memory:` | **OPTIONAL** — Can keep SQLite for fast unit tests, or switch to Postgres test DB | Low |
+
+---
+
+## Data Flow: Serverless PostgreSQL Connection
+
+### Connection Lifecycle (per Vercel function invocation)
+
+```
+1. Cold Start (first request to a new function instance):
+   ┌─────────────────────────────────────────────────┐
+   │ Vercel spawns Python process                     │
+   │ → Flask app initializes                          │
+   │ → SQLAlchemy creates engine with pool            │
+   │ → First request triggers TCP connection          │
+   │   to NeonDB Pooler (PgBouncer)                  │
+   │ → PgBouncer routes to Postgres compute           │
+   │   (may wake from scale-to-zero: ~200-500ms)     │
+   │ → Connection established, query executes         │
+   └─────────────────────────────────────────────────┘
+
+2. Warm Request (reuses existing function instance):
+   ┌─────────────────────────────────────────────────┐
+   │ SQLAlchemy reuses pooled connection              │
+   │ → pool_pre_ping checks connection is alive       │
+   │ → If stale (Neon suspended), reconnects          │
+   │ → Query executes on existing PgBouncer pool      │
+   └─────────────────────────────────────────────────┘
+
+3. Function Idle → Vercel Freezes Instance:
+   ┌─────────────────────────────────────────────────┐
+   │ SQLAlchemy pool connections go idle              │
+   │ → NeonDB PgBouncer returns them to pool          │
+   │ → After ~5min idle, NeonDB compute suspends      │
+   │ → Next request: pool_pre_ping detects stale      │
+   │   connection, SQLAlchemy reconnects transparently │
+   └─────────────────────────────────────────────────┘
+```
+
+### Connection String Format
+
+**Pooled (for Vercel serverless — REQUIRED):**
+```
+postgresql://{user}:{password}@{endpoint}-pooler.{region}.aws.neon.tech/{database}?sslmode=require
+```
+Note the `-pooler` suffix on the endpoint hostname. This routes through NeonDB's PgBouncer.
+
+**Direct (for migrations, seed scripts, pg_dump — optional):**
+```
+postgresql://{user}:{password}@{endpoint}.{region}.aws.neon.tech/{database}?sslmode=require
+```
+
+---
+
+## Detailed Modification Plans
+
+### 1. `.env/prosgressql_neondb.json` — REWRITE
+
+**Current (malformed):**
+```
+postgresql: //neondb_owner:...@ep-lingering-violet-a1jiok7c.ap-southeast-1.aws.neon.tech/neondb?sslmode=require
+```
+
+**Target (valid JSON):**
+```json
+{
+  "DATABASE_URL": "postgresql://neondb_owner:<password>@ep-lingering-violet-a1jiok7c-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require",
+  "DATABASE_URL_DIRECT": "postgresql://neondb_owner:<password>@ep-lingering-violet-a1jiok7c.ap-southeast-1.aws.neon.tech/neondb?sslmode=require"
+}
+```
+
+Key changes:
+- Valid JSON structure
+- `-pooler` suffix on endpoint for the primary DATABASE_URL
+- Separate `DATABASE_URL_DIRECT` for seed/migration scripts
+- Password stored in JSON (local dev), Vercel env vars for production
+
+### 2. `config.py` — MODIFY
+
+**Remove:**
+- `IS_VERCEL` flag
+- `DB_PATH` / SQLite path logic
+- `sqlite:///` URI construction
+
+**Add:**
+- Load from `.env/prosgressql_neondb.json`
+- `SQLALCHEMY_DATABASE_URI` = PostgreSQL connection string (pooled)
+- `SQLALCHEMY_ENGINE_OPTIONS` with:
+  - `pool_pre_ping=True` — detect stale connections after Neon scale-to-zero
+  - `pool_recycle=300` — recycle connections every 5 min (matches Neon default suspend)
+  - `pool_size=5` — small pool for serverless (each function instance)
+  - `max_overflow=10` — allow burst connections
+
+**Pattern:**
+```python
+neon_config = load_local_env('prosgressql_neondb.json')
+
+class Config:
+    SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL") or neon_config.get("DATABASE_URL")
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        "pool_pre_ping": True,
+        "pool_recycle": 300,
+        "pool_size": 5,
+        "max_overflow": 10,
+    }
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+```
+
+**Env var priority:** `DATABASE_URL` env var (Vercel) → `.env/prosgressql_neondb.json` (local dev)
+
+### 3. `app.py` — MODIFY
+
+**Remove:**
+- `if Config.IS_VERCEL: from database.seed_all import run_seed; run_seed()` block
+- The entire cold-start seed pattern
+
+**Keep:**
+- `db.create_all()` — safe for PostgreSQL, creates tables if they don't exist (idempotent)
+- Legacy data fix block (updates verification_status) — ORM-based, works on Postgres
+
+**Result:** App startup becomes ~instant on Vercel (no seed overhead).
+
+### 4. `requirements.txt` — MODIFY
+
+**Add:**
+```
+psycopg2-binary==2.9.9
+```
+
+This is the PostgreSQL adapter that SQLAlchemy uses under the hood when given a `postgresql://` URI. The `-binary` variant includes pre-compiled C extensions (no build tools needed on Vercel).
+
+### 5. `vercel.json` — MODIFY
+
+**Current config is minimal but functional for @vercel/python.** Main changes:
+- Ensure `DATABASE_URL` env var is set in Vercel project settings (not in vercel.json)
+- Consider adding `maxMemory` if cold starts are slow:
+
+```json
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "app.py",
+      "use": "@vercel/python",
+      "config": { "maxMemory": 512 }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/static/(.*)",
+      "dest": "/static/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/app.py"
+    }
+  ]
+}
+```
+
+**Critical:** Set `DATABASE_URL` in Vercel project settings (Settings → Environment Variables), pointing to the pooled NeonDB connection string. Do NOT put the connection string in `vercel.json`.
+
+### 6. `database/seed_all.py` — MODIFY (usage pattern change)
+
+**No code changes needed** — `run_seed()` uses SQLAlchemy ORM, which is Postgres-compatible. The seed functions already check for existing records before inserting (idempotent).
+
+**Usage change:**
+- **Before:** Called automatically on every Vercel cold start
+- **After:** Run manually once: `python database/seed_all.py` (from local machine or CI)
+- Data persists in NeonDB — no need to re-seed
+
+### 7. Tests — OPTIONAL
+
+Tests currently use `sqlite:///:memory:` for isolation. Two strategies:
+
+| Strategy | Pros | Cons |
+|----------|------|------|
+| **Keep SQLite for tests** | Fast, no external dependency, works offline | May miss Postgres-specific behavior |
+| **Use Neon branch for tests** | Tests against real Postgres dialect | Slower, needs network, needs cleanup |
+
+**Recommendation:** Keep `sqlite:///:memory:` for unit tests (speed), add a separate integration test config that uses Neon branch if needed later.
+
+---
+
+## Model Compatibility Audit
+
+All 13 models in `models/models.py` use standard SQLAlchemy types:
+
+| SQLAlchemy Type | SQLite Mapping | PostgreSQL Mapping | Compatible? |
+|----------------|---------------|-------------------|-------------|
+| `db.Integer` | INTEGER | INTEGER | Yes |
+| `db.String(N)` | VARCHAR(N) | VARCHAR(N) | Yes |
+| `db.Text` | TEXT | TEXT | Yes |
+| `db.Boolean` | INTEGER (0/1) | BOOLEAN | Yes |
+| `db.DateTime` | TEXT/REAL | TIMESTAMP | Yes |
+| `db.ForeignKey` | Supported | Supported | Yes |
+
+**No SQLite-specific code in models.** The `AUTOINCREMENT` keyword only appears in raw SQL migration scripts (`database/migrate_*.py`), which are obsolete — `db.create_all()` handles Postgres schema creation with `SERIAL` primary keys automatically.
+
+**One consideration:** `default=datetime.utcnow` works identically on both. No changes needed.
+
+---
+
+## Patterns to Follow
+
+### Pattern 1: Environment-Aware Config with Single DB
+**What:** Use PostgreSQL for both local dev and production (same NeonDB instance).
+**When:** Always — simplifies config, eliminates SQLite/Postgres incompatibility risk.
+**Example:**
+```python
+# config.py
+SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL") or neon_config.get("DATABASE_URL")
+```
+
+### Pattern 2: Pooled Connections for Serverless
+**What:** Use NeonDB's PgBouncer pooler endpoint for all application connections.
+**When:** Always for Vercel serverless functions — prevents connection exhaustion.
+**Why:** Each Vercel function instance creates its own connection pool. Without PgBouncer, 10 concurrent instances x 5 pool_size = 50 direct Postgres connections. With PgBouncer, these are multiplexed through a shared pool.
+
+### Pattern 3: pool_pre_ping for Scale-to-Zero Resilience
+**What:** SQLAlchemy checks if a connection is alive before using it.
+**When:** Required for NeonDB — compute may suspend after idle, killing TCP connections.
+**Source:** Neon SQLAlchemy docs — "Set the SQLAlchemy pool_pre_ping parameter to true"
+
+### Pattern 4: Idempotent Seed Scripts
+**What:** Seed scripts check for existing records before inserting.
+**When:** Running seeds against persistent database — prevents duplicates.
+**Status:** Already implemented in `seed_all.py` (checks `Registration.query.filter_by(email=...).first()` etc.)
+
+---
 
 ## Anti-Patterns to Avoid
 
-1. **Big-bang rewrite of `routes/scammer.py`**
+### Anti-Pattern 1: Cold-Start Seeding
+**What:** Running `run_seed()` on every Vercel cold start
+**Why bad:** Slow startup (seed_all.py creates ~50+ records), wastes DB connections, risks timeouts on Vercel (10s default)
+**Instead:** Seed once via CLI, remove from app.py startup
 
-- High chance of breaking report creation, evidence upload, and leaderboard sync.
+### Anti-Pattern 2: IS_VERCEL Environment Branching for DB
+**What:** Different database paths for Vercel vs local
+**Why bad:** Testing divergence — local uses SQLite, production uses (broken) SQLite on /tmp
+**Instead:** Single PostgreSQL connection string for all environments
 
-1. **Hard blocking from day one**
+### Anti-Pattern 3: Direct (Non-Pooled) Connections from Serverless
+**What:** Using NeonDB endpoint without `-pooler` suffix
+**Why bad:** Each serverless function instance opens direct Postgres connections, quickly exhausting `max_connections` (104 on free tier 0.25 CU)
+**Instead:** Always use `-pooler` endpoint for application connections
 
-- Causes false-positive lockouts without baseline telemetry.
+### Anti-Pattern 4: Storing Connection Strings in vercel.json
+**What:** Putting DATABASE_URL in vercel.json (committed to git)
+**Why bad:** Credentials exposed in source control
+**Instead:** Set via Vercel project settings (Settings → Environment Variables)
 
-1. **Mixing anti-spam logic directly into templates/JS**
+---
 
-- Security decisions must remain server-side and auditable.
+## New Components Needed
 
-1. **Replacing session identity model during same milestone**
+| Component | Purpose | Priority |
+|-----------|---------|----------|
+| None | No new files needed — all changes are modifications to existing files | — |
 
-- Separate concern; increases blast radius.
+**Explanation:** The migration is purely a config/dependency change. SQLAlchemy abstracts the DB engine, so switching from SQLite to PostgreSQL requires only:
+1. New dependency (`psycopg2-binary`)
+2. New connection string (PostgreSQL URI)
+3. Engine options (pool_pre_ping, pool_recycle)
+4. Removing SQLite-specific workarounds (IS_VERCEL, /tmp, cold-start seed)
 
-## Scalability Path
+No new abstraction layers, no new files, no new patterns.
 
-| Concern | Current (SQLite, low scale) | Mid Scale | High Scale |
-|---------|-----------------------------|-----------|------------|
-| Rate counters | SQLite counters acceptable | Move counters to Redis | Redis + async analytics pipeline |
-| Rule evaluation | Inline synchronous | Cached thresholds + precomputed windows | Dedicated abuse service/process |
-| UI delivery | Static files from Flask | Add CDN/cache headers | Split static hosting + edge cache |
+---
 
-## Confidence and Risk Notes
+## Build Order (Dependency-Aware)
 
-- **HIGH confidence:** Blueprint-centric additive integration, feature-flag rollout, and monitor-then-enforce strategy fit current architecture.
-- **MEDIUM confidence:** Exact abuse thresholds; must be tuned from real traffic.
-- **MEDIUM confidence:** Need final decision on using custom counters vs Flask-Limiter directly for all routes.
+```
+Phase 1: Config Foundation (no app changes yet)
+  1a. Fix .env/prosgressql_neondb.json → valid JSON with pooled + direct URLs
+  1b. Add psycopg2-binary to requirements.txt
+  1c. Modify config.py → PostgreSQL URI + engine options, remove IS_VERCEL/DB_PATH
+
+Phase 2: App Startup Cleanup (depends on Phase 1)
+  2a. Modify app.py → remove IS_VERCEL seed block
+  2b. Keep db.create_all() (creates tables on Postgres if not exist)
+
+Phase 3: Seed and Verify Locally (depends on Phase 1+2)
+  3a. Run app locally → verify db.create_all() creates tables on NeonDB
+  3b. Run seed_all.py once → populate NeonDB with demo data
+  3c. Verify all routes work (quiz, scammer, chatbot, admin, auth)
+
+Phase 4: Vercel Deployment Fix (depends on Phase 1+2+3)
+  4a. Set DATABASE_URL env var in Vercel project settings
+  4b. Update vercel.json if needed (maxMemory, build config)
+  4c. Deploy and verify → no more 500 errors
+  4d. Verify all routes on production URL
+
+Phase 5: Cleanup (depends on all above)
+  5a. Remove database/mindguard_v2.db from git (no longer needed)
+  5b. Update .gitignore for *.db files
+  5c. Update documentation (README, docs/)
+```
+
+**Why this order:**
+- Phase 1 must come first: config is the foundation everything depends on
+- Phase 2 depends on Phase 1: app.py imports Config
+- Phase 3 validates locally before touching Vercel: cheaper to debug
+- Phase 4 is the deployment itself: only after local validation passes
+- Phase 5 is cleanup: non-blocking, can happen anytime after Phase 4
+
+---
+
+## Scalability Considerations
+
+| Concern | Free Tier (0.25 CU) | If Traffic Grows |
+|---------|---------------------|------------------|
+| Max Connections | 104 (97 usable) | Upgrade compute CU |
+| Pooler Limit | 10,000 client connections via PgBouncer | More than enough |
+| Storage | 0.5 GB (free tier) | Upgrade plan |
+| Compute Suspend | 5 min idle → cold start ~200-500ms | Disable suspend (paid) |
+| Concurrent Vercel Functions | ~10 instances x 5 pool = 50 connections | Within 97 limit |
+
+**Current free tier is sufficient** for MindGuard's expected traffic (educational platform, not high-concurrency).
+
+---
 
 ## Sources
 
-### Codebase evidence (HIGH)
-
-- `app.py`
-- `routes/scammer.py`
-- `routes/auth.py`
-- `routes/main.py`
-- `models/models.py`
-- `.planning/PROJECT.md`
-- `.planning/codebase/ARCHITECTURE.md`
-- `.planning/codebase/STRUCTURE.md`
-
-### External references (MEDIUM)
-
-- Flask blueprints (official): <https://flask.palletsprojects.com/en/stable/blueprints/>
-- Flask sessions and request lifecycle (official): <https://flask.palletsprojects.com/en/stable/quickstart/#sessions>
-- Flask-Limiter docs (v4.1.1 page header observed): <https://flask-limiter.readthedocs.io/en/stable/>
+- [Neon SQLAlchemy Connection Guide](https://neon.com/docs/guides/sqlalchemy.md) — HIGH confidence
+- [Neon Connection Pooling](https://neon.com/docs/connect/connection-pooling.md) — HIGH confidence
+- [Neon Connection Methods Decision Tree](https://neon.com/docs/ai/skills/neon-postgres/references/connection-methods.md) — HIGH confidence
+- [Neon Scale to Zero](https://neon.com/docs/introduction/scale-to-zero.md) — HIGH confidence
+- Codebase analysis: config.py, app.py, extensions.py, models/models.py, vercel.json, seed_all.py — PRIMARY source

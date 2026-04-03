@@ -1,205 +1,435 @@
-# Domain Pitfalls
+# Domain Pitfalls — SQLite→NeonDB PostgreSQL Migration + Vercel Deployment
 
-**Domain:** Nền tảng web giáo dục an toàn mạng + báo cáo lừa đảo (Flask brownfield)
-**Researched:** 2026-03-19
-**Confidence tổng:** HIGH cho rủi ro codebase hiện tại, MEDIUM cho khuyến nghị mở rộng theo best-practice
+**Project:** MindGuard v1.1
+**Researched:** 2026-04-03
+**Scope:** Adding NeonDB PostgreSQL and fixing Vercel deployment to existing Flask platform
+**Confidence:** HIGH — pitfalls derived from direct codebase inspection + well-documented PostgreSQL/Vercel constraints
+
+---
 
 ## Critical Pitfalls
 
-### Pitfall 1: Chỉ dựa vào IP/cookie để chặn spam
+Mistakes that cause 500 errors, data loss, or deployment failure.
 
-**What goes wrong:** Hệ thống gắn nhãn spam chỉ theo IP hoặc cookie, dẫn tới false positive (NAT, mạng trường/công ty) và false negative (đổi IP, incognito, botnet).
-**Why it happens:** Thiết kế anti-spam quá đơn biến, thiếu risk scoring theo nhiều tín hiệu.
-**Consequences:** Chặn nhầm người dùng thật, bỏ lọt spam có chủ đích, UX giảm mạnh.
+---
+
+### Pitfall 1: NeonDB Config File Is Not Valid JSON
+
+**What goes wrong:** `config.py` uses `load_local_env('prosgressql_neondb.json')` which calls `json.load(f)`. The current file `.env/prosgressql_neondb.json` contains a raw connection string with inline comments — not JSON. `json.load()` silently fails (bare `except: return {}`) and returns an empty dict, so the connection string is never loaded.
+
+**Actual file content (sanitized):**
+```
+postgresql: //user:pass@host/db?sslmode=require
+ep-lingering-violet-...
+// comments about API keys
+```
+
+**Why it happens:** The file was created as a quick dump of NeonDB dashboard info, not structured as JSON.
+
+**Consequences:** `SQLALCHEMY_DATABASE_URI` falls back to SQLite. App appears to work locally but never connects to PostgreSQL. On Vercel, falls back to `/tmp/mindguard_v2.db` (ephemeral — data lost on every cold start).
+
 **Prevention:**
+1. Restructure file as valid JSON:
+   ```json
+   {
+     "DATABASE_URL": "postgresql://user:pass@host/neondb?sslmode=require"
+   }
+   ```
+2. Update `config.py` to load from this JSON and set `SQLALCHEMY_DATABASE_URI`.
+3. On Vercel, set `DATABASE_URL` as an environment variable (never rely on `.env/` files in serverless).
+4. Add validation: if the loaded URL doesn't start with `postgresql://`, raise an error at startup instead of silently falling back.
 
-- Dùng risk score đa tín hiệu: tần suất gửi, fingerprint nhẹ (ổn định nhưng tôn trọng riêng tư), tuổi tài khoản, chất lượng nội dung, lịch sử vi phạm.
-- Tách action theo mức rủi ro: cảnh báo mềm -> CAPTCHA tăng cường -> cooldown -> review thủ công.
-- Luôn có cơ chế appeal/unblock cho người dùng thật.
-**Warning signs (Detection):**
-- Tỷ lệ report bị chặn tăng mạnh từ cùng ASN/mạng nội bộ.
-- Nhiều ticket “tôi không spam vẫn bị chặn”.
-- Spam vẫn lọt dù đã bật block IP/cookie.
-**Suggested phase mapping:** Pha 2 (Anti-spam engine) + Pha 4 (Tuning & policy).
+**Detection:** App works locally with SQLite but 500s on Vercel, or data disappears between deploys.
 
-### Pitfall 2: Thu thập tín hiệu chống gian lận nhưng thiếu ranh giới quyền riêng tư
+**Phase target:** Phase 1 (Config & Connection) — must be the very first fix.
 
-**What goes wrong:** Ghi nhận IP, cookie, số điện thoại, evidence mà không phân lớp dữ liệu nhạy cảm, không giới hạn thời gian lưu.
-**Why it happens:** Ưu tiên chống spam nhanh, bỏ qua data governance ngay từ đầu.
-**Consequences:** Rủi ro lộ dữ liệu, khó tuân thủ, mất niềm tin người dùng.
+---
+
+### Pitfall 2: No PostgreSQL Driver in requirements.txt
+
+**What goes wrong:** `requirements.txt` contains only `Flask`, `Flask-SQLAlchemy`, `Flask-Mail`, `Werkzeug`, `MarkupSafe`, `requests`. There is no `psycopg2-binary`, `psycopg`, or any PostgreSQL adapter. SQLAlchemy cannot connect to PostgreSQL without a driver.
+
+**Why it happens:** The project was built on SQLite (which uses Python's built-in `sqlite3` module — no pip install needed).
+
+**Consequences:** `sqlalchemy.exc.OperationalError` or `ModuleNotFoundError: No module named 'psycopg2'` on first connection attempt. On Vercel, this manifests as a 500 error with no helpful message in user-facing logs.
+
 **Prevention:**
+1. Add `psycopg2-binary>=2.9` to `requirements.txt` (binary wheel — no C compiler needed, critical for Vercel).
+2. Do NOT use `psycopg2` (source package) — Vercel's build environment may not have `libpq-dev` and the compile will fail.
+3. Alternatively, use `psycopg[binary]>=3.1` (psycopg3) which is newer and also ships binary wheels.
+4. Test locally with PostgreSQL connection before deploying.
 
-- Phân loại dữ liệu: bắt buộc, tùy chọn, nhạy cảm cao.
-- Ẩn/mask mặc định dữ liệu PII ở UI (ví dụ số điện thoại chỉ hiện 3 số cuối theo yêu cầu sản phẩm).
-- Thiết kế retention policy (TTL), quyền truy cập tối thiểu, audit truy cập dữ liệu nhạy cảm.
-- Không lưu plaintext secrets/password/OTP trong session phía client.
-**Warning signs (Detection):**
-- Session chứa thông tin đăng ký nhạy cảm.
-- Admin UI hiển thị trực tiếp định danh đầy đủ.
-- Không trả lời được câu hỏi “dữ liệu này giữ bao lâu, ai được xem?”.
-**Suggested phase mapping:** Pha 1 (Data governance baseline) + Pha 3 (PII-safe UX).
+**Detection:** Immediate `ModuleNotFoundError` on app startup.
 
-### Pitfall 3: Không có guardrails bắt buộc trên endpoint thay đổi trạng thái
+**Phase target:** Phase 1 (Config & Connection).
 
-**What goes wrong:** Thiếu CSRF đồng bộ, thiếu rate limit tập trung, thiếu idempotency cho submit report.
-**Why it happens:** Route xử lý nghiệp vụ trực tiếp, mỗi endpoint tự làm theo cách riêng.
-**Consequences:** Dễ bị abuse login/register/report, duplicate submissions, moderation nhiễu.
+---
+
+### Pitfall 3: Raw SQL Migration Scripts Use SQLite-Specific Syntax
+
+**What goes wrong:** `database/migrate_anti_spam_phase2.py` (and `migrate_sensitive_access_log.py`) contain raw `CREATE TABLE` statements with `INTEGER PRIMARY KEY AUTOINCREMENT` — this is SQLite-only syntax. PostgreSQL uses `SERIAL` or `GENERATED ALWAYS AS IDENTITY`.
+
+**Actual code (`migrate_anti_spam_phase2.py` line 35):**
+```sql
+id INTEGER PRIMARY KEY AUTOINCREMENT,
+...
+triggered_cooldown BOOLEAN NOT NULL DEFAULT 0,
+```
+
+**Two issues:**
+1. `AUTOINCREMENT` → PostgreSQL syntax is `SERIAL PRIMARY KEY` or `INTEGER GENERATED ALWAYS AS IDENTITY`.
+2. `DEFAULT 0` for BOOLEAN → PostgreSQL expects `DEFAULT FALSE`. While `0` may work, it's dialect-incorrect.
+
+**Consequences:** Migration scripts fail with `syntax error at or near "AUTOINCREMENT"` on PostgreSQL.
+
 **Prevention:**
+1. With NeonDB, these migration scripts are no longer needed — `db.create_all()` will create tables using SQLAlchemy's PostgreSQL dialect which handles `SERIAL` and proper `BOOLEAN` automatically.
+2. If migration scripts must be kept for data migration, rewrite them using SQLAlchemy's `text()` with dialect-agnostic SQL, or use SQLAlchemy DDL operations instead of raw SQL.
+3. Mark all `database/migrate_*.py` scripts as "SQLite-only — do not run against PostgreSQL" in their docstrings.
 
-- Bật CSRF token cho mọi POST/PUT/DELETE.
-- Thêm rate-limit theo user + IP + route class (auth/report/chat).
-- Dùng idempotency key hoặc dedup window cho báo cáo gửi lặp.
-- Chuẩn hóa middleware/decorator dùng chung cho toàn bộ blueprint.
-**Warning signs (Detection):**
-- Burst request lớn vào auth/report mà không bị hãm.
-- Bản ghi trùng cùng nội dung xuất hiện liên tục trong vài phút.
-- Endpoint hành chính bị gọi từ phiên không hợp lệ.
-**Suggested phase mapping:** Pha 1 (Security guardrails) trước mọi thay đổi anti-spam/UX.
+**Detection:** `ProgrammingError` when running migration scripts against PostgreSQL.
 
-### Pitfall 4: Logic chống gian lận nằm trực tiếp trong route handlers
+**Phase target:** Phase 2 (Schema Migration) — audit all files in `database/` directory.
 
-**What goes wrong:** Rule spam, xử lý upload, persistence trộn trong routes nên khó test, khó thay đổi.
-**Why it happens:** Codebase brownfield đã monolithic ở `routes/auth.py`, `routes/scammer.py`, `routes/main.py`.
-**Consequences:** Mỗi lần chỉnh rule dễ kéo theo regression auth/report/UI.
+---
+
+### Pitfall 4: File Uploads Crash on Vercel's Read-Only Filesystem
+
+**What goes wrong:** `routes/scammer.py` (lines 169-173) saves evidence images to `static/uploads/evidence/` on the local filesystem:
+
+```python
+upload_folder = os.path.join(current_app.static_folder, 'uploads', 'evidence')
+if not os.path.exists(upload_folder): os.makedirs(upload_folder)
+file.save(os.path.join(upload_folder, unique_filename))
+```
+
+Vercel's serverless runtime has a **read-only filesystem** except `/tmp` (which is ephemeral per invocation).
+
+**Consequences:** File upload raises `OSError: [Errno 30] Read-only file system` or `PermissionError`. Every scammer report with evidence images fails. If saved to `/tmp`, files disappear after the function returns.
+
 **Prevention:**
+1. **Use external object storage** — Cloudflare R2, AWS S3, or Vercel Blob. Upload directly from the browser (presigned URL) or stream from the serverless function.
+2. As a quick interim fix: save file to `/tmp`, upload to external storage, then store the external URL in `evidence_urls`.
+3. Update `evidence_urls` column to store external URLs (it already stores URLs via `serialize_evidence()`, so the schema change is minimal).
+4. Add `IS_VERCEL` check: if on Vercel, reject local file save path and use the external storage path.
 
-- Tách service layer: `abuse_detection_service`, `report_ingestion_service`, `policy_service`.
-- Route chỉ làm parse request + response, còn policy/risk chạy trong service.
-- Viết contract tests cho service thay vì chỉ test end-to-end thủ công.
-**Warning signs (Detection):**
-- Một thay đổi nhỏ ở anti-spam làm hỏng luồng đăng ký/OTP.
-- PR anti-spam chạm quá nhiều file route không liên quan.
-- Không mock được logic để test unit.
-**Suggested phase mapping:** Pha 1 (Refactor nền) + Pha 2 (Policy implementation).
+**Detection:** Any report submission with attached evidence images returns 500 on Vercel.
 
-### Pitfall 5: Thiết kế “block ngay” thay vì “degrade gracefully”
+**Phase target:** Phase 3 or separate phase — requires choosing a storage provider and updating the upload flow.
 
-**What goes wrong:** Khi CAPTCHA/API ngoài chậm hoặc lỗi, toàn bộ luồng report/login thất bại cứng.
-**Why it happens:** Gọi HTTP đồng bộ trên request path, chưa có fallback/circuit-breaker.
-**Consequences:** Mất dữ liệu người dùng, tăng bounce rate, lỗi hàng loạt giờ cao điểm.
+---
+
+### Pitfall 5: Seed Data Runs on Every Vercel Cold Start (Data Duplication)
+
+**What goes wrong:** `app.py` (lines 36-39) runs `run_seed()` on every cold start when `IS_VERCEL` is true:
+
+```python
+if Config.IS_VERCEL:
+    from database.seed_all import run_seed
+    run_seed()
+```
+
+With SQLite in `/tmp`, this was necessary because the DB was empty on each cold start. With PostgreSQL (persistent), seeding on every cold start will **duplicate all data** — duplicate admin users, duplicate scam reports, duplicate quiz results.
+
+**Consequences:** Duplicate rows accumulate over time. Admin user creation may fail on unique constraint (email). Reports and leaderboard data become corrupted with ghost duplicates.
+
 **Prevention:**
+1. Remove the `IS_VERCEL` seed block entirely once PostgreSQL is connected.
+2. Run `seed_all.py` exactly once as a standalone script against NeonDB.
+3. Add idempotency guards to `run_seed()`: check if data exists before inserting (e.g., `if Registration.query.filter_by(email='admin@...').first() is None:`).
+4. Consider a `seed_status` table or flag to track whether seeding has been done.
 
-- Áp dụng fail-open có kiểm soát cho luồng ít rủi ro, fail-closed cho action nhạy cảm cao.
-- Dùng timeout ngắn + retry có backoff + fallback policy rõ ràng.
-- Tách các tác vụ không cần realtime sang background queue.
-**Warning signs (Detection):**
-- Latency p95 tăng theo thời gian phản hồi của dịch vụ ngoài.
-- Tỷ lệ submit thất bại tăng đồng thời với timeout HTTP upstream.
-- Người dùng phải gửi lại cùng một report nhiều lần.
-**Suggested phase mapping:** Pha 2 (Reliability hardening) + Pha 5 (Scale readiness).
+**Detection:** Duplicate admin accounts, exponentially growing row counts after multiple cold starts.
 
-### Pitfall 6: Chuyển UX lớn (light mode + one-question-per-page) theo kiểu big-bang
+**Phase target:** Phase 2 (Schema Migration) — must be addressed before first deploy with PostgreSQL.
 
-**What goes wrong:** Đổi layout/flow toàn hệ thống một lần gây vỡ tương thích template, JS cũ, hành vi session quiz.
-**Why it happens:** Không có migration UX theo từng lát cắt và thiếu đo lường trước/sau.
-**Consequences:** Giảm completion rate quiz, tăng confusion, phát sinh bug khó truy vết.
+---
+
+### Pitfall 6: `db.create_all()` at Module Top Level on Every Cold Start
+
+**What goes wrong:** `app.py` line 34 runs `db.create_all()` unconditionally at import time:
+
+```python
+with app.app_context():
+    db.create_all()
+```
+
+On Vercel, `app.py` is imported on every cold start. `db.create_all()` issues `CREATE TABLE IF NOT EXISTS` for every model — this hits NeonDB on every cold start, adding ~200-500ms latency.
+
+**Why it matters for NeonDB:** NeonDB computes scale to zero after 5 minutes of inactivity. The first cold start must: (1) wake NeonDB compute, (2) establish TLS connection, (3) run `CREATE TABLE IF NOT EXISTS` for 13+ tables. This can push cold start time to 3-8 seconds.
+
+**Consequences:** Slow cold starts. Unnecessary database round-trips. Potential connection timeout if NeonDB compute is waking up simultaneously.
+
 **Prevention:**
+1. Run `db.create_all()` only in a standalone setup script, not on every app import.
+2. On Vercel, trust that tables already exist (they persist in PostgreSQL).
+3. If defensive checks are needed, use a lightweight health check query (`SELECT 1`) instead of `CREATE TABLE IF NOT EXISTS` for all tables.
+4. Consider setting NeonDB's auto-suspend timeout to a longer value (e.g., 5 minutes → 15 minutes) during initial testing.
 
-- Rollout theo feature flag theo nhóm người dùng.
-- Giữ tương thích ngược dữ liệu quiz/result trong giai đoạn chuyển đổi.
-- Theo dõi metric bắt buộc: start-to-finish rate, abandon rate theo bước, thời gian mỗi câu.
-- UAT với kịch bản mobile trước khi mở rộng toàn bộ.
-**Warning signs (Detection):**
-- Completion rate quiz giảm mạnh sau release UI.
-- Tăng lỗi JS/template ở các trang quiz/result/profile.
-- Người dùng quay lại trang trước nhiều bất thường.
-**Suggested phase mapping:** Pha 3 (UX redesign incremental) + Pha 4 (Telemetry-based tuning).
+**Detection:** Cold start times > 5 seconds. Vercel function timeout errors (default 10s for hobby plan).
 
-### Pitfall 7: Không có audit trail cho hành động moderation/admin
+**Phase target:** Phase 1 (Config & Connection) — remove from startup path.
 
-**What goes wrong:** Duyệt/từ chối report, sửa/xóa dữ liệu nhưng không ghi ai làm, lúc nào, lý do gì.
-**Why it happens:** Chỉ dựa vào `session.get('is_admin')` và mutate trực tiếp DB.
-**Consequences:** Khó điều tra khi có khiếu nại, khó rollback quyết định sai.
+---
+
+### Pitfall 7: Missing SSL Configuration for NeonDB Connection
+
+**What goes wrong:** NeonDB requires SSL (`sslmode=require`). The connection string in the `.env` file includes `?sslmode=require`, but SQLAlchemy's default engine creation for PostgreSQL may not pass SSL parameters correctly on all platforms.
+
+**Consequences:** `psycopg2.OperationalError: connection to server failed: SSL required` or intermittent connection drops.
+
 **Prevention:**
+1. Ensure connection string includes `?sslmode=require` (already present in the NeonDB string).
+2. For `psycopg2`, this is usually sufficient. But if using connection pooling (see Pitfall 9), SSL must be configured at the pool level too.
+3. Add `SQLALCHEMY_ENGINE_OPTIONS` in config:
+   ```python
+   SQLALCHEMY_ENGINE_OPTIONS = {
+       "connect_args": {"sslmode": "require"}
+   }
+   ```
+4. Test connection from local dev machine to NeonDB before deploying.
 
-- Ghi audit log có cấu trúc cho mọi hành động nhạy cảm.
-- Yêu cầu reason code khi reject/approve.
-- Thêm soft delete + event history cho report quan trọng.
-**Warning signs (Detection):**
-- Không truy vết được vì sao một report biến mất/chuyển trạng thái.
-- Có tranh chấp moderation nhưng không có bằng chứng hệ thống.
-- Không thể dựng timeline sự cố.
-**Suggested phase mapping:** Pha 1 (Governance baseline) + Pha 4 (Operations hardening).
+**Detection:** `OperationalError` with SSL-related message on first query.
 
-### Pitfall 8: Thiếu chiến lược migration DB cho thay đổi anti-fraud
+**Phase target:** Phase 1 (Config & Connection).
 
-**What goes wrong:** Thêm cột/bảng chống spam trực tiếp, thiếu script migration có thể lặp lại và rollback.
-**Why it happens:** Brownfield SQLite + nhiều script thủ công rời rạc.
-**Consequences:** Lệch schema giữa môi trường, lỗi runtime khó đoán, dữ liệu lịch sử không đồng nhất.
-**Prevention:**
-
-- Mọi thay đổi schema phải có script migration độc lập trong `database/` theo convention dự án.
-- Mỗi migration có bước verify dữ liệu trước/sau, backup và rollback plan.
-- Chuẩn hóa naming migration theo mục đích anti-spam/privacy/ux.
-**Warning signs (Detection):**
-- Máy dev A chạy được, máy dev B lỗi cột/bảng thiếu.
-- Script seed/test phụ thuộc thứ tự chạy ngầm.
-- Cần sửa tay DB để app hoạt động lại.
-**Suggested phase mapping:** Pha 0 (Migration hygiene) trước các pha tính năng.
+---
 
 ## Moderate Pitfalls
 
-### Pitfall M1: Rule chống spam hard-code, không quan sát được
+Issues that cause bugs or degraded performance but aren't deployment-breaking.
 
-**What goes wrong:** Ngưỡng cố định trong code, không có dashboard theo dõi hiệu quả rule.
-**Prevention:** Đưa threshold vào config, log score distribution, review theo tuần.
-**Warning signs:** Mỗi lần đổi rule phải deploy code; team không biết rule nào đang tạo false positives.
-**Suggested phase mapping:** Pha 2.
+---
 
-### Pitfall M2: Không tách “dữ liệu bằng chứng” và “dữ liệu hiển thị”
+### Pitfall 8: Connection Pool Exhaustion in Serverless
 
-**What goes wrong:** Dữ liệu upload được phục vụ gần public path, rủi ro lộ chứng cứ.
-**Prevention:** Lưu private storage, cấp quyền truy cập có kiểm soát/signed URL ngắn hạn.
-**Warning signs:** Link evidence truy cập được khi không đăng nhập.
-**Suggested phase mapping:** Pha 1 + Pha 4.
+**What goes wrong:** SQLAlchemy's default connection pool (`QueuePool`) keeps connections open. In serverless, each cold start creates a new pool, but NeonDB has a connection limit (e.g., 100 for free tier). Multiple concurrent Vercel function instances can exhaust the pool.
 
-### Pitfall M3: Không có test hồi quy cho các đường nhạy cảm
+**Why it happens:** Vercel spins up multiple function instances under load. Each instance creates its own SQLAlchemy engine with its own pool. Unlike a traditional server with one pool, serverless can have N pools × M connections.
 
-**What goes wrong:** Mỗi lần đổi UX/anti-spam làm hỏng auth/report mà không phát hiện sớm.
-**Prevention:** Bắt buộc test cho CSRF/rate-limit/OTP expiry/dedup/report moderation side-effects.
-**Warning signs:** Hotfix tăng sau mỗi đợt release UX hoặc anti-spam.
-**Suggested phase mapping:** Pha 1 (test harness) duy trì xuyên suốt.
+**Consequences:** `psycopg2.OperationalError: too many connections for role "neondb_owner"`. Some requests fail while others succeed depending on which instance they hit.
+
+**Prevention:**
+1. Use `NullPool` for serverless (no persistent connections — connect per request):
+   ```python
+   from sqlalchemy.pool import NullPool
+   SQLALCHEMY_ENGINE_OPTIONS = {
+       "poolclass": NullPool,
+       "connect_args": {"sslmode": "require"}
+   }
+   ```
+2. Alternatively, use NeonDB's built-in connection pooler (pooler endpoint instead of direct endpoint). NeonDB provides a `-pooler` hostname specifically for serverless.
+3. Set `pool_size=1, max_overflow=0` if using `QueuePool` as a compromise.
+4. Monitor connection count via NeonDB dashboard during load testing.
+
+**Detection:** Intermittent 500 errors under concurrent load. NeonDB dashboard shows connection count at limit.
+
+**Phase target:** Phase 1 (Config & Connection) — must configure pool strategy before deploy.
+
+---
+
+### Pitfall 9: Flask Session Cookie SECRET_KEY Not Stable Across Deploys
+
+**What goes wrong:** Flask's default session is a signed cookie (client-side), which works fine across serverless instances. However, the `SECRET_KEY` has a hardcoded fallback: `"dev-secret-key-mindguard-2025-secure"`. If `SECRET_KEY` isn't set as a Vercel environment variable, the fallback is used — but if it ever changes between deploys, all existing sessions are invalidated.
+
+**Consequences:** Users get logged out on every deploy. CAPTCHA verification fails (session math answer doesn't match). Reporter IDs change, breaking anti-spam tracking.
+
+**Prevention:**
+1. Set `SECRET_KEY` as a Vercel environment variable with a strong, stable value.
+2. Never change the secret key between deploys unless intentionally invalidating sessions.
+3. The cookie-based session approach is actually serverless-friendly — no changes needed to session storage mechanism.
+
+**Detection:** Users report being logged out after every Vercel deploy. CAPTCHA always fails.
+
+**Phase target:** Phase 1 (Config & Connection) — set env var before first deploy.
+
+---
+
+### Pitfall 10: `LIKE` Case Sensitivity Difference
+
+**What goes wrong:** SQLite's `LIKE` operator is case-insensitive by default for ASCII characters. PostgreSQL's `LIKE` is case-sensitive. Any search or filter using `.like()` or `.contains()` in SQLAlchemy will behave differently.
+
+**Risk areas in MindGuard:**
+- Scammer report search by `scammer_identifier`, `scammer_name`, `description`
+- Admin dashboard filters
+- Any query using `Model.column.like('%term%')`
+
+**Consequences:** Searches that worked on SQLite return no results on PostgreSQL because of case mismatch. Users can't find scammer reports they previously could.
+
+**Prevention:**
+1. Use `Model.column.ilike('%term%')` (case-insensitive LIKE) instead of `.like()`.
+2. Or use `func.lower(Model.column).like(func.lower(term))`.
+3. Audit all `.like()`, `.contains()`, and `.startswith()` calls in routes and services.
+4. PostgreSQL also supports `ILIKE` natively — SQLAlchemy's `.ilike()` maps to it.
+
+**Detection:** Search features return fewer results on PostgreSQL than they did on SQLite.
+
+**Phase target:** Phase 2 (Schema Migration) — audit during model migration.
+
+---
+
+### Pitfall 11: `datetime.utcnow` and `db.func.now()` Timezone Behavior
+
+**What goes wrong:** All models use `default=datetime.utcnow` (without parentheses — correctly passing the function, not the result). `db.func.now()` is used in `scammer.py` lines 263, 273 for update timestamps. The PostgreSQL behavior difference: PostgreSQL's `NOW()` is timezone-aware if the column is `TIMESTAMP WITH TIME ZONE`, while `datetime.utcnow()` returns a naive (no timezone) datetime.
+
+**All model columns use `db.DateTime` (no timezone):**
+```python
+created_at = db.Column(db.DateTime, default=datetime.utcnow)
+```
+
+SQLAlchemy maps `DateTime` to `TIMESTAMP WITHOUT TIME ZONE` on PostgreSQL. `db.func.now()` works on both SQLite and PostgreSQL.
+
+**Prevention:**
+1. Keep `db.DateTime` (no timezone) — consistent with current behavior.
+2. Ensure `datetime.utcnow()` is used consistently (not `datetime.now()` which uses local time).
+3. `db.func.now()` works on both dialects — no change needed.
+4. If timezone support is needed later, migrate to `db.DateTime(timezone=True)` and use `datetime.now(timezone.utc)`.
+
+**Detection:** Timestamp comparison bugs. Reports showing wrong times.
+
+**Phase target:** Phase 2 — low risk, verify during testing.
+
+---
+
+### Pitfall 12: Boolean Storage Differences in Data Migration
+
+**What goes wrong:** SQLite stores `db.Boolean` as `0`/`1` integers. PostgreSQL stores them as native `TRUE`/`FALSE`. When migrating data from SQLite to PostgreSQL, boolean columns need explicit type casting.
+
+**Affected columns (4 total):**
+- `Registration.is_admin` (Boolean, default=False)
+- `Registration.onboarding_completed` (Boolean, default=False)
+- `AiQuizQuestion.is_verified` (Boolean, default=True)
+- `AntiSpamEvent.triggered_cooldown` (Boolean, default=False)
+
+**Consequences:** If data is migrated via raw SQL dump/restore, PostgreSQL may reject `0`/`1` values for boolean columns.
+
+**Prevention:**
+1. Use SQLAlchemy ORM for data migration (read from SQLite, write to PostgreSQL) — the ORM handles type conversion automatically.
+2. If using raw SQL, cast explicitly: `CASE WHEN old_value = 1 THEN TRUE ELSE FALSE END`.
+3. Don't use `pg_dump`/`sqlite3 .dump` for cross-database migration.
+
+**Detection:** `DataError: invalid input syntax for type boolean: "0"` during data import.
+
+**Phase target:** Phase 2 (Schema Migration) — data migration script must handle this.
+
+---
+
+### Pitfall 13: Vercel Python Runtime Timeout on Cold Start
+
+**What goes wrong:** Vercel's `@vercel/python` runtime has specific constraints:
+- **Max execution time:** 10 seconds (Hobby) / 60 seconds (Pro).
+- **No persistent process:** Each request may hit a new or reused function instance.
+- **Entry point:** Vercel expects a WSGI app object at module level in the file specified by `vercel.json`.
+
+**Current `app.py` runs at import time:** `db.create_all()` + conditional seed + legacy data fix query. Combined with NeonDB cold start (compute wake-up), this can exceed 10 seconds.
+
+**Consequences:** Function timeout on cold start. 500 errors if initialization takes too long.
+
+**Prevention:**
+1. Move ALL startup logic out of module-level code in `app.py`.
+2. Ensure `app.py` exports the WSGI app as fast as possible.
+3. Use lazy initialization for database connections.
+4. Remove seed and legacy-fix code from the import path entirely.
+5. Test cold start time end-to-end with a fresh Vercel deployment.
+
+**Detection:** Vercel deploys succeed but first request after idle returns 504 Gateway Timeout.
+
+**Phase target:** Phase 3 (Vercel Deployment) — restructure app initialization.
+
+---
 
 ## Minor Pitfalls
 
-### Pitfall m1: Thông điệp UX chống spam quá mơ hồ
+Issues that are easy to fix but easy to forget.
 
-**What goes wrong:** Người dùng bị chặn nhưng không hiểu vì sao và làm gì tiếp theo.
-**Prevention:** Viết copy rõ ràng: lý do chung, thời gian thử lại, kênh hỗ trợ.
-**Warning signs:** Ticket hỗ trợ “không biết lỗi gì”.
-**Suggested phase mapping:** Pha 3.
+---
 
-### Pitfall m2: Không đồng bộ style/token giữa các trang sau redesign
+### Pitfall 14: `db.String` Length Enforcement Difference
 
-**What goes wrong:** Light mode không nhất quán, trải nghiệm bị “vá chỗ”.
-**Prevention:** Chuẩn hóa design tokens và checklist UI regression desktop/mobile.
-**Warning signs:** Cùng một component hiển thị khác nhau giữa trang.
-**Suggested phase mapping:** Pha 3 + Pha 4.
+**What goes wrong:** SQLite ignores `String(200)` length limits entirely — you can store any length string. PostgreSQL enforces `VARCHAR(200)` strictly and will raise `DataError: value too long for type character varying(200)`.
 
-## Suggested Phase Mapping (Roadmap-oriented)
+**Risk areas:** `scammer_identifier` (200), `scammer_name` (200), `social_link` (200), `user_agent` (512). If existing SQLite data has values exceeding declared lengths, migration will fail.
 
-| Phase Topic | Mục tiêu | Pitfalls cần chặn ngay |
-|-------------|----------|-------------------------|
-| Pha 0 - Migration hygiene | Ổn định nền DB trước khi thêm anti-fraud | Pitfall 8 |
-| Pha 1 - Security & governance baseline | CSRF, rate-limit, audit log, phân lớp dữ liệu | Pitfall 2, 3, 4, 7, M2, M3 |
-| Pha 2 - Anti-spam engine | Risk scoring đa tín hiệu + reliability | Pitfall 1, 5, M1 |
-| Pha 3 - UX redesign incremental | Light mode + quiz one-question/page theo rollout | Pitfall 6, m1, m2 |
-| Pha 4 - Tuning & operations | Giảm false positive, vận hành moderation ổn định | Pitfall 1, 6, 7, M2 |
-| Pha 5 - Scale readiness | Tách tác vụ nền, chuẩn bị tăng tải | Pitfall 5, 8 |
+**Prevention:**
+1. Before migrating data, query max lengths in SQLite: `SELECT MAX(LENGTH(column)) FROM table`.
+2. Increase column sizes in models if needed (e.g., `user_agent` to `String(1024)` or `Text`).
+3. Consider using `db.Text` for unbounded strings (like `description`, which already uses `Text`).
 
-## Phase-Specific Warning Triggers
+**Detection:** `DataError: value too long` during data migration.
 
-| Phase Topic | Warning trigger thực tế | Mitigation ngay |
-|-------------|-------------------------|-----------------|
-| Pha 1 | Endpoint POST chưa có CSRF/rate-limit đồng nhất | Chặn release đến khi pass security checklist |
-| Pha 2 | Tỷ lệ block tăng nhưng spam vẫn lọt | Hiệu chỉnh score + thêm lớp challenge thay vì block cứng |
-| Pha 3 | Completion rate quiz giảm >10% sau rollout | Rollback flag + phân tích funnel theo bước |
-| Pha 4 | Khiếu nại moderation tăng, không truy vết được | Bắt buộc reason code + audit timeline |
-| Pha 5 | Timeout dịch vụ ngoài kéo sập luồng report | Queue hóa tác vụ chậm + timeout/fallback profile |
+**Phase target:** Phase 2 — check before data migration.
+
+---
+
+### Pitfall 15: Credentials Potentially Committed to Git
+
+**What goes wrong:** The `.env/prosgressql_neondb.json` file contains the NeonDB connection string with username and password in plaintext. If `.env/` is not properly gitignored, these credentials are in the repository history.
+
+**Consequences:** Anyone with repository access can connect to the production database. Credential leak if repo is ever made public.
+
+**Prevention:**
+1. Verify `.env/` is in `.gitignore`.
+2. **Rotate the NeonDB password immediately** if credentials were ever committed.
+3. On Vercel, use environment variables (`DATABASE_URL`) instead of file-based config.
+4. Check with `git log --all -- .env/` for any commits touching the directory.
+
+**Detection:** `git log --all -- .env/` returns results.
+
+**Phase target:** Phase 1 — security prerequisite.
+
+---
+
+### Pitfall 16: Vercel WSGI Entry Point Startup Code
+
+**What goes wrong:** Vercel's Python runtime imports `app.py` and looks for the `app` WSGI variable. The `if __name__ == "__main__":` block (ngrok, debug server) won't run on Vercel — that's correct. But everything outside that guard (create_all, seed, legacy fix) runs on every cold start.
+
+**Prevention:**
+1. Ensure the WSGI export path is clean: `app = Flask(...)`, `app.config.from_object(Config)`, blueprint registration — nothing else at module level.
+2. Move `db.create_all()`, seed logic, and legacy fixes into a separate `init_db.py` script or behind a CLI command.
+
+**Detection:** Already covered by Pitfalls 5, 6, and 13.
+
+**Phase target:** Phase 3 (Vercel Deployment).
+
+---
+
+### Pitfall 17: PostgreSQL Integer Sequence vs SQLite rowid
+
+**What goes wrong:** SQLite auto-assigns rowids and `AUTOINCREMENT` ensures monotonically increasing IDs (never reuses deleted IDs). PostgreSQL `SERIAL` uses sequences which also don't reuse, but the sequence value can have gaps after failed transactions. If any code relies on contiguous IDs (e.g., counting reports by ID range), behavior changes.
+
+**Prevention:** Don't rely on contiguous IDs. Use `COUNT(*)` instead of `MAX(id) - MIN(id) + 1`. This is unlikely to be an issue in MindGuard but worth noting.
+
+**Detection:** Report count discrepancies if counting by ID gaps.
+
+**Phase target:** No action needed — informational.
+
+---
+
+## Phase-Specific Warnings
+
+| Phase Topic | Likely Pitfall | Mitigation |
+|-------------|---------------|------------|
+| Config & Connection (Phase 1) | Pitfalls 1, 2, 7, 8, 9, 15 | Fix JSON config, add driver, configure SSL + NullPool, set SECRET_KEY, rotate credentials |
+| Schema Migration (Phase 2) | Pitfalls 3, 5, 6, 10, 11, 12, 14 | Rewrite migration scripts, remove ephemeral seed, audit LIKE/Boolean/String lengths |
+| Vercel Deployment (Phase 3) | Pitfalls 4, 6, 13, 16 | External file storage, clean startup path, respect runtime limits |
+| Data Migration (Phase 2.5) | Pitfalls 3, 12, 14 | Use ORM-based migration, validate boolean casting, check string lengths |
+
+## Integration Pitfalls (Multiple Systems Interacting)
+
+| Systems | Pitfall | Prevention |
+|---------|---------|------------|
+| NeonDB + Vercel cold start | NeonDB compute wakes from sleep (1-3s) + Vercel function cold start (1-2s) = 3-5s before first query. Add `db.create_all()` = potential timeout. | Remove `create_all()` from startup. Use NeonDB pooler endpoint. Consider keeping NeonDB awake during initial testing. |
+| File uploads + Vercel filesystem | Evidence images can't be saved to disk. Current code crashes on read-only FS. | Switch to external storage (Cloudflare R2 recommended — project already uses Cloudflare for CAPTCHA). |
+| Anti-spam + Serverless instances | Each Vercel instance has its own memory. If `AntiSpamDecisionService` caches anything in-memory, it won't share across instances. | Verify anti-spam service is fully database-backed (it appears to be via `AntiSpamEvent` and `AntiSpamActorState` models — likely OK). |
+| Session cookies + Deploy | `SECRET_KEY` fallback means different deploy = potentially different key = all sessions invalidated. | Set stable `SECRET_KEY` in Vercel env vars. |
+
+---
 
 ## Sources
 
-- `.planning/PROJECT.md` (HIGH, bối cảnh mục tiêu và phạm vi active)
-- `.planning/codebase/CONCERNS.md` (HIGH, bằng chứng rủi ro bảo mật/kiến trúc/vận hành hiện tại)
-- `.planning/codebase/CONVENTIONS.md` (HIGH, ràng buộc triển khai theo style và cấu trúc hiện có)
-- Kinh nghiệm triển khai Flask security/abuse-prevention trong ngành (MEDIUM, cần xác thực chi tiết khi vào từng phase implementation)
+- **NeonDB connection pooling:** NeonDB official docs — connection pooling for serverless (HIGH confidence)
+- **Vercel Python runtime:** Vercel docs — `@vercel/python` limitations (HIGH confidence)
+- **SQLite→PostgreSQL differences:** SQLAlchemy docs — dialect-specific behavior (HIGH confidence)
+- **psycopg2-binary for serverless:** psycopg2 docs — binary vs source package (HIGH confidence)
+- **Boolean/AUTOINCREMENT syntax:** PostgreSQL docs — DDL syntax differences from SQLite (HIGH confidence)
+- **Direct codebase inspection:** All pitfalls verified against actual code in `config.py`, `app.py`, `models/models.py`, `routes/scammer.py`, `database/migrate_anti_spam_phase2.py`, `vercel.json`, and `.env/prosgressql_neondb.json` (HIGH confidence)

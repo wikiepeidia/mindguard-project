@@ -1,224 +1,257 @@
-# Technology Stack Recommendation (2026)
+# Technology Stack: NeonDB PostgreSQL Migration & Vercel Deployment
 
-**Project:** MindGuard v2 (brownfield Flask monolith)  
-**Scope:** UX light-mode overhaul, per-question quiz flow, reporter leaderboard, privacy masking, anti-spam / anti-fraud controls  
-**Researched:** 2026-03-19
+**Project:** MindGuard v1.1
+**Researched:** 2026-04-03
+**Focus:** Stack additions/changes for NeonDB PostgreSQL + Vercel deployment ONLY
 
-## Executive Recommendation
+---
 
-Giữ **Flask monolith + Jinja + Bootstrap** làm trục chính. Khong doi sang microservices, khong doi framework frontend.  
-Huong toi uu cho scope nay la:
+## Recommended Stack Additions
 
-1. **Nang cap in-place** tren Flask 3.x va Flask-SQLAlchemy 3.x.
-2. **Them Redis** lam tang bo nho chia se cho rate limit, anti-spam counters, lock nhe, queue nhe.
-3. **Giu SQLite cho mốc nay** neu traffic vua/nhỏ, nhung chuan bi migration path sang PostgreSQL khi leaderboard/report growth tang nhanh.
-4. **Chong gian lan theo pipeline** (Turnstile + rate limit + dedupe + risk scoring + moderation queue), thay vi chi 1 lop CAPTCHA.
+### PostgreSQL Driver
 
-## Current vs Recommended
+| Technology | Version | Purpose | Why |
+|------------|---------|---------|-----|
+| `psycopg2-binary` | `>=2.9.9` | PostgreSQL adapter for Python/SQLAlchemy | Pre-compiled binary — no `libpq-dev` or C compile toolchain needed. Vercel's build environment does not guarantee native compilation support, so `-binary` is mandatory. Neon's official docs recommend it explicitly. |
 
-| Layer | Current repo | Recommended 2026 (compatible upgrade) | Why |
-|---|---|---|---|
-| Web framework | Flask 3.0.3 | Flask 3.1.x line | Ban stable docs hien tai da o 3.1.x, giu compatibility cao |
-| ORM | Flask-SQLAlchemy 3.1.1 | Flask-SQLAlchemy 3.1.x + SQLAlchemy 2.0 style incrementally | Dung huong docs official, khong can rewrite model |
-| DB | SQLite file | SQLite + schema/index tuning ngay; add migration path to PostgreSQL | Scope hien tai co leaderboard/rate events de phat sinh lock neu tang tai |
-| Bot defense | Turnstile co ban | Turnstile + Flask-Limiter + Redis-backed counters + risk rules | Lop phong thu nhieu tang, can theo route va actor fingerprint |
-| Background jobs | chua ro worker layer | RQ + Redis (lightweight) | Phu hop monolith, de tach tac vu nhe (score recompute, denormalize leaderboard) |
-| Frontend | Bootstrap 5.3.0 + custom CSS/JS | Bootstrap 5.3.x + design tokens (CSS vars) + progressive enhancement JS | Dat muc tieu light-mode overhaul nhanh, khong can SPA migration |
-| Security headers | thiet lap thu cong/chua ro day du | Header middleware tu code app (khuyen nghi custom) | Tranh phu thuoc extension cu, kiem soat ro CSP/nonce cho Jinja |
+**Why NOT `psycopg2` (non-binary)?** Requires `libpq-dev` headers and a C compiler to build from source. Vercel's serverless build environment does not reliably provide these. Will fail at `pip install` during deployment. Use `psycopg2-binary` unconditionally.
 
-## Recommended Stack (Concrete)
+**Why NOT `asyncpg`?** Flask is WSGI (synchronous). `asyncpg` is for `asyncio` frameworks (FastAPI, Starlette). Adding it adds complexity with zero benefit.
 
-### 1. Core App (keep monolith)
+**Why NOT Neon's serverless driver (`@neondatabase/serverless`)?** That's a JavaScript/TypeScript WebSocket driver for edge runtimes. Not applicable to Python/Flask.
 
-- `Flask` (3.1.x line)
-- `Flask-SQLAlchemy` (3.1.x line)
-- `Werkzeug` (3.1.x line)
-- `Jinja2` (theo Flask dependency)
+**Confidence:** HIGH — Neon official docs + SQLAlchemy docs + Vercel Python runtime docs all confirm.
 
-**Implementation note:**
+### SQLAlchemy (Version Pin)
 
-- Khong can doi sang FastAPI/ASGI cho scope nay.
-- Thuc hien update theo tung dependency batch nho, co regression test route auth/quiz/report.
+| Technology | Version | Purpose | Why |
+|------------|---------|---------|-----|
+| `SQLAlchemy` | `>=2.0.33` | ORM engine (already used via Flask-SQLAlchemy) | Versions < 2.0.33 have a bug where idle connections are reused after Neon suspends the compute, causing `SSL connection has been closed unexpectedly` errors. Neon's official SQLAlchemy guide explicitly recommends >= 2.0.33. |
 
-### 2. Data + Persistence
+**Current state:** `Flask-SQLAlchemy==3.1.1` pulls in SQLAlchemy >= 2.0 but does NOT guarantee >= 2.0.33. Explicitly pin `SQLAlchemy>=2.0.33` in `requirements.txt`.
 
-- **Now (milestone nay):** SQLite van chay duoc, nhung bat buoc them index va constraints cho report/leaderboard.
-- **Soon (phase tiep theo neu growth):** PostgreSQL 16+ cho write concurrency va analytics query.
+**Confidence:** HIGH — Neon docs + SQLAlchemy 2.0.33 changelog confirms the fix.
 
-**SQLite hardening checklist (ap dung ngay):**
+### No Other New Dependencies Needed
 
-- Bat `PRAGMA foreign_keys=ON` tren moi connection.
-- Can nhac transaction mode non-legacy (Python 3.12+ `autocommit=False` at connect level) de tranh edge-case transactional DDL.
-- Tao unique/index phuc vu:
-  - report dedupe keys
-  - leaderboard aggregates (reporter_id, created_at)
-  - risk event lookup (ip_hash, device_hash, window bucket)
-- Dung `ON CONFLICT DO UPDATE/DO NOTHING` cho counter/upsert cases.
+The existing stack handles everything else:
+- `Flask-SQLAlchemy==3.1.1` — already provides the ORM layer; the PostgreSQL dialect activates automatically when the connection string uses `postgresql://`
+- `Flask==3.0.3` — WSGI compatible with Vercel Python runtime
+- `requests==2.31.0` — unchanged (OpenRouter API calls)
+- `Flask-Mail==0.9.1` — unchanged
+- `Werkzeug==3.0.3` — unchanged
 
-### 3. Anti-Spam / Anti-Fraud
+---
 
-- `Flask-Limiter` (4.1.1 theo docs stable) + storage `redis://...`
-- `redis` Python client (latest stable line)
-- Cloudflare Turnstile (giu va nang cap server-side verification pipeline)
+## Updated requirements.txt
 
-**Rate-limit key design (important):**
+```txt
+Flask==3.0.3
+Flask-SQLAlchemy==3.1.1
+Flask-Mail==0.9.1
+Werkzeug==3.0.3
+MarkupSafe==2.1.5
+requests==2.31.0
+psycopg2-binary>=2.9.9
+SQLAlchemy>=2.0.33
+```
 
-- Khong chi `remote_addr`.
-- Dung composite key: `normalized_ip + session_id + device_cookie_hash + route_scope`.
-- Neu deploy sau reverse proxy, bat buoc `ProxyFix` dung so hop proxy de tranh spoof `X-Forwarded-For`.
+**Only 2 lines added.** No other changes.
 
-**Risk scoring inputs:**
+---
 
-- velocity (so report / 5m, 1h)
-- duplicate content ratio
-- fingerprint churn (1 cookie -> nhieu account, 1 IP -> nhieu account)
-- Turnstile fail ratio
+## NeonDB Connection Configuration
 
-### 4. Background Jobs (lightweight)
+### Connection String Format
 
-- `rq` + Redis worker
+```
+postgresql://USER:PASSWORD@ENDPOINT-pooler.REGION.aws.neon.tech/DBNAME?sslmode=require
+```
 
-**Use for:**
+For MindGuard (ap-southeast-1 region):
+```
+postgresql://neondb_owner:<password>@ep-lingering-violet-a1jiok7c-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require
+```
 
-- recompute leaderboard denormalized table
-- async dedupe similarity scoring
-- delayed moderation escalation
+**Critical: Use the `-pooler` hostname.** Adding `-pooler` to the endpoint ID routes connections through Neon's PgBouncer. Without it, each Vercel cold start opens a direct Postgres connection, and you'll hit `max_connections` (104 on free tier 0.25 CU) fast.
 
-**Why RQ over Celery here:**
+### Pooled vs Direct Connection
 
-- Scope vua/nhỏ, monolith-first, RQ setup don gian hon va du dung.
+| Use Case | Connection Type | When |
+|----------|----------------|------|
+| App runtime (Flask on Vercel) | **Pooled** (`-pooler` in hostname) | Always for the app — many short-lived connections from serverless |
+| Schema migrations (manual scripts) | **Direct** (no `-pooler`) | `db.create_all()` and seed scripts — may use SET/DDL statements incompatible with transaction-mode pooling |
 
-### 5. Privacy and Data Protection
+**Confidence:** HIGH — Neon connection pooling docs explicitly recommend pooled for serverless, direct for migrations.
 
-- Keep existing `utils/encryption.py` direction, bo sung:
-  - deterministic keyed hash (HMAC-SHA256) cho truong phuc vu dedupe/tracking
-  - encrypted-at-rest cho raw sensitive payload (neu van luu)
-- `phonenumbers` for E.164 normalization truoc khi mask/hash
+### SSL Configuration
 
-**Masking policy for phone (requested):**
+- `sslmode=require` in the connection string is sufficient
+- No client certificate files needed
+- No additional `connect_args` for SSL in SQLAlchemy
+- Neon enforces SSL on all connections by default
 
-- Chi hien thi `*** *** XYZ` (3 so cuoi)
-- Luu 2 cot logic:
-  - `phone_masked` (display-safe)
-  - `phone_hash` (dedupe/search, keyed)
-- Khong log raw phone vao app logs
+### SQLAlchemy Engine Options (Critical for Neon)
 
-### 6. Frontend for Light-Mode Overhaul
+These must be set in `config.py` or when initializing Flask-SQLAlchemy:
 
-- Keep Bootstrap 5.3.x
-- Design system nhe bang CSS custom properties:
-  - `--bg-default`, `--surface`, `--text-primary`, `--accent`, `--danger`
-- Tach style theo page (`quiz.css`, `report.css`) nhu repo da co, khong nhung inline CSS/JS vao template.
+```python
+SQLALCHEMY_ENGINE_OPTIONS = {
+    "pool_pre_ping": True,      # Test connection before use — handles Neon auto-suspend
+    "pool_recycle": 300,         # Recycle connections every 5 min — prevents stale SSL
+    "pool_size": 5,              # Keep pool small for serverless
+    "max_overflow": 10,          # Allow burst connections
+}
+```
 
-**For per-question quiz flow:**
+| Option | Value | Why |
+|--------|-------|-----|
+| `pool_pre_ping` | `True` | **Most important.** Neon suspends idle computes (free tier: after 5 min). When Flask reuses a pooled connection after suspend, the TCP socket is dead. `pool_pre_ping` issues a lightweight `SELECT 1` before each query to detect dead connections and replaces them. Without this, users get `SSL SYSCALL error: EOF detected`. |
+| `pool_recycle` | `300` | Forces connections to be replaced every 5 minutes. Prevents long-lived connections from going stale when Neon cycles infrastructure. |
+| `pool_size` | `5` | Vercel serverless functions are single-request (or Fluid Compute with limited concurrency). A large pool wastes Neon connections (free tier: 104 max). |
+| `max_overflow` | `10` | Allows temporary burst past `pool_size` for concurrent requests. |
 
-- Server-rendered multi-step route (`/quiz/<attempt_id>/<step>`)
-- Session + DB state (attempt table) de support refresh/back safely
-- Optional progressive enhancement JS cho transition, nhung logic chot diem o server
+**Confidence:** HIGH — Neon SQLAlchemy docs explicitly recommend `pool_pre_ping=True` and `pool_recycle`.
 
-### 7. Observability and Abuse Ops
+---
 
-- Structured logging JSON (stdlib logging + formatter)
-- Bao gom event types:
-  - `report_submitted`
-  - `report_rate_limited`
-  - `report_risk_scored`
-  - `report_auto_quarantined`
-- Ban dau co the ghi file + DB event table; chua can ELK ngay.
+## Vercel Deployment Configuration
 
-## Explicit Cautions (Do / Do Not)
+### Current vercel.json Assessment
 
-### Do
+```json
+{
+  "version": 2,
+  "builds": [{ "src": "app.py", "use": "@vercel/python" }],
+  "routes": [
+    { "src": "/static/(.*)", "dest": "/static/$1" },
+    { "src": "/(.*)", "dest": "/app.py" }
+  ]
+}
+```
 
-- Do them anti-spam theo **nhieu lop**: Turnstile + limiter + risk rules + moderation queue.
-- Do apply `ProxyFix` dung cau hinh khi sau proxy, neu khong rate limit key se sai.
-- Do giu migration script thu cong trong `database/` de dong bo convention repo hien tai.
-- Do tao test cho abuse paths (burst submit, duplicate payload, IP rotation pattern).
+**This is the legacy configuration format.** As of March 2026, Vercel's Python runtime auto-detects Flask from `requirements.txt` and doesn't require explicit `builds` or `routes`. The current config still works, but has redundancy.
 
-### Do Not
+### Recommended vercel.json
 
-- Do not dua he thong sang microservices o milestone nay.
-- Do not dua vao memory limiter trong production (docs Flask-Limiter ghi ro memory storage chi cho dev/test).
-- Do not dung extension security da lau khong cap nhat lam cot song (vd `flask-talisman` release cu 2019). Neu can headers, uu tien tu cau hinh middleware/response hook trong app.
-- Do not luu PII raw vao leaderboard table.
+Keep the current format — it works and is explicit. The Flask auto-detection is newer and may not handle the `static/` directory routing as expected (Flask's `app.static_folder` is not recommended on Vercel — use explicit routes or `public/` directory).
 
-## Upgrade/Additions List (Practical)
+### Vercel Python Runtime Facts
 
-### Upgrade (existing)
+| Aspect | Detail |
+|--------|--------|
+| Python versions | 3.12 (default), 3.13, 3.14 |
+| MindGuard target | 3.12 (matches current local dev) |
+| Framework detection | Auto-detects Flask from `requirements.txt` |
+| Entrypoint | `app.py` with `app = Flask(...)` — **already correct** |
+| Deployment model | Single Vercel Function with Fluid Compute |
+| Filesystem | **Read-only** — no SQLite, no writing to disk except `/tmp` |
+| Max bundle | 500 MB uncompressed |
+| Dependencies | Read from `requirements.txt` — **already used** |
+| Static files | Should use `public/` dir or explicit routes (current routes config handles this) |
 
-- Flask: `3.0.3 -> 3.1.x`
-- Werkzeug: `3.0.3 -> 3.1.x`
-- requests: update to current stable patch line
+**Confidence:** HIGH — Vercel Python runtime docs (updated March 2026).
 
-### Add (new)
+### Vercel Environment Variables
 
-- `Flask-Limiter[redis]`
-- `redis`
-- `rq`
-- `phonenumbers`
-- `python-json-logger` (or equivalent) for structured logs
+The NeonDB connection string must be set as a Vercel Environment Variable:
 
-### Optional (phase 2)
+| Variable | Value | Set Where |
+|----------|-------|-----------|
+| `DATABASE_URL` | `postgresql://neondb_owner:<pw>@ep-...-pooler...neon.tech/neondb?sslmode=require` | Vercel Dashboard → Project Settings → Environment Variables |
+| `SECRET_KEY` | (random secure string) | Vercel Dashboard |
+| `OPENROUTER_API_KEY` | (existing key) | Vercel Dashboard |
+| `CLOUDFLARE_SITE_KEY` | (existing key) | Vercel Dashboard |
+| `CLOUDFLARE_SECRET_KEY` | (existing key) | Vercel Dashboard |
 
-- `psycopg[binary]` (khi bat dau PostgreSQL)
-- `alembic` only if team doi chuan migration process; neu khong tiep tuc migration scripts thu cong theo convention hien tai
+`config.py` should read `DATABASE_URL` from `os.environ` and fall back to the local JSON config:
 
-## Implementation Approach by Target Scope
+```python
+SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL") or load_neondb_url()
+```
 
-1. **Light-mode UX overhaul**
+**The `.env/prosgressql_neondb.json` file is currently malformed** — it contains raw text, not valid JSON. Must be restructured to:
 
-- Introduce design token file trong `static/css/base.css`.
-- Refactor page CSS de dong nhat contrast, spacing, typography.
-- Keep Bootstrap utility-first approach de giam rewrite.
+```json
+{
+  "DATABASE_URL": "postgresql://neondb_owner:<password>@ep-lingering-violet-a1jiok7c-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require"
+}
+```
 
-1. **Per-question quiz flow**
+---
 
-- Add `quiz_attempts` + `quiz_attempt_answers` tables.
-- Track progress theo question index; autosave moi submit.
-- Lock final scoring server-side sau question cuoi.
+## Integration Points with Existing Code
 
-1. **Leaderboard for reporters**
+### config.py Changes Required
 
-- Add denormalized aggregate table (daily/weekly/all-time).
-- Update via transactional write + async reconcile job (RQ).
-- Chi hien thi identity da mask.
+| Current | Change To | Why |
+|---------|-----------|-----|
+| `SQLALCHEMY_DATABASE_URI = f"sqlite:///{DB_PATH}"` | Read from `DATABASE_URL` env var / JSON config | Switch from SQLite to PostgreSQL |
+| No `SQLALCHEMY_ENGINE_OPTIONS` | Add `pool_pre_ping`, `pool_recycle`, `pool_size` | Required for Neon auto-suspend resilience |
+| `IS_VERCEL` conditional for `/tmp` SQLite path | Remove entirely | No longer needed — NeonDB is remote, same URI for local and Vercel |
+| `load_local_env('prosgressql_neondb.json')` | Fix the JSON file to be valid JSON | Current file is not parseable JSON |
 
-1. **Privacy masking**
+### app.py Changes Required
 
-- Normalize -> hash/encrypt -> mask pipeline khi ingest report.
-- Expose chi masked fields o template/API.
+| Current | Change To | Why |
+|---------|-----------|-----|
+| `db.create_all()` runs on every import | Guard with check or use migration script | `db.create_all()` is safe with PostgreSQL but should use direct (non-pooled) connection for DDL |
+| Vercel cold-start seed (`if Config.IS_VERCEL: run_seed()`) | Remove or replace with one-time seed check | PostgreSQL is persistent — seeding on every cold start would duplicate data or fail on unique constraints |
 
-1. **Anti-spam / anti-fraud controls**
+### models/models.py — No Changes Needed
 
-- Route-level rate limits:
-  - `/scammer/report` strict
-  - auth routes medium
-  - read routes lenient
-- Risk scoring + threshold:
-  - low -> accept
-  - medium -> accept + queue review
-  - high -> quarantine + require stronger challenge
+All models use portable SQLAlchemy types:
+- `db.Integer`, `db.String(N)`, `db.Text`, `db.Boolean`, `db.DateTime`, `db.ForeignKey`
+- No SQLite-specific constructs (no `AUTOINCREMENT`, no `sqlite_` pragmas)
+- PostgreSQL dialect handles these identically
 
-## Confidence + Evidence
+**Confidence:** HIGH — Verified by reading all model definitions.
 
-| Area | Confidence | Notes |
-|---|---|---|
-| Flask/Flask-SQLAlchemy upgrade direction | HIGH | Official Pallets stable docs/changelog lines |
-| SQLite hardening details | HIGH | SQLAlchemy 2.0 SQLite dialect docs (2026 build) |
-| Rate limiting stack | HIGH | Flask-Limiter official docs incl. Redis backend warning for memory storage |
-| Turnstile integration direction | HIGH | Official Cloudflare Turnstile docs (updated Mar 2026) |
-| RQ recommendation vs Celery for this scope | MEDIUM | Official RQ docs + monolith complexity fit |
-| Flask security-header extension choice | MEDIUM | `flask-talisman` repo aging signal (release old), de-risk by custom headers |
+### Seed Data Strategy Change
+
+| Current (SQLite/Vercel) | Required (PostgreSQL) |
+|-------------------------|----------------------|
+| Seed on every Vercel cold start (ephemeral /tmp DB) | Seed once, data persists in NeonDB |
+| `seed_all.py` runs unconditionally | Must add idempotency checks (e.g., `INSERT ... ON CONFLICT DO NOTHING` or check if tables are populated) |
+
+---
+
+## What NOT to Add
+
+| Don't Add | Why |
+|-----------|-----|
+| `psycopg2` (non-binary) | Won't compile on Vercel |
+| `asyncpg` | Flask is synchronous WSGI |
+| `@neondatabase/serverless` | JavaScript-only driver |
+| `Alembic` / `flask-migrate` | Project convention: manual migration scripts in `database/` |
+| `python-dotenv` | Project already has its own JSON-based config loader |
+| `gunicorn` / `uvicorn` | Vercel provides its own WSGI server |
+| `pg8000` | No advantage over psycopg2-binary; less ecosystem support |
+| Client SSL certificates | Neon uses `sslmode=require` without client certs |
+| `pgbouncer` (local) | Neon provides server-side PgBouncer — no local pooler needed |
+
+---
+
+## Alternatives Considered
+
+| Category | Recommended | Alternative | Why Not |
+|----------|-------------|-------------|---------|
+| PG Driver | `psycopg2-binary` | `psycopg[binary]` (psycopg3) | psycopg3 works but Flask-SQLAlchemy's default dialect is `psycopg2`. Switching to psycopg3 requires `postgresql+psycopg://` URI and is an unnecessary change for this migration. |
+| PG Driver | `psycopg2-binary` | `pg8000` (pure Python) | Pure Python = slower. Less community support. No compile benefit over `-binary` which is already pre-compiled. |
+| Connection pooling | Neon server-side (PgBouncer) | SQLAlchemy `QueuePool` + Neon direct | Neon PgBouncer already handles pooling at 10K connections. SQLAlchemy's default QueuePool works fine on top, but the `-pooler` endpoint is what actually matters for serverless. |
+| Config format | `DATABASE_URL` env var | Keep `.env/*.json` only | Vercel env vars are the standard pattern. JSON fallback kept for local dev only. |
+
+---
 
 ## Sources
 
-- Flask docs (stable): <https://flask.palletsprojects.com/>
-- Flask deploy behind proxy: <https://flask.palletsprojects.com/en/stable/deploying/proxy_fix/>
-- Flask-SQLAlchemy docs: <https://flask-sqlalchemy.readthedocs.io/en/stable/>
-- SQLAlchemy SQLite dialect (2.0 docs): <https://docs.sqlalchemy.org/en/20/dialects/sqlite.html>
-- Alembic docs (context only): <https://alembic.sqlalchemy.org/en/latest/>
-- Flask-Limiter docs: <https://flask-limiter.readthedocs.io/en/stable/>
-- Cloudflare Turnstile docs: <https://developers.cloudflare.com/turnstile/>
-- RQ docs: <https://python-rq.org/>
-- Flask-WTF docs (CSRF option): <https://flask-wtf.readthedocs.io/en/1.2.x/>
-- Flask-Talisman repository status check: <https://github.com/GoogleCloudPlatform/flask-talisman>
+| Source | Confidence | URL |
+|--------|------------|-----|
+| Neon: Connect Python app | HIGH | https://neon.tech/docs/guides/python |
+| Neon: SQLAlchemy guide | HIGH | https://neon.tech/docs/guides/sqlalchemy |
+| Neon: Connection pooling | HIGH | https://neon.tech/docs/connect/connection-pooling |
+| Neon: Connect from any app | HIGH | https://neon.tech/docs/connect/connect-from-any-app |
+| Vercel: Python runtime | HIGH | https://vercel.com/docs/functions/runtimes/python |
+| Vercel: Flask on Vercel | HIGH | https://vercel.com/docs/frameworks/backend/flask |
+| SQLAlchemy 2.0.33 changelog | HIGH | https://docs.sqlalchemy.org/en/20/changelog/changelog_20.html#change-2.0.33-postgresql |
+| Existing codebase analysis | HIGH | Verified against config.py, models/models.py, requirements.txt, vercel.json, app.py |

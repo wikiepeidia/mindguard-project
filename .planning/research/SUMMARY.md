@@ -1,193 +1,251 @@
 # Project Research Summary
 
-**Project:** MindGuard v2
-**Domain:** Cybersecurity education and scam-reporting web platform (brownfield Flask monolith)
-**Researched:** 2026-03-19
-**Confidence:** MEDIUM-HIGH
+**Project:** MindGuard v1.1 — PostgreSQL Migration & Vercel Deployment Fix
+**Domain:** SQLite→NeonDB PostgreSQL migration + Vercel serverless deployment for Flask/SQLAlchemy app
+**Researched:** 2026-04-03
+**Confidence:** HIGH
+
+---
 
 ## Executive Summary
 
-MindGuard v2 is best built as an incremental hardening and UX modernization of the current Flask monolith, not a replatform. The combined research consistently supports keeping Flask + Jinja + Bootstrap and delivering improvements in additive slices: anti-spam policy services, privacy-safe data handling, and phased UI upgrades. This aligns with current architecture boundaries and minimizes regression risk on critical auth, quiz, and reporting routes.
+MindGuard's Vercel deployment is broken (500 errors) because it relies on SQLite in Vercel's ephemeral `/tmp` filesystem. Every cold start creates a fresh database, seeds it (causing duplicates or timeouts), and loses all data when the function instance recycles. The fix is straightforward: replace SQLite with NeonDB PostgreSQL (already provisioned in `ap-southeast-1`), strip all ephemeral-storage workarounds from `app.py` and `config.py`, and deploy with proper environment variables. The entire migration requires only **2 new pip packages** (`psycopg2-binary`, explicit `SQLAlchemy>=2.0.33` pin) and changes to **4 source files** (`config.py`, `app.py`, `requirements.txt`, `.env/prosgressql_neondb.json`). No model changes, no route changes, no service changes — SQLAlchemy's ORM abstracts the dialect switch completely.
 
-For this cycle, the strongest approach is to prioritize trust foundations first: shared light-mode design consistency, per-question quiz flow with durable server-side state, and multi-signal anti-abuse controls (not IP-only blocking). The research shows these are table-stakes for 2026 user expectations on scam-report platforms and directly support the active requirements in PROJECT.md.
+The primary risks are: (1) the malformed NeonDB config file silently falling back to SQLite without anyone noticing, (2) seed-on-cold-start duplicating data once PostgreSQL is connected, and (3) Vercel cold start timeouts if `db.create_all()` and NeonDB compute wake-up combine to exceed 10 seconds. All three are preventable with the configuration and startup changes detailed below. A secondary concern — file uploads crashing on Vercel's read-only filesystem — exists but is out of scope for this migration and should be a separate phase.
 
-The largest risks are false-positive abuse controls, privacy leakage from sensitive fields, and big-bang UX changes. Mitigation should follow monitor-then-enforce rollout, additive database migrations with rollback hygiene, and feature-flagged UI migration measured by funnel telemetry.
+The recommended approach is a **3-phase execution**: (Phase 1) fix configuration and verify local PostgreSQL connectivity, (Phase 2) migrate schema and data to NeonDB, (Phase 3) clean `app.py` startup path, deploy to Vercel, and verify. This order ensures each phase builds on a verified foundation.
+
+---
 
 ## Key Findings
 
-### Recommended Stack Direction
+### Recommended Stack Additions
 
-Keep the current monolith and upgrade in place rather than adopting microservices or SPA architecture. Add Redis-backed anti-abuse capabilities and lightweight background processing while preserving existing route and template contracts.
+Only **2 lines** added to `requirements.txt`. No new frameworks or major dependencies.
 
-**Core technologies:**
+| Package | Version | Purpose |
+|---------|---------|---------|
+| `psycopg2-binary` | `>=2.9.9` | PostgreSQL driver for SQLAlchemy. Must use `-binary` variant — Vercel build lacks `libpq-dev` for source compilation. |
+| `SQLAlchemy` | `>=2.0.33` | Explicit pin. Versions < 2.0.33 have a bug where idle connections fail after NeonDB auto-suspend (`SSL connection has been closed unexpectedly`). |
 
-- Flask 3.1.x: request lifecycle and blueprint composition, stable documented path from current 3.0.x baseline.
-- Flask-SQLAlchemy 3.1.x (SQLAlchemy 2.0 style incrementally): keeps model compatibility while enabling cleaner query/migration hygiene.
-- SQLite (current phase) with strict migration/index hardening: fastest delivery for v1; prepare PostgreSQL path when concurrency grows.
-- Flask-Limiter with Redis backend: production-grade rate limiting and abuse throttling.
-- Redis + RQ: shared counters and lightweight async jobs (leaderboard reconcile, abuse event processing).
-- Privacy utilities (hashing/masking normalization + phonenumbers): consistent PII minimization and deterministic masking.
-- Bootstrap 5.3.x + CSS design tokens: lowest-risk way to deliver light-mode consistency across pages.
+**Updated requirements.txt:**
+```txt
+Flask==3.0.3
+Flask-SQLAlchemy==3.1.1
+Flask-Mail==0.9.1
+Werkzeug==3.0.3
+MarkupSafe==2.1.5
+requests==2.31.0
+psycopg2-binary>=2.9.9
+SQLAlchemy>=2.0.33
+```
 
-### Feature Direction
+**What NOT to add:**
+- `asyncpg` — Flask is WSGI (sync). Zero benefit.
+- `@neondatabase/serverless` — JS/TS driver, not Python.
+- `psycopg2` (non-binary) — needs C compiler, fails on Vercel.
+- `Alembic` / `Flask-Migrate` — project convention prohibits automated migration tools.
 
-The feature research separates baseline trust expectations from engagement enhancements. For v1 planning, table-stakes should ship first, differentiators should be gated by anti-gaming safeguards, and anti-features should be explicitly blocked.
+**NeonDB connection string format (pooled, for serverless):**
+```
+postgresql://USER:PASSWORD@ENDPOINT-pooler.REGION.aws.neon.tech/DBNAME?sslmode=require
+```
+The `-pooler` suffix is **mandatory** for Vercel — routes through PgBouncer to prevent "too many connections" (free tier limit: 104).
 
-**Table-stakes:**
+**Required SQLAlchemy engine options:**
+```python
+SQLALCHEMY_ENGINE_OPTIONS = {
+    "pool_pre_ping": True,   # Detect stale connections after NeonDB suspend
+    "pool_recycle": 300,      # Recycle every 5 min (matches Neon suspend timer)
+    "pool_size": 5,           # Small pool for serverless
+    "max_overflow": 10,       # Allow burst
+}
+```
 
-- Light-mode UX consistency across auth, quiz, reporting, and profile flows.
-- 1-question-per-page quiz with visible progress and safe state persistence.
-- Baseline anti-abuse controls on report submission (rate limiting + clear cooldown feedback).
-- Privacy-by-default masking of sensitive reporter fields (phone visible only as masked form).
-- Transparent guidance for reporting flow and expected outcomes.
-- Abuse telemetry for monitoring false positives/false negatives.
+### Feature Table Stakes (Migration-Specific)
 
-**Differentiators:**
+From FEATURES_v1.1_migration.md — 10 table-stakes items, all required for a working deploy:
 
-- Reporter leaderboard with integrity controls.
-- Credibility-weighted scoring (quality over raw quantity).
-- Adaptive friction (step-up challenge based on risk, not blanket friction).
-- Contextual micro-learning inside reporting flow.
-- Privacy transparency panel explaining tracked signals and retention intent.
+**Must have (broken without these):**
+1. **Fix `.env/prosgressql_neondb.json`** — currently raw text, not valid JSON. Config loader silently returns `{}`.
+2. **Add `psycopg2-binary`** — no PostgreSQL driver exists in requirements.
+3. **Switch `SQLALCHEMY_DATABASE_URI` to PostgreSQL** — env var → JSON fallback pattern.
+4. **SSL connection** (`sslmode=require`) — NeonDB enforces SSL on all connections.
+5. **Remove seed-on-cold-start** — will duplicate all data on every Vercel function invocation.
+6. **Run seed exactly once** against NeonDB via manual script.
+7. **Set Vercel environment variables** — `DATABASE_URL`, `SECRET_KEY`, API keys.
 
-**Anti-features (avoid in v1):**
+**Should have (quality improvement):**
+- NeonDB connection pooling via `-pooler` endpoint (D1)
+- SQLAlchemy pool tuning for serverless (D2)
+- Health check endpoint for debugging (D7)
+- Cold start optimization — remove `db.create_all()` / legacy fix from import path (D10)
 
-- Raw phone display in public/admin-by-default views.
-- Count-only leaderboard without quality or moderation gates.
-- Hard blocking using only a single signal (IP or cookie alone).
-- Permanent lockouts for burst behavior without recovery path.
-- Big-bang redesign spanning IA/navigation/branding together.
-- Heavy bot-vendor dependency before baseline telemetry exists.
+**Explicitly defer (anti-features for v1.1):**
+- Alembic/Flask-Migrate (project convention: manual scripts only)
+- Dual DB support (SQLite dev / PG prod) — PROJECT.md says NeonDB for all environments
+- PG-specific features (JSONB, Array types) — keep models portable
+- Async driver (asyncpg) — would require ASGI rewrite
+- File upload cloud storage — separate concern, separate phase
+- Multi-region NeonDB — single region for v1.1
 
-### Architecture Build Order
+### Architecture Changes
 
-The architecture research strongly supports additive integration seams around existing routes (`auth`, `scammer`, `quiz`) and monitor-first policy rollout.
+**Root cause of current 500 errors:**
+```
+app.py imports → db.create_all() in /tmp → run_seed() every cold start → SQLite ephemeral → data lost
+```
 
-**Build order:**
+**Target architecture:**
+```
+app.py imports (fast) → SQLAlchemy → TCP+SSL → NeonDB Pooler (PgBouncer) → PostgreSQL (persistent)
+```
 
-1. Security and data-governance foundation: migration hygiene, CSRF/rate-limit guardrails, audit logging, abuse event schema.
-2. Anti-spam monitor mode: add service layer + policy engine + telemetry repository with no hard blocks yet.
-3. Soft enforcement on report flow: challenge/block thresholds only for clearly abusive patterns; validate false-positive rate.
-4. Auth flow reuse: apply same anti-abuse service to login/register with route-specific thresholds.
-5. UI design system foundation: shared light-mode tokens and base layout consistency.
-6. Page UX modernization: per-question quiz flow and report UX improvements under feature flags.
-7. Operations tuning and scale readiness: tighten thresholds, move expensive tasks to queue, prep PostgreSQL path if needed.
+**Files that change:**
 
-### Critical Pitfalls
+| File | Change | Effort |
+|------|--------|--------|
+| `config.py` | Remove `IS_VERCEL`/`DB_PATH`/SQLite logic. Add PostgreSQL URI from env/JSON. Add `SQLALCHEMY_ENGINE_OPTIONS`. | Medium |
+| `app.py` | Remove `IS_VERCEL` seed block. Remove legacy data fix from import path. Keep `db.create_all()` (safe, idempotent) or move to script. | Medium |
+| `requirements.txt` | Add 2 lines: `psycopg2-binary>=2.9.9`, `SQLAlchemy>=2.0.33`. | Minimal |
+| `.env/prosgressql_neondb.json` | Rewrite as valid JSON with `DATABASE_URL` and `DATABASE_URL_DIRECT` keys. | Low |
+| `vercel.json` | No change required (current config works). Optional: add function timeout config. | None |
 
-1. Single-signal abuse blocking (IP/cookie only): use multi-signal risk scoring and graduated actions.
-2. Privacy boundary gaps in anti-fraud telemetry: enforce masking, data classification, retention/role boundaries.
-3. Missing guardrails on state-changing endpoints: require CSRF, rate limits, dedupe/idempotency windows.
-4. Embedding anti-spam logic directly in route handlers: move to service/policy layers for testability and safer iteration.
-5. Hard-fail behavior when upstream challenge services degrade: use timeouts, fallback policy, and queue where realtime is unnecessary.
-6. Big-bang UX rollout: use feature flags and funnel metrics (completion, drop-off, per-step time).
-7. No moderation audit trail: log actor, reason codes, and timeline for sensitive actions.
-8. Unrepeatable DB migration changes: enforce standalone migration scripts in `database/` with verification and rollback plans.
+**Files that DON'T change:**
+- `models/models.py` — all 13 models use portable SQLAlchemy types
+- `routes/*.py` — all use ORM, no raw SQL
+- `services/*.py` — all use ORM
+- `extensions.py` — unchanged (engine options come from config)
+- `templates/` — unchanged
+- `static/` — unchanged
+
+### Critical Pitfalls (Top 7)
+
+Ranked by deployment impact:
+
+| # | Pitfall | Impact | Prevention | Phase |
+|---|---------|--------|------------|-------|
+| 1 | **Malformed NeonDB JSON config** — `json.load()` silently fails, falls back to SQLite | Silent wrong-database connection | Rewrite as valid JSON, add validation | Phase 1 |
+| 2 | **No PostgreSQL driver** — `ModuleNotFoundError: psycopg2` | Immediate 500 on any DB operation | Add `psycopg2-binary>=2.9.9` to requirements | Phase 1 |
+| 3 | **Seed-on-cold-start duplication** — `run_seed()` every Vercel invocation with persistent DB | Corrupted data, duplicate admin users | Remove `IS_VERCEL` seed block entirely | Phase 2 |
+| 4 | **Cold start timeout** — `db.create_all()` + NeonDB wake-up exceeds 10s | 504 Gateway Timeout | Remove startup DB work from import path | Phase 3 |
+| 5 | **Connection pool exhaustion** — N Vercel instances × M connections > 104 limit | Intermittent 500s under load | Use `-pooler` endpoint + `pool_size=5` | Phase 1 |
+| 6 | **`LIKE` case sensitivity change** — SQLite case-insensitive, PostgreSQL case-sensitive | Broken search results | Audit all `.like()` → `.ilike()` | Phase 2 |
+| 7 | **Read-only filesystem for uploads** — `static/uploads/evidence/` write fails | Report submission with evidence crashes | Defer to separate phase (cloud storage) | Future |
+
+---
 
 ## Implications for Roadmap
 
-Suggested phase structure for requirements and roadmap generation:
+### Phase 1: Configuration & Connection
+**Rationale:** Everything else depends on a working PostgreSQL connection. Must be verified locally before touching deployment.
+**Delivers:** Local Flask app connected to NeonDB PostgreSQL instead of SQLite.
+**Addresses:** T1 (fix JSON), T2 (add driver), T3 (switch URI), T7 (SSL), D1 (pooler URL), D2 (pool tuning).
+**Avoids:** Pitfalls 1 (malformed JSON), 2 (no driver), 5 (pool exhaustion), 7 (SSL).
+**Work:**
+- Rewrite `.env/prosgressql_neondb.json` as valid JSON
+- Add `psycopg2-binary>=2.9.9` and pin `SQLAlchemy>=2.0.33` in requirements.txt
+- Rewrite `config.py`: remove `IS_VERCEL`/SQLite branching, add PostgreSQL URI + engine options
+- Verify local connection to NeonDB (SELECT 1)
+- Check credential security (`.env/` in `.gitignore`, rotate if committed)
 
-### Phase 1: Foundations (Security, Data, Observability)
+### Phase 2: Schema & Data Migration
+**Rationale:** With connection working, create schema in PostgreSQL and migrate any existing data. Must happen before Vercel deploy to ensure tables exist.
+**Delivers:** NeonDB has all 13 tables populated with seed data. Data integrity verified.
+**Addresses:** T4 (create_all strategy), T5 (remove seed-on-cold-start), T6 (one-time seed), T10 (boolean compat), D4 (data migration).
+**Avoids:** Pitfalls 3 (seed duplication), 6 (LIKE case sensitivity), 12 (boolean conversion), 14 (string length).
+**Work:**
+- Run `db.create_all()` once against NeonDB (via script, not app startup)
+- Run `seed_all.py` once against NeonDB
+- Audit `.like()` → `.ilike()` in all routes/services
+- Verify `db.String(N)` lengths against existing data
+- Mark old SQLite migration scripts as obsolete
 
-**Rationale:** De-risks every later feature and blocks high-severity governance failures early.
-**Delivers:** Migration hygiene, abuse tables, CSRF/rate-limit baseline, moderation audit trail, privacy masking utilities.
-**Addresses:** Table-stakes for privacy and abuse monitoring.
-**Avoids:** Pitfalls 2, 3, 7, 8.
+### Phase 3: Vercel Deployment & Startup Optimization
+**Rationale:** Database is ready. Now clean up `app.py` so Vercel cold starts are fast and reliable.
+**Delivers:** Working Vercel deployment — no 500 errors, fast cold starts.
+**Addresses:** T8 (WSGI routing), T9 (env vars), D6 (static files), D7 (health check), D10 (cold start).
+**Avoids:** Pitfalls 4 (cold start timeout), 9 (SECRET_KEY), 13 (Vercel timeout), 16 (startup code).
+**Work:**
+- Remove `IS_VERCEL` seed block from `app.py`
+- Move legacy data fix to one-time script
+- Optionally move `db.create_all()` out of import path
+- Set all environment variables on Vercel dashboard
+- Add `/health` endpoint
+- Deploy and verify
+- Set `SECRET_KEY` as stable Vercel env var
 
-### Phase 2: Anti-Spam Engine (Monitor -> Soft Enforce)
+### Phase 4 (Future): File Upload Storage
+**Rationale:** Not part of DB migration but will break on Vercel. Separate concern.
+**Delivers:** Evidence image uploads work on Vercel via cloud storage.
+**Note:** Deferred per research — requires choosing storage provider (Vercel Blob, Cloudflare R2, S3).
 
-**Rationale:** Needs telemetry before strict blocking to prevent user lockouts.
-**Delivers:** Anti-spam service + rule engine + route guard wrappers on report flow, threshold configs, reason-coded decisions.
-**Addresses:** Table-stakes for anti-abuse and cooldown feedback.
-**Avoids:** Pitfalls 1, 4, 5.
+### Phase Ordering Rationale
 
-### Phase 3: UX System and Quiz Flow Modernization
-
-**Rationale:** Build shared token system before page-level redesign to avoid inconsistent UI drift.
-**Delivers:** Light-mode design token foundation, one-question-per-page quiz with progress + resilient state, mobile-first regression checks.
-**Addresses:** Table-stakes for UX consistency and staged quiz flow.
-**Avoids:** Pitfall 6.
-
-### Phase 4: Leaderboard Integrity and Engagement
-
-**Rationale:** Leaderboard should only launch after anti-gaming and moderation signals exist.
-**Delivers:** Reporter leaderboard, quality-weighted scoring, integrity rules, reconciliation job.
-**Addresses:** Differentiators (leaderboard and credibility scoring).
-**Avoids:** Count-only gaming anti-feature.
-
-### Phase 5: Tuning, Reliability, and Scale Preparation
-
-**Rationale:** Consolidates metrics-driven tuning after initial rollout behavior is observed.
-**Delivers:** Threshold tuning, false-positive reduction, queue hardening, optional PostgreSQL migration plan trigger criteria.
-**Addresses:** Reliability and sustainability goals.
-**Avoids:** Overfitting and premature replatforming.
-
-### Recommendations for v1 Scope
-
-Include in v1:
-
-- Light-mode consistency and quiz flow redesign (1 question/page) with telemetry.
-- Privacy-safe reporter masking everywhere rendered.
-- Multi-signal anti-abuse baseline with monitor-first rollout and soft enforcement.
-- Foundation for moderation auditability.
-
-Gate or defer beyond core v1:
-
-- Advanced adaptive friction engine beyond rules-based thresholds.
-- ML-driven bot classification.
-- Broad platform redesign outside targeted UX flows.
-- Major architectural replatform.
+- **Phase 1 before 2:** Can't migrate data without a working connection.
+- **Phase 2 before 3:** Vercel deploy needs tables to already exist in PostgreSQL — can't rely on cold-start `create_all`.
+- **Phase 3 last:** Cleanup and deploy after DB is proven stable.
+- **Phase 4 deferred:** File uploads are a separate feature, not blocking the core migration. Evidence URL storage works (text column), only the upload mechanism needs cloud storage.
 
 ### Research Flags
 
-Phases likely needing deeper research during planning:
+**Standard patterns (skip deep research during planning):**
+- Phase 1 — well-documented: Neon official docs + SQLAlchemy docs cover everything.
+- Phase 2 — straightforward: `db.create_all()` + seed script + LIKE audit is mechanical.
+- Phase 3 — well-documented: Vercel Python runtime + Flask WSGI is stable.
 
-- Phase 2: threshold calibration and false-positive management strategy under real traffic.
-- Phase 4: quality-weighted leaderboard formula and abuse-resistance economics.
-- Phase 5: PostgreSQL migration trigger criteria and cutover strategy.
+**May need research during planning:**
+- Phase 4 (file uploads) — needs storage provider comparison if not already decided.
 
-Phases with established patterns (lower research burden):
-
-- Phase 1: CSRF/rate limiting/audit logging/migration hygiene in Flask monoliths.
-- Phase 3: design tokens + progressive disclosure quiz UX patterns.
+---
 
 ## Confidence Assessment
 
 | Area | Confidence | Notes |
 |------|------------|-------|
-| Stack | HIGH | Based on official Flask, SQLAlchemy, Flask-Limiter, Cloudflare references and codebase fit. |
-| Features | MEDIUM | Strong baseline from OWASP/industry guidance; leaderboard mechanics need product tuning. |
-| Architecture | HIGH | Directly grounded in current blueprint/route structure and additive integration strategy. |
-| Pitfalls | HIGH | High agreement between codebase concerns and domain failure modes. |
+| Stack | **HIGH** | Neon official docs, SQLAlchemy docs, Vercel Python runtime docs all cross-confirm. Only 2 packages needed. |
+| Features (migration) | **HIGH** | Based on direct codebase inspection. All 10 table-stakes are concrete, file-level changes. |
+| Features (v1.0 UX) | **MEDIUM** | FEATURES.md from prior milestone — UX guidance sound but not relevant to this migration. |
+| Architecture | **HIGH** | Root cause diagnosed from code. Target architecture follows Neon's official serverless pattern. |
+| Pitfalls | **HIGH** | All pitfalls derived from actual code inspection + known PostgreSQL/Vercel constraints. |
 
-**Overall confidence:** MEDIUM-HIGH
+**Overall confidence:** **HIGH** — This is a well-documented migration path (Flask + SQLAlchemy + NeonDB + Vercel). No novel patterns required.
 
 ### Gaps to Address
 
-- Abuse thresholds are not research-resolvable without production-like telemetry; must tune via staged rollout.
-- Leaderboard scoring governance (quality signals, moderation weighting) needs explicit product policy before launch.
-- Privacy notice wording and retention windows require policy decisions aligned with implementation.
-- Trigger points for SQLite -> PostgreSQL migration should be defined as measurable SLO/SLI thresholds.
+| Gap | How to Handle |
+|-----|---------------|
+| **Real user data in SQLite?** | Need user input: is there production data in SQLite that must be migrated, or is seed data sufficient? This changes Phase 2 scope significantly. |
+| **Vercel plan tier** | Hobby (10s timeout) vs Pro (60s). Affects whether AI chatbot routes will timeout. Need user input. |
+| **File upload current state** | Are evidence images currently stored locally? If so, they're already lost on Vercel. May not need immediate action. |
+| **NeonDB password rotation** | Credentials may be in git history (`.env/` file). Need to verify `.gitignore` and possibly rotate. |
+| **FEATURES.md scope mismatch** | The v1.0 FEATURES.md covers UX/quiz/leaderboard — not this migration. FEATURES_v1.1_migration.md is the relevant file. Future milestones should reference the appropriate features file. |
+
+### Open Questions Requiring User Input
+
+1. **Is there real user data in the SQLite database that must be preserved?** If yes, Phase 2 needs a full data migration script (SQLite → PostgreSQL). If no, just seed fresh.
+2. **What Vercel plan are you on?** Hobby has a 10-second function timeout. AI chatbot and scam analysis routes may exceed this.
+3. **Should the NeonDB password be rotated?** If `.env/prosgressql_neondb.json` was ever committed to git, credentials are exposed.
+4. **Is the filename typo (`prosgressql`) intentional?** The file is referenced as `prosgressql_neondb.json` in `config.py`. Renaming to `postgresql_neondb.json` would require updating the config loader call.
+
+---
 
 ## Sources
 
 ### Primary (HIGH confidence)
-
-- `.planning/research/STACK.md`
-- `.planning/research/FEATURES.md`
-- `.planning/research/ARCHITECTURE.md`
-- `.planning/research/PITFALLS.md`
-- `.planning/PROJECT.md`
+- **Codebase analysis:** `config.py`, `app.py`, `models/models.py`, `extensions.py`, `vercel.json`, `requirements.txt`, `database/seed_all.py`, `.env/prosgressql_neondb.json`
+- **NeonDB docs:** Connection pooling, SQLAlchemy integration, auto-suspend, SSL requirements
+- **SQLAlchemy docs:** `pool_pre_ping`, `pool_recycle`, dialect portability, engine configuration
+- **Vercel Python runtime docs:** `@vercel/python` WSGI detection, filesystem constraints, environment variables
 
 ### Secondary (MEDIUM confidence)
+- **PROJECT.md constraints:** NeonDB for all environments, no Alembic, single region
+- **copilot-instructions.md:** Manual migration scripts only, `.env/` JSON config pattern
 
-- Flask official docs and deployment guidance
-- Flask-SQLAlchemy and SQLAlchemy SQLite dialect docs
-- Flask-Limiter docs
-- Cloudflare Turnstile docs
-- OWASP authentication/privacy cheat sheets
+### Tertiary (LOW confidence)
+- **v1.0 FEATURES.md:** UX/quiz/leaderboard features — not directly applicable to migration but informs future milestones
 
 ---
-*Research completed: 2026-03-19*
+
+*Research completed: 2026-04-03*
 *Ready for roadmap: yes*

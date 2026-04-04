@@ -36,18 +36,22 @@ Tables confirmed in NeonDB:
 ## Decisions
 
 ### D-01: Remove IS_VERCEL seed block from app.py
+
 **Decision**: Remove the `if Config.IS_VERCEL: run_seed()` block (was lines 36-39).
 **Status**: ✅ Already done — app.py is clean.
 **Rationale**: Seeding on every cold start causes duplicate data on Vercel's ephemeral containers.
 
 ### D-02: Remove db.create_all() from app.py
+
 **Decision**: Remove `db.create_all()` from startup after confirming NeonDB tables exist.
 **Status**: ✅ Already done — removed, comment added: `# Schema managed externally`.
 **Rationale**: NeonDB tables confirmed via `information_schema.tables` (13 tables present). 200-500ms penalty avoided.
 
 ### D-03: Add idempotency guards to seed scripts
+
 **Decision**: Add check-before-insert guards to all `seed_*` functions in `database/seed_all.py`.
 **Status**: ✅ Already done — all 6 seed functions have guards:
+
 - `seed_admin`: `filter_by(email=...).first()`
 - `seed_users`: `filter_by(email=...).first()` per user
 - `seed_scammers`: `filter_by(scammer_info_raw=...).first()` per entry
@@ -56,6 +60,7 @@ Tables confirmed in NeonDB:
 - `seed_quiz_results`: `QuizResult.query.count() >= 15` check
 
 ### D-04: Seed execution method — manual terminal command
+
 **Decision**: Seed is run once via manual terminal command, NOT auto-detected at startup.
 **Status**: ⏳ Not yet run — this is the remaining work for Phase 8.
 **Command**: `python -m database.seed_all` (or `python database/seed_all.py`)

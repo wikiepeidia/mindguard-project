@@ -59,5 +59,5 @@ Plan: Complete (all phases done)
 ## Session Continuity
 
 - **Last Updated**: 2026-04-04
-- **Stopped at**: v1.1 milestone complete — all phases 7-9 done, production live at https://mindguard-five.vercel.app
+- **Stopped at**: v1.1 milestone complete — all phases 7-9 done, production live at <https://mindguard-five.vercel.app>
 - **Resume file**: .planning/ROADMAP.md

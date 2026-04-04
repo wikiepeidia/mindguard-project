@@ -52,6 +52,7 @@ completed: 2026-04-04
 - **Files modified:** 3
 
 ## Accomplishments
+
 - Created valid `.env/postgresql_neondb.json` with NeonDB pooler endpoint (replaces malformed `prosgressql_neondb.json`)
 - Rewrote `config.py` database section: env var → JSON → SQLite fallback chain with NullPool + pool_pre_ping
 - Verified live NeonDB connection: `SELECT 1` returns 1 through both raw SQLAlchemy and Flask app context
@@ -65,11 +66,13 @@ completed: 2026-04-04
 3. **Task 3: Verify NeonDB connection end-to-end** - verification only, no code changes
 
 ## Files Created/Modified
+
 - `.env/postgresql_neondb.json` - Valid JSON with DATABASE_URL (pooler endpoint) and NEON_API_KEY
 - `config.py` - PostgreSQL URI with env→JSON→SQLite fallback, NullPool engine options, IS_VERCEL /tmp path removed
 - `requirements.txt` - Added psycopg2-binary>=2.9.9 and SQLAlchemy>=2.0.33
 
 ## Decisions Made
+
 - Conditional `SQLALCHEMY_ENGINE_OPTIONS`: NullPool + pool_pre_ping only for postgresql:// URIs. SQLite fallback gets empty dict (NullPool is incompatible with SQLite).
 - `sslmode=require` stays in the URI string itself — no separate `connect_args` needed.
 
@@ -78,12 +81,15 @@ completed: 2026-04-04
 None — plan executed exactly as written.
 
 ## Issues Encountered
+
 None
 
 ## User Setup Required
+
 None — no external service configuration required.
 
 ## Next Phase Readiness
+
 - Phase 8 (App Startup Cleanup): `IS_VERCEL` flag preserved for seed removal. `db.create_all()` ready to test against NeonDB.
 - Phase 9 (Vercel Deployment): `DATABASE_URL` env var pattern ready — just needs Vercel dashboard configuration. Cloudflare Turnstile will activate when `CLOUDFLARE_SITE_KEY` and `CLOUDFLARE_SECRET_KEY` env vars are set on Vercel.
 

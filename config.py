@@ -15,6 +15,7 @@ def load_local_env(filename):
 
 cf_config = load_local_env('cloudflare.json')
 ai_config = load_local_env('chatbot.json')
+db_config = load_local_env('postgresql_neondb.json')
 
 class Config:
     BASE_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -23,13 +24,26 @@ class Config:
     SECRET_KEY = os.environ.get("SECRET_KEY") or "dev-secret-key-mindguard-2025-secure"
     PERMANENT_SESSION_LIFETIME = 86400 * 7
 
-    # Vercel has a read-only filesystem — SQLite must write to /tmp
-    if IS_VERCEL:
-        DB_PATH = '/tmp/mindguard_v2.db'
+    # Database: NeonDB PostgreSQL (primary), SQLite fallback (local emergency only)
+    # Priority: env var DATABASE_URL → .env/postgresql_neondb.json → local SQLite
+    _db_url = os.environ.get('DATABASE_URL') or db_config.get('DATABASE_URL')
+    if _db_url:
+        SQLALCHEMY_DATABASE_URI = _db_url
     else:
-        DB_PATH = os.path.join(BASE_DIR, 'database', 'mindguard_v2.db')
-    SQLALCHEMY_DATABASE_URI = f"sqlite:///{DB_PATH}"
+        # Emergency local fallback — NeonDB not configured
+        SQLALCHEMY_DATABASE_URI = f"sqlite:///{os.path.join(BASE_DIR, 'database', 'mindguard_v2.db')}"
+
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+    # NeonDB engine options: NullPool (pgbouncer handles pooling), pre-ping for auto-suspend
+    if SQLALCHEMY_DATABASE_URI.startswith('postgresql'):
+        from sqlalchemy.pool import NullPool
+        SQLALCHEMY_ENGINE_OPTIONS = {
+            "pool_pre_ping": True,
+            "poolclass": NullPool,
+        }
+    else:
+        SQLALCHEMY_ENGINE_OPTIONS = {}
     
     # Cấu hình AI (OpenRouter)
     OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY") or ai_config.get("OPENROUTER_API_KEY") or "sk-or-v1-..." 

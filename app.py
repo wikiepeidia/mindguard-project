@@ -47,6 +47,10 @@ def inject_globals():
     }
 
 # --- ĐƯỜNG DẪN TẮT CHO ADMIN ---
+@app.route('/favicon.ico')
+def favicon():
+    return redirect(url_for('static', filename='favicon.svg'))
+
 @app.route('/admin')
 def admin_redirect():
     return redirect(url_for('admin.admin_login'))

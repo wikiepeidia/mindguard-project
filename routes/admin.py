@@ -2,7 +2,8 @@ import json
 from datetime import datetime, timedelta
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash, send_file
 from functools import wraps
-from sqlalchemy import func
+from sqlalchemy import func, cast
+from sqlalchemy.types import Date
 from models import Registration, QuizResult, ScammerReport, ScammerLeaderboard, AntiSpamEvent, db
 from werkzeug.security import check_password_hash
 from config import Config
@@ -54,9 +55,9 @@ def admin_dashboard():
     latest_scammer_reports = ScammerReport.query.order_by(ScammerReport.created_at.desc()).limit(5).all()
     all_users = Registration.query.order_by(Registration.role.asc(), Registration.created_at.desc()).limit(50).all()
 
-    # Chart Data
-    trend_data = db.session.query(func.strftime('%Y-%m-%d', ScammerReport.created_at).label('d'), func.count(ScammerReport.id)).group_by('d').order_by('d').limit(7).all()
-    trend_labels = [d[0] for d in trend_data]
+    # Chart Data (cast to Date — compatible with both PostgreSQL and SQLite)
+    trend_data = db.session.query(cast(ScammerReport.created_at, Date).label('d'), func.count(ScammerReport.id)).group_by('d').order_by('d').limit(7).all()
+    trend_labels = [str(d[0]) for d in trend_data]
     trend_values = [d[1] for d in trend_data]
 
     type_data = db.session.query(ScammerReport.scam_type, func.count(ScammerReport.id)).group_by(ScammerReport.scam_type).all()

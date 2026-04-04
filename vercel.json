@@ -6,6 +6,11 @@
       "use": "@vercel/python"
     }
   ],
+  "functions": {
+    "app.py": {
+      "regions": ["sin1"]
+    }
+  },
   "routes": [
     {
       "src": "/(.*)",

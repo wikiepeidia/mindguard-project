@@ -1,14 +1,14 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.0
-milestone_name: — Core Platform
+milestone: v1.1
+milestone_name: — PostgreSQL & Vercel Deployment
 status: Milestone complete
-last_updated: "2026-04-04T01:48:17.296Z"
+last_updated: "2026-04-04T03:00:00.000Z"
 progress:
-  total_phases: 7
-  completed_phases: 7
-  total_plans: 16
-  completed_plans: 16
+  total_phases: 9
+  completed_phases: 9
+  total_plans: 18
+  completed_plans: 18
 ---
 
 # STATE - MindGuard v2
@@ -16,12 +16,12 @@ progress:
 ## Project Reference
 
 - **Core Value**: Nguoi dung co the hoc, kiem tra nhan thuc va gui bao cao lua dao mot cach de dung, an toan, va dang tin cay.
-- **Current Focus**: Migrate SQLite sang NeonDB PostgreSQL va fix Vercel deployment.
+- **Current Focus**: v1.1 Milestone Complete — NeonDB + Vercel deployment live.
 
 ## Current Position
 
-Phase: 07
-Plan: Not started
+Phase: 09
+Plan: Complete (all phases done)
 
 ## Performance Metrics
 
@@ -50,14 +50,14 @@ Plan: Not started
 
 ### Open Todos
 
-(None — starting Phase 7)
+(None — v1.1 milestone complete)
 
 ### Blockers
 
-- Vercel deployment hien tai bi 500 errors — root cause: SQLite ephemeral + seed-on-cold-start.
+(None — 500 errors resolved via NeonDB migration + env var configuration)
 
 ## Session Continuity
 
-- **Last Updated**: 2026-04-03
-- **Stopped at**: Roadmap created — ready to plan Phase 7
+- **Last Updated**: 2026-04-04
+- **Stopped at**: v1.1 milestone complete — all phases 7-9 done, production live at https://mindguard-five.vercel.app
 - **Resume file**: .planning/ROADMAP.md

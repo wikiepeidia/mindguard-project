@@ -23,9 +23,12 @@
 
 ### v1.1 — PostgreSQL & Vercel Deployment
 
-- [ ] **Phase 7: PostgreSQL Configuration & Connection** - Fix config, them driver, chuyen URI sang NeonDB PostgreSQL va xac nhan ket noi local.
-- [ ] **Phase 8: App Startup Cleanup & Data Seeding** - Xoa seed-on-cold-start, xac nhan create_all va chay seed 1 lan tren NeonDB.
-- [ ] **Phase 9: Vercel Deployment & Verification** - Cau hinh env vars tren Vercel va xac nhan deployment tra ve 200.
+- [x] **Phase 7: PostgreSQL Configuration & Connection** - Fix config, them driver, chuyen URI sang NeonDB PostgreSQL va xac nhan ket noi local.
+ (completed 2026-04-03)
+- [x] **Phase 8: App Startup Cleanup & Data Seeding** - Xoa seed-on-cold-start, xac nhan create_all va chay seed 1 lan tren NeonDB.
+ (completed 2026-04-04)
+- [x] **Phase 9: Vercel Deployment & Verification** - Cau hinh env vars tren Vercel va xac nhan deployment tra ve 200.
+ (completed 2026-04-04)
 
 ## Phase Details
 
@@ -185,6 +188,6 @@ Plans:
 | 4. Quiz One-Question Flow | 3/3 | Complete | 2026-03-23 |
 | 5. Leaderboard Integrity | 2/2 | Complete | 2026-03-23 |
 | 6. Reporting SOP & ML Readiness | 2/2 | Complete | 2026-03-26 |
-| 7. PostgreSQL Configuration & Connection | 0/0 | Not started | - |
-| 8. App Startup Cleanup & Data Seeding | 0/0 | Not started | - |
-| 9. Vercel Deployment & Verification | 0/0 | Not started | - |
+| 7. PostgreSQL Configuration & Connection | 1/1 | Complete | 2026-04-03 |
+| 8. App Startup Cleanup & Data Seeding | 1/1 | Complete | 2026-04-04 |
+| 9. Vercel Deployment & Verification | 1/1 | Complete | 2026-04-04 |

@@ -59,18 +59,18 @@ Requirements for PostgreSQL migration and Vercel deployment fix.
 
 ### App Startup
 
-- [ ] **START-01**: Cold-start seeding bi xoa khoi `app.py` (khong chay `seed_all.py` moi Vercel invocation)
+- [x] **START-01**: Cold-start seeding bi xoa khoi `app.py` (khong chay `seed_all.py` moi Vercel invocation)
 - [x] **START-02**: Logic `IS_VERCEL` SQLite `/tmp` path bi xoa khoi `config.py`
-- [ ] **START-03**: `db.create_all()` duoc xac nhan hoat dong voi NeonDB pooler connection
+- [x] **START-03**: `db.create_all()` duoc xac nhan hoat dong voi NeonDB pooler connection
 
 ### Data Seeding
 
-- [ ] **SEED-01**: Seed scripts chay 1 lan duy nhat de tao du lieu ban dau tren NeonDB
+- [x] **SEED-01**: Seed scripts chay 1 lan duy nhat de tao du lieu ban dau tren NeonDB
 
 ### Vercel Deployment
 
-- [ ] **VDEP-01**: `DATABASE_URL` va cac secrets hien co duoc cau hinh trong Vercel environment variables
-- [ ] **VDEP-02**: Vercel deployment tra ve 200 (khong con 500 errors)
+- [x] **VDEP-01**: `DATABASE_URL` va cac secrets hien co duoc cau hinh trong Vercel environment variables
+- [x] **VDEP-02**: Vercel deployment tra ve 200 (khong con 500 errors)
 
 ## v2 Requirements (Deferred)
 
@@ -128,12 +128,12 @@ Requirements for PostgreSQL migration and Vercel deployment fix.
 | DBCFG-02 | Phase 7 | Complete |
 | DBCFG-03 | Phase 7 | Complete |
 | DBCFG-04 | Phase 7 | Complete |
-| START-01 | Phase 8 | Pending |
+| START-01 | Phase 8 | Complete |
 | START-02 | Phase 7 | Complete |
-| START-03 | Phase 8 | Pending |
-| SEED-01 | Phase 8 | Pending |
-| VDEP-01 | Phase 9 | Pending |
-| VDEP-02 | Phase 9 | Pending |
+| START-03 | Phase 8 | Complete |
+| SEED-01 | Phase 8 | Complete |
+| VDEP-01 | Phase 9 | Complete |
+| VDEP-02 | Phase 9 | Complete |
 
 **Coverage:**
 

@@ -144,7 +144,10 @@ Plans:
 2. `.env/prosgressql_neondb.json` la file JSON hop le, `json.load()` parse duoc va chua key `DATABASE_URL`.
 3. `config.py` khong con bat ky logic SQLite hoac `IS_VERCEL` `/tmp` path nao.
 4. Connection su dung NeonDB pooler endpoint voi `pool_pre_ping=True`, `sslmode=require` va pool tuning phu hop serverless.
-**Plans**: TBD
+**Plans**: 1 plan
+
+Plans:
+- [ ] 07-01-PLAN.md — Fix JSON config, add psycopg2 driver, rewrite config.py for NeonDB PostgreSQL, verify connection
 
 ### Phase 8: App Startup Cleanup & Data Seeding
 

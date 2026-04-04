@@ -52,15 +52,15 @@ Requirements for PostgreSQL migration and Vercel deployment fix.
 
 ### Database Configuration
 
-- [ ] **DBCFG-01**: `.env/prosgressql_neondb.json` duoc cau truc lai thanh JSON hop le voi key `DATABASE_URL`
-- [ ] **DBCFG-02**: `config.py` chuyen `SQLALCHEMY_DATABASE_URI` tu SQLite sang NeonDB PostgreSQL
-- [ ] **DBCFG-03**: `psycopg2-binary` duoc them vao `requirements.txt`
-- [ ] **DBCFG-04**: SQLAlchemy engine duoc cau hinh `pool_pre_ping=True` va NeonDB pooler endpoint
+- [x] **DBCFG-01**: `.env/prosgressql_neondb.json` duoc cau truc lai thanh JSON hop le voi key `DATABASE_URL`
+- [x] **DBCFG-02**: `config.py` chuyen `SQLALCHEMY_DATABASE_URI` tu SQLite sang NeonDB PostgreSQL
+- [x] **DBCFG-03**: `psycopg2-binary` duoc them vao `requirements.txt`
+- [x] **DBCFG-04**: SQLAlchemy engine duoc cau hinh `pool_pre_ping=True` va NeonDB pooler endpoint
 
 ### App Startup
 
 - [ ] **START-01**: Cold-start seeding bi xoa khoi `app.py` (khong chay `seed_all.py` moi Vercel invocation)
-- [ ] **START-02**: Logic `IS_VERCEL` SQLite `/tmp` path bi xoa khoi `config.py`
+- [x] **START-02**: Logic `IS_VERCEL` SQLite `/tmp` path bi xoa khoi `config.py`
 - [ ] **START-03**: `db.create_all()` duoc xac nhan hoat dong voi NeonDB pooler connection
 
 ### Data Seeding
@@ -124,18 +124,19 @@ Requirements for PostgreSQL migration and Vercel deployment fix.
 | DOC-02 | Phase 6 | Complete |
 | ML-01 | Phase 6 | Complete |
 | ML-02 | Phase 6 | Complete |
-| DBCFG-01 | Phase 7 | Pending |
-| DBCFG-02 | Phase 7 | Pending |
-| DBCFG-03 | Phase 7 | Pending |
-| DBCFG-04 | Phase 7 | Pending |
+| DBCFG-01 | Phase 7 | Complete |
+| DBCFG-02 | Phase 7 | Complete |
+| DBCFG-03 | Phase 7 | Complete |
+| DBCFG-04 | Phase 7 | Complete |
 | START-01 | Phase 8 | Pending |
-| START-02 | Phase 7 | Pending |
+| START-02 | Phase 7 | Complete |
 | START-03 | Phase 8 | Pending |
 | SEED-01 | Phase 8 | Pending |
 | VDEP-01 | Phase 9 | Pending |
 | VDEP-02 | Phase 9 | Pending |
 
 **Coverage:**
+
 - v1.0 requirements: 20 total — all complete
 - v1.1 requirements: 10 total — all mapped ✓
 - Mapped to phases: 10/10

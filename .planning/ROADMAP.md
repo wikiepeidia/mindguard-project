@@ -147,7 +147,7 @@ Plans:
 **Plans**: 1 plan
 
 Plans:
-- [ ] 07-01-PLAN.md — Fix JSON config, add psycopg2 driver, rewrite config.py for NeonDB PostgreSQL, verify connection
+- [x] 07-01-PLAN.md — Fix JSON config, add psycopg2 driver, rewrite config.py for NeonDB PostgreSQL, verify connection
 
 ### Phase 8: App Startup Cleanup & Data Seeding
 

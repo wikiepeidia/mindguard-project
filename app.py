@@ -9,7 +9,6 @@ from routes.quiz import quiz_bp
 from routes.auth import auth_bp
 from routes.admin import admin_bp
 from utils.helpers import mask_sensitive_data, get_verification_badge
-from models import ScammerReport
 import os
 
 app = Flask(__name__)
@@ -29,27 +28,7 @@ def mask_filter(s, data_type='auto'):
 # Khởi tạo DB & Mail
 db.init_app(app)
 mail.init_app(app)
-
-with app.app_context():
-    db.create_all()
-
-    # On Vercel, /tmp is ephemeral — seed data on every cold start
-    if Config.IS_VERCEL:
-        from database.seed_all import run_seed
-        run_seed()
-
-    # Fix legacy data: approved reports must have verification_status='verified'
-    _stale = ScammerReport.query.filter(
-        ScammerReport.status == 'approved',
-        db.or_(
-            ScammerReport.verification_status == 'unverified',
-            ScammerReport.verification_status.is_(None),
-        ),
-    ).all()
-    if _stale:
-        for _r in _stale:
-            _r.verification_status = 'verified'
-        db.session.commit()
+# Schema managed externally; seeding via: python -m database.seed_all
 
 # Đăng ký Blueprints
 app.register_blueprint(main_bp)

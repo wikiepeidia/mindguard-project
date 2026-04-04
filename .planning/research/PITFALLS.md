@@ -18,6 +18,7 @@ Mistakes that cause 500 errors, data loss, or deployment failure.
 **What goes wrong:** `config.py` uses `load_local_env('prosgressql_neondb.json')` which calls `json.load(f)`. The current file `.env/prosgressql_neondb.json` contains a raw connection string with inline comments — not JSON. `json.load()` silently fails (bare `except: return {}`) and returns an empty dict, so the connection string is never loaded.
 
 **Actual file content (sanitized):**
+
 ```
 postgresql: //user:pass@host/db?sslmode=require
 ep-lingering-violet-...
@@ -29,12 +30,15 @@ ep-lingering-violet-...
 **Consequences:** `SQLALCHEMY_DATABASE_URI` falls back to SQLite. App appears to work locally but never connects to PostgreSQL. On Vercel, falls back to `/tmp/mindguard_v2.db` (ephemeral — data lost on every cold start).
 
 **Prevention:**
+
 1. Restructure file as valid JSON:
+
    ```json
    {
      "DATABASE_URL": "postgresql://user:pass@host/neondb?sslmode=require"
    }
    ```
+
 2. Update `config.py` to load from this JSON and set `SQLALCHEMY_DATABASE_URI`.
 3. On Vercel, set `DATABASE_URL` as an environment variable (never rely on `.env/` files in serverless).
 4. Add validation: if the loaded URL doesn't start with `postgresql://`, raise an error at startup instead of silently falling back.
@@ -54,6 +58,7 @@ ep-lingering-violet-...
 **Consequences:** `sqlalchemy.exc.OperationalError` or `ModuleNotFoundError: No module named 'psycopg2'` on first connection attempt. On Vercel, this manifests as a 500 error with no helpful message in user-facing logs.
 
 **Prevention:**
+
 1. Add `psycopg2-binary>=2.9` to `requirements.txt` (binary wheel — no C compiler needed, critical for Vercel).
 2. Do NOT use `psycopg2` (source package) — Vercel's build environment may not have `libpq-dev` and the compile will fail.
 3. Alternatively, use `psycopg[binary]>=3.1` (psycopg3) which is newer and also ships binary wheels.
@@ -70,6 +75,7 @@ ep-lingering-violet-...
 **What goes wrong:** `database/migrate_anti_spam_phase2.py` (and `migrate_sensitive_access_log.py`) contain raw `CREATE TABLE` statements with `INTEGER PRIMARY KEY AUTOINCREMENT` — this is SQLite-only syntax. PostgreSQL uses `SERIAL` or `GENERATED ALWAYS AS IDENTITY`.
 
 **Actual code (`migrate_anti_spam_phase2.py` line 35):**
+
 ```sql
 id INTEGER PRIMARY KEY AUTOINCREMENT,
 ...
@@ -77,12 +83,14 @@ triggered_cooldown BOOLEAN NOT NULL DEFAULT 0,
 ```
 
 **Two issues:**
+
 1. `AUTOINCREMENT` → PostgreSQL syntax is `SERIAL PRIMARY KEY` or `INTEGER GENERATED ALWAYS AS IDENTITY`.
 2. `DEFAULT 0` for BOOLEAN → PostgreSQL expects `DEFAULT FALSE`. While `0` may work, it's dialect-incorrect.
 
 **Consequences:** Migration scripts fail with `syntax error at or near "AUTOINCREMENT"` on PostgreSQL.
 
 **Prevention:**
+
 1. With NeonDB, these migration scripts are no longer needed — `db.create_all()` will create tables using SQLAlchemy's PostgreSQL dialect which handles `SERIAL` and proper `BOOLEAN` automatically.
 2. If migration scripts must be kept for data migration, rewrite them using SQLAlchemy's `text()` with dialect-agnostic SQL, or use SQLAlchemy DDL operations instead of raw SQL.
 3. Mark all `database/migrate_*.py` scripts as "SQLite-only — do not run against PostgreSQL" in their docstrings.
@@ -108,6 +116,7 @@ Vercel's serverless runtime has a **read-only filesystem** except `/tmp` (which 
 **Consequences:** File upload raises `OSError: [Errno 30] Read-only file system` or `PermissionError`. Every scammer report with evidence images fails. If saved to `/tmp`, files disappear after the function returns.
 
 **Prevention:**
+
 1. **Use external object storage** — Cloudflare R2, AWS S3, or Vercel Blob. Upload directly from the browser (presigned URL) or stream from the serverless function.
 2. As a quick interim fix: save file to `/tmp`, upload to external storage, then store the external URL in `evidence_urls`.
 3. Update `evidence_urls` column to store external URLs (it already stores URLs via `serialize_evidence()`, so the schema change is minimal).
@@ -134,6 +143,7 @@ With SQLite in `/tmp`, this was necessary because the DB was empty on each cold 
 **Consequences:** Duplicate rows accumulate over time. Admin user creation may fail on unique constraint (email). Reports and leaderboard data become corrupted with ghost duplicates.
 
 **Prevention:**
+
 1. Remove the `IS_VERCEL` seed block entirely once PostgreSQL is connected.
 2. Run `seed_all.py` exactly once as a standalone script against NeonDB.
 3. Add idempotency guards to `run_seed()`: check if data exists before inserting (e.g., `if Registration.query.filter_by(email='admin@...').first() is None:`).
@@ -161,6 +171,7 @@ On Vercel, `app.py` is imported on every cold start. `db.create_all()` issues `C
 **Consequences:** Slow cold starts. Unnecessary database round-trips. Potential connection timeout if NeonDB compute is waking up simultaneously.
 
 **Prevention:**
+
 1. Run `db.create_all()` only in a standalone setup script, not on every app import.
 2. On Vercel, trust that tables already exist (they persist in PostgreSQL).
 3. If defensive checks are needed, use a lightweight health check query (`SELECT 1`) instead of `CREATE TABLE IF NOT EXISTS` for all tables.
@@ -179,14 +190,17 @@ On Vercel, `app.py` is imported on every cold start. `db.create_all()` issues `C
 **Consequences:** `psycopg2.OperationalError: connection to server failed: SSL required` or intermittent connection drops.
 
 **Prevention:**
+
 1. Ensure connection string includes `?sslmode=require` (already present in the NeonDB string).
 2. For `psycopg2`, this is usually sufficient. But if using connection pooling (see Pitfall 9), SSL must be configured at the pool level too.
 3. Add `SQLALCHEMY_ENGINE_OPTIONS` in config:
+
    ```python
    SQLALCHEMY_ENGINE_OPTIONS = {
        "connect_args": {"sslmode": "require"}
    }
    ```
+
 4. Test connection from local dev machine to NeonDB before deploying.
 
 **Detection:** `OperationalError` with SSL-related message on first query.
@@ -210,7 +224,9 @@ Issues that cause bugs or degraded performance but aren't deployment-breaking.
 **Consequences:** `psycopg2.OperationalError: too many connections for role "neondb_owner"`. Some requests fail while others succeed depending on which instance they hit.
 
 **Prevention:**
+
 1. Use `NullPool` for serverless (no persistent connections — connect per request):
+
    ```python
    from sqlalchemy.pool import NullPool
    SQLALCHEMY_ENGINE_OPTIONS = {
@@ -218,6 +234,7 @@ Issues that cause bugs or degraded performance but aren't deployment-breaking.
        "connect_args": {"sslmode": "require"}
    }
    ```
+
 2. Alternatively, use NeonDB's built-in connection pooler (pooler endpoint instead of direct endpoint). NeonDB provides a `-pooler` hostname specifically for serverless.
 3. Set `pool_size=1, max_overflow=0` if using `QueuePool` as a compromise.
 4. Monitor connection count via NeonDB dashboard during load testing.
@@ -235,6 +252,7 @@ Issues that cause bugs or degraded performance but aren't deployment-breaking.
 **Consequences:** Users get logged out on every deploy. CAPTCHA verification fails (session math answer doesn't match). Reporter IDs change, breaking anti-spam tracking.
 
 **Prevention:**
+
 1. Set `SECRET_KEY` as a Vercel environment variable with a strong, stable value.
 2. Never change the secret key between deploys unless intentionally invalidating sessions.
 3. The cookie-based session approach is actually serverless-friendly — no changes needed to session storage mechanism.
@@ -250,6 +268,7 @@ Issues that cause bugs or degraded performance but aren't deployment-breaking.
 **What goes wrong:** SQLite's `LIKE` operator is case-insensitive by default for ASCII characters. PostgreSQL's `LIKE` is case-sensitive. Any search or filter using `.like()` or `.contains()` in SQLAlchemy will behave differently.
 
 **Risk areas in MindGuard:**
+
 - Scammer report search by `scammer_identifier`, `scammer_name`, `description`
 - Admin dashboard filters
 - Any query using `Model.column.like('%term%')`
@@ -257,6 +276,7 @@ Issues that cause bugs or degraded performance but aren't deployment-breaking.
 **Consequences:** Searches that worked on SQLite return no results on PostgreSQL because of case mismatch. Users can't find scammer reports they previously could.
 
 **Prevention:**
+
 1. Use `Model.column.ilike('%term%')` (case-insensitive LIKE) instead of `.like()`.
 2. Or use `func.lower(Model.column).like(func.lower(term))`.
 3. Audit all `.like()`, `.contains()`, and `.startswith()` calls in routes and services.
@@ -273,6 +293,7 @@ Issues that cause bugs or degraded performance but aren't deployment-breaking.
 **What goes wrong:** All models use `default=datetime.utcnow` (without parentheses — correctly passing the function, not the result). `db.func.now()` is used in `scammer.py` lines 263, 273 for update timestamps. The PostgreSQL behavior difference: PostgreSQL's `NOW()` is timezone-aware if the column is `TIMESTAMP WITH TIME ZONE`, while `datetime.utcnow()` returns a naive (no timezone) datetime.
 
 **All model columns use `db.DateTime` (no timezone):**
+
 ```python
 created_at = db.Column(db.DateTime, default=datetime.utcnow)
 ```
@@ -280,6 +301,7 @@ created_at = db.Column(db.DateTime, default=datetime.utcnow)
 SQLAlchemy maps `DateTime` to `TIMESTAMP WITHOUT TIME ZONE` on PostgreSQL. `db.func.now()` works on both SQLite and PostgreSQL.
 
 **Prevention:**
+
 1. Keep `db.DateTime` (no timezone) — consistent with current behavior.
 2. Ensure `datetime.utcnow()` is used consistently (not `datetime.now()` which uses local time).
 3. `db.func.now()` works on both dialects — no change needed.
@@ -296,6 +318,7 @@ SQLAlchemy maps `DateTime` to `TIMESTAMP WITHOUT TIME ZONE` on PostgreSQL. `db.f
 **What goes wrong:** SQLite stores `db.Boolean` as `0`/`1` integers. PostgreSQL stores them as native `TRUE`/`FALSE`. When migrating data from SQLite to PostgreSQL, boolean columns need explicit type casting.
 
 **Affected columns (4 total):**
+
 - `Registration.is_admin` (Boolean, default=False)
 - `Registration.onboarding_completed` (Boolean, default=False)
 - `AiQuizQuestion.is_verified` (Boolean, default=True)
@@ -304,6 +327,7 @@ SQLAlchemy maps `DateTime` to `TIMESTAMP WITHOUT TIME ZONE` on PostgreSQL. `db.f
 **Consequences:** If data is migrated via raw SQL dump/restore, PostgreSQL may reject `0`/`1` values for boolean columns.
 
 **Prevention:**
+
 1. Use SQLAlchemy ORM for data migration (read from SQLite, write to PostgreSQL) — the ORM handles type conversion automatically.
 2. If using raw SQL, cast explicitly: `CASE WHEN old_value = 1 THEN TRUE ELSE FALSE END`.
 3. Don't use `pg_dump`/`sqlite3 .dump` for cross-database migration.
@@ -317,6 +341,7 @@ SQLAlchemy maps `DateTime` to `TIMESTAMP WITHOUT TIME ZONE` on PostgreSQL. `db.f
 ### Pitfall 13: Vercel Python Runtime Timeout on Cold Start
 
 **What goes wrong:** Vercel's `@vercel/python` runtime has specific constraints:
+
 - **Max execution time:** 10 seconds (Hobby) / 60 seconds (Pro).
 - **No persistent process:** Each request may hit a new or reused function instance.
 - **Entry point:** Vercel expects a WSGI app object at module level in the file specified by `vercel.json`.
@@ -326,6 +351,7 @@ SQLAlchemy maps `DateTime` to `TIMESTAMP WITHOUT TIME ZONE` on PostgreSQL. `db.f
 **Consequences:** Function timeout on cold start. 500 errors if initialization takes too long.
 
 **Prevention:**
+
 1. Move ALL startup logic out of module-level code in `app.py`.
 2. Ensure `app.py` exports the WSGI app as fast as possible.
 3. Use lazy initialization for database connections.
@@ -351,6 +377,7 @@ Issues that are easy to fix but easy to forget.
 **Risk areas:** `scammer_identifier` (200), `scammer_name` (200), `social_link` (200), `user_agent` (512). If existing SQLite data has values exceeding declared lengths, migration will fail.
 
 **Prevention:**
+
 1. Before migrating data, query max lengths in SQLite: `SELECT MAX(LENGTH(column)) FROM table`.
 2. Increase column sizes in models if needed (e.g., `user_agent` to `String(1024)` or `Text`).
 3. Consider using `db.Text` for unbounded strings (like `description`, which already uses `Text`).
@@ -368,6 +395,7 @@ Issues that are easy to fix but easy to forget.
 **Consequences:** Anyone with repository access can connect to the production database. Credential leak if repo is ever made public.
 
 **Prevention:**
+
 1. Verify `.env/` is in `.gitignore`.
 2. **Rotate the NeonDB password immediately** if credentials were ever committed.
 3. On Vercel, use environment variables (`DATABASE_URL`) instead of file-based config.
@@ -384,6 +412,7 @@ Issues that are easy to fix but easy to forget.
 **What goes wrong:** Vercel's Python runtime imports `app.py` and looks for the `app` WSGI variable. The `if __name__ == "__main__":` block (ngrok, debug server) won't run on Vercel — that's correct. But everything outside that guard (create_all, seed, legacy fix) runs on every cold start.
 
 **Prevention:**
+
 1. Ensure the WSGI export path is clean: `app = Flask(...)`, `app.config.from_object(Config)`, blueprint registration — nothing else at module level.
 2. Move `db.create_all()`, seed logic, and legacy fixes into a separate `init_db.py` script or behind a CLI command.
 

@@ -13,6 +13,7 @@ Nguoi dung co the hoc, kiem tra nhan thuc va gui bao cao lua dao mot cach de dun
 **Goal:** Migrate toan bo SQLite sang NeonDB PostgreSQL va fix Vercel deployment (500 errors), dua MindGuard len production on dinh.
 
 **Target features:**
+
 - Migrate tat ca SQLAlchemy models sang NeonDB PostgreSQL
 - Cau truc lai `.env/prosgressql_neondb.json` thanh JSON hop le
 - Fix Vercel 500 errors khi deploy
@@ -77,6 +78,7 @@ Du an da hoan thanh v1.0 voi 6 phases (Privacy, Anti-Spam, Light Mode, Quiz Flow
 This document evolves at phase transitions and milestone boundaries.
 
 **After each phase transition** (via `/gsd-transition`):
+
 1. Requirements invalidated? → Move to Out of Scope with reason
 2. Requirements validated? → Move to Validated with phase reference
 3. New requirements emerged? → Add to Active
@@ -84,6 +86,7 @@ This document evolves at phase transitions and milestone boundaries.
 5. "What This Is" still accurate? → Update if drifted
 
 **After each milestone** (via `/gsd-complete-milestone`):
+
 1. Full review of all sections
 2. Core Value check — still the right priority?
 3. Audit Out of Scope — reasons still valid?

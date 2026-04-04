@@ -29,6 +29,7 @@ Only **2 lines** added to `requirements.txt`. No new frameworks or major depende
 | `SQLAlchemy` | `>=2.0.33` | Explicit pin. Versions < 2.0.33 have a bug where idle connections fail after NeonDB auto-suspend (`SSL connection has been closed unexpectedly`). |
 
 **Updated requirements.txt:**
+
 ```txt
 Flask==3.0.3
 Flask-SQLAlchemy==3.1.1
@@ -41,18 +42,22 @@ SQLAlchemy>=2.0.33
 ```
 
 **What NOT to add:**
+
 - `asyncpg` — Flask is WSGI (sync). Zero benefit.
 - `@neondatabase/serverless` — JS/TS driver, not Python.
 - `psycopg2` (non-binary) — needs C compiler, fails on Vercel.
 - `Alembic` / `Flask-Migrate` — project convention prohibits automated migration tools.
 
 **NeonDB connection string format (pooled, for serverless):**
+
 ```
 postgresql://USER:PASSWORD@ENDPOINT-pooler.REGION.aws.neon.tech/DBNAME?sslmode=require
 ```
+
 The `-pooler` suffix is **mandatory** for Vercel — routes through PgBouncer to prevent "too many connections" (free tier limit: 104).
 
 **Required SQLAlchemy engine options:**
+
 ```python
 SQLALCHEMY_ENGINE_OPTIONS = {
     "pool_pre_ping": True,   # Detect stale connections after NeonDB suspend
@@ -67,6 +72,7 @@ SQLALCHEMY_ENGINE_OPTIONS = {
 From FEATURES_v1.1_migration.md — 10 table-stakes items, all required for a working deploy:
 
 **Must have (broken without these):**
+
 1. **Fix `.env/prosgressql_neondb.json`** — currently raw text, not valid JSON. Config loader silently returns `{}`.
 2. **Add `psycopg2-binary`** — no PostgreSQL driver exists in requirements.
 3. **Switch `SQLALCHEMY_DATABASE_URI` to PostgreSQL** — env var → JSON fallback pattern.
@@ -76,12 +82,14 @@ From FEATURES_v1.1_migration.md — 10 table-stakes items, all required for a wo
 7. **Set Vercel environment variables** — `DATABASE_URL`, `SECRET_KEY`, API keys.
 
 **Should have (quality improvement):**
+
 - NeonDB connection pooling via `-pooler` endpoint (D1)
 - SQLAlchemy pool tuning for serverless (D2)
 - Health check endpoint for debugging (D7)
 - Cold start optimization — remove `db.create_all()` / legacy fix from import path (D10)
 
 **Explicitly defer (anti-features for v1.1):**
+
 - Alembic/Flask-Migrate (project convention: manual scripts only)
 - Dual DB support (SQLite dev / PG prod) — PROJECT.md says NeonDB for all environments
 - PG-specific features (JSONB, Array types) — keep models portable
@@ -92,11 +100,13 @@ From FEATURES_v1.1_migration.md — 10 table-stakes items, all required for a wo
 ### Architecture Changes
 
 **Root cause of current 500 errors:**
+
 ```
 app.py imports → db.create_all() in /tmp → run_seed() every cold start → SQLite ephemeral → data lost
 ```
 
 **Target architecture:**
+
 ```
 app.py imports (fast) → SQLAlchemy → TCP+SSL → NeonDB Pooler (PgBouncer) → PostgreSQL (persistent)
 ```
@@ -112,6 +122,7 @@ app.py imports (fast) → SQLAlchemy → TCP+SSL → NeonDB Pooler (PgBouncer) �
 | `vercel.json` | No change required (current config works). Optional: add function timeout config. | None |
 
 **Files that DON'T change:**
+
 - `models/models.py` — all 13 models use portable SQLAlchemy types
 - `routes/*.py` — all use ORM, no raw SQL
 - `services/*.py` — all use ORM
@@ -138,11 +149,13 @@ Ranked by deployment impact:
 ## Implications for Roadmap
 
 ### Phase 1: Configuration & Connection
+
 **Rationale:** Everything else depends on a working PostgreSQL connection. Must be verified locally before touching deployment.
 **Delivers:** Local Flask app connected to NeonDB PostgreSQL instead of SQLite.
 **Addresses:** T1 (fix JSON), T2 (add driver), T3 (switch URI), T7 (SSL), D1 (pooler URL), D2 (pool tuning).
 **Avoids:** Pitfalls 1 (malformed JSON), 2 (no driver), 5 (pool exhaustion), 7 (SSL).
 **Work:**
+
 - Rewrite `.env/prosgressql_neondb.json` as valid JSON
 - Add `psycopg2-binary>=2.9.9` and pin `SQLAlchemy>=2.0.33` in requirements.txt
 - Rewrite `config.py`: remove `IS_VERCEL`/SQLite branching, add PostgreSQL URI + engine options
@@ -150,11 +163,13 @@ Ranked by deployment impact:
 - Check credential security (`.env/` in `.gitignore`, rotate if committed)
 
 ### Phase 2: Schema & Data Migration
+
 **Rationale:** With connection working, create schema in PostgreSQL and migrate any existing data. Must happen before Vercel deploy to ensure tables exist.
 **Delivers:** NeonDB has all 13 tables populated with seed data. Data integrity verified.
 **Addresses:** T4 (create_all strategy), T5 (remove seed-on-cold-start), T6 (one-time seed), T10 (boolean compat), D4 (data migration).
 **Avoids:** Pitfalls 3 (seed duplication), 6 (LIKE case sensitivity), 12 (boolean conversion), 14 (string length).
 **Work:**
+
 - Run `db.create_all()` once against NeonDB (via script, not app startup)
 - Run `seed_all.py` once against NeonDB
 - Audit `.like()` → `.ilike()` in all routes/services
@@ -162,11 +177,13 @@ Ranked by deployment impact:
 - Mark old SQLite migration scripts as obsolete
 
 ### Phase 3: Vercel Deployment & Startup Optimization
+
 **Rationale:** Database is ready. Now clean up `app.py` so Vercel cold starts are fast and reliable.
 **Delivers:** Working Vercel deployment — no 500 errors, fast cold starts.
 **Addresses:** T8 (WSGI routing), T9 (env vars), D6 (static files), D7 (health check), D10 (cold start).
 **Avoids:** Pitfalls 4 (cold start timeout), 9 (SECRET_KEY), 13 (Vercel timeout), 16 (startup code).
 **Work:**
+
 - Remove `IS_VERCEL` seed block from `app.py`
 - Move legacy data fix to one-time script
 - Optionally move `db.create_all()` out of import path
@@ -176,6 +193,7 @@ Ranked by deployment impact:
 - Set `SECRET_KEY` as stable Vercel env var
 
 ### Phase 4 (Future): File Upload Storage
+
 **Rationale:** Not part of DB migration but will break on Vercel. Separate concern.
 **Delivers:** Evidence image uploads work on Vercel via cloud storage.
 **Note:** Deferred per research — requires choosing storage provider (Vercel Blob, Cloudflare R2, S3).
@@ -190,11 +208,13 @@ Ranked by deployment impact:
 ### Research Flags
 
 **Standard patterns (skip deep research during planning):**
+
 - Phase 1 — well-documented: Neon official docs + SQLAlchemy docs cover everything.
 - Phase 2 — straightforward: `db.create_all()` + seed script + LIKE audit is mechanical.
 - Phase 3 — well-documented: Vercel Python runtime + Flask WSGI is stable.
 
 **May need research during planning:**
+
 - Phase 4 (file uploads) — needs storage provider comparison if not already decided.
 
 ---
@@ -233,16 +253,19 @@ Ranked by deployment impact:
 ## Sources
 
 ### Primary (HIGH confidence)
+
 - **Codebase analysis:** `config.py`, `app.py`, `models/models.py`, `extensions.py`, `vercel.json`, `requirements.txt`, `database/seed_all.py`, `.env/prosgressql_neondb.json`
 - **NeonDB docs:** Connection pooling, SQLAlchemy integration, auto-suspend, SSL requirements
 - **SQLAlchemy docs:** `pool_pre_ping`, `pool_recycle`, dialect portability, engine configuration
 - **Vercel Python runtime docs:** `@vercel/python` WSGI detection, filesystem constraints, environment variables
 
 ### Secondary (MEDIUM confidence)
+
 - **PROJECT.md constraints:** NeonDB for all environments, no Alembic, single region
 - **copilot-instructions.md:** Manual migration scripts only, `.env/` JSON config pattern
 
 ### Tertiary (LOW confidence)
+
 - **v1.0 FEATURES.md:** UX/quiz/leaderboard features — not directly applicable to migration but informs future milestones
 
 ---

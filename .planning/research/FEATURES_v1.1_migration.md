@@ -95,6 +95,7 @@ T9 (Vercel env vars) ──→ T8 (verify WSGI routing) ──→ D7 (health che
 ## MVP Recommendation
 
 **Phase 1 — Database Migration (do first, verify locally):**
+
 1. T1: Fix NeonDB JSON config file
 2. T2: Add `psycopg2-binary` to requirements
 3. T3: Switch `SQLALCHEMY_DATABASE_URI` to PostgreSQL
@@ -105,6 +106,7 @@ T9 (Vercel env vars) ──→ T8 (verify WSGI routing) ──→ D7 (health che
 8. D4: Migrate existing SQLite data if any real user data exists
 
 **Phase 2 — Vercel Deployment Fix (do after DB is stable):**
+
 1. T5: Remove ephemeral seed-on-cold-start from `app.py`
 2. T10: Verify boolean/datetime column compatibility
 3. T9: Set all env vars on Vercel dashboard
@@ -114,6 +116,7 @@ T9 (Vercel env vars) ──→ T8 (verify WSGI routing) ──→ D7 (health che
 7. D10: Optimize cold start (remove legacy data fix block)
 
 **Defer to future milestone:**
+
 - D5: Function timeout (requires Pro plan)
 - D8: NeonDB branching for PR previews (nice-to-have)
 - D9: Schema diff (nice-to-have)
@@ -139,6 +142,7 @@ T9 (Vercel env vars) ──→ T8 (verify WSGI routing) ──→ D7 (health che
 ### NeonDB Config File Issue
 
 The file `.env/prosgressql_neondb.json` is currently:
+
 ```
 postgresql: //neondb_owner:npg_NlUTW9nsARq4@ep-...neon.tech/neondb?sslmode=require
 ep-lingering-violet-a1jiok7c
@@ -147,6 +151,7 @@ ep-lingering-violet-a1jiok7c
 ```
 
 This is **not valid JSON**. Must become:
+
 ```json
 {
   "DATABASE_URL": "postgresql://neondb_owner:<password>@ep-lingering-violet-a1jiok7c-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require"
@@ -158,6 +163,7 @@ Note: Use the `-pooler` endpoint for serverless (D1).
 ### Requirements Gap
 
 Current `requirements.txt` is missing:
+
 - `psycopg2-binary` — PostgreSQL driver (required)
 
 No other dependency changes needed. Flask-SQLAlchemy handles PostgreSQL via the driver.

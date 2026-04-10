@@ -8,17 +8,18 @@ MindGuard v2 la nen tang giao duc an toan mang va phong chong lua dao duoc xay d
 
 Nguoi dung co the hoc, kiem tra nhan thuc va gui bao cao lua dao mot cach de dung, an toan, va dang tin cay.
 
-## Current Milestone: v1.1 PostgreSQL & Vercel Deployment
+## Current Milestone: v1.2 Beta 1 Go-Live (Code Freeze)
 
-**Goal:** Migrate toan bo SQLite sang NeonDB PostgreSQL va fix Vercel deployment (500 errors), dua MindGuard len production on dinh.
+**Goal:** Sửa lỗi UI nghiêm trọng, gia cố hạ tầng chống quá tải, đảm bảo an toàn AI, và hoàn thiện tài liệu trước khi ra mắt Beta 1 cho người dân Hà Nội (~10 triệu người dùng tiềm năng).
 
 **Target features:**
 
-- Migrate tat ca SQLAlchemy models sang NeonDB PostgreSQL
-- Cau truc lai `.env/prosgressql_neondb.json` thanh JSON hop le
-- Fix Vercel 500 errors khi deploy
-- Seed data chi chay 1 lan (khong seed moi cold start)
-- NeonDB dung cho ca local dev va production
+- Sửa lỗi UI nghiêm trọng (dropdown "Đăng xuất", hitbox "Hồ sơ", chatbot lưu lịch sử, huy hiệu Certification)
+- Rate limiting + WAF rules cho AI chatbot endpoints (chống drain API budget)
+- Xác minh logging baseline và stress test tìm ngưỡng CCU
+- Banner chính sách quyền riêng tư trên trang chủ
+- Điều chỉnh AI prompt bình dân hóa + fallback cứng cho chủ đề nhạy cảm
+- Nút "Báo cáo sai / Góp ý" cho Beta
 
 ## Requirements
 
@@ -38,29 +39,38 @@ Nguoi dung co the hoc, kiem tra nhan thuc va gui bao cao lua dao mot cach de dun
 
 ### Active
 
-- [ ] Migrate toan bo database tu SQLite sang NeonDB PostgreSQL
-- [ ] Fix Vercel deployment 500 errors
-- [ ] Seed data strategy cho PostgreSQL (one-time, khong ephemeral)
-- [ ] Config JSON hop le cho NeonDB connection
+- [ ] Sửa nút "Đăng xuất" bị chết trong dropdown menu
+- [ ] Sửa hitbox quá nhỏ của mục "Hồ sơ" trong menu
+- [ ] Sửa chatbot bubble chat không lưu lịch sử giữa các phiên
+- [ ] Thiết kế và triển khai huy hiệu "Certification Verify" đúng cách
+- [ ] Rate limiting + WAF rules trên endpoint AI chatbot
+- [ ] Xác minh logging baseline (request, error, audit logs) hoạt động và lưu trữ an toàn
+- [ ] Stress test tìm ngưỡng CCU tối đa cho Beta 1
+- [ ] Banner chính sách quyền riêng tư trên trang chủ
+- [ ] Điều chỉnh system prompt AI cho ngôn ngữ bình dân
+- [ ] Cơ chế fallback cứng cho AI khi gặp chủ đề nhạy cảm (OTP + Hotline Công an Hà Nội)
+- [ ] Nút "Báo cáo sai / Góp ý" cho Beta
 
 ### Out of Scope
 
-- Dark mode trong v1.1 — uu tien infrastructure stability
-- Tinh nang khong lien quan truc tiep den giao duc/chong lua dao — khong phuc vu core value
-- Auto-scaling/multi-region — v1.1 chi can 1 region on dinh
-- Migration tool tu dong (Alembic/flask-migrate) — dung manual scripts theo conventions
+- Dark mode trong v1.2 — ưu tiên sửa lỗi và gia cố, không thêm tính năng
+- Tính năng mới (notifications, social, gamification) — CODE FREEZE cho Beta 1
+- Auto-scaling/multi-region — v1.2 chỉ cần 1 region ổn định
+- Migration tool tự động (Alembic/flask-migrate) — dùng manual scripts theo conventions
+- OAuth/2FA — không nằm trong scope Beta 1
 
 ## Context
 
-Du an da hoan thanh v1.0 voi 6 phases (Privacy, Anti-Spam, Light Mode, Quiz Flow, Leaderboard, Docs/ML). Hien tai dang chay tren SQLite + Vercel nhung gap 500 errors khi deploy. NeonDB PostgreSQL da co connection string san. Can migrate toan bo models sang Postgres va fix Vercel config de ung dung chay on dinh tren production.
+Dự án đã hoàn thành v1.0 (6 phases: Privacy, Anti-Spam, Light Mode, Quiz Flow, Leaderboard, Docs/ML) và v1.1 (3 phases: PostgreSQL migration, seeding, Vercel deployment). App đang live tại mindguard-five.vercel.app trên NeonDB PostgreSQL. Hiện tại đang trong giai đoạn CODE FREEZE chuẩn bị Beta 1 Go-Live trước ngày lễ quốc gia. MindGuard được định vị là ứng dụng AI chatbot phát hiện lừa đảo tài chính công cộng cho người dân Hà Nội (~10 triệu người dùng tiềm năng). Chỉ sửa lỗi, gia cố hạ tầng, và đảm bảo an toàn AI.
 
 ## Constraints
 
-- **Tech stack**: Flask + NeonDB PostgreSQL + SQLAlchemy + Jinja — chuyen tu SQLite sang Postgres
-- **Database**: NeonDB PostgreSQL cho ca local va production — khong phan tach env
+- **Tech stack**: Flask + NeonDB PostgreSQL + SQLAlchemy + Jinja — không thay đổi stack
+- **Database**: NeonDB PostgreSQL cho cả local và production — không phân tách env
 - **Deployment**: Vercel serverless — read-only filesystem, ephemeral function instances
-- **Compatibility**: Phai giu backward-compatible voi data structure hien tai — khong mat du lieu
-- **Security**: Connection string va credentials phai duoc bao ve trong .env/ — khong commit secrets
+- **Code Freeze**: KHÔNG thêm tính năng mới — chỉ sửa lỗi, gia cố, và an toàn AI
+- **Security**: Connection string và credentials phải được bảo vệ trong .env/ — không commit secrets
+- **Quy mô**: Phải sẵn sàng cho ~10 triệu người dùng tiềm năng (Beta 1 Hà Nội)
 
 ## Key Decisions
 
@@ -69,9 +79,10 @@ Du an da hoan thanh v1.0 voi 6 phases (Privacy, Anti-Spam, Light Mode, Quiz Flow
 | Uu tien light mode va UX quiz lam trung tam v1 | Nhu cau uu tien cao nhat tu nguoi dung la UI/UX | ✓ Good |
 | Giu kien truc Flask brownfield, nang cap theo tung pha | Giam rui ro hoi quy va tan dung he thong dang chay | ✓ Good |
 | Dua anti-spam (rule tan suat + IP/cookie tracking) vao v1 | Bao ve chat luong du lieu bao cao va han che gian lan | ✓ Good |
-| Migrate toan bo sang NeonDB PostgreSQL cho v1.1 | SQLite khong phu hop Vercel serverless (ephemeral /tmp), NeonDB da co san | — Pending |
-| NeonDB cho ca local va production | Don gian hoa config, tranh sqlite/postgres incompatibility | — Pending |
-| Postgres truoc, Vercel fix sau | DB on dinh la tien quyet de debug deployment | — Pending |
+| Migrate toàn bộ sang NeonDB PostgreSQL cho v1.1 | SQLite không phù hợp Vercel serverless (ephemeral /tmp), NeonDB đã có sẵn | ✓ Good |
+| NeonDB cho cả local và production | Đơn giản hóa config, tránh sqlite/postgres incompatibility | ✓ Good |
+| Postgres trước, Vercel fix sau | DB ổn định là tiên quyết để debug deployment | ✓ Good |
+| Code Freeze cho v1.2 Beta 1 | Ổn định trước go-live, không thêm tính năng mới | — Pending |
 
 ## Evolution
 
@@ -93,4 +104,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-03 after milestone v1.1 initialization*
+*Last updated: 2026-04-10 after milestone v1.2 initialization*

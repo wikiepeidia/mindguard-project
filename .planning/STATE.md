@@ -1,63 +1,70 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.1
-milestone_name: — PostgreSQL & Vercel Deployment
-status: Milestone complete
-last_updated: "2026-04-04T03:00:00.000Z"
+milestone: v1.2
+milestone_name: — Beta 1 Go-Live (Code Freeze)
+status: Defining requirements
+last_updated: "2026-04-10T00:00:00.000Z"
 progress:
-  total_phases: 9
-  completed_phases: 9
-  total_plans: 18
-  completed_plans: 18
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
 ---
 
 # STATE - MindGuard v2
 
 ## Project Reference
 
-- **Core Value**: Nguoi dung co the hoc, kiem tra nhan thuc va gui bao cao lua dao mot cach de dung, an toan, va dang tin cay.
-- **Current Focus**: v1.1 Milestone Complete — NeonDB + Vercel deployment live.
+- **Core Value**: Người dùng có thể học, kiểm tra nhận thức và gửi báo cáo lừa đảo một cách dễ dùng, an toàn, và đáng tin cậy.
+- **Current Focus**: v1.2 Beta 1 Go-Live (Code Freeze) — sửa lỗi, gia cố, an toàn AI.
 
 ## Current Position
 
-Phase: 09
-Plan: Complete (all phases done)
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-04-10 — Milestone v1.2 started
 
 ## Performance Metrics
 
-- **v1.1 requirements total**: 10
-- **Mapped to phases**: 10
-- **Coverage**: 100% ✓
+- **v1.2 requirements total**: TBD
+- **Mapped to phases**: TBD
+- **Coverage**: TBD
 - **Open blockers**: 0
 
 ## Accumulated Context
 
 ### Key Decisions (from v1.0)
 
-- Tach privacy/masking + audit thanh Phase 1 de giam rui ro lo du lieu truoc khi mo rong feature.
-- Dat anti-spam monitor->soft-enforce thanh Phase 2 de uu tien telemetry va giam false-positive.
-- Dat light-mode token system truoc quiz redesign de tranh UX drift va hoi quy giao dien.
+- Tách privacy/masking + audit thành Phase 1 để giảm rủi ro lộ dữ liệu trước khi mở rộng feature.
+- Đặt anti-spam monitor->soft-enforce thành Phase 2 để ưu tiên telemetry và giảm false-positive.
+- Đặt light-mode token system trước quiz redesign để tránh UX drift và hồi quy giao diện.
 - Session-backed one-question step flow with PRG pattern (04-01).
 - Python-level aggregation over SQLAlchemy case() to avoid version-specific syntax differences (05-01).
 
 ### Key Decisions (v1.1)
 
-- Migrate toan bo sang NeonDB PostgreSQL (khong giu SQLite cho local).
-- Postgres truoc, Vercel fix sau — DB on dinh la tien quyet.
-- NeonDB cho ca local va production — cung connection string.
-- Fresh seed only — khong can migrate user data tu SQLite.
-- Dung `-pooler` endpoint de tranh connection exhaustion tren serverless.
+- Migrate toàn bộ sang NeonDB PostgreSQL (không giữ SQLite cho local).
+- Postgres trước, Vercel fix sau — DB ổn định là tiên quyết.
+- NeonDB cho cả local và production — cùng connection string.
+- Fresh seed only — không cần migrate user data từ SQLite.
+- Dùng `-pooler` endpoint để tránh connection exhaustion trên serverless.
+
+### Key Decisions (v1.2)
+
+- CODE FREEZE — không thêm tính năng mới, chỉ sửa lỗi và gia cố.
+- Ưu tiên: UI bugs > Infrastructure hardening > AI safety > Documentation.
 
 ### Open Todos
 
-(None — v1.1 milestone complete)
+(None — defining requirements)
 
 ### Blockers
 
-(None — 500 errors resolved via NeonDB migration + env var configuration)
+(None)
 
 ## Session Continuity
 
-- **Last Updated**: 2026-04-04
-- **Stopped at**: v1.1 milestone complete — all phases 7-9 done, production live at <https://mindguard-five.vercel.app>
+- **Last Updated**: 2026-04-10
+- **Stopped at**: Milestone v1.2 initialized, defining requirements
 - **Resume file**: .planning/ROADMAP.md

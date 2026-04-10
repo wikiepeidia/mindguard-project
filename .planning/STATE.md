@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: — Beta 1 Go-Live (Code Freeze)
-status: Defining requirements
+status: Active — Phase 10 not started
 last_updated: "2026-04-10T00:00:00.000Z"
 progress:
-  total_phases: 0
+  total_phases: 5
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -16,20 +16,25 @@ progress:
 ## Project Reference
 
 - **Core Value**: Người dùng có thể học, kiểm tra nhận thức và gửi báo cáo lừa đảo một cách dễ dùng, an toàn, và đáng tin cậy.
-- **Current Focus**: v1.2 Beta 1 Go-Live (Code Freeze) — sửa lỗi, gia cố, an toàn AI.
+- **Current Focus**: v1.2 Beta 1 Go-Live (Code Freeze) — sửa lỗi UI, gia cố hạ tầng, an toàn AI, tin cậy trước Beta 1 Hà Nội.
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: Phase 10 — Infrastructure & Security Hardening (not started)
 Plan: —
-Status: Defining requirements
-Last activity: 2026-04-10 — Milestone v1.2 started
+Status: Roadmap created, ready to plan Phase 10
+Last activity: 2026-04-10 — v1.2 roadmap created (5 phases, 17 requirements mapped)
+
+```text
+Progress: [                    ] 0/5 phases complete
+          Phase 10 → 11 → 12 → 13 → 14
+```
 
 ## Performance Metrics
 
-- **v1.2 requirements total**: TBD
-- **Mapped to phases**: TBD
-- **Coverage**: TBD
+- **v1.2 requirements total**: 17
+- **Mapped to phases**: 17/17
+- **Coverage**: 100%
 - **Open blockers**: 0
 
 ## Accumulated Context
@@ -53,11 +58,15 @@ Last activity: 2026-04-10 — Milestone v1.2 started
 ### Key Decisions (v1.2)
 
 - CODE FREEZE — không thêm tính năng mới, chỉ sửa lỗi và gia cố.
-- Ưu tiên: UI bugs > Infrastructure hardening > AI safety > Documentation.
+- Phase 10 (security) trước tất cả — security incident tại Beta là unrecoverable.
+- Phase 11 (UI bugs) sau Phase 10 — zero backend dependencies, fast wins.
+- Phase 12 (AI safety) trước Phase 13 (rate limiting) — timeout fix trước, vì function timeout không bao giờ trả 429.
+- Rate limiting phải dùng NeonDB làm storage backend — Vercel serverless không có shared memory giữa các instance.
+- Phase 14 (stress test) cuối cùng — validates toàn bộ hardening dưới tải.
 
 ### Open Todos
 
-(None — defining requirements)
+- Plan Phase 10 via `/gsd:plan-phase 10`
 
 ### Blockers
 
@@ -66,5 +75,6 @@ Last activity: 2026-04-10 — Milestone v1.2 started
 ## Session Continuity
 
 - **Last Updated**: 2026-04-10
-- **Stopped at**: Milestone v1.2 initialized, defining requirements
+- **Stopped at**: v1.2 roadmap created — 5 phases, 17/17 requirements mapped
+- **Resume with**: `/gsd:plan-phase 10`
 - **Resume file**: .planning/ROADMAP.md

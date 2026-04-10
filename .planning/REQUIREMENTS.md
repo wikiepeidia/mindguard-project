@@ -167,15 +167,32 @@ Requirements cho gia cố hạ tầng, sửa lỗi UI, an toàn AI, và tin cậ
 | SEED-01 | Phase 8 | Complete |
 | VDEP-01 | Phase 9 | Complete |
 | VDEP-02 | Phase 9 | Complete |
+| INFRA-01 | Phase 10 | Pending |
+| INFRA-02 | Phase 10 | Pending |
+| INFRA-03 | Phase 10 | Pending |
+| UIFIX-01 | Phase 11 | Pending |
+| UIFIX-02 | Phase 11 | Pending |
+| UIFIX-03 | Phase 11 | Pending |
+| UIFIX-04 | Phase 11 | Pending |
+| UIFIX-05 | Phase 11 | Pending |
+| AISF-01 | Phase 12 | Pending |
+| AISF-02 | Phase 12 | Pending |
+| AISF-03 | Phase 12 | Pending |
+| AISF-04 | Phase 12 | Pending |
+| INFRA-04 | Phase 13 | Pending |
+| TRUST-01 | Phase 13 | Pending |
+| TRUST-02 | Phase 13 | Pending |
+| TRUST-03 | Phase 13 | Pending |
+| INFRA-05 | Phase 14 | Pending |
 
 **Coverage:**
 
 - v1.0 requirements: 20 total — all complete ✓
 - v1.1 requirements: 10 total — all complete ✓
-- v1.2 requirements: 17 total — pending mapping
-- Mapped to phases: TBD
-- Unmapped: 17 (awaiting roadmap)
+- v1.2 requirements: 17 total — 17/17 mapped ✓
+- Mapped to phases: 47/47 total requirements
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-19*
-*Last updated: 2026-04-10 after v1.2 requirements definition*
+*Last updated: 2026-04-10 after v1.2 roadmap creation*

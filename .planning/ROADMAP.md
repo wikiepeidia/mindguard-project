@@ -2,7 +2,7 @@
 
 **Created:** 2026-03-19
 **Granularity:** standard
-**Coverage:** 16/16 v1.0 requirements mapped · 10/10 v1.1 requirements mapped
+**Coverage:** 16/16 v1.0 requirements mapped · 10/10 v1.1 requirements mapped · 17/17 v1.2 requirements mapped
 
 ## Phases
 
@@ -29,6 +29,14 @@
  (completed 2026-04-04)
 - [x] **Phase 9: Vercel Deployment & Verification** - Cau hinh env vars tren Vercel va xac nhan deployment tra ve 200.
  (completed 2026-04-04)
+
+### v1.2 — Beta 1 Go-Live (Code Freeze)
+
+- [ ] **Phase 10: Infrastructure & Security Hardening** - Loai bo startup risk va di chuyen credentials sang env vars truoc khi Beta go-live.
+- [ ] **Phase 11: UI Bug Fixes** - Sua het loi UI nghiem trong va polish tong the truoc Beta.
+- [ ] **Phase 12: AI Safety** - Dam bao AI chatbot an toan, nhanh, va phu hop ngon ngu nguoi dung pho thong.
+- [ ] **Phase 13: Rate Limiting & Trust Signals** - Chong drain API budget, logging baseline, banner quyen rieng tu, va nut gop y cho Beta.
+- [ ] **Phase 14: Stress Test & Beta Sign-off** - Tim nguong CCU toi da va xac nhan toan bo he thong san sang cho Beta 1.
 
 ## Phase Details
 
@@ -179,6 +187,76 @@ Plans:
 4. Cold start hoan thanh trong gioi han 10s cua Vercel hobby tier.
 **Plans**: TBD
 
+### Phase 10: Infrastructure & Security Hardening
+
+**Goal**: App khong con chua bat ky startup risk hay hardcoded credentials nao truoc khi Beta go-live.
+**Depends on**: Phase 9 (v1.1 complete)
+**Requirements**: INFRA-01, INFRA-02, INFRA-03
+**Success Criteria** (what must be TRUE):
+
+1. Cold start khong thuc thi `db.create_all()` — app.py import nhanh, khong co DB operation nao xay ra truoc khi request den.
+2. `ADMIN_PASSWORD`, `REPORT_ENCRYPTION_KEY`, va `SECRET_KEY` fallback khong con hardcode trong `config.py` — tat ca lay tu Vercel environment variables.
+3. Frontend khong lo bat ky admin credential nao trong HTML, JS, hoac network response ma nguoi dung co the inspect.
+4. Deploy Vercel sau khi thay doi van tra ve 200 tren cac trang chinh (homepage, quiz, auth).
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 11: UI Bug Fixes
+
+**Goal**: Nguoi dung co the su dung day du cac tinh nang chinh cua MindGuard ma khong gap loi UI nao truoc Beta.
+**Depends on**: Phase 10
+**Requirements**: UIFIX-01, UIFIX-02, UIFIX-03, UIFIX-04, UIFIX-05
+**Success Criteria** (what must be TRUE):
+
+1. Nguoi dung click "Dang xuat" trong dropdown menu va duoc dang xuat thanh cong.
+2. Nguoi dung click vao "Ho so" trong menu va duoc dieu huong dung trang, hitbox du lon de click tren mobile.
+3. Nguoi dung da dang nhap mo chatbot bubble, gui tin nhan, dong lai, mo lai — lich su hoi thoai van hien thi day du.
+4. Huy hieu "Certification Verify" hien thi ro rang, dung style, va phan biet duoc voi cac badge khac.
+5. Giao dien tong the gon dep, khong co element bi lech/tran/che khuat khi kiem tra bang mat thuong truoc Beta.
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 12: AI Safety
+
+**Goal**: AI chatbot tra loi an toan, dung thoi han, va bang ngon ngu de hieu cho tat ca nguoi dung.
+**Depends on**: Phase 10
+**Requirements**: AISF-01, AISF-02, AISF-03, AISF-04
+**Success Criteria** (what must be TRUE):
+
+1. Cac endpoint chatbot khong bao gio vuot qua 8 giay cho OpenRouter call — Vercel function khong bi kill do timeout.
+2. Khi nguoi dung hoi ve chu de chinh tri, ton giao, hoac tu hai, chatbot tra loi bang thong diep cung dinh nghia san va hien thi so hotline Cong an HN 113 thay vi tiep tuc tro chuyen.
+3. Khi AI khong chac chan ve cau tra loi, nguoi dung thay canh bao ro rang kem huong dan lien he co quan chuc nang — khong nhan thong tin co ve chinh xac nhung sai.
+4. System prompt viet bang ngon ngu binh dan, cau tra loi AI khong dung thuat ngu ky thuat trong tuong tac thuc te.
+**Plans**: TBD
+
+### Phase 13: Rate Limiting & Trust Signals
+
+**Goal**: Nguoi dung thay MindGuard bao ve quyen rieng tu cua ho, API budget duoc bao ve, va co the gop y de cai thien san pham.
+**Depends on**: Phase 12
+**Requirements**: INFRA-04, TRUST-01, TRUST-02, TRUST-03
+**Success Criteria** (what must be TRUE):
+
+1. Sau khi vuot nguong so luong request, `/chatbot/api`, `/chatbot/support`, va `/chatbot/send` tra ve thong bao rate limit — khong the tiep tuc gui lien tuc de drain API.
+2. Rate limit counter luu tren NeonDB — hoat dong nhat quan tren nhieu Vercel function instance (khong bi reset giua cac cold start).
+3. Trang chu hien thi banner quyen rieng tu ro rang: MindGuard KHONG luu thong tin ca nhan, KHONG yeu cau quyen truy cap danh ba/tin nhan.
+4. Request, error, va audit logs duoc ghi lai va luu tru an toan tren Vercel — co the truy xuat khi can debug.
+5. Nguoi dung thay nut "Bao cao sai / Gop y" tren giao dien chatbot va co the gui phan hoi duoc luu vao DB.
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 14: Stress Test & Beta Sign-off
+
+**Goal**: Team biet chinh xac ngung CCU toi da cua he thong va co bang chung he thong san sang cho Beta 1 Ha Noi.
+**Depends on**: Phase 13
+**Requirements**: INFRA-05
+**Success Criteria** (what must be TRUE):
+
+1. Locust chay thanh cong voi tai tang dan — tim duoc nguong CCU noi error rate bat dau tang > 5%.
+2. Co bao cao stress test ghi ro: nguong CCU on dinh, P50/P95 latency, diem that bai dau tien (endpoint nao, loi gi).
+3. Neu nguong CCU thap hon muc chap nhan cho Beta, co ke hoach giam thieu cu the truoc khi go-live.
+4. Tat ca 17 yeu cau v1.2 da duoc xac nhan hoat dong tren production URL truoc khi ky Beta sign-off.
+**Plans**: TBD
+
 ## Progress Table
 
 | Phase | Plans Complete | Status | Completed |
@@ -192,3 +270,8 @@ Plans:
 | 7. PostgreSQL Configuration & Connection | 1/1 | Complete | 2026-04-03 |
 | 8. App Startup Cleanup & Data Seeding | 1/1 | Complete | 2026-04-04 |
 | 9. Vercel Deployment & Verification | 1/1 | Complete | 2026-04-04 |
+| 10. Infrastructure & Security Hardening | 0/? | Not started | - |
+| 11. UI Bug Fixes | 0/? | Not started | - |
+| 12. AI Safety | 0/? | Not started | - |
+| 13. Rate Limiting & Trust Signals | 0/? | Not started | - |
+| 14. Stress Test & Beta Sign-off | 0/? | Not started | - |

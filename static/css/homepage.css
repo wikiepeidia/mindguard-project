@@ -102,7 +102,7 @@
 
 .scammer-item h6,
 .scammer-item .small,
-.scammer-item span {
+.scammer-item span:not(.badge) {
     color: var(--mg-text-primary);
 }
 

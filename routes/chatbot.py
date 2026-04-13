@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, session, jsonify, url_for, redirect
-from models import Registration, AiChatSession, AiChatMessage
+from models import Registration, AiChatSession, AiChatMessage, ChatFeedback
 from extensions import db, limiter, csrf
 from utils.chatbot import query_ai_model, simple_bot_reply, generate_support_reply
 from utils.helpers import login_required
@@ -116,3 +116,37 @@ def support_chat():
     msg = data.get("message", "")
     reply = generate_support_reply(msg)
     return jsonify({"reply": reply})
+
+
+# 6. API Góp ý / Báo cáo sai (TRUST-03)
+@chatbot_bp.route("/feedback", methods=["POST"])
+@csrf.exempt
+@login_required
+@limiter.limit("10/minute")
+def submit_feedback():
+    data = request.get_json() or {}
+    feedback_type = data.get("feedback_type", "").strip()
+    feedback_text = data.get("feedback_text", "").strip()
+    message_id = data.get("message_id")
+    session_id = data.get("session_id")
+
+    valid_types = ("incorrect", "offensive", "unclear", "other")
+    if feedback_type not in valid_types:
+        return jsonify({"error": "Loại góp ý không hợp lệ"}), 400
+
+    if not feedback_text:
+        return jsonify({"error": "Vui lòng nhập nội dung góp ý"}), 400
+
+    user = Registration.query.filter_by(email=session.get("registration_email")).first()
+
+    fb = ChatFeedback(
+        user_id=user.id if user else None,
+        session_id=session_id,
+        message_id=message_id,
+        feedback_type=feedback_type,
+        feedback_text=feedback_text,
+    )
+    db.session.add(fb)
+    db.session.commit()
+
+    return jsonify({"success": True, "message": "Cảm ơn bạn đã góp ý! Chúng tôi sẽ xem xét và cải thiện."})

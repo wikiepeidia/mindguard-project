@@ -170,3 +170,16 @@ class AntiSpamActorState(db.Model):
     last_risk_level = db.Column(db.String(10), nullable=False, default='low')
     last_seen_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
+
+class ChatFeedback(db.Model):
+    """Lưu góp ý / báo cáo sai từ người dùng về câu trả lời chatbot."""
+    __tablename__ = 'chat_feedbacks'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('registrations.id'), nullable=True)
+    session_id = db.Column(db.Integer, db.ForeignKey('ai_chat_sessions.id'), nullable=True)
+    message_id = db.Column(db.Integer, db.ForeignKey('ai_chat_messages.id'), nullable=True)
+    feedback_type = db.Column(db.String(30), nullable=False)  # 'incorrect', 'offensive', 'unclear', 'other'
+    feedback_text = db.Column(db.Text, nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+

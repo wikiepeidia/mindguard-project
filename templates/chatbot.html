@@ -38,6 +38,10 @@
       </div>
     </div>
     <div class="d-flex gap-2">
+      <button class="btn btn-outline-warning btn-sm fw-semibold" data-bs-toggle="modal" data-bs-target="#feedbackModal"
+        title="Báo cáo sai / Góp ý">
+        <i class="fas fa-flag me-1"></i> Góp ý
+      </button>
       <button class="btn btn-light btn-sm text-secondary border" onclick="location.reload()" title="Bắt đầu lại">
         <i class="fas fa-redo-alt me-1"></i> Làm mới
       </button>
@@ -143,9 +147,57 @@
     </div>
   </div>
 
+  <!-- Feedback Modal (TRUST-03) -->
+  <div class="modal fade" id="feedbackModal" tabindex="-1" aria-labelledby="feedbackModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content rounded-4 shadow">
+        <div class="modal-header border-0 pb-0">
+          <h5 class="modal-title fw-bold" id="feedbackModalLabel">
+            <i class="fas fa-flag text-warning me-2"></i>Báo cáo sai / Góp ý
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+        </div>
+        <div class="modal-body">
+          <p class="text-muted mb-3">Góp ý của bạn giúp MindGuard cải thiện chất lượng trả lời. Cảm ơn bạn!</p>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Loại góp ý</label>
+            <div class="d-flex flex-wrap gap-2" id="feedbackTypeGroup">
+              <button type="button" class="btn btn-outline-danger btn-sm rounded-pill feedback-type-btn" data-type="incorrect">
+                <i class="fas fa-times-circle me-1"></i> Trả lời sai
+              </button>
+              <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill feedback-type-btn" data-type="unclear">
+                <i class="fas fa-question-circle me-1"></i> Khó hiểu
+              </button>
+              <button type="button" class="btn btn-outline-dark btn-sm rounded-pill feedback-type-btn" data-type="offensive">
+                <i class="fas fa-exclamation-circle me-1"></i> Không phù hợp
+              </button>
+              <button type="button" class="btn btn-outline-primary btn-sm rounded-pill feedback-type-btn" data-type="other">
+                <i class="fas fa-comment me-1"></i> Khác
+              </button>
+            </div>
+            <input type="hidden" id="feedbackType" value="">
+          </div>
+          <div class="mb-3">
+            <label for="feedbackText" class="form-label fw-semibold">Nội dung góp ý</label>
+            <textarea class="form-control" id="feedbackText" rows="3"
+              placeholder="Mô tả ngắn gọn vấn đề hoặc đề xuất cải thiện..."></textarea>
+          </div>
+          <div id="feedbackAlert" class="d-none"></div>
+        </div>
+        <div class="modal-footer border-0 pt-0">
+          <button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button>
+          <button type="button" class="btn btn-warning fw-bold" id="submitFeedbackBtn">
+            <i class="fas fa-paper-plane me-1"></i> Gửi góp ý
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </div>
 {% endblock %}
 
 {% block scripts %}
 <script src="{{ url_for('static', filename='js/chatbot_page.js') }}"></script>
+<script src="{{ url_for('static', filename='js/chatbot_feedback.js') }}"></script>
 {% endblock %}

@@ -1,22 +1,5 @@
 .scammer-profile-page {
-    /* margin-top removed — base.html navbar spacer (80px) handles top spacing */
-}
-
-/* Fix Bootstrap .badge overriding text-* color classes */
-.scammer-profile-page .badge.text-danger {
-    color: var(--bs-danger) !important;
-}
-
-.scammer-profile-page .badge.text-success {
-    color: var(--bs-success) !important;
-}
-
-.scammer-profile-page .badge.text-info {
-    color: var(--bs-info) !important;
-}
-
-.scammer-profile-page .badge.text-warning {
-    color: var(--bs-warning) !important;
+    margin-top: 60px;
 }
 
 .scammer-profile-title {

@@ -1,9 +1,5 @@
 document.addEventListener('DOMContentLoaded', function () {
-    try {
-        AOS.init({ duration: 800, once: true });
-    } catch (e) {
-        // AOS library may fail to load from CDN — do not crash the rest of the handler.
-    }
+    AOS.init({ duration: 800, once: true });
 
     // --- JS CHO HIỆU ỨNG HẠT NỀN (Áo mới) ---
     const canvas = document.getElementById('network-canvas');
@@ -51,59 +47,63 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Auto-hide flash alerts after a short delay for cleaner UX.
-    // Error (danger) alerts are excluded — users need time to read them.
-    document.querySelectorAll('.alert.alert-dismissible').forEach(function (alertElement) {
-        // Skip auto-dismiss for error/danger alerts — they require user acknowledgment.
-        var isError = alertElement.classList.contains('alert-danger') ||
-            alertElement.classList.contains('alert-error');
-        if (isError) return;
-
-        var timer = null;
-
-        var dismiss = function () {
-            // Add the fade-out class for a smooth CSS transition.
-            alertElement.classList.add('alert-auto-dismiss');
-            // After the CSS transition completes (500ms), remove the element from the DOM.
-            alertElement.addEventListener('transitionend', function handler() {
-                alertElement.removeEventListener('transitionend', handler);
+    document.querySelectorAll('.alert.alert-dismissible').forEach((alertElement) => {
+        const timer = setTimeout(() => {
+            if (window.bootstrap && window.bootstrap.Alert) {
+                window.bootstrap.Alert.getOrCreateInstance(alertElement).close();
+            } else {
+                alertElement.classList.remove('show');
                 alertElement.remove();
-            });
-            // Fallback removal in case transitionend does not fire (e.g., display:none ancestor).
-            setTimeout(function () {
-                if (alertElement.parentNode) {
-                    alertElement.remove();
-                }
-            }, 600);
-        };
+            }
+        }, 2800);
 
-        var startTimer = function () {
-            timer = setTimeout(dismiss, 2000);
-        };
-
-        startTimer();
-
-        // Pause the timer while the user hovers over the alert.
-        alertElement.addEventListener('mouseenter', function () { clearTimeout(timer); });
-        alertElement.addEventListener('mouseleave', startTimer);
+        alertElement.addEventListener('mouseenter', () => clearTimeout(timer), { once: true });
     });
 
-    // --- CHATBOT LOGIC (Giữ nguyên 100% của bạn) ---
+    // --- CHATBOT WIDGET LOGIC ---
     const chatInput = document.getElementById("chatInput");
     const sendChatBtn = document.getElementById("sendChatBtn");
     const chatbox = document.getElementById("chatbox");
+
+    const STORAGE_KEY = "mindguard_widget_history";
+    const MAX_HISTORY = 30; // tối đa 30 tin nhắn lưu lại
 
     const createChatLi = (message, className) => {
         const chatLi = document.createElement("div");
         chatLi.classList.add("chat-msg", className);
         chatLi.innerHTML = message;
         return chatLi;
-    }
+    };
+
+    // Lưu 1 tin nhắn vào localStorage
+    const saveMessage = (text, role) => {
+        try {
+            const history = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+            history.push({ text, role, ts: Date.now() });
+            if (history.length > MAX_HISTORY) history.splice(0, history.length - MAX_HISTORY);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
+        } catch (e) { /* localStorage không khả dụng */ }
+    };
+
+    // Khôi phục lịch sử khi mở trang
+    const loadHistory = () => {
+        try {
+            const history = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+            if (history.length === 0) return;
+            history.forEach(({ text, role }) => {
+                const cls = role === "user" ? "msg-outgoing" : "msg-incoming";
+                chatbox.appendChild(createChatLi(text, cls));
+            });
+            chatbox.scrollTo(0, chatbox.scrollHeight);
+        } catch (e) { /* bỏ qua */ }
+    };
 
     const handleChat = () => {
         const userMessage = chatInput.value.trim();
         if (!userMessage) return;
 
         chatbox.appendChild(createChatLi(userMessage, "msg-outgoing"));
+        saveMessage(userMessage, "user");
         chatbox.scrollTo(0, chatbox.scrollHeight);
         chatInput.value = "";
 
@@ -111,8 +111,7 @@ document.addEventListener('DOMContentLoaded', function () {
         chatbox.appendChild(loadingLi);
         chatbox.scrollTo(0, chatbox.scrollHeight);
 
-        // Use the global variable for URL
-        const apiUrl = window.CHATBOT_API_URL || "/chatbot/api"; // Fallback path if variable missing
+        const apiUrl = window.CHATBOT_API_URL || "/chatbot/api";
 
         fetch(apiUrl, {
             method: "POST",
@@ -120,21 +119,36 @@ document.addEventListener('DOMContentLoaded', function () {
             body: JSON.stringify({ message: userMessage })
         }).then(res => res.json()).then(data => {
             chatbox.removeChild(loadingLi);
-            chatbox.appendChild(createChatLi(data.reply, "msg-incoming"));
+            const reply = data.reply || "Xin lỗi, tôi chưa hiểu câu hỏi này.";
+            chatbox.appendChild(createChatLi(reply, "msg-incoming"));
+            saveMessage(reply, "bot");
             chatbox.scrollTo(0, chatbox.scrollHeight);
         }).catch(() => {
             chatbox.removeChild(loadingLi);
-            chatbox.appendChild(createChatLi("❌ Lỗi kết nối AI. Vui lòng thử lại.", "msg-incoming"));
+            const errMsg = "❌ Lỗi kết nối AI. Vui lòng thử lại.";
+            chatbox.appendChild(createChatLi(errMsg, "msg-incoming"));
+            saveMessage(errMsg, "bot");
         });
-    }
+    };
 
     if (sendChatBtn) {
+        loadHistory(); // khôi phục lịch sử khi load trang
         sendChatBtn.addEventListener("click", handleChat);
         chatInput.addEventListener("keydown", (e) => {
             if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
                 handleChat();
             }
+        });
+    }
+
+    const clearChatBtn = document.getElementById("clearChatBtn");
+    if (clearChatBtn) {
+        clearChatBtn.addEventListener("click", () => {
+            try { localStorage.removeItem(STORAGE_KEY); } catch (e) { /* bỏ qua */ }
+            // Giữ lại tin chào, xoá các tin khác
+            const msgs = chatbox.querySelectorAll(".chat-msg:not(#welcomeMsg)");
+            msgs.forEach(m => m.remove());
         });
     }
 });

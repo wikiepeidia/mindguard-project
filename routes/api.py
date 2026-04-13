@@ -2,6 +2,7 @@ from flask import Blueprint, jsonify, request
 from models import ScammerReport, ScamReport, ScammerLeaderboard
 from sqlalchemy import or_
 from utils.privacy_policy import MASKED_DATA_NOTICE, to_display_identifier
+from extensions import limiter, csrf
 
 api_bp = Blueprint('api', __name__, url_prefix='/api/v1')
 
@@ -23,6 +24,7 @@ def serialize_public_check_result(raw_result: dict, is_admin: bool = False) -> d
     }
 
 @api_bp.route('/check', methods=['GET'])
+@limiter.limit("30/minute;5/second")
 def check_scammer():
     """
     Public API to check for scammer info.
@@ -73,6 +75,7 @@ def check_scammer():
         })
 
 @api_bp.route('/stats', methods=['GET'])
+@limiter.limit("60/minute")
 def stats():
     """Public stats API"""
     total_scammers = ScammerReport.query.filter_by(status='approved').count()

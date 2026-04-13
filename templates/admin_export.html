@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+
+<div class="admin-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="admin-sidebar d-none d-lg-flex flex-column">
+    <div class="admin-sidebar-brand">
+      <div class="d-flex align-items-center gap-2">
+        <div class="admin-avatar"><i class="fas fa-user-shield"></i></div>
+        <div>
+          <div class="fw-bold" style="font-size:0.875rem;">{{ session.get('admin_name', 'Admin') }}</div>
+          <div class="text-muted" style="font-size:0.7rem;">Quản trị viên</div>
+        </div>
+      </div>
+    </div>
+    <nav class="admin-nav">
+      <div class="admin-nav-label">Menu chính</div>
+      <a href="{{ url_for('admin.admin_dashboard') }}" class="admin-nav-link">
+        <span class="nav-icon"><i class="fas fa-th-large"></i></span> Tổng quan
+      </a>
+      <a href="{{ url_for('admin.scammer_reports') }}" class="admin-nav-link">
+        <span class="nav-icon"><i class="fas fa-file-signature"></i></span> Duyệt tố cáo
+      </a>
+      <a href="{{ url_for('admin.export_dataset') }}" class="admin-nav-link active">
+        <span class="nav-icon"><i class="fas fa-download"></i></span> Xuất dữ liệu
+      </a>
+      <a href="{{ url_for('admin.sensitive_access_logs') }}" class="admin-nav-link">
+        <span class="nav-icon"><i class="fas fa-history"></i></span> Nhật ký truy cập
+      </a>
+    </nav>
+    <div class="admin-sidebar-footer">
+      <a href="{{ url_for('admin.admin_logout') }}" class="admin-nav-link danger-link mb-0">
+        <span class="nav-icon"><i class="fas fa-sign-out-alt"></i></span> Đăng xuất
+      </a>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="admin-main">
+
+    <div class="admin-page-header">
+      <h2 class="mb-1"><i class="fas fa-download me-2 text-info"></i>Xuất Dữ Liệu</h2>
+      <p class="text-muted small mb-0">Xuất danh sách tố cáo đã duyệt ra file CSV</p>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, message in messages %}
+      <div class="alert alert-{{ category }} py-2 small mb-4">{{ message }}</div>
+      {% endfor %}
+    {% endwith %}
+
+    <div class="row g-4">
+
+      <!-- Thống kê nhanh -->
+      <div class="col-md-4">
+        <div class="stat-card stat-card-success">
+          <div class="stat-card-icon"><i class="fas fa-check-circle"></i></div>
+          <div class="stat-card-value">{{ approved_count }}</div>
+          <div class="stat-card-label">Tố cáo đã duyệt</div>
+          <i class="fas fa-check-circle stat-card-bg-icon"></i>
+        </div>
+      </div>
+
+      <!-- Form xuất chuẩn -->
+      <div class="col-md-4">
+        <div class="admin-table-card h-100">
+          <div class="admin-table-header">
+            <div class="d-flex align-items-center gap-2">
+              <i class="fas fa-file-csv text-info"></i>
+              <span class="fw-bold">Xuất chuẩn</span>
+            </div>
+          </div>
+          <div class="p-4">
+            <p class="text-muted small mb-4">Dữ liệu ẩn danh — identifier đã được che. Phù hợp để chia sẻ công khai hoặc nghiên cứu.</p>
+            <form method="POST">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <input type="hidden" name="full_data" value="0">
+              <input type="hidden" name="reason" value="standard_export">
+              <button type="submit" class="btn btn-info text-white rounded-pill w-100 fw-bold">
+                <i class="fas fa-download me-2"></i>Tải xuống CSV
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Form xuất đầy đủ -->
+      <div class="col-md-4">
+        <div class="admin-table-card h-100" style="border-color: rgba(220,38,38,0.3);">
+          <div class="admin-table-header" style="border-color: rgba(220,38,38,0.2);">
+            <div class="d-flex align-items-center gap-2">
+              <i class="fas fa-database text-danger"></i>
+              <span class="fw-bold">Xuất đầy đủ</span>
+            </div>
+            <span class="badge rounded-pill px-2" style="background:rgba(220,38,38,0.1);color:#dc2626;font-size:0.65rem;">Nhạy cảm</span>
+          </div>
+          <div class="p-4">
+            <p class="text-muted small mb-3">Bao gồm thông tin thô (SĐT, số tài khoản thật). Hành động này được ghi vào nhật ký.</p>
+            <form method="POST">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <input type="hidden" name="full_data" value="1">
+              <div class="mb-3">
+                <label class="form-label text-muted small fw-bold">Lý do xuất <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" name="reason" placeholder="VD: Phối hợp công an điều tra..." required>
+              </div>
+              <button type="submit" class="btn btn-danger rounded-pill w-100 fw-bold"
+                onclick="return confirm('Bạn sắp xuất dữ liệu nhạy cảm. Hành động này sẽ được ghi lại. Tiếp tục?')">
+                <i class="fas fa-exclamation-triangle me-2"></i>Xuất dữ liệu đầy đủ
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+{% endblock %}

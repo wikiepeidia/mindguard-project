@@ -1,4 +1,15 @@
-/* Body styles are defined in style.css — do not duplicate here */
+:root {
+    color-scheme: light;
+}
+
+body {
+    background-color: var(--primary-bg);
+    background-image: radial-gradient(circle at 50% 0%, #e8f8fc 0%, var(--mg-canvas) 80%);
+    color: var(--mg-text-primary);
+    overflow-x: hidden;
+    font-family: 'Inter', sans-serif;
+    position: relative;
+}
 
 /* Hiệu ứng hạt mạng lưới nền */
 #network-canvas {
@@ -24,6 +35,11 @@ body> :not(#network-canvas) {
     border-bottom: 1px solid var(--glass-border);
     padding: 15px 0;
     transition: 0.3s;
+    z-index: 10500 !important;
+}
+
+.navbar .dropdown-menu {
+    z-index: 10600 !important;
 }
 
 .navbar-brand {
@@ -184,10 +200,10 @@ body.show-chatbot .chatbot-window {
     background: var(--mg-surface);
 }
 
-/* Glass Card for flash messages — use .flash-card for the left-border accent variant */
-.flash-card {
+/* Glass Card cho thông báo Flash */
+.glass-card {
     background: var(--glass-bg);
     backdrop-filter: blur(10px);
-    border-left: 4px solid var(--accent-color);
+    border-left: 4px solid var(--accent-color) !important;
     border: 1px solid var(--glass-border);
 }

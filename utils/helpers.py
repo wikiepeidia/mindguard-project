@@ -2,38 +2,17 @@
 import random
 from datetime import datetime
 from functools import wraps
-from flask import session, redirect, url_for, flash, request, jsonify
+from flask import session, redirect, url_for, flash, request
 from utils.privacy_policy import mask_identifier_keep_2_2, mask_phone_keep_last3
-
-
-def _is_ajax_request():
-    """Detect AJAX/fetch requests via headers or content negotiation."""
-    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-        return True
-    if request.content_type and 'application/json' in request.content_type:
-        return True
-    accept = request.headers.get('Accept', '')
-    if 'application/json' in accept and 'text/html' not in accept:
-        return True
-    return False
-
 
 def login_required(f):
     """
     Decorator: Bắt buộc đăng nhập User.
-    Returns JSON 401 for AJAX/API requests instead of redirecting to login page.
     """
     @wraps(f)
     def decorated_function(*args, **kwargs):
         # Kiểm tra xem email user có trong session không
         if not session.get('registration_email'):
-            # For AJAX/JSON requests, return a JSON 401 instead of redirect
-            if _is_ajax_request():
-                return jsonify({
-                    "error": "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.",
-                    "code": "UNAUTHENTICATED",
-                    "login_url": url_for('auth.login'),
-                }), 401
             flash("Bạn cần đăng nhập để sử dụng tính năng này!", "warning")
             # Lưu lại trang người dùng muốn vào để chuyển hướng lại sau khi login
             return redirect(url_for('auth.login', next=request.url))

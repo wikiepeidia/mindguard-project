@@ -1,75 +1,49 @@
 """Chatbot AI logic utilities."""
 import json
-import re
-import urllib.error
 import urllib.request
-
+import urllib.error
 from config import Config
 
+# Từ khóa nhạy cảm cần chuyển sang câu trả lời an toàn
+_SENSITIVE_KEYWORDS = [
+    "chính trị", "đảng", "chính phủ", "biểu tình", "tôn giáo", "phật giáo",
+    "thiên chúa", "hồi giáo", "nhà nước", "quốc hội", "bầu cử", "lật đổ",
+    "phản động", "khủng bố", "vũ khí", "ma túy",
+]
 
-DEFAULT_SYSTEM_PROMPT = (
-    "Bạn là MindGuard AI, trợ lý an ninh mạng cho người dùng Việt Nam. "
-    "Luôn trả lời bằng tiếng Việt tự nhiên, rõ ràng, ngắn gọn và hữu ích. "
-    "Khi người dùng nghi bị lừa đảo, hãy ưu tiên các bước xử lý ngay, cảnh báo rủi ro và cách lưu bằng chứng. "
-    "Không bịa thông tin, không nói lan man, không dùng từ vô nghĩa."
+_SAFE_FALLBACK = (
+    "Hiện tại MindGuard chưa đủ dữ liệu để kết luận chắc chắn về vấn đề này. "
+    "Để an toàn, bác/anh/chị tuyệt đối KHÔNG cung cấp mã OTP, mật khẩu hay chuyển tiền. "
+    "Nếu cần hỗ trợ khẩn, hãy liên hệ đường dây nóng Công an TP Hà Nội: 113."
 )
 
-SUPPORT_SYSTEM_PROMPT = (
-    "Bạn là trợ lý hỗ trợ báo cáo lừa đảo của MindGuard. "
-    "Hướng dẫn người dùng các bước tố cáo, lưu bằng chứng và tự bảo vệ tài khoản bằng tiếng Việt rõ ràng."
-)
+SYSTEM_PROMPT_DEFAULT = """Bạn là MindGuard AI, trợ lý cảnh báo lừa đảo của người dân Hà Nội.
 
-LOW_QUALITY_MARKERS = (
-    "tham comand",
-    "mật khan",
-    "diện tích khác",
-    "giấi",
-    "thiến một",
-    "trào phản ứng",
-    "phê phát",
-    "hang drồn",
-    "li̱n",
-)
+Quy tắc bắt buộc:
+1. Dùng ngôn ngữ đời thường, gần gũi. Xưng hô "bác/anh/chị" với người dùng.
+2. Tránh tuyệt đối thuật ngữ kỹ thuật. Ví dụ: KHÔNG nói "malware" — hãy nói "mã độc ăn cắp tài khoản ngân hàng".
+3. Câu trả lời ngắn gọn, tối đa 3-4 câu. Nếu cần liệt kê thì dùng gạch đầu dòng.
+4. Nếu không chắc chắn hoặc câu hỏi ngoài phạm vi lừa đảo/an toàn mạng, hãy trả lời: "MindGuard chưa có đủ thông tin để kết luận. Để an toàn, bác/anh/chị không nên cung cấp OTP hay chuyển tiền. Liên hệ 113 nếu cần hỗ trợ khẩn."
+5. KHÔNG đưa ra kết luận pháp lý, KHÔNG khuyên dùng thuốc, KHÔNG bình luận chính trị hay tôn giáo."""
 
 
-def normalize_ai_reply(text):
-    """Collapse whitespace so provider output can be evaluated consistently."""
-    return re.sub(r"\s+", " ", (text or "")).strip()
+def _is_sensitive(message: str) -> bool:
+    """Kiểm tra câu hỏi có chứa nội dung nhạy cảm không."""
+    msg_lower = message.lower()
+    return any(kw in msg_lower for kw in _SENSITIVE_KEYWORDS)
 
 
-def is_low_quality_ai_reply(text):
-    """Reject obviously broken provider output before surfacing it to users."""
-    normalized = normalize_ai_reply(text)
-    if len(normalized) < 40:
-        return True
-
-    lowered = normalized.lower()
-    if any(marker in lowered for marker in LOW_QUALITY_MARKERS):
-        return True
-
-    repeated_words = re.search(r"\b([\wÀ-ỹ]{4,})\s+\1\b", lowered)
-    if repeated_words:
-        return True
-
-    return False
-
-
-def query_ai_model_with_meta(prompt, system_prompt=None):
-    """Query OpenRouter and return both reply text and provider metadata."""
+def query_ai_model(prompt, system_prompt=None):
+    """Query OpenRouter AI with automatic fallback."""
     api_key = Config.OPENROUTER_API_KEY
     models = Config.OPENROUTER_MODELS
-    meta = {
-        "source": "fallback",
-        "model": None,
-        "errors": [],
-    }
 
     if not api_key or api_key.startswith("sk-or-v1-..."):
-        meta["errors"].append("openrouter_api_key_missing")
-        return None, meta
+        return None
 
-    if system_prompt is None:
-        system_prompt = DEFAULT_SYSTEM_PROMPT
+    # Chặn câu hỏi nhạy cảm trước khi gọi AI
+    if _is_sensitive(prompt):
+        return _SAFE_FALLBACK
 
     url = "https://openrouter.ai/api/v1/chat/completions"
     headers = {
@@ -79,119 +53,65 @@ def query_ai_model_with_meta(prompt, system_prompt=None):
         "X-Title": "MindGuard"
     }
 
+    if system_prompt is None:
+        system_prompt = SYSTEM_PROMPT_DEFAULT
+
     for model in models:
-        payload = {
+        data = {
             "model": model,
-            "temperature": 0.2,
-            "max_tokens": 500,
-            "messages": [
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": prompt},
-            ],
+            "messages": [{"role": "system", "content": system_prompt}, {"role": "user", "content": prompt}]
         }
         try:
-            req = urllib.request.Request(
-                url,
-                data=json.dumps(payload).encode("utf-8"),
-                headers=headers,
-            )
-            with urllib.request.urlopen(req, timeout=15) as response:
-                result = json.loads(response.read().decode("utf-8"))
-                choices = result.get("choices") or []
-                if not choices:
-                    meta["errors"].append(f"{model}:empty_choices")
-                    continue
+            req = urllib.request.Request(url, data=json.dumps(data).encode('utf-8'), headers=headers)
+            with urllib.request.urlopen(req, timeout=10) as response:
+                result = json.loads(response.read().decode('utf-8'))
+                if 'choices' in result and len(result['choices']) > 0:
+                    return result['choices'][0]['message']['content']
+        except urllib.error.HTTPError as e:
+            error_body = e.read().decode('utf-8')
+            print(f"Model {model} HTTP error {e.code}: {error_body}")
+            continue
+        except Exception as e:
+            print(f"Model {model} failed: {e}")
+            continue
 
-                content = normalize_ai_reply(choices[0].get("message", {}).get("content", ""))
-                if is_low_quality_ai_reply(content):
-                    meta["errors"].append(f"{model}:low_quality_response")
-                    continue
-
-                meta["source"] = "openrouter"
-                meta["model"] = model
-                return content, meta
-        except urllib.error.HTTPError as error:
-            error_body = error.read().decode("utf-8")
-            meta["errors"].append(f"{model}:http_{error.code}")
-            print(f"Model {model} HTTP error {error.code}: {error_body}")
-        except Exception as error:
-            meta["errors"].append(f"{model}:{type(error).__name__}")
-            print(f"Model {model} failed: {error}")
-
-    return None, meta
-
-
-def query_ai_model(prompt, system_prompt=None):
-    """Backward-compatible string-only provider call."""
-    reply, _meta = query_ai_model_with_meta(prompt, system_prompt=system_prompt)
-    return reply
+    return None
 
 
 def simple_bot_reply(message):
-    """Local safety fallback when provider output is unavailable or unusable."""
-    msg = (message or "").lower()
+    """Fallback khi AI không khả dụng."""
+    if _is_sensitive(message):
+        return _SAFE_FALLBACK
 
-    if any(keyword in msg for keyword in ["bị lừa tiền", "mất tiền", "chuyển khoản", "chuyển tiền", "chiếm đoạt", "mất otp"]):
+    msg = message.lower()
+    if any(kw in msg for kw in ["lừa đảo", "scam", "giả mạo", "link lạ", "đường link"]):
         return (
-            "Tình huống này có dấu hiệu lừa đảo tài chính. Bạn nên làm ngay:\n"
-            "- Gọi ngân hàng hoặc ví điện tử để khóa tài khoản, thẻ và yêu cầu tra soát giao dịch.\n"
-            "- Đổi mật khẩu email, ngân hàng, ví điện tử và bật xác thực 2 lớp nếu chưa có.\n"
-            "- Ngừng chuyển thêm tiền, không gửi mã OTP, mật khẩu hay ảnh giấy tờ cho đối tượng.\n"
-            "- Lưu toàn bộ bằng chứng: ảnh chụp màn hình, số tài khoản, link, tin nhắn, hóa đơn chuyển khoản.\n"
-            "- Trình báo cơ quan công an hoặc ngân hàng càng sớm càng tốt để tăng khả năng xử lý."
+            "Đây có thể là dấu hiệu lừa đảo. "
+            "Bác/anh/chị KHÔNG bấm vào link lạ, KHÔNG cung cấp OTP hay mật khẩu. "
+            "Có thể báo cáo ngay tại mục 'Tố cáo lừa đảo' trên MindGuard."
         )
-
-    if any(keyword in msg for keyword in ["otp", "mã xác minh", "mật khẩu", "đăng nhập"]):
+    if any(kw in msg for kw in ["otp", "mã xác nhận", "mã ngân hàng"]):
         return (
-            "Nếu bạn đã lộ OTP hoặc mật khẩu, hãy xử lý ngay:\n"
-            "- Đổi mật khẩu của email, ngân hàng, mạng xã hội và các tài khoản liên quan.\n"
-            "- Đăng xuất khỏi các phiên lạ và bật xác thực 2 lớp.\n"
-            "- Kiểm tra lịch sử giao dịch hoặc đăng nhập bất thường để phát hiện chiếm quyền truy cập.\n"
-            "- Không cung cấp thêm mã xác minh cho bất kỳ ai, kể cả người tự xưng là nhân viên hỗ trợ."
+            "TUYỆT ĐỐI không cung cấp mã OTP cho bất kỳ ai, kể cả người tự xưng là nhân viên ngân hàng hay công an. "
+            "Đây là chiêu lừa đảo phổ biến nhất hiện nay."
         )
-
-    if any(keyword in msg for keyword in ["link", "website", "trang web", "url", "http"]):
+    if any(kw in msg for kw in ["chuyển tiền", "chuyển khoản", "nạp tiền"]):
         return (
-            "Nếu bạn nghi ngờ link hoặc website lừa đảo:\n"
-            "- Không bấm tiếp vào link và không nhập thông tin cá nhân hoặc thông tin thẻ.\n"
-            "- Kiểm tra kỹ tên miền, lỗi chính tả và các dấu hiệu giả mạo thương hiệu.\n"
-            "- Chụp màn hình trang nghi ngờ để lưu bằng chứng.\n"
-            "- Bạn có thể gửi nguyên văn link hoặc nội dung tin nhắn cho tôi để tôi phân tích kỹ hơn."
+            "Bác/anh/chị hãy xác minh kỹ danh tính người nhận trước khi chuyển tiền. "
+            "Nếu bị yêu cầu chuyển tiền gấp hoặc giữ bí mật — đó là dấu hiệu lừa đảo."
         )
-
-    if any(keyword in msg for keyword in ["tuyển dụng", "việc làm", "cộng tác viên", "nhiệm vụ", "hoa hồng"]):
-        return (
-            "Đây là mẫu lừa đảo tuyển dụng rất phổ biến nếu họ yêu cầu ứng tiền hoặc làm nhiệm vụ nhận hoa hồng.\n"
-            "- Không nộp phí giữ chỗ, phí đào tạo hoặc tiền mở tài khoản nhiệm vụ.\n"
-            "- Kiểm tra công ty qua website chính thức và kênh liên hệ độc lập.\n"
-            "- Lưu lại thông tin tuyển dụng, số điện thoại và tài khoản nhận tiền để báo cáo khi cần."
-        )
-
-    if "lừa đảo" in msg or "scam" in msg or "báo cáo" in msg or "số điện thoại" in msg:
-        return (
-            "Đây có thể là dấu hiệu lừa đảo. Bạn nên:\n"
-            "- Không chuyển tiền hoặc cung cấp thông tin cá nhân.\n"
-            "- Kiểm tra người gửi, số điện thoại, tài khoản ngân hàng hoặc đường link.\n"
-            "- Lưu bằng chứng để báo cáo trên MindGuard hoặc cho cơ quan chức năng nếu cần."
-        )
-
     return (
-        "Bạn hãy gửi thêm chi tiết như nội dung tin nhắn, đường link, số điện thoại hoặc cách đối tượng liên hệ. "
-        "Trong lúc này, đừng bấm link lạ, đừng chuyển tiền và không chia sẻ mã OTP."
+        "MindGuard chưa đủ thông tin để trả lời câu này. "
+        "Bác/anh/chị có thể mô tả thêm nội dung tin nhắn hoặc đường link nghi ngờ không?"
     )
 
 
-def generate_chatbot_reply(message, system_prompt=None):
-    """Return a user-facing reply plus source metadata."""
-    ai_reply, meta = query_ai_model_with_meta(message, system_prompt=system_prompt)
-    if ai_reply:
-        return ai_reply, meta
-
-    fallback_reply = simple_bot_reply(message)
-    meta["source"] = "fallback"
-    return fallback_reply, meta
-
-
 def generate_support_reply(message):
-    """Specific reply flow for support context."""
-    return generate_chatbot_reply(message, system_prompt=SUPPORT_SYSTEM_PROMPT)
+    """Trả lời trong modal hỗ trợ báo cáo lừa đảo."""
+    support_prompt = (
+        "Bạn là trợ lý hỗ trợ báo cáo lừa đảo của MindGuard. "
+        "Hướng dẫn người dùng cách tố cáo bằng ngôn ngữ đơn giản, thân thiện. "
+        "Xưng hô bác/anh/chị. Tối đa 3 câu."
+    )
+    ai_reply = query_ai_model(message, system_prompt=support_prompt)
+    return ai_reply if ai_reply else simple_bot_reply(message)

@@ -3,8 +3,10 @@ let isMasked = true;
 function toggleMask() {
     const display = document.getElementById('identifierDisplay');
     const button = document.getElementById('maskToggle');
+    // Ensure SCAMMER_DATA exists
     if (!window.SCAMMER_DATA) return;
 
+    // Check login status
     if (!window.SCAMMER_DATA.isLoggedIn) {
         if (confirm('Để xem đầy đủ thông tin, bạn cần đăng nhập. Đi tới trang đăng nhập?')) {
             window.location.href = '/login?next=' + encodeURIComponent(window.location.pathname);
@@ -29,17 +31,13 @@ function showImageModal(src) {
 }
 
 function confirmReport() {
-    if (!window.SCAMMER_DATA || !window.SCAMMER_DATA.isLoggedIn) {
-        if (confirm('Bạn cần đăng nhập để xác nhận báo cáo. Đi tới trang đăng nhập?')) {
-            window.location.href = '/login?next=' + encodeURIComponent(window.location.pathname);
-        }
-        return;
-    }
-    alert('Cảm ơn! Xác nhận của bạn đã được ghi nhận.');
+    // TODO: Implement confirm functionality
+    alert('Chức năng xác nhận đang được phát triển!');
 }
 
 function shareWarning() {
     const url = window.location.href;
+    // Prefer original identifier if logged in for better context, else just generic text
     let identifier = "đối tượng này";
     if (window.SCAMMER_DATA && window.SCAMMER_DATA.maskedIdentifier) {
         identifier = window.SCAMMER_DATA.maskedIdentifier;
@@ -60,14 +58,14 @@ function shareWarning() {
 
 function followScammer() {
     if (!window.SCAMMER_DATA) return;
-
+    
+    // Check login just in case UI shows it by mistake
     if (!window.SCAMMER_DATA.isLoggedIn) {
-        if (confirm('Bạn cần đăng nhập để theo dõi. Đi tới trang đăng nhập?')) {
-            window.location.href = '/login?next=' + encodeURIComponent(window.location.pathname);
-        }
+        alert("Vui lòng đăng nhập để theo dõi.");
         return;
     }
 
+    // Use originalIdentifier from SCAMMER_DATA which is available if logged in
     const identifier = window.SCAMMER_DATA.originalIdentifier;
 
     fetch('/scammer/follow', {
@@ -77,20 +75,22 @@ function followScammer() {
         },
         body: 'identifier=' + encodeURIComponent(identifier)
     })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === 'followed') {
-                updateFollowButton(true);
-            } else if (data.status === 'unfollowed') {
-                updateFollowButton(false);
-            } else {
-                alert(data.message || 'Có lỗi xảy ra.');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Lỗi kết nối.');
-        });
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'followed') {
+            updateFollowButton(true);
+            // alert('Đã bắt đầu theo dõi!'); 
+        } else if (data.status === 'unfollowed') {
+            updateFollowButton(false);
+            // alert('Đã hủy theo dõi.');
+        } else {
+            alert(data.message || 'Có lỗi xảy ra.');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('K lỗi kết nối.');
+    });
 }
 
 function updateFollowButton(isFollowing) {
@@ -110,5 +110,8 @@ function updateFollowButton(isFollowing) {
         icon.classList.remove('fa-bell');
         icon.classList.add('fa-bell-slash');
         txt.textContent = 'Theo dõi cảnh báo';
+    }
+}
+
     }
 }

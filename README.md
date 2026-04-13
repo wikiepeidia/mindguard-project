@@ -1,122 +1,90 @@
-# MindGuard
+# Lộ Trình Phát Triển Tối Ưu cho MindGuard (Best Approach Strategy)
+>
+> Main lanugage for the project should be vietnamese-consistent with existing documentation.
+Dựa trên phân tích mã nguồn hiện tại (Flask Skeleton) và tài liệu mô tả dự án, dưới đây là lộ trình đề xuất để chuyển đổi MindGuard từ bản demo (MVP) sang một sản phẩm thực tế hoàn chỉnh.
 
-> A community-driven fraud awareness platform that educates Vietnamese users about scams through quizzes, enables scammer reporting with community verification, and provides AI chatbot guidance.
+## I. Đánh Giá Hiện Trạng
 
----
-
-## Overview
-
-MindGuard is a web-based platform designed to protect Vietnamese citizens of all ages from online fraud and scams. Inspired by Checkscam.vn, it combines education (interactive quizzes about scam types), community action (scammer reporting with verification badges and a public leaderboard), and AI assistance (chatbot powered by OpenRouter for fraud prevention guidance). It also includes a curated knowledge base of articles about specific scam types and prevention tips, managed by administrators.
-
-The platform serves three user types: learners (taking quizzes, reading articles), reporters (submitting and verifying scammer reports), and administrators (managing content and moderating reports). By gamifying fraud awareness and leveraging community intelligence, MindGuard makes fraud prevention accessible and engaging.
-
----
-
-## Tech Stack
-
-| Layer | Technology | Notes |
-|-------|-----------|-------|
-| Frontend | Jinja2 Templates + Bootstrap 5 | Server-side rendered HTML |
-| Styling | Bootstrap 5 + Custom CSS | Light-mode semantic tokens |
-| Backend | Python 3.12.10 + Flask 3.0.3 | Blueprints-based routing |
-| Database | SQLite 3 | Via SQLAlchemy ORM |
-| ORM | Flask-SQLAlchemy 3.1.1 | |
-| Auth | Flask sessions + Werkzeug | Password hashing, OTP email verification |
-| AI Integration | OpenRouter API | Free models: Mistral, Qwen, Llama |
-| Anti-Bot | Cloudflare Turnstile | CAPTCHA for forms |
-| Hosting | localhost + ngrok | Production target TBD |
+* **Điểm mạnh:**
+  * Cấu trúc dự án MVC rõ ràng (Templates/Static/App logic).
+  * Giao diện Frontend đã hoàn thiện tốt với Bootstrap.
+  * Các luồng chính (Quiz, Report, Chat) đã chạy được.
+* **Điểm yếu (Cần khắc phục ngay):**
+  * **Dữ liệu tạm thời:** Mọi báo cáo lừa đảo và kết quả quiz đang lưu trong RAM (biến global). Reset server là mất hết.
+  * **Chatbot sơ khai:** Logic `if-else` bắt từ khóa quá đơn giản, chưa thực sự là "AI".
+  * **Dashboard tĩnh:** Trang Admin chưa kết nối dữ liệu thực.
 
 ---
 
-## Getting Started
+## II. Kế Hoạch Triển Khai (Action Plan)
 
-### Prerequisites
+Chúng ta không nên làm tất cả cùng lúc. Hãy chia làm 3 giai đoạn ưu tiên:
 
-- Python 3.12.10+
-- pip (package manager)
-- No external database needed (SQLite file-based)
+### Giai đoạn 1: "Bộ nhớ" (Database Implementation) - Ưu tiên cao nhất
 
-### Installation
+Mục tiêu: Dữ liệu (Báo cáo lừa đảo, Người dùng đăng ký) phải được lưu trữ vĩnh viễn.
 
-```bash
-git clone <repo-url>
-cd mindguard_flask_v2
-pip install -r requirements.txt
-# Or use the custom installer:
-python packages/Installer.py
+1. **Cài đặt `Flask-SQLAlchemy`**:
+    * Đây là ORM tiêu chuẩn cho Flask, giúp thao tác DB bằng Python object thay vì SQL thuần.
+    * Sử dụng **SQLite** cho môi trường phát triển (dễ dàng, không cần cài server DB riêng).
+2. **Thiết kế Database Schema (`models.py`)**:
+    * `User`: Lưu thông tin người làm Quiz (Họ tên, Email, Điểm số, Mã chứng nhận).
+    * `ScamReport`: Lưu các báo cáo lừa đảo (Tiêu đề, Loại lừa đảo, Mô tả, Kênh tiếp cận).
+3. **Refactor `app.py`**:
+    * Thay thế các list tạm `reports = []` bằng các câu lệnh truy vấn DB (`ScamReport.query.all()`).
+
+### Giai đoạn 2: "Bộ não" quản trị (Dashboard & Admin)
+
+Mục tiêu: Tận dụng file `admin_dashboard.html` đã có.
+
+1. **Xây dựng Route Admin**:
+    * Tạo route `/admin` có bảo mật (cần đăng nhập, dù đơn giản là hardcode user/pass lúc đầu).
+2. **Hiển thị dữ liệu thực**:
+    * Query tất cả `ScamReport` từ DB và đẩy sang template Admin.
+    * Thêm chức năng **Xóa** (Delete) các báo cáo spam/sai lệch.
+3. **Thống kê cơ bản**:
+    * Đếm số lượng Report theo loại (Ngân hàng, Tình cảm, v.v.) để vẽ biểu đồ.
+
+### Giai đoạn 3: "Trí tuệ" (AI Integration) - Điểm nhấn dự án
+
+Mục tiêu: Biến Chatbot thành trợ lý thực thụ.
+
+1. **Nâng cấp Chatbot**:
+    * Thay logic `rule-based` bằng API của một LLM (như **DEEPSEEK api?** - đang miễn phí, hoặc DeếéekDee).
+    * Tạo **System Prompt** cho AI: *"Bạn là chuyên gia an ninh mạng MindGuard. Hãy tư vấn ngắn gọn, tập trung vào cách phòng tránh lừa đảo..."*
+2. **Gợi ý tự động**:
+    * Khi người dùng gõ mô tả lừa đảo, dùng AI để gợi ý "Loại lừa đảo" tự động.
+
+---
+
+## III. Đề xuất Cấu trúc Database (Models) , database Progressql /sqlite
+
+Dưới đây là thiết kế kiến nghị cho file `models.py` sắp tới:
+
+```python
+from flask_sqlalchemy import SQLAlchemy
+from datetime import datetime
+
+db = SQLAlchemy()
+
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    full_name = db.Column(db.String(100), nullable=False)
+    email = db.Column(db.String(120), nullable=False)
+    score = db.Column(db.Integer)
+    certificate_code = db.Column(db.String(20))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+class ScamReport(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(200), nullable=False)
+    scam_type = db.Column(db.String(50)) # Ngân hàng, Đầu tư, v.v.
+    description = db.Column(db.Text, nullable=False)
+    contact_method = db.Column(db.String(50)) # SMS, Zalo, v.v.
+    is_verified = db.Column(db.Boolean, default=False) # Cho admin duyệt
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 ```
 
-### Database Setup
+## IV. Kết luận
 
-```bash
-cd database/
-python create_database.py      # Initialize schema
-python seed_kb_articles.py     # Load sample articles
-python create_admin.py         # Create admin user
-cd ..
-```
-
-### Running Locally
-
-```bash
-python app.py
-```
-
-Open [http://localhost:5000](http://localhost:5000) in your browser.
-
-Admin panel: [http://localhost:5000/admin](http://localhost:5000/admin) (dev credentials: `admin` / `mindguard2025`)
-
-### Running Tests
-
-```bash
-python -m pytest
-```
-
----
-
-## Project Structure
-
-```
-mindguard_flask_v2/
-├── app.py                  # Flask application entry point
-├── config.py               # Configuration settings
-├── extensions.py           # SQLAlchemy & Flask-Mail init
-├── requirements.txt        # Python dependencies
-├── routes/                 # Flask blueprints (auth, quiz, scammer, chatbot, admin, etc.)
-├── models/                 # SQLAlchemy database models
-├── services/               # Business logic (anti-spam, leaderboard integrity)
-├── utils/                  # Helpers (AI agent, encryption, privacy, quiz data)
-├── templates/              # Jinja2 HTML templates
-├── static/                 # CSS, JS, uploaded files
-├── database/               # SQLite DB, migrations, seed scripts
-├── tests/                  # Test suite
-├── documents/              # SOP docs, changelog, guides
-├── packages/               # Custom installer for deployment
-├── docs/                   # Technical & user documentation
-├── PRD.md                  # Product requirements (source of truth)
-├── TODO.md                 # Project backlog
-└── CLAUDE.md               # Claude AI instructions
-```
-
----
-
-## Environment Variables
-
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `.env/chatbot.json` → `api_key` | Yes | OpenRouter API key for AI chatbot |
-| `.env/cloudflare.json` → `site_key`, `secret_key` | Yes | Cloudflare Turnstile CAPTCHA keys |
-| `.env/ngrok.json` → `auth_token` | No | Ngrok auth token for public tunneling |
-| `config.py` → `SECRET_KEY` | Yes | Flask secret key (change in production!) |
-
----
-
-## Deployment
-
-Currently runs locally with optional ngrok tunneling for public access. Production deployment target is TBD.
-
----
-
-## License
-
-Not yet specified.
+Hãy bắt đầu ngay với **Giai đoạn 1 (Database)**. Đây là nền móng quan trọng nhất. Sau khi cài xong DB, việc làm Admin Dashboard hay AI sẽ dễ dàng hơn rất nhiều.

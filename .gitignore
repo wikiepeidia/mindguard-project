@@ -375,6 +375,3 @@ sample_retail_data/
 fun_work_hub.db
 group_project_ai_ml.db
 .github/gsd-file-manifest.json
-datasets/scam_dataset_export.csv
-.vercel
-.env*.local

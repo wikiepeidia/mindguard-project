@@ -31,6 +31,7 @@
             <div class="col-xl-10">
                 <form class="report-shell" action="{{ url_for('scammer.report_scammer') }}" method="POST"
                     enctype="multipart/form-data" id="reportForm">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <div class="report-mode-grid mb-4" data-aos="fade-up">
                         <div class="report-mode-item">
                             <input type="radio" class="btn-check" name="report_mode" id="mode_scammer" value="person"

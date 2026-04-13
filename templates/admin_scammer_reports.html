@@ -1,48 +1,94 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container-fluid py-4">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
 
-    <!-- HEADER & BỘ LỌC -->
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4" data-aos="fade-down">
-        <div class="mb-3 mb-md-0">
-            <h2 class="fw-bold text-body mb-0"><i class="fas fa-gavel me-2 text-warning"></i>Kiểm Duyệt Tố Cáo</h2>
-            <p class="text-muted small">Quyết định của bạn sẽ giúp làm sạch không gian mạng</p>
-        </div>
+<div class="admin-layout">
 
-        <div class="btn-group shadow-sm">
-            <a href="{{ url_for('admin.scammer_reports', status='all') }}"
-                class="btn btn-outline-secondary {{ 'active' if status_filter == 'all' else '' }}">Tất cả</a>
-            <a href="{{ url_for('admin.scammer_reports', status='pending') }}"
-                class="btn btn-outline-warning fw-bold {{ 'active' if status_filter == 'pending' else '' }}">Chờ
-                duyệt</a>
-            <a href="{{ url_for('admin.scammer_reports', status='approved') }}"
-                class="btn btn-outline-success {{ 'active' if status_filter == 'approved' else '' }}">Đã duyệt</a>
-            <a href="{{ url_for('admin.scammer_reports', status='rejected') }}"
-                class="btn btn-outline-danger {{ 'active' if status_filter == 'rejected' else '' }}">Đã từ chối</a>
+  <!-- SIDEBAR -->
+  <aside class="admin-sidebar d-none d-lg-flex flex-column">
+    <div class="admin-sidebar-brand">
+      <div class="d-flex align-items-center gap-2">
+        <div class="admin-avatar">
+          <i class="fas fa-user-shield"></i>
         </div>
+        <div>
+          <div class="fw-bold" style="font-size:0.875rem;">{{ session.get('admin_name', 'Admin') }}</div>
+          <div class="text-muted" style="font-size:0.7rem;">Quản trị viên</div>
+        </div>
+      </div>
+    </div>
+    <nav class="admin-nav">
+      <div class="admin-nav-label">Menu chính</div>
+      <a href="{{ url_for('admin.admin_dashboard') }}" class="admin-nav-link">
+        <span class="nav-icon"><i class="fas fa-th-large"></i></span> Tổng quan
+      </a>
+      <a href="{{ url_for('admin.scammer_reports') }}" class="admin-nav-link active">
+        <span class="nav-icon"><i class="fas fa-file-signature"></i></span> Duyệt tố cáo
+      </a>
+      <a href="{{ url_for('admin.export_dataset') }}" class="admin-nav-link">
+        <span class="nav-icon"><i class="fas fa-download"></i></span> Xuất dữ liệu
+      </a>
+      <a href="{{ url_for('admin.sensitive_access_logs') }}" class="admin-nav-link">
+        <span class="nav-icon"><i class="fas fa-history"></i></span> Nhật ký truy cập
+      </a>
+    </nav>
+    <div class="admin-sidebar-footer">
+      <a href="{{ url_for('admin.admin_logout') }}" class="admin-nav-link danger-link mb-0">
+        <span class="nav-icon"><i class="fas fa-sign-out-alt"></i></span> Đăng xuất
+      </a>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="admin-main">
+
+    <!-- Header -->
+    <div class="admin-page-header d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+      <div>
+        <h2 class="mb-1"><i class="fas fa-gavel me-2 text-warning"></i>Kiểm Duyệt Tố Cáo</h2>
+        <p class="text-muted small mb-0">Quyết định của bạn sẽ giúp làm sạch không gian mạng</p>
+      </div>
+      <div class="d-flex gap-2 flex-wrap align-items-center">
+        <form method="GET" action="{{ url_for('admin.scammer_reports') }}" class="d-flex gap-2">
+          <input type="hidden" name="status" value="{{ status_filter }}">
+          <input type="text" class="form-control form-control-sm rounded-pill px-3"
+            name="q" value="{{ search }}" placeholder="Tìm SĐT, số TK..." style="width:200px;">
+          <button type="submit" class="btn btn-sm btn-outline-info rounded-pill px-3">
+            <i class="fas fa-search"></i>
+          </button>
+        </form>
+        <a href="{{ url_for('admin.scammer_reports', status='all') }}"
+          class="btn btn-sm rounded-pill px-3 {{ 'btn-secondary' if status_filter == 'all' else 'btn-outline-secondary' }}">Tất cả</a>
+        <a href="{{ url_for('admin.scammer_reports', status='pending') }}"
+          class="btn btn-sm rounded-pill px-3 fw-bold {{ 'btn-warning text-dark' if status_filter == 'pending' else 'btn-outline-warning' }}">
+          Chờ duyệt</a>
+        <a href="{{ url_for('admin.scammer_reports', status='approved') }}"
+          class="btn btn-sm rounded-pill px-3 {{ 'btn-success' if status_filter == 'approved' else 'btn-outline-success' }}">Đã duyệt</a>
+        <a href="{{ url_for('admin.scammer_reports', status='rejected') }}"
+          class="btn btn-sm rounded-pill px-3 {{ 'btn-danger' if status_filter == 'rejected' else 'btn-outline-danger' }}">Đã từ chối</a>
+      </div>
     </div>
 
     {% if reports|length == 0 %}
-    <div class="glass-card text-center py-5">
-        <i class="fas fa-clipboard-check fa-4x text-muted mb-3 opacity-50"></i>
-        <h4 class="text-muted">Không có dữ liệu tố cáo nào.</h4>
+    <div class="admin-table-card text-center py-5">
+      <i class="fas fa-clipboard-check fa-3x text-muted mb-3 opacity-25"></i>
+      <h5 class="text-muted">Không có tố cáo nào trong mục này.</h5>
     </div>
     {% else %}
-    <!-- TABLE LIST -->
-    <div class="glass-card p-0 overflow-hidden" data-aos="fade-up">
-        <div class="table-responsive">
-            <table class="table table-admin mb-0 align-middle w-100">
-                <thead>
-                    <tr>
-                        <th class="ps-4">ID</th>
-                        <th>Đối tượng</th>
-                        <th>Chi tiết vi phạm</th>
-                        <th>Bằng chứng</th>
-                        <th>Trạng thái</th>
-                        <th class="text-end pe-4">Hành động</th>
-                    </tr>
-                </thead>
+    <div class="admin-table-card" data-aos="fade-up">
+      <div class="table-responsive">
+        <table class="table table-admin mb-0 align-middle">
+          <thead>
+            <tr>
+              <th class="ps-4">ID</th>
+              <th>Đối tượng</th>
+              <th>Chi tiết vi phạm</th>
+              <th>Bằng chứng</th>
+              <th>Trạng thái</th>
+              <th class="text-end pe-4">Hành động</th>
+            </tr>
+          </thead>
                 <tbody>
                     {% for report in reports %}
                     <tr>
@@ -51,8 +97,8 @@
                         <!-- Cột Đối tượng -->
                         <td>
                             <div class="d-flex align-items-center">
-                                <div class="bg-white border border-light-subtle p-2 rounded me-3 text-center d-flex align-items-center justify-content-center"
-                                    style="width: 40px; height: 40px;">
+                                <div class="p-2 rounded me-3 text-center d-flex align-items-center justify-content-center"
+                                    style="width: 40px; height: 40px; background: var(--mg-surface-soft); border: 1px solid var(--mg-border);">
                                     {% if report.report_type == 'bank' %}
                                     <i class="fas fa-university text-success"></i>
                                     {% elif report.report_type == 'website' %}
@@ -104,11 +150,13 @@
                             <div class="btn-group">
                                 <form action="{{ url_for('admin.approve_report', report_id=report.id) }}" method="POST"
                                     class="d-inline">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                     <button type="submit" class="btn btn-sm btn-success" title="Duyệt"><i
                                             class="fas fa-check"></i></button>
                                 </form>
                                 <form action="{{ url_for('admin.reject_report', report_id=report.id) }}" method="POST"
                                     class="d-inline ms-1">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                     <button type="submit" class="btn btn-sm btn-outline-danger" title="Từ chối"
                                         onclick="return confirm('Từ chối tố cáo này?');"><i
                                             class="fas fa-times"></i></button>
@@ -124,7 +172,41 @@
             </table>
         </div>
     </div>
+
+    <!-- Pagination -->
+    {% if pagination and pagination.pages > 1 %}
+    <div class="d-flex justify-content-center align-items-center gap-2 mt-4">
+      {% if pagination.has_prev %}
+      <a href="{{ url_for('admin.scammer_reports', status=status_filter, q=search, page=pagination.prev_num) }}"
+        class="btn btn-sm btn-outline-secondary rounded-pill px-3">
+        <i class="fas fa-chevron-left"></i>
+      </a>
+      {% endif %}
+
+      {% for p in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+        {% if p %}
+          <a href="{{ url_for('admin.scammer_reports', status=status_filter, q=search, page=p) }}"
+            class="btn btn-sm rounded-pill px-3 {{ 'btn-info text-white' if p == pagination.page else 'btn-outline-secondary' }}">
+            {{ p }}
+          </a>
+        {% else %}
+          <span class="text-muted px-1">…</span>
+        {% endif %}
+      {% endfor %}
+
+      {% if pagination.has_next %}
+      <a href="{{ url_for('admin.scammer_reports', status=status_filter, q=search, page=pagination.next_num) }}"
+        class="btn btn-sm btn-outline-secondary rounded-pill px-3">
+        <i class="fas fa-chevron-right"></i>
+      </a>
+      {% endif %}
+
+      <span class="text-muted small ms-2">{{ pagination.total }} bản ghi</span>
+    </div>
     {% endif %}
+
+    {% endif %}
+  </main>
 </div>
 
 <!-- ============================================== -->
@@ -134,12 +216,12 @@
 {% if report.evidence_list and report.evidence_list|length > 0 %}
 <div class="modal fade" id="modalEvidence{{ report.id }}" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg"> <!-- modal-lg để ảnh to hơn -->
-        <div class="modal-content bg-white border border-light-subtle shadow-lg">
-            <div class="modal-header border-light-subtle">
+        <div class="modal-content border shadow-lg" style="background: var(--mg-surface); border-color: var(--mg-border) !important;">
+            <div class="modal-header" style="border-color: var(--mg-border)">
                 <h5 class="modal-title text-body">Bằng chứng Tố cáo #{{ report.id }}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body p-0 bg-white">
+            <div class="modal-body p-0" style="background: var(--mg-surface);">
                 <!-- Carousel Xem Ảnh -->
                 <div id="carousel{{ report.id }}" class="carousel slide" data-bs-ride="false">
                     <div class="carousel-inner">
@@ -168,7 +250,7 @@
                     {% endif %}
                 </div>
             </div>
-            <div class="modal-footer border-light-subtle justify-content-center py-2">
+            <div class="modal-footer justify-content-center py-2" style="border-color: var(--mg-border);">
                 <small class="text-muted">Nhấn vào mũi tên để xem các ảnh tiếp theo</small>
             </div>
         </div>

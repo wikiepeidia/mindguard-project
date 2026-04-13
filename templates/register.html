@@ -1,79 +1,120 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="container py-5">
-  <div class="row justify-content-center">
-    <div class="col-lg-7">
-      <div class="card shadow-sm border-0 rounded-4 glass-card" data-aos="fade-up" data-aos-duration="1000">
-        <div class="card-body p-4 p-md-5">
-          <h3 class="fw-bold mb-3 text-center">Đăng ký tham gia bài test</h3>
-          <p class="text-muted small mb-4 text-center">
-            Vui lòng sử dụng Gmail cá nhân để lưu kết quả và nhận chứng chỉ MindGuard.
-          </p>
-          <form method="post">
-            <div class="mb-3">
-              <label class="form-label" for="reg_name">Họ và tên *</label>
-              <input type="text" class="form-control" name="name" id="reg_name" placeholder="Nguyễn Văn A" required>
-            </div>
-            <div class="mb-3">
-              <label class="form-label" for="reg_email">Gmail cá nhân *</label>
-              <input type="email" class="form-control" name="email" id="reg_email" placeholder="tenban@gmail.com"
-                required>
-            </div>
-            <div class="mb-3">
-              <label class="form-label" for="reg_password">Mật khẩu *</label>
-              <input type="password" class="form-control" name="password" id="reg_password" placeholder="Nhập mật khẩu"
-                required minlength="6">
-            </div>
-            <div class="row">
-              <div class="col-md-6 mb-3">
-                <label class="form-label" for="dobInput">Ngày sinh</label>
-                <input type="date" class="form-control" name="date_of_birth" id="dobInput">
-              </div>
 
-              <div class="col-md-6 mb-3">
-                <label class="form-label" for="reg_city">Tỉnh/Thành phố</label>
-                <input type="text" class="form-control" name="city" id="reg_city" placeholder="Ví dụ: Hải Phòng">
-              </div>
-              <div class="col-md-6 mb-3">
-                <label class="form-label" for="reg_occupation">Nghề nghiệp / Vai trò</label>
-                <input type="text" class="form-control" name="occupation" id="reg_occupation"
-                  placeholder="Học sinh, Sinh viên, ...">
+<div class="auth-page-wrapper">
+  <div class="auth-split-container">
+
+    <!-- LEFT: Brand panel -->
+    <div class="auth-brand-panel d-none d-lg-flex">
+      <div class="auth-brand-inner">
+        <a class="navbar-brand d-block mb-4" href="{{ url_for('main.index') }}">
+          <i class="fas fa-shield-alt text-info me-2"></i>Mind<span>Guard</span>
+        </a>
+        <h2 class="fw-bold mb-3">Tham gia cộng đồng<br>phòng chống lừa đảo</h2>
+        <p class="text-muted mb-5" style="line-height:1.8;">
+          Đăng ký miễn phí để tham gia kiểm tra IQ an toàn số,
+          tố cáo ẩn danh và nhận chứng chỉ bảo vệ cộng đồng.
+        </p>
+        <div class="auth-privacy-note p-3 rounded-3 border">
+          <div class="d-flex align-items-start gap-2">
+            <i class="fas fa-shield-alt text-info mt-1"></i>
+            <div>
+              <div class="fw-semibold mb-1" style="font-size:0.85rem;">Cam kết bảo mật</div>
+              <div class="text-muted" style="font-size:0.8rem; line-height:1.6;">
+                MindGuard <strong>KHÔNG lưu</strong> thông tin cá nhân nhạy cảm.
+                Chỉ cần Gmail để xác thực tài khoản.
               </div>
             </div>
-
-            <!-- Cloudflare Turnstile -->
-            {% if site_key %}
-            <div class="mb-3 d-flex justify-content-center">
-              <div class="cf-turnstile" data-sitekey="{{ site_key }}" data-theme="light"></div>
-            </div>
-            {% endif %}
-
-            <!-- Math Captcha Fallback -->
-            <div id="math-captcha-container" class="mb-3 {% if site_key and not force_math %}d-none{% endif %}">
-              <label class="form-label text-warning"><i class="fas fa-calculator me-2"></i>Câu hỏi bảo mật (Không dùng
-                Cloudflare)</label>
-              <div class="input-group">
-                <span class="input-group-text fw-bold">{{ math_question }}</span>
-                <input type="number" class="form-control" name="math_answer" placeholder="Kết quả?">
-              </div>
-              <small class="text-muted d-block mt-1">* Nhập kết quả phép tính trên để xác thực.</small>
-            </div>
-
-            <div class="d-grid mb-3">
-              <button type="submit" class="btn btn-primary btn-lg rounded-pill fw-bold">Tiếp tục (Xác minh
-                Email)</button>
-            </div>
-          </form>
-
-          <div class="text-center mt-3">
-            <p class="small text-muted mb-0">Đã có tài khoản?</p>
-            <a href="{{ url_for('auth.login') }}" class="small fw-bold text-decoration-none">Đăng nhập ngay</a>
           </div>
         </div>
       </div>
     </div>
+
+    <!-- RIGHT: Form panel -->
+    <div class="auth-form-panel">
+      <div class="auth-form-inner" data-aos="fade-up" data-aos-duration="600">
+
+        <div class="text-center mb-4">
+          <div class="auth-form-icon mb-3">
+            <i class="fas fa-user-plus text-info fa-2x"></i>
+          </div>
+          <h3 class="fw-bold mb-1">Tạo tài khoản</h3>
+          <p class="text-muted small mb-0">Chỉ mất 1 phút</p>
+        </div>
+
+        <form method="post">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <div class="mb-3">
+            <label class="form-label fw-medium">Họ và tên *</label>
+            <div class="input-group auth-input-group">
+              <span class="input-group-text"><i class="fas fa-user text-muted"></i></span>
+              <input type="text" class="form-control" name="name" placeholder="Nguyễn Văn A" required>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-medium">Gmail cá nhân *</label>
+            <div class="input-group auth-input-group">
+              <span class="input-group-text"><i class="fas fa-envelope text-muted"></i></span>
+              <input type="email" class="form-control" name="email" placeholder="tenban@gmail.com" required>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-medium">Mật khẩu *</label>
+            <div class="input-group auth-input-group">
+              <span class="input-group-text"><i class="fas fa-lock text-muted"></i></span>
+              <input type="password" class="form-control" name="password"
+                placeholder="Tối thiểu 6 ký tự" required minlength="6">
+            </div>
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-6">
+              <label class="form-label fw-medium">Ngày sinh</label>
+              <input type="date" class="form-control" name="date_of_birth" id="dobInput">
+            </div>
+            <div class="col-6">
+              <label class="form-label fw-medium">Tỉnh/Thành phố</label>
+              <input type="text" class="form-control" name="city" placeholder="Hà Nội">
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-medium">Nghề nghiệp</label>
+              <input type="text" class="form-control" name="occupation" placeholder="Học sinh, Sinh viên...">
+            </div>
+          </div>
+
+          {% if site_key %}
+          <div class="mb-3 d-flex justify-content-center">
+            <div class="cf-turnstile" data-sitekey="{{ site_key }}" data-theme="light"></div>
+          </div>
+          {% endif %}
+
+          <div id="math-captcha-container" class="mb-3 {% if site_key and not force_math %}d-none{% endif %}">
+            <label class="form-label fw-medium text-warning">
+              <i class="fas fa-calculator me-2"></i>Xác thực bảo mật
+            </label>
+            <div class="input-group auth-input-group">
+              <span class="input-group-text fw-bold">{{ math_question }}</span>
+              <input type="number" class="form-control" name="math_answer" placeholder="Kết quả?">
+            </div>
+          </div>
+
+          <div class="d-grid mb-3">
+            <button type="submit" class="btn btn-info btn-lg rounded-pill fw-bold text-white auth-submit-btn">
+              <i class="fas fa-arrow-right me-2"></i>Tiếp tục — Xác minh Email
+            </button>
+          </div>
+        </form>
+
+        <div class="text-center">
+          <p class="text-muted small mb-0">Đã có tài khoản?
+            <a href="{{ url_for('auth.login') }}" class="fw-bold text-info text-decoration-none">Đăng nhập</a>
+          </p>
+        </div>
+
+      </div>
+    </div>
+
   </div>
-</div>
 </div>
 
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>

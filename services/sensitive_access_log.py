@@ -43,8 +43,8 @@ def log_sensitive_access(
     return row
 
 
-def query_sensitive_access_logs(actor_email=None, action=None, start_time=None, end_time=None):
-    """Query logs with optional filters for actor, action, and created_at window."""
+def query_sensitive_access_logs(actor_email=None, action=None, start_time=None, end_time=None, page=None, per_page=20):
+    """Query logs with optional filters. Returns (list, pagination) if page given, else (list, None)."""
     query = SensitiveAccessLog.query
 
     if actor_email:
@@ -56,7 +56,13 @@ def query_sensitive_access_logs(actor_email=None, action=None, start_time=None, 
     if end_time:
         query = query.filter(SensitiveAccessLog.created_at <= end_time)
 
-    return query.order_by(SensitiveAccessLog.created_at.desc()).all()
+    query = query.order_by(SensitiveAccessLog.created_at.desc())
+
+    if page is not None:
+        pagination = query.paginate(page=page, per_page=per_page, error_out=False)
+        return pagination.items, pagination
+
+    return query.all(), None
 
 
 def cleanup_expired_sensitive_access_logs(retention_days=90, now=None):

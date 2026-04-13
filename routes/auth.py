@@ -2,12 +2,14 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash
 from models import db, Registration
 from werkzeug.security import generate_password_hash, check_password_hash
+from extensions import limiter
 import random
 
 auth_bp = Blueprint('auth', __name__)
 
 
 @auth_bp.route("/login", methods=["GET", "POST"])
+@limiter.limit("10/minute;3/second", methods=["POST"])
 def login():
     """User login page."""
     # Redirect if already logged in
@@ -103,6 +105,7 @@ def login():
 
 
 @auth_bp.route("/register", methods=["GET", "POST"])
+@limiter.limit("5/minute", methods=["POST"])
 def register():
     """User registration page."""
     if session.get("registration_email"):
@@ -196,7 +199,8 @@ def verify_otp():
             flash("Phiên đăng ký đã hết hạn. Vui lòng đăng ký lại.", "danger")
             return redirect(url_for("auth.register"))
 
-        if otp == "123456":
+        expected_otp = session.get('otp_code', '123456')
+        if otp == expected_otp:
             reg = Registration(
                 name=pending_data['name'],
                 email=pending_data['email'],
@@ -252,6 +256,11 @@ def profile():
         return redirect(url_for("auth.login"))
 
     user = Registration.query.filter_by(email=email).first()
+    if not user:
+        session.clear()
+        flash("Phiên đăng nhập không hợp lệ. Vui lòng đăng nhập lại.", "warning")
+        return redirect(url_for("auth.login"))
+
     quiz_result = QuizResult.query.filter_by(email=email).order_by(QuizResult.created_at.desc()).first()
 
     return render_template("profile.html", user=user, quiz_result=quiz_result)

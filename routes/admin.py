@@ -2,14 +2,15 @@ import json
 from datetime import datetime, timedelta
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash, send_file
 from functools import wraps
-from sqlalchemy import func, cast
-from sqlalchemy.types import Date
+from sqlalchemy import func
 from models import Registration, QuizResult, ScammerReport, ScammerLeaderboard, AntiSpamEvent, db
 from werkzeug.security import check_password_hash
 from config import Config
 from utils.helpers import calculate_danger_level
 from utils.privacy_policy import to_display_identifier
 from services.sensitive_access_log import log_sensitive_access, query_sensitive_access_logs
+from services.admin_guard import check_and_autolock, unsuspend_admin, is_admin_suspended
+from extensions import limiter, csrf
 import os
 import csv
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
@@ -23,11 +24,31 @@ def _get_admin_actor():
 def admin_required(f):
     @wraps(f)
     def wrapped(*args, **kwargs):
-        if not session.get("is_admin"): return redirect(url_for("admin.admin_login"))
+        if not session.get("is_admin"):
+            return redirect(url_for("admin.admin_login"))
+
+        admin_email = session.get("admin_email", "")
+        admin_id = session.get("admin_id")
+
+        # Kiểm tra tài khoản có đang bị khóa không
+        suspended, reason = is_admin_suspended(admin_email)
+        if suspended:
+            session.clear()
+            flash(f"Tài khoản admin đã bị tạm khóa do hành vi bất thường. Lý do: {reason}", "danger")
+            return redirect(url_for("admin.admin_login"))
+
+        # Kiểm tra hành vi trong 24h qua, tự động khóa nếu vượt ngưỡng
+        blocked, block_reason = check_and_autolock(admin_email, admin_id)
+        if blocked:
+            session.clear()
+            flash(f"Phiên làm việc bị chấm dứt do phát hiện hành vi bất thường: {block_reason}", "danger")
+            return redirect(url_for("admin.admin_login"))
+
         return f(*args, **kwargs)
     return wrapped
 
 @admin_bp.route("/login", methods=["GET", "POST"])
+@limiter.limit("5/minute;1/second", methods=["POST"])
 def admin_login():
     if session.get("is_admin"): return redirect(url_for("admin.admin_dashboard"))
     if request.method == "POST":
@@ -55,9 +76,9 @@ def admin_dashboard():
     latest_scammer_reports = ScammerReport.query.order_by(ScammerReport.created_at.desc()).limit(5).all()
     all_users = Registration.query.order_by(Registration.role.asc(), Registration.created_at.desc()).limit(50).all()
 
-    # Chart Data (cast to Date — compatible with both PostgreSQL and SQLite)
-    trend_data = db.session.query(cast(ScammerReport.created_at, Date).label('d'), func.count(ScammerReport.id)).group_by('d').order_by('d').limit(7).all()
-    trend_labels = [str(d[0]) for d in trend_data]
+    # Chart Data
+    trend_data = db.session.query(func.strftime('%Y-%m-%d', ScammerReport.created_at).label('d'), func.count(ScammerReport.id)).group_by('d').order_by('d').limit(7).all()
+    trend_labels = [d[0] for d in trend_data]
     trend_values = [d[1] for d in trend_data]
 
     type_data = db.session.query(ScammerReport.scam_type, func.count(ScammerReport.id)).group_by(ScammerReport.scam_type).all()
@@ -79,11 +100,80 @@ def admin_logout():
     session.clear()
     return redirect(url_for("main.index"))
 
+
+@admin_bp.route("/unsuspend", methods=["POST"])
+@csrf.exempt
+def unsuspend_admin_account():
+    """
+    Mở khóa tài khoản admin bị suspend.
+    Yêu cầu secret key từ Config — không cần đăng nhập.
+    POST body: { secret: "...", email: "admin@..." }
+    """
+    secret = request.form.get("secret") or request.json.get("secret", "") if request.is_json else request.form.get("secret", "")
+    email = request.form.get("email") or (request.json.get("email", "") if request.is_json else "")
+
+    if secret != Config.ADMIN_UNSUSPEND_SECRET:
+        return {"status": "error", "message": "Sai secret key."}, 403
+
+    if unsuspend_admin(email):
+        return {"status": "ok", "message": f"Đã mở khóa {email}."}, 200
+    return {"status": "error", "message": "Không tìm thấy tài khoản."}, 404
+
+@admin_bp.route("/create-admin", methods=["POST"])
+@admin_required
+def create_admin_account():
+    name = request.form.get("name", "").strip()
+    email = request.form.get("email", "").strip().lower()
+    password = request.form.get("password", "")
+
+    if not name or not email or len(password) < 8:
+        flash("Vui lòng điền đầy đủ thông tin, mật khẩu tối thiểu 8 ký tự.", "danger")
+        return redirect(url_for("admin.admin_dashboard"))
+
+    existing = Registration.query.filter_by(email=email).first()
+    if existing:
+        flash(f"Email {email} đã tồn tại trong hệ thống.", "danger")
+        return redirect(url_for("admin.admin_dashboard"))
+
+    from werkzeug.security import generate_password_hash
+    new_admin = Registration(
+        name=name,
+        email=email,
+        password_hash=generate_password_hash(password),
+        role="admin",
+        onboarding_completed=True,
+    )
+    db.session.add(new_admin)
+    db.session.commit()
+
+    actor_id, actor_email = _get_admin_actor()
+    log_sensitive_access(
+        actor_id=actor_id,
+        actor_email=actor_email,
+        action="update",
+        object_type="admin_account",
+        object_id=email,
+        reason="create_admin",
+    )
+
+    flash(f"Đã tạo tài khoản admin cho {email}.", "success")
+    return redirect(url_for("admin.admin_dashboard"))
+
+
 @admin_bp.route("/delete-user/<int:user_id>", methods=["POST"])
 @admin_required
 def delete_user(user_id):
     user = Registration.query.get_or_404(user_id)
     if user.role != 'admin' and not user.is_admin:
+        actor_id, actor_email = _get_admin_actor()
+        log_sensitive_access(
+            actor_id=actor_id,
+            actor_email=actor_email,
+            action="update",
+            object_type="user",
+            object_id=str(user_id),
+            reason=f"delete_user:{user.email}",
+        )
         db.session.delete(user)
         db.session.commit()
     return redirect(url_for("admin.admin_dashboard"))
@@ -93,6 +183,15 @@ def delete_user(user_id):
 def edit_user(user_id):
     user = Registration.query.get_or_404(user_id)
     if user.role != 'admin' and not user.is_admin:
+        actor_id, actor_email = _get_admin_actor()
+        log_sensitive_access(
+            actor_id=actor_id,
+            actor_email=actor_email,
+            action="update",
+            object_type="user",
+            object_id=str(user_id),
+            reason=f"edit_user:{user.email}",
+        )
         user.name = request.form.get("name")
         user.phone_number = request.form.get("phone_number")
         db.session.commit()
@@ -102,10 +201,19 @@ def edit_user(user_id):
 @admin_required
 def scammer_reports():
     status = request.args.get('status', 'all')
+    search = request.args.get('q', '').strip()
+    page = request.args.get('page', 1, type=int)
+    per_page = 15
+
     query = ScammerReport.query
-    if status != 'all': query = query.filter_by(status=status)
-    reports = query.order_by(ScammerReport.created_at.desc()).all()
-    # Handle evidence JSON
+    if status != 'all':
+        query = query.filter_by(status=status)
+    if search:
+        query = query.filter(ScammerReport.scammer_info_raw.ilike(f'%{search}%'))
+
+    pagination = query.order_by(ScammerReport.created_at.desc()).paginate(page=page, per_page=per_page, error_out=False)
+    reports = pagination.items
+
     for r in reports:
         if r.evidence_urls:
             try: r.evidence_list = json.loads(r.evidence_urls)
@@ -118,18 +226,19 @@ def scammer_reports():
         actor_email=actor_email,
         action="view",
         object_type="scammer_reports",
-        object_id=f"status:{status};count:{len(reports)}",
+        object_id=f"status:{status};page:{page};q:{search}",
         reason="admin_full_view",
     )
 
-    return render_template("admin_scammer_reports.html", reports=reports, status_filter=status)
+    return render_template("admin_scammer_reports.html",
+        reports=reports, status_filter=status,
+        pagination=pagination, search=search)
 
 @admin_bp.route("/approve-report/<int:report_id>", methods=["POST"])
 @admin_required
 def approve_report(report_id):
     report = ScammerReport.query.get_or_404(report_id)
     report.status = 'approved'
-    report.verification_status = 'verified'
     lb = ScammerLeaderboard.query.filter_by(scammer_id=report.id).first()
     if lb:
         lb.total_reports = report.report_count
@@ -172,14 +281,20 @@ def reject_report(report_id):
     flash("Đã từ chối.", "warning")
     return redirect(request.referrer)
 
-@admin_bp.route("/export-dataset")
+@admin_bp.route("/export-dataset", methods=["GET", "POST"])
 @admin_required
 def export_dataset():
-    full_data_requested = request.args.get("full_data", "0").lower() in {"1", "true", "yes"}
-    reason = (request.args.get("reason") or "").strip()
+    approved_count = ScammerReport.query.filter_by(status='approved').count()
+
+    if request.method == "GET":
+        return render_template("admin_export.html", approved_count=approved_count)
+
+    full_data_requested = request.form.get("full_data", "0") == "1"
+    reason = request.form.get("reason", "").strip()
 
     if full_data_requested and not reason:
-        return "Ly do bat buoc khi xuat full-data.", 400
+        flash("Vui lòng nhập lý do khi xuất dữ liệu đầy đủ.", "danger")
+        return render_template("admin_export.html", approved_count=approved_count)
 
     dataset_dir = os.path.join(Config.BASE_DIR, 'datasets')
     if not os.path.exists(dataset_dir): os.makedirs(dataset_dir)
@@ -195,7 +310,6 @@ def export_dataset():
                 identifier_value = report.scammer_info_raw or 'Hidden'
             else:
                 identifier_value = to_display_identifier(report.scammer_info_raw, report.report_type, is_admin=False)
-
             writer.writerow({
                 'id': report.id,
                 'identifier': identifier_value,
@@ -206,16 +320,15 @@ def export_dataset():
                 'date': report.created_at.strftime('%Y-%m-%d')
             })
 
-    if full_data_requested:
-        actor_id, actor_email = _get_admin_actor()
-        log_sensitive_access(
-            actor_id=actor_id,
-            actor_email=actor_email,
-            action="export",
-            object_type="dataset",
-            object_id="approved_scam_reports",
-            reason=reason,
-        )
+    actor_id, actor_email = _get_admin_actor()
+    log_sensitive_access(
+        actor_id=actor_id,
+        actor_email=actor_email,
+        action="export",
+        object_type="dataset",
+        object_id=f"approved_scam_reports;full={full_data_requested}",
+        reason=reason or "standard_export",
+    )
 
     return send_file(filepath, as_attachment=True, download_name=filename)
 
@@ -241,27 +354,45 @@ def sensitive_access_logs():
         except ValueError:
             end_time = None
 
-    logs = query_sensitive_access_logs(
+    page = request.args.get('page', 1, type=int)
+    per_page = 20
+
+    logs, log_pagination = query_sensitive_access_logs(
         actor_email=actor or None,
         action=action or None,
         start_time=start_time,
         end_time=end_time,
+        page=page,
+        per_page=per_page,
     )
 
     default_threshold = getattr(Config, "SENSITIVE_ACCESS_ALERT_THRESHOLD", 10)
     threshold = int(request.args.get("threshold") or default_threshold)
+
+    # Ngưỡng riêng theo từng loại action — export nguy hiểm hơn view
+    ACTION_THRESHOLDS = {"export": 3, "update": 5, "view": threshold}
+
     recent_window_start = datetime.utcnow() - timedelta(hours=24)
-    recent_logs = query_sensitive_access_logs(start_time=recent_window_start)
+    recent_logs, _ = query_sensitive_access_logs(start_time=recent_window_start)
 
-    actor_counts = {}
-    ip_counts = {}
+    # Đếm theo (actor, action) và (ip, action)
+    actor_action_counts = {}
+    ip_action_counts = {}
     for row in recent_logs:
-        actor_counts[row.actor_email] = actor_counts.get(row.actor_email, 0) + 1
+        key = (row.actor_email, row.action)
+        actor_action_counts[key] = actor_action_counts.get(key, 0) + 1
         if row.ip_address:
-            ip_counts[row.ip_address] = ip_counts.get(row.ip_address, 0) + 1
+            ikey = (row.ip_address, row.action)
+            ip_action_counts[ikey] = ip_action_counts.get(ikey, 0) + 1
 
-    high_frequency_actors = [k for k, v in actor_counts.items() if v >= threshold]
-    high_frequency_ips = [k for k, v in ip_counts.items() if v >= threshold]
+    high_frequency_actors = list({
+        actor for (actor, action), count in actor_action_counts.items()
+        if count >= ACTION_THRESHOLDS.get(action, threshold)
+    })
+    high_frequency_ips = list({
+        ip for (ip, action), count in ip_action_counts.items()
+        if count >= ACTION_THRESHOLDS.get(action, threshold)
+    })
 
     anti_spam_window_start = datetime.utcnow() - timedelta(hours=24)
     anti_spam_total_events = (
@@ -297,6 +428,7 @@ def sensitive_access_logs():
     return render_template(
         "admin_sensitive_access_logs.html",
         logs=logs,
+        log_pagination=log_pagination,
         filters={"actor": actor, "action": action, "start": start_raw, "end": end_raw},
         threshold=threshold,
         high_frequency_actors=high_frequency_actors,

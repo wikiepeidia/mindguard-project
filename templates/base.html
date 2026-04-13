@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{% block title %}MindGuard - An ninh mạng cộng đồng{% endblock %}</title>
 
     <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
@@ -18,7 +19,7 @@
     {% block head_css %}{% endblock %}
 </head>
 
-<body class="{% block body_class %}{% endblock %}">
+<body>
 
     <canvas id="network-canvas"></canvas>
 
@@ -60,13 +61,13 @@
                             href="#" data-bs-toggle="dropdown">
                             {{ session.get('registration_name') }}
                         </a>
-                        <ul class="dropdown-menu dropdown-menu-end shadow-lg border mt-2 p-2">
-                            <li><a class="dropdown-item rounded" href="{{ url_for('auth.profile') }}"><i
+                        <ul class="dropdown-menu dropdown-menu-end shadow-lg border mt-1 p-2" style="min-width: 180px; z-index: 9999;">
+                            <li><a class="dropdown-item rounded py-2 px-3 d-flex align-items-center" href="{{ url_for('auth.profile') }}"><i
                                         class="fas fa-id-card me-2 text-info"></i> Hồ sơ</a></li>
                             <li>
-                                <hr class="dropdown-divider opacity-25">
+                                <hr class="dropdown-divider opacity-25 my-1">
                             </li>
-                            <li><a class="dropdown-item rounded text-danger" href="{{ url_for('auth.logout') }}"><i
+                            <li><a class="dropdown-item rounded py-2 px-3 d-flex align-items-center text-danger" href="{{ url_for('auth.logout') }}"><i
                                         class="fas fa-power-off me-2"></i> Đăng xuất</a></li>
                         </ul>
                     </li>
@@ -82,13 +83,10 @@
         </div>
     </nav>
 
-    {% block navbar_spacer %}
     <div style="height: 80px;"></div>
-    {% endblock %}
 
-    {% block global_flash %}
-    <div class="container mt-3 position-fixed top-0 end-0"
-        style="z-index: 9999; max-width: min(400px, calc(100vw - 40px)); margin-top: 90px; margin-right: 20px;">
+    <div class="container mt-3 position-absolute top-0 end-0"
+        style="z-index: 9999; max-width: 400px; margin-top: 90px; margin-right: 20px;">
         {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
         {% for category, message in messages %}
@@ -100,7 +98,6 @@
         {% endif %}
         {% endwith %}
     </div>
-    {% endblock %}
 
     {% block main_wrapper %}
     {% block content %}{% endblock %}
@@ -108,7 +105,7 @@
 
     <!-- Chatbot Widget: Always available (Anonymous or Logged In) -->
     <button class="chatbot-toggler d-flex align-items-center justify-content-center"
-        onclick="document.body.classList.toggle('show-chatbot')" aria-label="Mở chatbot">
+        onclick="document.body.classList.toggle('show-chatbot')">
         <span class="icon-chat position-absolute d-flex align-items-center justify-content-center w-100 h-100"><i
                 class="fas fa-robot fa-lg text-white"></i></span>
         <span class="icon-close position-absolute d-flex align-items-center justify-content-center w-100 h-100"
@@ -124,13 +121,16 @@
                     <small class="opacity-75" style="font-size: 0.7rem;">Online 24/7 • Chuyên gia bảo mật</small>
                 </div>
             </div>
-            <i class="fas fa-times fs-5" style="cursor: pointer;"
-                onclick="document.body.classList.remove('show-chatbot')"></i>
+            <div class="d-flex align-items-center gap-2">
+                <i class="fas fa-trash-alt fs-6 opacity-75" style="cursor: pointer;" title="Xoá lịch sử"
+                    id="clearChatBtn"></i>
+                <i class="fas fa-times fs-5" style="cursor: pointer;"
+                    onclick="document.body.classList.remove('show-chatbot')"></i>
+            </div>
         </div>
         <div class="chatbox" id="chatbox">
-            <div class="chat-msg msg-incoming">
-                👋 Xin chào! Tôi là AI phân tích lừa đảo. Bạn hãy copy tin nhắn hoặc đường link nghi ngờ vào đây để tôi
-                kiểm tra nhé!
+            <div class="chat-msg msg-incoming" id="welcomeMsg">
+                👋 Xin chào! Tôi là AI phân tích lừa đảo. Bác/anh/chị hãy copy tin nhắn hoặc đường link nghi ngờ vào đây để tôi kiểm tra nhé!
             </div>
         </div>
         <div class="chat-input">
@@ -153,7 +153,7 @@
                     <div class="d-flex gap-2">
                         <a href="https://github.com/wikiepeidia/mindguard-project" target="_blank"
                             class="btn btn-outline-light btn-sm rounded-circle"
-                            style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;"
+                            style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;"
                             title="View Source Code"><i class="fab fa-github"></i></a>
                     </div>
                 </div>
@@ -174,9 +174,8 @@
                     <h6 class="fw-bold mb-3">Đăng ký nhận tin</h6>
                     <p class="text-muted small mb-3">Nhận cảnh báo mới nhất qua email.</p>
                     <div class="input-group">
-                        <input type="email" class="form-control" placeholder="Email của bạn" aria-label="Email của bạn">
-                        <button class="btn btn-info" type="button" aria-label="Đăng ký"><i
-                                class="fas fa-paper-plane"></i></button>
+                        <input type="email" class="form-control" placeholder="Email của bạn">
+                        <button class="btn btn-info" type="button"><i class="fas fa-paper-plane"></i></button>
                     </div>
                 </div>
             </div>

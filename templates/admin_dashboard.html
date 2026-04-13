@@ -1,271 +1,344 @@
 {% extends "base.html" %}
-
 {% block content %}
-<div class="container-fluid py-4">
-    <div class="row g-4">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
 
-        <!-- SIDEBAR (MENU TRÁI) -->
-        <div class="col-lg-2 d-none d-lg-block">
-            <div class="glass-card p-3 sticky-top" style="top: 100px;">
-                <div class="text-center mb-4">
-                    <div
-                        class="bg-info bg-opacity-10 rounded-circle d-inline-flex p-3 mb-2 text-info border border-info border-opacity-25">
-                        <i class="fas fa-user-shield fa-2x"></i>
-                    </div>
-                    <h6 class="fw-bold text-body mt-2">ADMIN PANEL</h6>
-                    <small class="text-muted">Xin chào, {{ session.get('admin_name', 'Admin') }}</small>
-                </div>
+<div class="admin-layout">
 
-                <hr class="border-secondary opacity-25">
-
-                <a href="{{ url_for('admin.admin_dashboard') }}" class="admin-sidebar-link active">
-                    <i class="fas fa-th-large me-2"></i> Tổng quan
-                </a>
-                <a href="{{ url_for('admin.scammer_reports') }}" class="admin-sidebar-link">
-                    <i class="fas fa-file-signature me-2"></i> Duyệt tố cáo
-                    {% if pending_reports > 0 %}
-                    <span class="badge bg-danger rounded-pill float-end">{{ pending_reports }}</span>
-                    {% endif %}
-                </a>
-                <a href="{{ url_for('admin.export_dataset') }}" class="admin-sidebar-link">
-                    <i class="fas fa-download me-2"></i> Xuất dữ liệu
-                </a>
-
-                <div class="mt-5 pt-3 border-top border-secondary border-opacity-25">
-                    <a href="{{ url_for('admin.admin_logout') }}" class="admin-sidebar-link text-danger">
-                        <i class="fas fa-sign-out-alt me-2"></i> Đăng xuất
-                    </a>
-                </div>
-            </div>
+  <!-- SIDEBAR -->
+  <aside class="admin-sidebar d-none d-lg-flex flex-column">
+    <div class="admin-sidebar-brand">
+      <div class="d-flex align-items-center gap-2">
+        <div class="admin-avatar">
+          <i class="fas fa-user-shield"></i>
         </div>
-
-        <!-- MAIN CONTENT (NỘI DUNG PHẢI) -->
-        <div class="col-lg-10">
-
-            <!-- 1. STATS CARDS -->
-            <div class="row g-3 mb-4" data-aos="fade-up">
-                <div class="col-md-3">
-                    <div class="stat-card-admin">
-                        <h3 class="fw-bold mb-0">{{ scammer_report_count }}</h3>
-                        <small class="text-secondary text-uppercase fw-bold">Tổng Tố Cáo</small>
-                        <i class="fas fa-file-alt stat-icon-bg"></i>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="stat-card-admin" style="border-left: 4px solid var(--danger);">
-                        <h3 class="fw-bold text-danger mb-0">{{ pending_reports }}</h3>
-                        <small class="text-danger text-uppercase fw-bold">Chờ Duyệt</small>
-                        <i class="fas fa-clock stat-icon-bg"></i>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="stat-card-admin">
-                        <h3 class="fw-bold text-info mb-0">{{ registration_count }}</h3>
-                        <small class="text-info text-uppercase fw-bold">Thành viên</small>
-                        <i class="fas fa-users stat-icon-bg"></i>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="stat-card-admin">
-                        <h3 class="fw-bold text-success mb-0">{{ quiz_count }}</h3>
-                        <small class="text-success text-uppercase fw-bold">Lượt Test IQ</small>
-                        <i class="fas fa-brain stat-icon-bg"></i>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 2. DANH SÁCH THÀNH VIÊN (THAY CHO BIỂU ĐỒ) -->
-            <div class="row g-4 mb-4">
-                <div class="col-lg-8" data-aos="fade-up" data-aos-delay="100">
-                    <div class="glass-card h-100 p-0 overflow-hidden">
-                        <div
-                            class="p-3 border-bottom border-secondary border-opacity-25 d-flex justify-content-between align-items-center">
-                            <h5 class="fw-bold text-body mb-0"><i class="fas fa-users-cog me-2 text-info"></i>Quản lý
-                                Tài khoản</h5>
-                            <span class="badge bg-secondary">{{ all_users|length }} Tài khoản</span>
-                        </div>
-
-                        <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
-                            <table class="table table-admin mb-0 align-middle w-100">
-                                <thead class="sticky-top" style="z-index: 10;">
-                                    <tr>
-                                        <th class="ps-3">Họ Tên / Email</th>
-                                        <th>Vai trò</th>
-                                        <th>Ngày tham gia</th>
-                                        <th class="text-end pe-3">Hành động</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for user in all_users %}
-                                    <tr>
-                                        <td class="ps-3">
-                                            <div class="d-flex align-items-center">
-                                                <div class="bg-white border border-light-subtle rounded-circle me-2 d-flex align-items-center justify-content-center"
-                                                    style="width: 35px; height: 35px;">
-                                                    <i class="fas fa-user text-muted"></i>
-                                                </div>
-                                                <div>
-                                                    <div class="fw-bold text-body">{{ user.name }}</div>
-                                                    <div class="small text-muted">{{ user.email }}</div>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            {% if user.role == 'admin' %}
-                                            <span
-                                                class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-2 py-1">
-                                                <i class="fas fa-user-shield me-1"></i> ADMIN
-                                            </span>
-                                            {% else %}
-                                            <span
-                                                class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 px-2 py-1">
-                                                <i class="fas fa-user me-1"></i> Member
-                                            </span>
-                                            {% endif %}
-                                        </td>
-                                        <td class="text-muted small">
-                                            {{ user.created_at.strftime('%d/%m/%Y') }}
-                                        </td>
-                                        <td class="text-end pe-3">
-                                            {% if user.role == 'admin' %}
-                                            <button class="btn btn-sm btn-outline-secondary opacity-50" disabled
-                                                style="cursor: not-allowed;" title="Không thể tác động Admin">
-                                                <i class="fas fa-lock"></i>
-                                            </button>
-                                            {% else %}
-                                            <div class="btn-group">
-                                                <!-- Nút Sửa -->
-                                                <button type="button" class="btn btn-sm btn-outline-warning"
-                                                    data-bs-toggle="modal" data-bs-target="#editUserModal{{ user.id }}">
-                                                    <i class="fas fa-edit"></i>
-                                                </button>
-
-                                                <!-- Nút Xóa -->
-                                                <form action="{{ url_for('admin.delete_user', user_id=user.id) }}"
-                                                    method="POST" class="d-inline" data-user-name="{{ user.name }}"
-                                                    onsubmit="return confirm('CẢNH BÁO: Bạn có chắc chắn muốn xóa user ' + this.dataset.userName + ' không? Hành động này không thể hoàn tác!');">
-                                                    <button type="submit" class="btn btn-sm btn-outline-danger ms-1">
-                                                        <i class="fas fa-trash-alt"></i>
-                                                    </button>
-                                                </form>
-                                            </div>
-
-                                            <!-- MODAL SỬA USER -->
-                                            <div class="modal fade" id="editUserModal{{ user.id }}" tabindex="-1"
-                                                aria-hidden="true">
-                                                <div class="modal-dialog modal-dialog-centered">
-                                                    <div
-                                                        class="modal-content bg-white border border-light-subtle text-start">
-                                                        <div class="modal-header border-light-subtle">
-                                                            <h5 class="modal-title text-body">Sửa thành viên: {{
-                                                                user.name }}</h5>
-                                                            <button type="button" class="btn-close"
-                                                                data-bs-dismiss="modal" aria-label="Close"></button>
-                                                        </div>
-                                                        <form action="{{ url_for('admin.edit_user', user_id=user.id) }}"
-                                                            method="POST">
-                                                            <div class="modal-body">
-                                                                <div class="mb-3">
-                                                                    <label class="form-label text-muted small">Họ
-                                                                        tên</label>
-                                                                    <input type="text" class="form-control" name="name"
-                                                                        value="{{ user.name }}" required>
-                                                                </div>
-                                                                <div class="mb-3">
-                                                                    <label class="form-label text-muted small">Thành
-                                                                        phố</label>
-                                                                    <input type="text" class="form-control" name="city"
-                                                                        value="{{ user.city }}">
-                                                                </div>
-                                                                <div class="mb-3">
-                                                                    <label class="form-label text-muted small">Số điện
-                                                                        thoại (Optional)</label>
-                                                                    <input type="text" class="form-control"
-                                                                        name="phone_number"
-                                                                        value="{{ user.phone_number or '' }}">
-                                                                </div>
-                                                                <div class="alert alert-info small py-2 mb-0">
-                                                                    <i class="fas fa-info-circle me-1"></i> Email không
-                                                                    thể thay đổi để đảm bảo định danh.
-                                                                </div>
-                                                            </div>
-                                                            <div class="modal-footer border-light-subtle">
-                                                                <button type="button" class="btn btn-secondary btn-sm"
-                                                                    data-bs-dismiss="modal">Hủy</button>
-                                                                <button type="submit" class="btn btn-primary btn-sm">Lưu
-                                                                    thay đổi</button>
-                                                            </div>
-                                                        </form>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            {% endif %}
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Mới cập nhật (Giữ nguyên) -->
-                <div class="col-lg-4" data-aos="fade-up" data-aos-delay="200">
-                    <div class="glass-card h-100">
-                        <h5 class="fw-bold text-body mb-4"><i class="fas fa-history me-2 text-warning"></i>Tố cáo mới
-                            nhất</h5>
-
-                        {% if latest_scammer_reports %}
-                        <div class="vstack gap-3">
-                            {% for report in latest_scammer_reports %}
-                            <div
-                                class="d-flex align-items-center border-bottom border-secondary border-opacity-25 pb-2">
-                                <div class="me-3">
-                                    {% if report.status == 'pending' %}
-                                    <i class="fas fa-circle text-warning small"></i>
-                                    {% elif report.status == 'approved' %}
-                                    <i class="fas fa-circle text-success small"></i>
-                                    {% else %}
-                                    <i class="fas fa-circle text-danger small"></i>
-                                    {% endif %}
-                                </div>
-                                <div class="flex-grow-1 overflow-hidden">
-                                    <h6 class="mb-0 text-body text-truncate" style="font-size: 0.9rem;">
-                                        {{ report.scammer_info_raw }}
-                                    </h6>
-                                    <small class="text-muted" style="font-size: 0.75rem;">{{
-                                        report.created_at.strftime('%H:%M %d/%m') }}</small>
-                                </div>
-                                <a href="{{ url_for('admin.scammer_reports') }}"
-                                    class="btn btn-sm btn-dark text-muted"><i class="fas fa-chevron-right"></i></a>
-                            </div>
-                            {% endfor %}
-                        </div>
-                        {% else %}
-                        <p class="text-muted small fst-italic">Chưa có dữ liệu tố cáo nào.</p>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-
-            <!-- 3. QUICK ACTIONS -->
-            <div class="glass-card bg-danger bg-opacity-10 border-danger border-opacity-25" data-aos="fade-up"
-                data-aos-delay="300">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h5 class="text-body fw-bold"><i class="fas fa-bell me-2 text-danger"></i>Cần xử lý gấp</h5>
-                        <p class="text-muted mb-0">Có <strong class="text-danger fw-bold">{{ pending_reports }}</strong>
-                            tố cáo
-                            đang chờ bạn phê duyệt.</p>
-                    </div>
-                    <a href="{{ url_for('admin.scammer_reports', status='pending') }}"
-                        class="btn btn-danger px-4 rounded-pill shadow-sm">
-                        Xử lý ngay <i class="fas fa-arrow-right ms-2"></i>
-                    </a>
-                </div>
-            </div>
-
+        <div>
+          <div class="fw-bold" style="font-size:0.875rem;">{{ session.get('admin_name', 'Admin') }}</div>
+          <div class="text-muted" style="font-size:0.7rem;">Quản trị viên</div>
         </div>
+      </div>
     </div>
+
+    <nav class="admin-nav">
+      <div class="admin-nav-label">Menu chính</div>
+      <a href="{{ url_for('admin.admin_dashboard') }}" class="admin-nav-link active">
+        <span class="nav-icon"><i class="fas fa-th-large"></i></span>
+        Tổng quan
+      </a>
+      <a href="{{ url_for('admin.scammer_reports') }}" class="admin-nav-link">
+        <span class="nav-icon"><i class="fas fa-file-signature"></i></span>
+        Duyệt tố cáo
+        {% if pending_reports > 0 %}
+        <span class="badge bg-danger rounded-pill ms-auto" style="font-size:0.65rem;">{{ pending_reports }}</span>
+        {% endif %}
+      </a>
+      <a href="{{ url_for('admin.export_dataset') }}" class="admin-nav-link">
+        <span class="nav-icon"><i class="fas fa-download"></i></span>
+        Xuất dữ liệu
+      </a>
+      <a href="{{ url_for('admin.sensitive_access_logs') }}" class="admin-nav-link">
+        <span class="nav-icon"><i class="fas fa-history"></i></span>
+        Nhật ký truy cập
+      </a>
+
+      <div class="admin-nav-label mt-3">Hệ thống</div>
+      <a href="{{ url_for('main.index') }}" class="admin-nav-link" target="_blank">
+        <span class="nav-icon"><i class="fas fa-external-link-alt"></i></span>
+        Xem trang chủ
+      </a>
+    </nav>
+
+    <div class="admin-sidebar-footer">
+      <a href="{{ url_for('admin.admin_logout') }}" class="admin-nav-link danger-link mb-0">
+        <span class="nav-icon"><i class="fas fa-sign-out-alt"></i></span>
+        Đăng xuất
+      </a>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="admin-main">
+
+    <!-- Page header -->
+    <div class="admin-page-header d-flex align-items-center justify-content-between">
+      <div>
+        <h2 class="mb-1"><i class="fas fa-th-large me-2 text-info"></i>Tổng quan</h2>
+        <p class="text-muted small mb-0">Chào mừng trở lại, {{ session.get('admin_name', 'Admin') }}</p>
+      </div>
+      <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-3 py-2">
+        <i class="fas fa-circle me-1" style="font-size:0.5rem;"></i> Hệ thống hoạt động
+      </span>
+    </div>
+
+    <!-- Stat cards -->
+    <div class="row g-3 mb-4" data-aos="fade-up">
+      <div class="col-6 col-md-3">
+        <div class="stat-card stat-card-info">
+          <div class="stat-card-icon"><i class="fas fa-file-alt"></i></div>
+          <div class="stat-card-value">{{ scammer_report_count }}</div>
+          <div class="stat-card-label">Tổng tố cáo</div>
+          <i class="fas fa-file-alt stat-card-bg-icon"></i>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="stat-card stat-card-danger">
+          <div class="stat-card-icon"><i class="fas fa-clock"></i></div>
+          <div class="stat-card-value">{{ pending_reports }}</div>
+          <div class="stat-card-label">Chờ duyệt</div>
+          <i class="fas fa-clock stat-card-bg-icon"></i>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="stat-card stat-card-success">
+          <div class="stat-card-icon"><i class="fas fa-users"></i></div>
+          <div class="stat-card-value">{{ registration_count }}</div>
+          <div class="stat-card-label">Thành viên</div>
+          <i class="fas fa-users stat-card-bg-icon"></i>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="stat-card stat-card-warning">
+          <div class="stat-card-icon"><i class="fas fa-brain"></i></div>
+          <div class="stat-card-value">{{ quiz_count }}</div>
+          <div class="stat-card-label">Lượt Test IQ</div>
+          <i class="fas fa-brain stat-card-bg-icon"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- Alert banner nếu có tố cáo chờ -->
+    {% if pending_reports > 0 %}
+    <div class="admin-alert-banner d-flex align-items-center justify-content-between mb-4" data-aos="fade-up">
+      <div class="d-flex align-items-center gap-3">
+        <div class="stat-card-icon stat-card-danger" style="margin:0; width:40px; height:40px; border-radius:10px;">
+          <i class="fas fa-bell"></i>
+        </div>
+        <div>
+          <div class="fw-bold">Cần xử lý gấp</div>
+          <div class="text-muted small">Có <strong class="text-danger">{{ pending_reports }}</strong> tố cáo đang chờ phê duyệt</div>
+        </div>
+      </div>
+      <a href="{{ url_for('admin.scammer_reports', status='pending') }}"
+        class="btn btn-danger btn-sm rounded-pill px-4 fw-bold flex-shrink-0">
+        Xử lý ngay <i class="fas fa-arrow-right ms-1"></i>
+      </a>
+    </div>
+    {% endif %}
+
+    <!-- Tables row -->
+    <div class="row g-4" data-aos="fade-up" data-aos-delay="100">
+
+      <!-- Danh sách tài khoản -->
+      <div class="col-lg-8">
+        <div class="admin-table-card">
+          <div class="admin-table-header">
+            <div class="d-flex align-items-center gap-2">
+              <i class="fas fa-users-cog text-info"></i>
+              <span class="fw-bold">Quản lý Tài khoản</span>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+              <span class="badge bg-secondary bg-opacity-10 text-secondary border rounded-pill px-2">
+                {{ all_users|length }} tài khoản
+              </span>
+              <button class="btn btn-sm btn-info rounded-pill px-3 text-white fw-bold"
+                data-bs-toggle="modal" data-bs-target="#createAdminModal">
+                <i class="fas fa-user-plus me-1"></i> Thêm Admin
+              </button>
+            </div>
+          </div>
+          <div style="max-height: 420px; overflow-y: auto;">
+            <table class="table table-admin mb-0">
+              <thead>
+                <tr>
+                  <th class="ps-4">Thành viên</th>
+                  <th>Vai trò</th>
+                  <th>Ngày tham gia</th>
+                  <th class="text-end pe-4">Hành động</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for user in all_users %}
+                <tr>
+                  <td class="ps-4">
+                    <div class="d-flex align-items-center gap-2">
+                      <div class="user-avatar-sm"><i class="fas fa-user"></i></div>
+                      <div>
+                        <div class="fw-semibold" style="font-size:0.875rem;">{{ user.name }}</div>
+                        <div class="text-muted" style="font-size:0.75rem;">{{ user.email }}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    {% if user.role == 'admin' %}
+                    <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-20 rounded-pill px-2 py-1">
+                      <i class="fas fa-shield-alt me-1"></i>Admin
+                    </span>
+                    {% else %}
+                    <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-20 rounded-pill px-2 py-1">
+                      <i class="fas fa-user me-1"></i>Member
+                    </span>
+                    {% endif %}
+                  </td>
+                  <td class="text-muted" style="font-size:0.8rem;">
+                    {{ user.created_at.strftime('%d/%m/%Y') }}
+                  </td>
+                  <td class="text-end pe-4">
+                    {% if user.role == 'admin' %}
+                    <button class="btn btn-sm btn-outline-secondary opacity-30" disabled title="Không thể tác động Admin">
+                      <i class="fas fa-lock"></i>
+                    </button>
+                    {% else %}
+                    <div class="btn-group btn-group-sm">
+                      <button class="btn btn-outline-warning rounded-start-2" data-bs-toggle="modal"
+                        data-bs-target="#editUserModal{{ user.id }}" title="Sửa">
+                        <i class="fas fa-edit"></i>
+                      </button>
+                      <form action="{{ url_for('admin.delete_user', user_id=user.id) }}" method="POST" class="d-inline"
+                        onsubmit="return confirm('Xóa tài khoản {{ user.name }}?');">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn btn-outline-danger rounded-end-2" title="Xóa">
+                          <i class="fas fa-trash-alt"></i>
+                        </button>
+                      </form>
+                    </div>
+
+                    <!-- Modal sửa user -->
+                    <div class="modal fade" id="editUserModal{{ user.id }}" tabindex="-1" aria-hidden="true">
+                      <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content border-0 shadow-lg" style="border-radius:16px;">
+                          <div class="modal-header border-bottom p-4">
+                            <h5 class="modal-title fw-bold">Sửa: {{ user.name }}</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                          </div>
+                          <form action="{{ url_for('admin.edit_user', user_id=user.id) }}" method="POST">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <div class="modal-body p-4">
+                              <div class="mb-3">
+                                <label class="form-label text-muted small fw-bold">Họ tên</label>
+                                <input type="text" class="form-control" name="name" value="{{ user.name }}" required>
+                              </div>
+                              <div class="mb-3">
+                                <label class="form-label text-muted small fw-bold">Thành phố</label>
+                                <input type="text" class="form-control" name="city" value="{{ user.city or '' }}">
+                              </div>
+                              <div class="mb-3">
+                                <label class="form-label text-muted small fw-bold">Số điện thoại</label>
+                                <input type="text" class="form-control" name="phone_number" value="{{ user.phone_number or '' }}">
+                              </div>
+                              <div class="p-3 rounded-3 bg-info bg-opacity-10 border border-info border-opacity-25">
+                                <p class="small text-info mb-0"><i class="fas fa-info-circle me-1"></i>Email không thể thay đổi.</p>
+                              </div>
+                            </div>
+                            <div class="modal-footer border-top p-3">
+                              <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3" data-bs-dismiss="modal">Hủy</button>
+                              <button type="submit" class="btn btn-info btn-sm rounded-pill px-4 text-white fw-bold">Lưu thay đổi</button>
+                            </div>
+                          </form>
+                        </div>
+                      </div>
+                    </div>
+                    {% endif %}
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tố cáo mới nhất -->
+      <div class="col-lg-4">
+        <div class="admin-table-card h-100">
+          <div class="admin-table-header">
+            <div class="d-flex align-items-center gap-2">
+              <i class="fas fa-history text-warning"></i>
+              <span class="fw-bold">Tố cáo mới nhất</span>
+            </div>
+            <a href="{{ url_for('admin.scammer_reports') }}" class="text-info small text-decoration-none">
+              Xem tất cả →
+            </a>
+          </div>
+          <div class="p-3">
+            {% if latest_scammer_reports %}
+            {% for report in latest_scammer_reports %}
+            <div class="recent-report-item">
+              <div class="report-status-dot
+                {% if report.status == 'pending' %}bg-warning
+                {% elif report.status == 'approved' %}bg-success
+                {% else %}bg-danger{% endif %}">
+              </div>
+              <div class="flex-grow-1 overflow-hidden">
+                <div class="fw-semibold text-truncate" style="font-size:0.85rem;">{{ report.scammer_info_raw }}</div>
+                <div class="text-muted" style="font-size:0.72rem;">{{ report.created_at.strftime('%H:%M  %d/%m/%Y') }}</div>
+              </div>
+              <span class="badge rounded-pill px-2
+                {% if report.status == 'pending' %}bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25
+                {% elif report.status == 'approved' %}bg-success bg-opacity-10 text-success border border-success border-opacity-25
+                {% else %}bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25{% endif %}"
+                style="font-size:0.65rem; white-space:nowrap;">
+                {% if report.status == 'pending' %}Chờ duyệt
+                {% elif report.status == 'approved' %}Đã duyệt
+                {% else %}Từ chối{% endif %}
+              </span>
+            </div>
+            {% endfor %}
+            {% else %}
+            <div class="text-center py-4 text-muted">
+              <i class="fas fa-inbox fa-2x mb-2 opacity-25"></i>
+              <p class="small mb-0">Chưa có tố cáo nào</p>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
 </div>
+
+<!-- Modal tạo admin mới -->
+<div class="modal fade" id="createAdminModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border shadow-lg" style="background: var(--mg-surface); border-color: var(--mg-border) !important; border-radius: 16px;">
+      <div class="modal-header" style="border-color: var(--mg-border);">
+        <h5 class="modal-title fw-bold"><i class="fas fa-user-shield me-2 text-info"></i>Tạo tài khoản Admin mới</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form action="{{ url_for('admin.create_admin_account') }}" method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="modal-body p-4">
+          {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, message in messages %}
+              {% if 'admin' in message %}
+              <div class="alert alert-{{ 'danger' if category == 'danger' else 'success' }} py-2 small">{{ message }}</div>
+              {% endif %}
+            {% endfor %}
+          {% endwith %}
+          <div class="mb-3">
+            <label class="form-label text-muted small fw-bold">Họ tên</label>
+            <input type="text" class="form-control" name="name" placeholder="Nguyễn Văn A" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label text-muted small fw-bold">Email</label>
+            <input type="email" class="form-control" name="email" placeholder="admin2@mindguard.com" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label text-muted small fw-bold">Mật khẩu</label>
+            <input type="password" class="form-control" name="password" placeholder="••••••••" minlength="8" required>
+          </div>
+          <div class="p-3 rounded-3" style="background: rgba(220,38,38,0.05); border: 1px solid rgba(220,38,38,0.15);">
+            <p class="small mb-0" style="color: #dc2626;"><i class="fas fa-exclamation-triangle me-1"></i>Tài khoản này có toàn quyền quản trị. Chỉ cấp cho người tin cậy.</p>
+          </div>
+        </div>
+        <div class="modal-footer" style="border-color: var(--mg-border);">
+          <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3" data-bs-dismiss="modal">Hủy</button>
+          <button type="submit" class="btn btn-info btn-sm rounded-pill px-4 text-white fw-bold">
+            <i class="fas fa-user-plus me-1"></i> Tạo Admin
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
 {% endblock %}

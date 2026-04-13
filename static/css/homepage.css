@@ -147,13 +147,96 @@
 }
 
 @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
 
-    0%,
-    100% {
-        opacity: 1;
-    }
+/* =============================================
+   TOOLS SECTION — Cards
+   ============================================= */
+.tool-card {
+    border-radius: 18px !important;
+    transition: all 0.3s ease;
+}
 
-    50% {
-        opacity: 0.5;
-    }
+.tool-card-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    background: var(--mg-surface-soft);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--mg-border);
+}
+
+/* Featured card — Chatbot */
+.tool-card-featured {
+    background: linear-gradient(135deg, #0891b2 0%, #0284c7 50%, #1d4ed8 100%);
+    border: none;
+    box-shadow: 0 20px 60px rgba(8, 145, 178, 0.35);
+    transition: all 0.35s ease;
+}
+
+.tool-card-featured:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 28px 70px rgba(8, 145, 178, 0.45);
+}
+
+.featured-glow {
+    position: absolute;
+    width: 300px;
+    height: 300px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,255,255,0.12) 0%, transparent 70%);
+    top: -80px;
+    right: -80px;
+    pointer-events: none;
+}
+
+.featured-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.btn-white {
+    background: #ffffff;
+    color: #0891b2 !important;
+    border: none;
+    font-weight: 700;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+    transition: all 0.3s ease;
+}
+
+.btn-white:hover {
+    background: #f0f9ff;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 22px rgba(0,0,0,0.2);
+    color: #0284c7 !important;
+}
+
+/* =============================================
+   HERO — Search bar improvements
+   ============================================= */
+.search-wrapper .input-group {
+    transition: box-shadow 0.3s ease;
+}
+
+.search-wrapper .input-group:focus-within {
+    box-shadow: 0 8px 40px rgba(6, 182, 212, 0.22) !important;
+    border-color: var(--mg-accent) !important;
+}
+
+/* =============================================
+   FOOTER
+   ============================================= */
+footer {
+    background: var(--mg-surface-soft) !important;
+    border-top: 1px solid var(--mg-border) !important;
 }

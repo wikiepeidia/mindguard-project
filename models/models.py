@@ -27,6 +27,8 @@ class Registration(db.Model):
     phone_number = db.Column(db.String(20))
     bio = db.Column(db.Text)
     onboarding_completed = db.Column(db.Boolean, default=False)
+    is_suspended = db.Column(db.Boolean, default=False)
+    suspended_reason = db.Column(db.String(255), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 class QuizResult(db.Model):

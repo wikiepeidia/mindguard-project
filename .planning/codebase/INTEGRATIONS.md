@@ -1,115 +1,181 @@
 # External Integrations
 
-**Analysis Date:** 2026-03-19
+**Analysis Date:** 2026-04-13
 
 ## APIs & External Services
 
-**AI Inference:**
+**AI & Content Generation:**
+- OpenRouter API - Provides AI chatbot replies and AI-generated quiz questions
+  - SDK/Client: `urllib.request` (standard library HTTP client)
+  - Auth: `OPENROUTER_API_KEY` (from env or `.env/chatbot.json`)
+  - URL: `https://openrouter.ai/api/v1/chat/completions`
+  - Models used (free tier): Liquid LFM 2.5, AllenAI Molmo 2, Google Gemini 2.0 Flash Lite
+  - Implementation: `utils/chatbot.py::query_ai_model()` with automatic model fallback
+  - Rate limiting: 20 requests/minute; 3 requests/second (configured in routes)
+  - Fallback behavior: If API fails, returns simple rule-based bot response
 
-- OpenRouter - LLM chat completions for chatbot and support assistant
-  - SDK/Client: built-in `urllib.request` (no official SDK package), implemented in `utils/chatbot.py`
-  - Auth: `OPENROUTER_API_KEY` from `config.py`
-  - Endpoint: `https://openrouter.ai/api/v1/chat/completions`
-  - Model fallback chain: configured in `Config.OPENROUTER_MODELS` in `config.py`
+**Bot Protection & CAPTCHA:**
+- Cloudflare Turnstile - CAPTCHA verification on login/register/reporting forms
+  - SDK/Client: JavaScript widget (client-side) + `requests` library (server-side verification)
+  - Public Key: `CLOUDFLARE_SITE_KEY` (from env or `.env/cloudflare.json`)
+  - Secret Key: `CLOUDFLARE_SECRET_KEY` (from env or `.env/cloudflare.json`)
+  - Verification URL: `https://challenges.cloudflare.com/turnstile/v0/siteverify`
+  - Fallback: Math CAPTCHA (simple arithmetic problem) when Turnstile unavailable
+  - Implementation: `routes/auth.py::login()` and `routes/scammer.py` form handlers
 
-**Bot Protection / CAPTCHA:**
-
-- Cloudflare Turnstile - anti-bot validation on login/register/report forms
-  - SDK/Client: `requests` HTTP calls in `routes/auth.py` and `routes/scammer.py`
-  - Auth: `CLOUDFLARE_SECRET_KEY` (server-side), `CLOUDFLARE_SITE_KEY` (template rendering)
-  - Endpoint: `https://challenges.cloudflare.com/turnstile/v0/siteverify`
-  - Frontend script loaded in `templates/login.html`, `templates/register.html`, `templates/report_scammer.html`
-
-**Development Tunnel:**
-
-- ngrok - optional public URL for local development
-  - SDK/Client: `pyngrok` in `utils/ngrok_tunnel.py`
-  - Auth: `NGROK_AUTHTOKEN` (env or `.env/ngrok.json`)
-  - Invocation: app startup path in `app.py`
-
-**Frontend CDN Services:**
-
-- jsDelivr CDN - Bootstrap CSS/JS in `templates/base.html`
-- Cloudflare CDNJS - Font Awesome CSS in `templates/base.html`
-- unpkg CDN - AOS library in `templates/base.html`
+**Public URL Tunneling:**
+- ngrok - Exposes localhost:5000 publicly for demos and external access
+  - SDK/Client: `pyngrok` library (Python wrapper)
+  - Auth: `NGROK_AUTHTOKEN` (from env or `.env/ngrok.json`)
+  - Usage: Starts tunnel on app startup in `app.py` (only in main process)
+  - Implementation: `utils/ngrok_tunnel.py::start_ngrok()`
+  - Output: Public URL printed to console (format: `https://xxxx-xx-xxx-xx-xx.ngrok.io`)
 
 ## Data Storage
 
 **Databases:**
-
-- SQLite (local file DB)
-  - Connection: `SQLALCHEMY_DATABASE_URI` built from local path in `config.py`
-  - Client: Flask-SQLAlchemy (`extensions.py`, `models/models.py`)
-  - Database file path target: `database/mindguard_v2.db`
+- SQLite 3 (file-based)
+  - Connection: `sqlite:////[project_root]/database/mindguard_v2.db`
+  - File path: `/database/mindguard_v2.db` (committed to git, 90KB)
+  - Client: Flask-SQLAlchemy ORM via SQLAlchemy
+  - Models: 13 tables (`Registration`, `QuizResult`, `ScammerReport`, `AiChatSession`, etc.)
+  - Initialization: `db.create_all()` called on app startup in `app.py`
+  - No external database server required (zero-config, file-based)
 
 **File Storage:**
-
 - Local filesystem only
-  - Uploaded evidence persisted under `static/uploads/evidence/` in `routes/scammer.py`
-  - Additional upload directory exists at `uploads/evidence/` in repository root
+  - User uploads: Not currently implemented
+  - Static assets: `static/css/`, `static/js/` served by Flask directly
+  - Database exports: Written to local disk (admin export feature)
 
 **Caching:**
-
-- None detected (no Redis/Memcached/cache library integration found)
+- None (in-memory session management via Flask sessions)
+- Conversation history: Persisted to SQLite (not volatile cache)
+- Rate limit state: In-memory (Flask-Limiter default)
 
 ## Authentication & Identity
 
 **Auth Provider:**
+- Custom (no external OAuth or SAML)
+  - Implementation: Server-side sessions with Werkzeug password hashing
+  - Session store: Flask server-side session (signed cookie-based)
+  - Password hashing: PBKDF2-SHA256 via Werkzeug
+  - Routes: `routes/auth.py` (login, register, password reset, OTP verification)
+  - OTP email delivery: Via Flask-Mail (not yet fully configured in code)
 
-- Custom session-based auth (Flask sessions)
-  - Implementation: registration/login in `routes/auth.py`, decorator-based protection via `utils/helpers.py` (`login_required`), session keys checked in routes
-  - Admin path: separate admin login flow in `routes/admin.py` and `/admin` redirect in `app.py`
+**Supported Authentication Methods:**
+- Email + Password (local registration and login)
+- No OAuth/Google/Facebook login
+- No 2FA beyond OTP-via-email (not fully implemented)
+
+**Session Management:**
+- Session lifetime: 7 days (`PERMANENT_SESSION_LIFETIME = 86400 * 7`)
+- Session storage: Server-side (Flask manages via signed cookies)
+- Roles: `user` (default) or `admin`
+- Role-based access control: Routes check `user.role` before granting admin access
+
+## Email Services
+
+**Email Provider:**
+- Flask-Mail 0.9.1 - Configured but not fully utilized
+  - Purpose: OTP delivery for password reset (partially implemented)
+  - Configuration: Reads from environment variables (e.g., `MAIL_SERVER`, `MAIL_USERNAME`, `MAIL_PASSWORD`)
+  - No active SMTP server configured in code (auth routes reference mail but implementation incomplete)
 
 ## Monitoring & Observability
 
 **Error Tracking:**
-
-- None detected (no Sentry, Rollbar, Bugsnag, or equivalent integration found)
+- None (no Sentry, Rollbar, or similar)
+- Errors logged to Flask app.logger (standard logging module)
 
 **Logs:**
-
-- Basic stdout logging via `print(...)` and Flask dev output
-  - Examples in `utils/chatbot.py`, `utils/ngrok_tunnel.py`, and startup banner in `app.py`
+- File-based logging to `logs/access.log`
+  - Format: IP address, HTTP method, path, status code, user agent
+  - Implementation: `app.py::log_request()` decorator
+- Sensitive access audit: `SensitiveAccessLog` table in database
+  - Purpose: Track admin operations on PII
+  - Implementation: `services/sensitive_access_log.py`
+- Anti-spam events: `AntiSpamEvent` table in database
+  - Purpose: Track and analyze rate limit violations
+  - Implementation: `services/anti_spam.py`
 
 ## CI/CD & Deployment
 
 **Hosting:**
-
-- Not explicitly defined in repository configuration
-- Current run mode is direct Flask execution (`app.run(debug=True)` in `app.py`)
+- Currently: localhost:5000 (development server)
+- Public demo: ngrok tunnel (dynamic URL, regenerated on each startup)
+- Production target: TBD (not deployed yet)
 
 **CI Pipeline:**
+- None configured (GitHub Actions planned for future)
+- No automated testing on PRs
+- Manual deployment via `python app.py`
 
-- Not detected (no GitHub Actions workflow for test/build/deploy found in `.github/workflows/` during this tech scan)
+**Deployment Process:**
+- Manual: Clone repo → `pip install -r requirements.txt` → `python app.py`
+- Custom installer available: `packages/Installer.py` (wrapper around pip)
+- Production deployment: Use Gunicorn/uWSGI instead of Flask development server
 
 ## Environment Configuration
 
-**Required env vars:**
+**Required Environment Variables:**
+- `OPENROUTER_API_KEY` - AI chatbot and quiz generation (free tier)
+- `CLOUDFLARE_SITE_KEY` - CAPTCHA public key
+- `CLOUDFLARE_SECRET_KEY` - CAPTCHA verification secret
+- `NGROK_AUTHTOKEN` - Public URL tunneling (optional, only for demo)
+- `SECRET_KEY` - Flask session encryption (falls back to hardcoded value)
+- `ADMIN_UNSUSPEND_SECRET` - Admin account unlock secret
+- `ABUS_MODE` - Anti-spam mode ("monitor" or "enforce")
+- `ABUS_WINDOW_MINUTES`, `ABUS_THRESHOLD_COUNT`, `ABUS_COOLDOWN_MINUTES` - Anti-spam tuning
 
-- `SECRET_KEY` - Flask session secret (`config.py`)
-- `OPENROUTER_API_KEY` - AI API access (`config.py`, `utils/chatbot.py`)
-- `CLOUDFLARE_SITE_KEY` - Turnstile site widget key (`config.py`, templates)
-- `CLOUDFLARE_SECRET_KEY` - Turnstile server verification key (`config.py`, `routes/auth.py`, `routes/scammer.py`)
-- `NGROK_AUTHTOKEN` - optional local tunnel auth (`utils/ngrok_tunnel.py`)
+**Optional Environment Variables:**
+- `WERKZEUG_RUN_MAIN` - Used internally to prevent double startup of ngrok
+- `MAIL_SERVER`, `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD` - Email configuration (not active)
 
-**Secrets location:**
-
-- Environment variables
-- JSON fallback files under `.env/` loaded by `load_local_env` in `config.py`
-- `.env` directory is present in workspace (contents intentionally not read)
+**Secrets Location:**
+- `.env/` directory (JSON files):
+  - `.env/chatbot.json` - `OPENROUTER_API_KEY`
+  - `.env/cloudflare.json` - `SITE_KEY`, `SECRET_KEY`
+  - `.env/ngrok.json` - `NGROK_AUTHTOKEN`
+  - `.env/postgresql_neondb.json` - Future PostgreSQL migration (not yet used)
+- OR: Environment variables (take precedence over JSON files)
+- Never hardcode secrets in source code (fallback values are placeholders only)
 
 ## Webhooks & Callbacks
 
 **Incoming:**
-
-- None detected (no externally invoked webhook endpoints identified)
+- Cloudflare Turnstile callback: No webhook, verification is synchronous HTTP POST
 
 **Outgoing:**
+- None (no event-based callbacks to external systems)
+- ngrok serves incoming traffic from internet to local app (not a webhook but public exposure)
 
-- Outbound HTTP calls to:
-  - OpenRouter completions API in `utils/chatbot.py`
-  - Cloudflare Turnstile verify API in `routes/auth.py` and `routes/scammer.py`
+## Data Flow Summary
+
+**Quiz Generation Flow:**
+1. User requests quiz via `routes/quiz.py`
+2. System calls `utils/chatbot.py::query_ai_model()` with system prompt
+3. OpenRouter API returns AI-generated question
+4. Result stored in `AiQuizQuestion` table
+5. Displayed to user in template
+
+**Chatbot Flow:**
+1. User sends message via `routes/chatbot.py::send_message()`
+2. CSRF token validated (Flask-WTF)
+3. Rate limiter checks (Flask-Limiter: 20/minute)
+4. Message persisted to `AiChatMessage` table
+5. OpenRouter API called via `utils/chatbot.py::query_ai_model()`
+6. AI response persisted and returned as JSON
+7. Client renders response in chat UI
+
+**Scammer Report Flow:**
+1. User submits report via `routes/scammer.py`
+2. Cloudflare Turnstile verification via HTTPS POST
+3. Fallback to math CAPTCHA if Turnstile unavailable
+4. Anti-spam scoring by IP, account, cookie
+5. Report encrypted and stored in `ScammerReport` table
+6. Admin moderation via `routes/admin.py`
 
 ---
 
-*Integration audit: 2026-03-19*
+*Integration audit: 2026-04-13*

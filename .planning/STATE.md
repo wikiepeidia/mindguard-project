@@ -70,11 +70,11 @@ Progress: [██████████████████░░] 16/17 r
 
 ### Pending Todos (5 new bugs from teammate code drop)
 
-- Fix blurry red badge stats on homepage (UI)
-- Fix dark theme on featured section homepage (UI)
-- Investigate missing Cloudflare Turnstile CAPTCHA (auth)
-- Fix toast notification hidden behind header (UI)
-- Fix Vercel deployment issues (infra)
+- ~~Fix blurry red badge stats on homepage (UI)~~ ✅ Fixed — font-smoothing + translateZ(0)
+- ~~Fix dark theme on featured section homepage (UI)~~ ✅ Fixed — lighter gradient
+- ~~Investigate missing Cloudflare Turnstile CAPTCHA (auth)~~ ✅ Not a bug — CAPTCHA renders correctly
+- ~~Fix toast notification hidden behind header (UI)~~ ✅ Fixed — z-index 10700 > navbar 10500
+- ~~Fix Vercel deployment issues (infra)~~ ✅ Fixed — PostgreSQL config, missing blueprints, logs dir, schema sync
 
 ### Open Requirements
 
@@ -86,7 +86,7 @@ Progress: [██████████████████░░] 16/17 r
 
 ## Session Continuity
 
-- **Last Updated**: 2026-04-13
-- **Stopped at**: Phase 13 TRUST-03 completed — feedback button added to chatbot
-- **Resume with**: `/gsd:plan-phase 14` for stress test or push + deploy
+- **Last Updated**: 2026-04-14
+- **Stopped at**: All 5 pending bugs resolved. Vercel production live.
+- **Resume with**: `/gsd:plan-phase 14` for stress test (only remaining v1.2 item)
 - **Resume file**: .planning/ROADMAP.md

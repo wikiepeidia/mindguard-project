@@ -32,7 +32,7 @@
 
 ### v1.2 — Beta 1 Go-Live (Code Freeze)
 
-- [ ] **Phase 10: Infrastructure & Security Hardening** - Loai bo startup risk va di chuyen credentials sang env vars truoc khi Beta go-live.
+- [x] **Phase 10: Infrastructure & Security Hardening** - Loai bo startup risk va di chuyen credentials sang env vars truoc khi Beta go-live. (completed 2026-04-13)
 - [ ] **Phase 11: UI Bug Fixes** - Sua het loi UI nghiem trong va polish tong the truoc Beta.
 - [ ] **Phase 12: AI Safety** - Dam bao AI chatbot an toan, nhanh, va phu hop ngon ngu nguoi dung pho thong.
 - [ ] **Phase 13: Rate Limiting & Trust Signals** - Chong drain API budget, logging baseline, banner quyen rieng tu, va nut gop y cho Beta.
@@ -202,7 +202,7 @@ Plans:
 
 Plans:
 
-- [ ] 10-01-PLAN.md — Remove db.create_all() from startup and move hardcoded credentials to env vars
+- [x] 10-01-PLAN.md — Remove db.create_all() from startup and move hardcoded credentials to env vars
 
 ### Phase 11: UI Bug Fixes
 
@@ -273,7 +273,7 @@ Plans:
 | 7. PostgreSQL Configuration & Connection | 1/1 | Complete | 2026-04-03 |
 | 8. App Startup Cleanup & Data Seeding | 1/1 | Complete | 2026-04-04 |
 | 9. Vercel Deployment & Verification | 1/1 | Complete | 2026-04-04 |
-| 10. Infrastructure & Security Hardening | 0/1 | Partial (1/3 reqs done by teammate, 2 remaining) | - |
+| 10. Infrastructure & Security Hardening | 1/1 | Complete    | 2026-04-13 |
 | 11. UI Bug Fixes | 0/0 | Complete (all 5 reqs done by teammate) | 2026-04-13 |
 | 12. AI Safety | 0/? | Partial (3/4 reqs done by teammate, timeout fix remaining) | - |
 | 13. Rate Limiting & Trust Signals | 0/? | Partial (3/4 reqs done by teammate, feedback button remaining) | - |

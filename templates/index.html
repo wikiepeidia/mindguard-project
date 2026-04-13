@@ -59,7 +59,8 @@
                             <p class="text-white opacity-75 mb-0" style="font-size: 0.9rem; line-height: 1.6;">
                                 <strong class="text-white">Dữ liệu do cộng đồng cung cấp</strong>, kết quả mang tính
                                 cảnh báo — vui lòng kiểm chứng trước khi giao dịch.
-                                MindGuard <strong class="text-info">KHÔNG lưu thông tin cá nhân</strong> của người tra cứu.
+                                MindGuard <strong class="text-info">KHÔNG lưu thông tin cá nhân</strong> của người tra
+                                cứu.
                             </p>
                         </div>
                     </div>
@@ -181,21 +182,24 @@
                                     <div class="flex-grow-1 overflow-hidden">
                                         <div class="d-flex justify-content-between align-items-center mb-1">
                                             <h6 class="text-white fw-bold mb-0 text-truncate me-2"
-                                                style="font-size: 1rem;">
+                                                style="font-size: 1rem; min-width: 0;">
                                                 {{ entry.identifier }}
                                             </h6>
-                                            <span
-                                                class="badge bg-danger bg-opacity-20 text-danger border border-danger border-opacity-20 rounded-pill">
-                                                {{ entry.total_reports }} <i class="fas fa-exclamation-triangle ms-1"
-                                                    style="font-size: 0.6rem;"></i>
-                                            </span>
-                                            {% if entry.confirmed_by_count > 0 %}
-                                            <span
-                                                class="badge bg-info bg-opacity-20 text-info border border-info border-opacity-20 rounded-pill ms-1">
-                                                {{ entry.confirmed_by_count }} <i class="fas fa-users ms-1"
-                                                    style="font-size: 0.6rem;"></i>
-                                            </span>
-                                            {% endif %}
+                                            <div class="d-flex gap-1 flex-shrink-0">
+                                                <span
+                                                    class="badge bg-danger bg-opacity-20 text-danger border border-danger border-opacity-20 rounded-pill">
+                                                    {{ entry.total_reports }} <i
+                                                        class="fas fa-exclamation-triangle ms-1"
+                                                        style="font-size: 0.6rem;"></i>
+                                                </span>
+                                                {% if entry.confirmed_by_count > 0 %}
+                                                <span
+                                                    class="badge bg-info bg-opacity-20 text-info border border-info border-opacity-20 rounded-pill">
+                                                    {{ entry.confirmed_by_count }} <i class="fas fa-users ms-1"
+                                                        style="font-size: 0.6rem;"></i>
+                                                </span>
+                                                {% endif %}
+                                            </div>
                                         </div>
                                         <div class="d-flex align-items-center text-slate-300 small mb-1">
                                             <span class="text-truncate me-2" style="max-width: 150px;">{{ entry.name
@@ -271,7 +275,8 @@
 
             <!-- Card 2: Chatbot — FEATURED -->
             <div class="col-md-4 col-lg-6" data-aos="fade-up" data-aos-delay="150">
-                <div class="tool-card-featured h-100 d-flex flex-column p-5 rounded-4 position-relative overflow-hidden">
+                <div
+                    class="tool-card-featured h-100 d-flex flex-column p-5 rounded-4 position-relative overflow-hidden">
                     <!-- Background glow -->
                     <div class="featured-glow"></div>
                     <div class="position-relative" style="z-index:1;">
@@ -279,7 +284,8 @@
                             <div class="featured-icon">
                                 <i class="fas fa-robot fa-lg text-white"></i>
                             </div>
-                            <span class="badge bg-white bg-opacity-20 text-white rounded-pill px-3 py-1" style="font-size:0.75rem;">
+                            <span class="badge bg-white bg-opacity-20 text-white rounded-pill px-3 py-1"
+                                style="font-size:0.75rem;">
                                 Tính năng nổi bật
                             </span>
                         </div>
@@ -290,13 +296,16 @@
                             cảnh báo <strong class="text-white">trong vài giây</strong>.
                         </p>
                         <div class="d-flex flex-wrap gap-2 mb-4">
-                            <span class="badge rounded-pill px-3 py-2" style="background:rgba(255,255,255,0.15); color:#fff; font-size:0.75rem;">
+                            <span class="badge rounded-pill px-3 py-2"
+                                style="background:rgba(255,255,255,0.15); color:#fff; font-size:0.75rem;">
                                 <i class="fas fa-link me-1"></i> Kiểm tra link
                             </span>
-                            <span class="badge rounded-pill px-3 py-2" style="background:rgba(255,255,255,0.15); color:#fff; font-size:0.75rem;">
+                            <span class="badge rounded-pill px-3 py-2"
+                                style="background:rgba(255,255,255,0.15); color:#fff; font-size:0.75rem;">
                                 <i class="fas fa-sms me-1"></i> Phân tích tin nhắn
                             </span>
-                            <span class="badge rounded-pill px-3 py-2" style="background:rgba(255,255,255,0.15); color:#fff; font-size:0.75rem;">
+                            <span class="badge rounded-pill px-3 py-2"
+                                style="background:rgba(255,255,255,0.15); color:#fff; font-size:0.75rem;">
                                 <i class="fas fa-clock me-1"></i> Online 24/7
                             </span>
                         </div>
@@ -340,7 +349,8 @@
                 </div>
                 <div class="col-lg-8">
                     <div class="d-flex align-items-center gap-2 mb-2">
-                        <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 rounded-pill px-3 py-1">
+                        <span
+                            class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 rounded-pill px-3 py-1">
                             <i class="fas fa-lock me-1"></i> Chính sách Bảo mật & Điều khoản Sử dụng
                         </span>
                     </div>
@@ -350,7 +360,8 @@
                             <div class="d-flex align-items-start gap-2">
                                 <i class="fas fa-check-circle text-success mt-1 flex-shrink-0"></i>
                                 <small class="text-muted" style="line-height: 1.6;">
-                                    <strong class="text-danger">KHÔNG lưu trữ</strong> thông tin định danh cá nhân của người tra cứu (tên, CCCD, địa chỉ, IP).
+                                    <strong class="text-danger">KHÔNG lưu trữ</strong> thông tin định danh cá nhân của
+                                    người tra cứu (tên, CCCD, địa chỉ, IP).
                                 </small>
                             </div>
                         </div>
@@ -358,7 +369,8 @@
                             <div class="d-flex align-items-start gap-2">
                                 <i class="fas fa-check-circle text-success mt-1 flex-shrink-0"></i>
                                 <small class="text-muted" style="line-height: 1.6;">
-                                    <strong class="text-danger">KHÔNG yêu cầu</strong> quyền truy cập danh bạ, tin nhắn hay bất kỳ dữ liệu thiết bị nào.
+                                    <strong class="text-danger">KHÔNG yêu cầu</strong> quyền truy cập danh bạ, tin nhắn
+                                    hay bất kỳ dữ liệu thiết bị nào.
                                 </small>
                             </div>
                         </div>
@@ -366,7 +378,8 @@
                             <div class="d-flex align-items-start gap-2">
                                 <i class="fas fa-check-circle text-success mt-1 flex-shrink-0"></i>
                                 <small class="text-muted" style="line-height: 1.6;">
-                                    <strong class="text-info">CHỈ thu thập</strong> dữ liệu nguồn lừa đảo (SĐT, STK, URL) do cộng đồng tự nguyện cung cấp.
+                                    <strong class="text-info">CHỈ thu thập</strong> dữ liệu nguồn lừa đảo (SĐT, STK,
+                                    URL) do cộng đồng tự nguyện cung cấp.
                                 </small>
                             </div>
                         </div>
@@ -374,7 +387,8 @@
                             <div class="d-flex align-items-start gap-2">
                                 <i class="fas fa-check-circle text-success mt-1 flex-shrink-0"></i>
                                 <small class="text-muted" style="line-height: 1.6;">
-                                    <strong class="text-success">Danh tính người tố cáo</strong> được mã hóa và ẩn danh hoàn toàn trước khi lưu vào hệ thống.
+                                    <strong class="text-success">Danh tính người tố cáo</strong> được mã hóa và ẩn danh
+                                    hoàn toàn trước khi lưu vào hệ thống.
                                 </small>
                             </div>
                         </div>
@@ -383,8 +397,8 @@
                 <div class="col-lg-3 text-center text-lg-end">
                     <p class="text-muted small mb-2">Dữ liệu báo cáo chỉ dùng để</p>
                     <p class="text-info fw-bold mb-3">cảnh báo cộng đồng &<br>hỗ trợ cơ quan chức năng</p>
-                    <a href="#" class="btn btn-outline-info btn-sm rounded-pill px-3"
-                        data-bs-toggle="modal" data-bs-target="#privacyModal">
+                    <a href="#" class="btn btn-outline-info btn-sm rounded-pill px-3" data-bs-toggle="modal"
+                        data-bs-target="#privacyModal">
                         <i class="fas fa-file-alt me-1"></i> Xem chi tiết
                     </a>
                 </div>
@@ -407,7 +421,8 @@
                 <div class="mb-4 p-3 rounded-3 bg-info bg-opacity-10 border border-info border-opacity-25">
                     <p class="text-info mb-0 small">
                         <i class="fas fa-info-circle me-2"></i>
-                        MindGuard là hệ thống cảnh báo lừa đảo cộng đồng, <strong>phi lợi nhuận</strong>, hoạt động vì lợi ích cộng đồng.
+                        MindGuard là hệ thống cảnh báo lừa đảo cộng đồng, <strong>phi lợi nhuận</strong>, hoạt động vì
+                        lợi ích cộng đồng.
                     </p>
                 </div>
 
@@ -415,31 +430,39 @@
                     <i class="fas fa-database text-info"></i> 1. Chúng tôi thu thập gì?
                 </h6>
                 <ul class="text-muted small mb-4" style="line-height: 2;">
-                    <li><strong class="text-dark">Dữ liệu lừa đảo:</strong> Số điện thoại, số tài khoản ngân hàng, URL/website nghi ngờ do người dùng tự nguyện báo cáo.</li>
-                    <li><strong class="text-dark">Thông tin đăng ký:</strong> Email (chỉ dùng để xác thực tài khoản), họ tên hiển thị.</li>
-                    <li><strong class="text-danger">KHÔNG thu thập:</strong> CCCD/CMND, địa chỉ nhà, số điện thoại cá nhân, danh bạ, tin nhắn, vị trí GPS.</li>
+                    <li><strong class="text-dark">Dữ liệu lừa đảo:</strong> Số điện thoại, số tài khoản ngân hàng,
+                        URL/website nghi ngờ do người dùng tự nguyện báo cáo.</li>
+                    <li><strong class="text-dark">Thông tin đăng ký:</strong> Email (chỉ dùng để xác thực tài khoản), họ
+                        tên hiển thị.</li>
+                    <li><strong class="text-danger">KHÔNG thu thập:</strong> CCCD/CMND, địa chỉ nhà, số điện thoại cá
+                        nhân, danh bạ, tin nhắn, vị trí GPS.</li>
                 </ul>
 
                 <h6 class="fw-bold mb-3 d-flex align-items-center gap-2">
                     <i class="fas fa-user-secret text-success"></i> 2. Ẩn danh người tố cáo
                 </h6>
                 <p class="text-muted small mb-4" style="line-height: 1.8;">
-                    Danh tính người gửi báo cáo được <strong class="text-dark">mã hóa SHA-256 một chiều</strong> ngay khi nhận. Hệ thống không thể truy ngược về email hay tài khoản gốc. Các báo cáo hiển thị công khai chỉ gồm thông tin về đối tượng lừa đảo.
+                    Danh tính người gửi báo cáo được <strong class="text-dark">mã hóa SHA-256 một chiều</strong> ngay
+                    khi nhận. Hệ thống không thể truy ngược về email hay tài khoản gốc. Các báo cáo hiển thị công khai
+                    chỉ gồm thông tin về đối tượng lừa đảo.
                 </p>
 
                 <h6 class="fw-bold mb-3 d-flex align-items-center gap-2">
                     <i class="fas fa-eye-slash text-warning"></i> 3. Che giấu thông tin nhạy cảm
                 </h6>
                 <p class="text-muted small mb-4" style="line-height: 1.8;">
-                    Số điện thoại và tài khoản ngân hàng hiển thị dạng <strong class="text-dark">đã che một phần</strong> (VD: <code>090***789</code>) để đủ nhận diện nhưng không lộ toàn bộ.
+                    Số điện thoại và tài khoản ngân hàng hiển thị dạng <strong class="text-dark">đã che một
+                        phần</strong> (VD: <code>090***789</code>) để đủ nhận diện nhưng không lộ toàn bộ.
                 </p>
 
                 <h6 class="fw-bold mb-3 d-flex align-items-center gap-2">
                     <i class="fas fa-gavel text-danger"></i> 4. Điều khoản sử dụng
                 </h6>
                 <ul class="text-muted small mb-4" style="line-height: 2;">
-                    <li>Dữ liệu mang tính <strong class="text-dark">cảnh báo cộng đồng</strong>, không có giá trị pháp lý thay thế kết luận của cơ quan chức năng.</li>
-                    <li>Nghiêm cấm sử dụng hệ thống để <strong class="text-danger">vu khống, cố tình báo cáo sai</strong> thông tin người khác.</li>
+                    <li>Dữ liệu mang tính <strong class="text-dark">cảnh báo cộng đồng</strong>, không có giá trị pháp
+                        lý thay thế kết luận của cơ quan chức năng.</li>
+                    <li>Nghiêm cấm sử dụng hệ thống để <strong class="text-danger">vu khống, cố tình báo cáo
+                            sai</strong> thông tin người khác.</li>
                     <li>MindGuard có quyền xóa các báo cáo vi phạm mà không cần thông báo trước.</li>
                 </ul>
 
@@ -447,11 +470,14 @@
                     <i class="fas fa-phone text-info"></i> 5. Liên hệ & Khiếu nại
                 </h6>
                 <p class="text-muted small mb-0" style="line-height: 1.8;">
-                    Nếu bác/anh/chị cho rằng thông tin của mình bị báo cáo sai, hãy liên hệ qua trang <strong class="text-dark">Tố cáo</strong> và chọn mục "Phản hồi / Khiếu nại". Chúng tôi sẽ xem xét và xóa trong vòng 72 giờ.
+                    Nếu bác/anh/chị cho rằng thông tin của mình bị báo cáo sai, hãy liên hệ qua trang <strong
+                        class="text-dark">Tố cáo</strong> và chọn mục "Phản hồi / Khiếu nại". Chúng tôi sẽ xem xét và
+                    xóa trong vòng 72 giờ.
                 </p>
             </div>
             <div class="modal-footer border-top p-3">
-                <button type="button" class="btn btn-info rounded-pill px-4 text-white" data-bs-dismiss="modal">Đã hiểu</button>
+                <button type="button" class="btn btn-info rounded-pill px-4 text-white" data-bs-dismiss="modal">Đã
+                    hiểu</button>
             </div>
         </div>
     </div>

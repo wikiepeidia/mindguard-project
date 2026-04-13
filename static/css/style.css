@@ -542,6 +542,20 @@ footer .input-group .btn.btn-info {
     transform: translateZ(0);
 }
 
+/* Tăng tương phản cho badge nền mờ (bg-opacity-10/20) trên nền sáng */
+.badge.text-info {
+    color: #0e7490 !important;
+}
+.badge.text-danger {
+    color: #b91c1c !important;
+}
+.badge.text-success {
+    color: #15803d !important;
+}
+.badge.text-warning {
+    color: #a16207 !important;
+}
+
 .hover-up {
     transition: transform 0.3s ease;
 }

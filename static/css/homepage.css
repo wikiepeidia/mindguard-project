@@ -106,24 +106,6 @@
     color: var(--mg-text-primary);
 }
 
-/* Tăng tương phản cho badge trên nền trắng của .scammer-item */
-.scammer-item .badge.text-info {
-    color: #0e7490 !important; /* cyan đậm — dễ đọc trên nền trắng */
-}
-.scammer-item .badge.text-danger {
-    color: #b91c1c !important; /* đỏ đậm */
-}
-.scammer-item .badge.text-success {
-    color: #15803d !important; /* xanh lá đậm */
-}
-.scammer-item .badge.text-warning {
-    color: #a16207 !important; /* vàng đậm */
-}
-.scammer-item .badge {
-    --bs-bg-opacity: 0.15;
-    font-weight: 600;
-    letter-spacing: 0.01em;
-}
 
 .hero-section .filter-btn {
     border-color: var(--mg-border-strong) !important;
@@ -196,6 +178,11 @@
     border: none;
     box-shadow: 0 20px 60px rgba(6, 182, 212, 0.25);
     transition: all 0.35s ease;
+}
+
+.tool-card-featured .text-white,
+.tool-card-featured .text-light {
+    color: #ffffff !important;
 }
 
 .tool-card-featured:hover {

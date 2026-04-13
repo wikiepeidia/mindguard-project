@@ -270,8 +270,8 @@ Plans:
 | 7. PostgreSQL Configuration & Connection | 1/1 | Complete | 2026-04-03 |
 | 8. App Startup Cleanup & Data Seeding | 1/1 | Complete | 2026-04-04 |
 | 9. Vercel Deployment & Verification | 1/1 | Complete | 2026-04-04 |
-| 10. Infrastructure & Security Hardening | 0/? | Not started | - |
-| 11. UI Bug Fixes | 0/? | Not started | - |
-| 12. AI Safety | 0/? | Not started | - |
-| 13. Rate Limiting & Trust Signals | 0/? | Not started | - |
+| 10. Infrastructure & Security Hardening | 0/? | Partial (1/3 reqs done by teammate, 2 remaining) | - |
+| 11. UI Bug Fixes | 0/0 | Complete (all 5 reqs done by teammate) | 2026-04-13 |
+| 12. AI Safety | 0/? | Partial (3/4 reqs done by teammate, timeout fix remaining) | - |
+| 13. Rate Limiting & Trust Signals | 0/? | Partial (3/4 reqs done by teammate, feedback button remaining) | - |
 | 14. Stress Test & Beta Sign-off | 0/? | Not started | - |

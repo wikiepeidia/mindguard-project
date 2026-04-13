@@ -80,30 +80,30 @@ Requirements cho gia cố hạ tầng, sửa lỗi UI, an toàn AI, và tin cậ
 
 - [ ] **INFRA-01**: Xóa `db.create_all()` khỏi startup path — không tạo bảng mỗi cold start
 - [ ] **INFRA-02**: Di chuyển `ADMIN_PASSWORD`, `REPORT_ENCRYPTION_KEY`, `SECRET_KEY` fallback từ `config.py` sang Vercel environment variables
-- [ ] **INFRA-03**: Bỏ hardcode admin credentials khỏi frontend để tránh user xâm nhập tài khoản admin
-- [ ] **INFRA-04**: Rate limiting DB-backed trên `/chatbot/api`, `/chatbot/support`, `/chatbot/send` để chống drain API budget
+- [x] **INFRA-03**: Bỏ hardcode admin credentials khỏi frontend để tránh user xâm nhập tài khoản admin *(đã hoàn thành bởi teammate)*
+- [x] **INFRA-04**: Rate limiting DB-backed trên `/chatbot/api`, `/chatbot/support`, `/chatbot/send` để chống drain API budget *(đã hoàn thành bởi teammate — @limiter.limit trên cả 3 endpoints)*
 - [ ] **INFRA-05**: Stress test với locust tìm ngưỡng CCU tối đa trước Beta 1
 
 ### Sửa lỗi UI
 
-- [ ] **UIFIX-01**: Sửa nút "Đăng xuất" trong dropdown menu để click được
-- [ ] **UIFIX-02**: Sửa hitbox quá nhỏ của mục "Hồ sơ" trong menu
-- [ ] **UIFIX-03**: Sửa chatbot bubble chat để lưu lịch sử trò chuyện giữa các phiên cho user đã đăng nhập
-- [ ] **UIFIX-04**: Thiết kế và style huy hiệu "Certification Verify" đáng tin cậy và dễ nhìn
-- [ ] **UIFIX-05**: Rà soát và chỉnh sửa UI tổng thể cho gọn đẹp trước Beta
+- [x] **UIFIX-01**: Sửa nút "Đăng xuất" trong dropdown menu để click được *(đã hoàn thành bởi teammate)*
+- [x] **UIFIX-02**: Sửa hitbox quá nhỏ của mục "Hồ sơ" trong menu *(đã hoàn thành bởi teammate)*
+- [x] **UIFIX-03**: Sửa chatbot bubble chat để lưu lịch sử trò chuyện giữa các phiên cho user đã đăng nhập *(đã hoàn thành bởi teammate — localStorage, 30 messages)*
+- [x] **UIFIX-04**: Thiết kế và style huy hiệu "Certification Verify" đáng tin cậy và dễ nhìn *(đã hoàn thành bởi teammate)*
+- [x] **UIFIX-05**: Rà soát và chỉnh sửa UI tổng thể cho gọn đẹp trước Beta *(đã hoàn thành bởi teammate — glassmorphism, modern CSS)*
 
 ### An toàn AI
 
-- [ ] **AISF-01**: Giảm timeout OpenRouter từ 15s xuống 8s để không vượt 10s Vercel function kill limit
-- [ ] **AISF-02**: Hard-block trả lời cứng khi gặp chủ đề nhạy cảm (chính trị/tôn giáo/tự hại) + hotline Công an HN 113
-- [ ] **AISF-03**: Điều chỉnh system prompt cho ngôn ngữ bình dân, tránh thuật ngữ kỹ thuật
-- [ ] **AISF-04**: Fallback an toàn khi AI không chắc chắn — cảnh báo OTP + hướng dẫn liên hệ cơ quan chức năng
+- [ ] **AISF-01**: Giảm timeout OpenRouter từ 15s xuống 8s để không vượt 10s Vercel function kill limit *(hiện tại 10s, cần giảm xuống 8s)*
+- [x] **AISF-02**: Hard-block trả lời cứng khi gặp chủ đề nhạy cảm (chính trị/tôn giáo/tự hại) + hotline Công an HN 113 *(đã hoàn thành bởi teammate)*
+- [x] **AISF-03**: Điều chỉnh system prompt cho ngôn ngữ bình dân, tránh thuật ngữ kỹ thuật *(đã hoàn thành bởi teammate)*
+- [x] **AISF-04**: Fallback an toàn khi AI không chắc chắn — cảnh báo OTP + hướng dẫn liên hệ cơ quan chức năng *(đã hoàn thành bởi teammate)*
 
 ### Tin cậy & Phản hồi
 
-- [ ] **TRUST-01**: Banner chính sách quyền riêng tư trên trang chủ: "MindGuard KHÔNG lưu trữ thông tin cá nhân, KHÔNG yêu cầu quyền truy cập danh bạ/tin nhắn"
-- [ ] **TRUST-02**: Xác minh logging baseline (request, error, audit logs) hoạt động và lưu trữ an toàn trên Vercel
-- [ ] **TRUST-03**: Nút "Báo cáo sai / Góp ý" trên giao diện chatbot để thu thập dữ liệu tinh chỉnh cho Beta
+- [x] **TRUST-01**: Banner chính sách quyền riêng tư trên trang chủ: "MindGuard KHÔNG lưu trữ thông tin cá nhân, KHÔNG yêu cầu quyền truy cập danh bạ/tin nhắn" *(đã hoàn thành bởi teammate — section + modal)*
+- [x] **TRUST-02**: Xác minh logging baseline (request, error, audit logs) hoạt động và lưu trữ an toàn trên Vercel *(đã hoàn thành bởi teammate — access logging trong app.py)*
+- [ ] **TRUST-03**: Nút "Báo cáo sai / Góp ý" trên giao diện chatbot để thu thập dữ liệu tinh chỉnh cho Beta *(route /chatbot/support có, nhưng UI button chưa nổi bật)*
 
 ## v2 Requirements (Deferred)
 
@@ -169,19 +169,19 @@ Requirements cho gia cố hạ tầng, sửa lỗi UI, an toàn AI, và tin cậ
 | VDEP-02 | Phase 9 | Complete |
 | INFRA-01 | Phase 10 | Pending |
 | INFRA-02 | Phase 10 | Pending |
-| INFRA-03 | Phase 10 | Pending |
-| UIFIX-01 | Phase 11 | Pending |
-| UIFIX-02 | Phase 11 | Pending |
-| UIFIX-03 | Phase 11 | Pending |
-| UIFIX-04 | Phase 11 | Pending |
-| UIFIX-05 | Phase 11 | Pending |
+| INFRA-03 | Phase 10 | Complete (teammate) |
+| UIFIX-01 | Phase 11 | Complete (teammate) |
+| UIFIX-02 | Phase 11 | Complete (teammate) |
+| UIFIX-03 | Phase 11 | Complete (teammate) |
+| UIFIX-04 | Phase 11 | Complete (teammate) |
+| UIFIX-05 | Phase 11 | Complete (teammate) |
 | AISF-01 | Phase 12 | Pending |
-| AISF-02 | Phase 12 | Pending |
-| AISF-03 | Phase 12 | Pending |
-| AISF-04 | Phase 12 | Pending |
-| INFRA-04 | Phase 13 | Pending |
-| TRUST-01 | Phase 13 | Pending |
-| TRUST-02 | Phase 13 | Pending |
+| AISF-02 | Phase 12 | Complete (teammate) |
+| AISF-03 | Phase 12 | Complete (teammate) |
+| AISF-04 | Phase 12 | Complete (teammate) |
+| INFRA-04 | Phase 13 | Complete (teammate) |
+| TRUST-01 | Phase 13 | Complete (teammate) |
+| TRUST-02 | Phase 13 | Complete (teammate) |
 | TRUST-03 | Phase 13 | Pending |
 | INFRA-05 | Phase 14 | Pending |
 
@@ -189,10 +189,10 @@ Requirements cho gia cố hạ tầng, sửa lỗi UI, an toàn AI, và tin cậ
 
 - v1.0 requirements: 20 total — all complete ✓
 - v1.1 requirements: 10 total — all complete ✓
-- v1.2 requirements: 17 total — 17/17 mapped ✓
+- v1.2 requirements: 17 total — 12 complete (teammate), 5 remaining
 - Mapped to phases: 47/47 total requirements
 - Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-19*
-*Last updated: 2026-04-10 after v1.2 roadmap creation*
+*Last updated: 2026-04-13 after teammate code drop verification*

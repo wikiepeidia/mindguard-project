@@ -2,11 +2,11 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: — Beta 1 Go-Live (Code Freeze)
-status: Active — Phase 10 not started
-last_updated: "2026-04-10T00:00:00.000Z"
+status: Active — teammate completed 12/17 reqs, 5 remaining
+last_updated: "2026-04-13T00:00:00.000Z"
 progress:
   total_phases: 5
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 0
   completed_plans: 0
 ---
@@ -16,25 +16,36 @@ progress:
 ## Project Reference
 
 - **Core Value**: Người dùng có thể học, kiểm tra nhận thức và gửi báo cáo lừa đảo một cách dễ dùng, an toàn, và đáng tin cậy.
-- **Current Focus**: v1.2 Beta 1 Go-Live (Code Freeze) — sửa lỗi UI, gia cố hạ tầng, an toàn AI, tin cậy trước Beta 1 Hà Nội.
+- **Current Focus**: v1.2 Beta 1 Go-Live (Code Freeze) — teammate đã hoàn thành phần lớn, còn 5 items.
 
 ## Current Position
 
-Phase: Phase 10 — Infrastructure & Security Hardening (not started)
+Phase: Phase 10 — Infrastructure & Security Hardening (partial — 1/3 reqs done)
 Plan: —
-Status: Roadmap created, ready to plan Phase 10
-Last activity: 2026-04-10 — v1.2 roadmap created (5 phases, 17 requirements mapped)
+Status: Teammate code drop verified, planning updated, ready to execute remaining work
+Last activity: 2026-04-13 — Verified teammate's code drop (12/17 requirements complete)
 
 ```text
-Progress: [                    ] 0/5 phases complete
-          Phase 10 → 11 → 12 → 13 → 14
+Progress: [████████████████    ] 12/17 requirements complete
+          Phase 10 (2 left) → 11 ✓ → 12 (1 left) → 13 (1 left) → 14 (not started)
 ```
+
+## Remaining Work (5 items)
+
+| Phase | Requirement | Item | Effort |
+|-------|-------------|------|--------|
+| 10 | INFRA-01 | Xóa `db.create_all()` từ `app.py:69-70` | 1 dòng |
+| 10 | INFRA-02 | Di chuyển `ADMIN_PASSWORD` & `REPORT_ENCRYPTION_KEY` sang env vars | ~5 dòng |
+| 12 | AISF-01 | Giảm timeout 10s → 8s trong `utils/chatbot.py:66` | 1 dòng |
+| 13 | TRUST-03 | Thêm nút "Báo cáo sai / Góp ý" nổi bật trong chatbot UI | UI nhỏ |
+| 14 | INFRA-05 | Stress test với locust tìm ngưỡng CCU | Hoạt động riêng |
 
 ## Performance Metrics
 
 - **v1.2 requirements total**: 17
-- **Mapped to phases**: 17/17
-- **Coverage**: 100%
+- **Completed by teammate**: 12
+- **Remaining**: 5
+- **Coverage**: 100% mapped
 - **Open blockers**: 0
 
 ## Accumulated Context
@@ -43,7 +54,6 @@ Progress: [                    ] 0/5 phases complete
 
 - Tách privacy/masking + audit thành Phase 1 để giảm rủi ro lộ dữ liệu trước khi mở rộng feature.
 - Đặt anti-spam monitor->soft-enforce thành Phase 2 để ưu tiên telemetry và giảm false-positive.
-- Đặt light-mode token system trước quiz redesign để tránh UX drift và hồi quy giao diện.
 - Session-backed one-question step flow with PRG pattern (04-01).
 - Python-level aggregation over SQLAlchemy case() to avoid version-specific syntax differences (05-01).
 
@@ -58,15 +68,12 @@ Progress: [                    ] 0/5 phases complete
 ### Key Decisions (v1.2)
 
 - CODE FREEZE — không thêm tính năng mới, chỉ sửa lỗi và gia cố.
-- Phase 10 (security) trước tất cả — security incident tại Beta là unrecoverable.
-- Phase 11 (UI bugs) sau Phase 10 — zero backend dependencies, fast wins.
-- Phase 12 (AI safety) trước Phase 13 (rate limiting) — timeout fix trước, vì function timeout không bao giờ trả 429.
-- Rate limiting phải dùng NeonDB làm storage backend — Vercel serverless không có shared memory giữa các instance.
-- Phase 14 (stress test) cuối cùng — validates toàn bộ hardening dưới tải.
+- Teammate đã hoàn thành: rate limiting, UI fixes, AI safety (trừ timeout), privacy banner, logging baseline.
+- Còn lại: security hardening (credentials), AI timeout fix, feedback button, stress test.
 
 ### Open Todos
 
-- Plan Phase 10 via `/gsd:plan-phase 10`
+- Fix remaining 5 requirements (INFRA-01, INFRA-02, AISF-01, TRUST-03, INFRA-05)
 
 ### Blockers
 
@@ -74,7 +81,7 @@ Progress: [                    ] 0/5 phases complete
 
 ## Session Continuity
 
-- **Last Updated**: 2026-04-10
-- **Stopped at**: v1.2 roadmap created — 5 phases, 17/17 requirements mapped
-- **Resume with**: `/gsd:plan-phase 10`
+- **Last Updated**: 2026-04-13
+- **Stopped at**: Planning updated after teammate code drop — 5 items remaining
+- **Resume with**: `/gsd:plan-phase 10` or execute remaining fixes directly
 - **Resume file**: .planning/ROADMAP.md

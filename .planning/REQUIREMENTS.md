@@ -103,7 +103,7 @@ Requirements cho gia cố hạ tầng, sửa lỗi UI, an toàn AI, và tin cậ
 
 - [x] **TRUST-01**: Banner chính sách quyền riêng tư trên trang chủ: "MindGuard KHÔNG lưu trữ thông tin cá nhân, KHÔNG yêu cầu quyền truy cập danh bạ/tin nhắn" *(đã hoàn thành bởi teammate — section + modal)*
 - [x] **TRUST-02**: Xác minh logging baseline (request, error, audit logs) hoạt động và lưu trữ an toàn trên Vercel *(đã hoàn thành bởi teammate — access logging trong app.py)*
-- [ ] **TRUST-03**: Nút "Báo cáo sai / Góp ý" trên giao diện chatbot để thu thập dữ liệu tinh chỉnh cho Beta *(route /chatbot/support có, nhưng UI button chưa nổi bật)*
+- [x] **TRUST-03**: Nút "Báo cáo sai / Góp ý" trên giao diện chatbot để thu thập dữ liệu tinh chỉnh cho Beta *(done — prominent button + modal + DB)*
 
 ## v2 Requirements (Deferred)
 
@@ -182,7 +182,7 @@ Requirements cho gia cố hạ tầng, sửa lỗi UI, an toàn AI, và tin cậ
 | INFRA-04 | Phase 13 | Complete (teammate) |
 | TRUST-01 | Phase 13 | Complete (teammate) |
 | TRUST-02 | Phase 13 | Complete (teammate) |
-| TRUST-03 | Phase 13 | Pending |
+| TRUST-03 | Phase 13 | Done |
 | INFRA-05 | Phase 14 | Pending |
 
 **Coverage:**

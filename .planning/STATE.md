@@ -17,7 +17,7 @@ progress:
 ## Project Reference
 
 - **Core Value**: Người dùng có thể học, kiểm tra nhận thức và gửi báo cáo lừa đảo một cách dễ dùng, an toàn, và đáng tin cậy.
-- **Current Focus**: v1.2 Beta 1 Go-Live (Code Freeze) — teammate đã hoàn thành phần lớn, còn 5 items.
+- **Current Focus**: v1.2 Beta 1 Go-Live — 16/17 reqs done, chỉ còn stress test (Phase 14).
 
 ## Current Position
 
@@ -27,25 +27,21 @@ Status: Executing Phase 10
 Last activity: 2026-04-13
 
 ```text
-Progress: [████████████████    ] 12/17 requirements complete
-          Phase 10 (2 left) → 11 ✓ → 12 (1 left) → 13 (1 left) → 14 (not started)
+Progress: [██████████████████░░] 16/17 requirements complete
+           Phase 10 ✓ → 11 ✓ → 12 ✓ → 13 ✓ → 14 (not started)
 ```
 
-## Remaining Work (5 items)
+## Remaining Work (1 item)
 
 | Phase | Requirement | Item | Effort |
 |-------|-------------|------|--------|
-| 10 | INFRA-01 | Xóa `db.create_all()` từ `app.py:69-70` | 1 dòng |
-| 10 | INFRA-02 | Di chuyển `ADMIN_PASSWORD` & `REPORT_ENCRYPTION_KEY` sang env vars | ~5 dòng |
-| 12 | AISF-01 | Giảm timeout 10s → 8s trong `utils/chatbot.py:66` | 1 dòng |
-| 13 | TRUST-03 | Thêm nút "Báo cáo sai / Góp ý" nổi bật trong chatbot UI | UI nhỏ |
 | 14 | INFRA-05 | Stress test với locust tìm ngưỡng CCU | Hoạt động riêng |
 
 ## Performance Metrics
 
 - **v1.2 requirements total**: 17
-- **Completed by teammate**: 12
-- **Remaining**: 5
+- **Completed**: 16
+- **Remaining**: 1 (INFRA-05 stress test)
 - **Coverage**: 100% mapped
 - **Open blockers**: 0
 
@@ -82,7 +78,7 @@ Progress: [████████████████    ] 12/17 requireme
 
 ### Open Requirements
 
-- Fix remaining 5 requirements (INFRA-01, INFRA-02, AISF-01, TRUST-03, INFRA-05)
+- Fix remaining 1 requirement (INFRA-05 — stress test)
 
 ### Blockers
 
@@ -91,6 +87,6 @@ Progress: [████████████████    ] 12/17 requireme
 ## Session Continuity
 
 - **Last Updated**: 2026-04-13
-- **Stopped at**: Planning updated after teammate code drop — 5 items remaining
-- **Resume with**: `/gsd:plan-phase 10` or execute remaining fixes directly
+- **Stopped at**: Phase 13 TRUST-03 completed — feedback button added to chatbot
+- **Resume with**: `/gsd:plan-phase 14` for stress test or push + deploy
 - **Resume file**: .planning/ROADMAP.md

@@ -280,5 +280,5 @@ Plans:
 | 10. Infrastructure & Security Hardening | 1/1 | Complete    | 2026-04-13 |
 | 11. UI Bug Fixes | 0/0 | Complete (all 5 reqs done by teammate) | 2026-04-13 |
 | 12. AI Safety | 1/1 | Complete | 2026-04-13 |
-| 13. Rate Limiting & Trust Signals | 0/? | Partial (3/4 reqs done by teammate, feedback button remaining) | - |
+| 13. Rate Limiting & Trust Signals | 0/? | Complete (4/4 reqs done — TRUST-03 feedback button added) | 2026-04-13 |
 | 14. Stress Test & Beta Sign-off | 0/? | Not started | - |

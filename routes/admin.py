@@ -76,9 +76,10 @@ def admin_dashboard():
     latest_scammer_reports = ScammerReport.query.order_by(ScammerReport.created_at.desc()).limit(5).all()
     all_users = Registration.query.order_by(Registration.role.asc(), Registration.created_at.desc()).limit(50).all()
 
-    # Chart Data
-    trend_data = db.session.query(func.strftime('%Y-%m-%d', ScammerReport.created_at).label('d'), func.count(ScammerReport.id)).group_by('d').order_by('d').limit(7).all()
-    trend_labels = [d[0] for d in trend_data]
+    # Chart Data — use CAST for PostgreSQL compatibility (strftime is SQLite-only)
+    date_col = func.cast(ScammerReport.created_at, db.Date).label('d')
+    trend_data = db.session.query(date_col, func.count(ScammerReport.id)).group_by(date_col).order_by(date_col).limit(7).all()
+    trend_labels = [str(d[0]) for d in trend_data]
     trend_values = [d[1] for d in trend_data]
 
     type_data = db.session.query(ScammerReport.scam_type, func.count(ScammerReport.id)).group_by(ScammerReport.scam_type).all()

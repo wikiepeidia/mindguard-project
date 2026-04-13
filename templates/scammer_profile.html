@@ -47,17 +47,17 @@
                         </div>
                         <p class="scammer-subtext mb-2">{{ scammer.scammer_name or 'Chưa rõ danh tính' }}</p>
                         <div class="d-flex gap-2 flex-wrap">
-                            <span class="badge bg-danger bg-opacity-20 text-danger border border-danger">
+                            <span class="badge bg-danger bg-opacity-25 text-danger border border-danger">
                                 {{ scammer.report_count }} báo cáo
                             </span>
                             {% if verification_badge %}
                             <span
-                                class="badge bg-{{ verification_badge.class }} bg-opacity-20 text-{{ verification_badge.class }} border border-{{ verification_badge.class }}">
+                                class="badge bg-{{ verification_badge.class }} bg-opacity-25 text-{{ verification_badge.class }} border border-{{ verification_badge.class }}">
                                 <i class="fas {{ verification_badge.icon }}"></i> {{ verification_badge.text }}
                             </span>
                             {% endif %}
                             {% if scammer.confirmed_by_count > 0 %}
-                            <span class="badge bg-info bg-opacity-20 text-info border border-info">
+                            <span class="badge bg-info bg-opacity-25 text-info border border-info">
                                 <i class="fas fa-users"></i> {{ scammer.confirmed_by_count }} người xác nhận
                             </span>
                             {% endif %}
@@ -75,7 +75,7 @@
                     <div class="col-auto">
                         <div class="position-relative d-inline-block">
                             <div
-                                class="bg-{{ risk_info.color }} bg-opacity-20 d-flex align-items-center justify-content-center border border-{{ risk_info.color }} border-2 scammer-risk-circle">
+                                class="bg-{{ risk_info.color }} bg-opacity-25 d-flex align-items-center justify-content-center border border-{{ risk_info.color }} border-2 scammer-risk-circle">
                                 <h2 class="text-{{ risk_info.color }} fw-bold mb-0">{{ scammer.risk_score or 0 }}</h2>
                             </div>
                         </div>
@@ -177,14 +177,14 @@
 
                 <div class="mb-3">
                     <small class="d-block mb-1 scammer-info-label">Loại lừa đảo</small>
-                    <span class="badge bg-danger bg-opacity-20 text-danger border border-danger px-3 py-2">
+                    <span class="badge bg-danger bg-opacity-25 text-danger border border-danger px-3 py-2">
                         {{ scammer.scam_type }}
                     </span>
                 </div>
 
                 <div class="mb-3">
                     <small class="d-block mb-1 scammer-info-label">Nền tảng</small>
-                    <span class="badge bg-info bg-opacity-20 text-info border border-info px-3 py-2">
+                    <span class="badge bg-info bg-opacity-25 text-info border border-info px-3 py-2">
                         {{ scammer.platform or 'Không rõ' }}
                     </span>
                 </div>
@@ -192,7 +192,7 @@
                 {% if scammer.bank_name %}
                 <div class="mb-3">
                     <small class="d-block mb-1 scammer-info-label">Ngân hàng</small>
-                    <span class="badge bg-success bg-opacity-20 text-success border border-success px-3 py-2">
+                    <span class="badge bg-success bg-opacity-25 text-success border border-success px-3 py-2">
                         {{ scammer.bank_name }}
                     </span>
                 </div>

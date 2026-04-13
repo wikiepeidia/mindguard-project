@@ -97,7 +97,7 @@
                 <div class="glass-card p-0 overflow-hidden shadow-2xl border-0"
                     style="height: 550px; display: flex; flex-direction: column;">
 
-                    <div class="p-3 border-bottom border-white border-opacity-10 bg-white bg-opacity-5">
+                    <div class="p-3 border-bottom border-white border-opacity-10 bg-white bg-opacity-10">
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <div class="d-flex align-items-center">
                                 <span class="badge bg-danger animate-pulse me-2">LIVE</span>
@@ -146,7 +146,7 @@
                         {% if top_scammers %}
                         <div class="vstack gap-3">
                             {% for entry in top_scammers %}
-                            <div class="bg-white bg-opacity-5 p-3 rounded-xl border border-white border-opacity-5 hover-up cursor-pointer transition-all scammer-item"
+                            <div class="bg-white bg-opacity-10 p-3 rounded-xl border border-white border-opacity-5 hover-up cursor-pointer transition-all scammer-item"
                                 data-risk-level="{{ 'high' if entry.risk_score >= 60 else 'low' }}"
                                 data-verification="{{ entry.verification_status }}" data-scammer-id="{{ entry.id }}"
                                 data-report-type="{{ entry.report_type }}"
@@ -212,7 +212,7 @@
                                             <div class="d-flex align-items-center gap-2">
                                                 {% set badge = get_verification_badge(entry.verification_status) %}
                                                 <span
-                                                    class="badge bg-{{ badge.class }} bg-opacity-20 text-{{ badge.class }} border border-{{ badge.class }} rounded-pill px-2">
+                                                    class="badge bg-{{ badge.class }} bg-opacity-25 text-{{ badge.class }} border border-{{ badge.class }} rounded-pill px-2">
                                                     <i class="fas {{ badge.icon }} me-1"></i> {{ badge.text }}
                                                 </span>
                                                 <small class="text-slate-400" style="font-size: 0.7rem;">
@@ -284,7 +284,7 @@
                             <div class="featured-icon">
                                 <i class="fas fa-robot fa-lg text-white"></i>
                             </div>
-                            <span class="badge bg-white bg-opacity-20 text-white rounded-pill px-3 py-1"
+                            <span class="badge bg-white bg-opacity-25 text-white rounded-pill px-3 py-1"
                                 style="font-size:0.75rem;">
                                 Tính năng nổi bật
                             </span>
@@ -609,7 +609,7 @@
 
                         <div class="mb-3">
                             <label class="text-slate-500 small fw-bold text-uppercase">Chi tiết thủ đoạn:</label>
-                            <p class="text-white small fst-italic mt-1 p-3 bg-white bg-opacity-5 rounded-lg border border-white border-opacity-5"
+                            <p class="text-white small fst-italic mt-1 p-3 bg-white bg-opacity-10 rounded-lg border border-white border-opacity-5"
                                 id="detailDesc">...</p>
                         </div>
                     </div>
@@ -625,7 +625,7 @@
                             </div>
                         </div>
                         <div id="noEvidenceSection"
-                            class="h-100 d-flex flex-column align-items-center justify-content-center text-slate-500 border border-white border-opacity-10 rounded-xl border-dashed bg-white bg-opacity-5"
+                            class="h-100 d-flex flex-column align-items-center justify-content-center text-slate-500 border border-white border-opacity-10 rounded-xl border-dashed bg-white bg-opacity-10"
                             style="min-height: 250px;">
                             <i class="fas fa-user-secret fa-4x mb-3 opacity-20"></i>
                             <small class="text-uppercase fw-bold opacity-50">Chưa có ảnh bằng chứng</small>
@@ -645,7 +645,7 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content glass-card shadow-2xl border-white border-opacity-10">
             <div class="modal-header border-0 justify-content-center pt-5">
-                <div class="icon-box p-4 rounded-circle bg-white bg-opacity-5 mb-2">
+                <div class="icon-box p-4 rounded-circle bg-white bg-opacity-10 mb-2">
                     <i class="fas fa-search fa-3x" id="resultIcon"></i>
                 </div>
             </div>

@@ -3,7 +3,7 @@
 {% block content %}
 
 <!-- Custom CSS for Homepage -->
-<link rel="stylesheet" href="{{ url_for('static', filename='css/homepage.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/homepage.css') }}?v=3">
 
 <section class="hero-section position-relative" style="padding-top: 120px; padding-bottom: 40px; overflow: hidden;">
     <!-- Removed .hero-glow to fix UI issues -->
@@ -187,14 +187,14 @@
                                             </h6>
                                             <div class="d-flex gap-1 flex-shrink-0">
                                                 <span
-                                                    class="badge bg-danger bg-opacity-20 text-danger border border-danger border-opacity-20 rounded-pill">
+                                                    class="badge bg-danger bg-opacity-25 text-danger border border-danger rounded-pill">
                                                     {{ entry.total_reports }} <i
                                                         class="fas fa-exclamation-triangle ms-1"
                                                         style="font-size: 0.6rem;"></i>
                                                 </span>
                                                 {% if entry.confirmed_by_count > 0 %}
                                                 <span
-                                                    class="badge bg-info bg-opacity-20 text-info border border-info border-opacity-20 rounded-pill">
+                                                    class="badge bg-info bg-opacity-25 text-info border border-info rounded-pill">
                                                     {{ entry.confirmed_by_count }} <i class="fas fa-users ms-1"
                                                         style="font-size: 0.6rem;"></i>
                                                 </span>
@@ -212,7 +212,7 @@
                                             <div class="d-flex align-items-center gap-2">
                                                 {% set badge = get_verification_badge(entry.verification_status) %}
                                                 <span
-                                                    class="badge bg-{{ badge.class }} bg-opacity-10 text-{{ badge.class }} border border-{{ badge.class }} border-opacity-20 rounded-pill px-2">
+                                                    class="badge bg-{{ badge.class }} bg-opacity-20 text-{{ badge.class }} border border-{{ badge.class }} rounded-pill px-2">
                                                     <i class="fas {{ badge.icon }} me-1"></i> {{ badge.text }}
                                                 </span>
                                                 <small class="text-slate-400" style="font-size: 0.7rem;">

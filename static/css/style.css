@@ -544,16 +544,23 @@ footer .input-group .btn.btn-info {
 
 /* Tăng tương phản cho badge nền mờ (bg-opacity-10/20) trên nền sáng */
 .badge.text-info {
-    color: #0e7490 !important;
+    color: #0c5e78 !important;
+    border-color: #0e7490 !important;
 }
 .badge.text-danger {
-    color: #b91c1c !important;
+    color: #991b1b !important;
+    border-color: #b91c1c !important;
 }
 .badge.text-success {
-    color: #15803d !important;
+    color: #166534 !important;
+    border-color: #15803d !important;
 }
 .badge.text-warning {
-    color: #a16207 !important;
+    color: #854d0e !important;
+    border-color: #a16207 !important;
+}
+.badge {
+    font-weight: 700 !important;
 }
 
 .hover-up {

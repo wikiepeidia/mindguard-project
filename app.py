@@ -66,9 +66,6 @@ mail.init_app(app)
 limiter.init_app(app)
 csrf.init_app(app)
 
-with app.app_context():
-    db.create_all()
-
 # Đăng ký Blueprints
 app.register_blueprint(main_bp)
 app.register_blueprint(scammer_bp)

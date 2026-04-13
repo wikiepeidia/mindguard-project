@@ -41,9 +41,9 @@ class Config:
 
     # Cấu hình khác
     ADMIN_USERNAME = "admin"
-    ADMIN_PASSWORD = "mindguard2025"
+    ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "")
     QUIZ_PASS_PERCENTAGE = 0.75
-    REPORT_ENCRYPTION_KEY = "mindguard-secret-key-2025"
+    REPORT_ENCRYPTION_KEY = os.environ.get("REPORT_ENCRYPTION_KEY", "")
 
     # Admin guard — secret key để mở khóa tài khoản admin bị suspend
     ADMIN_UNSUSPEND_SECRET = os.environ.get("ADMIN_UNSUSPEND_SECRET") or "0f27bbb5d2fd0bf9e76a5f0f08fcb4d614a7bc1130950832892faa4640420932"

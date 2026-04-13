@@ -522,20 +522,20 @@ footer .input-group .btn.btn-info {
 /* Animation nhấp nháy cho chữ LIVE — không dùng opacity để tránh mờ chữ */
 @keyframes blink-live {
     0%, 100% {
-        box-shadow: 0 0 10px 3px rgba(239, 68, 68, 0.7);
-        background-color: rgba(239, 68, 68, 0.95);
+        box-shadow: 0 0 10px 3px rgba(185, 28, 28, 0.7);
     }
     50% {
-        box-shadow: 0 0 3px 1px rgba(239, 68, 68, 0.2);
-        background-color: rgba(239, 68, 68, 0.55);
+        box-shadow: 0 0 3px 1px rgba(185, 28, 28, 0.2);
     }
 }
 
 .animate-pulse {
     animation: blink-live 1s ease-in-out infinite;
+    background-color: #b91c1c !important;
     color: #fff !important;
     font-weight: 700;
     letter-spacing: 0.05em;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
 }
 
 /* Chống mờ chữ trên badge và nhãn nhỏ */
@@ -544,7 +544,7 @@ footer .input-group .btn.btn-info {
     -moz-osx-font-smoothing: grayscale;
 }
 
-/* Tăng tương phản cho badge nền mờ (bg-opacity-10/20) trên nền sáng */
+/* Tăng tương phản cho badge nền mờ (bg-opacity-10/25) trên nền sáng */
 .badge.text-info {
     color: #0c5e78 !important;
     border-color: #0e7490 !important;
@@ -563,6 +563,12 @@ footer .input-group .btn.btn-info {
 }
 .badge {
     font-weight: 700 !important;
+}
+
+/* Badge nền đỏ cần chữ trắng rõ ràng — bg-danger mặc định quá sáng */
+.badge.bg-danger:not([class*="text-danger"]) {
+    background-color: #b91c1c !important;
+    color: #fff !important;
 }
 
 /* Tăng bg-opacity cho badge — mặc định Bootstrap quá nhạt */

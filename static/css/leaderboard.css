@@ -75,7 +75,13 @@
 
 .leaderboard-chip {
     border-radius: var(--mg-radius-pill);
-    font-weight: 600;
+    font-weight: 700;
+}
+
+.leaderboard-chip.bg-danger {
+    background-color: #b91c1c !important;
+    color: #fff !important;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
 }
 
 .leaderboard-chip-muted {

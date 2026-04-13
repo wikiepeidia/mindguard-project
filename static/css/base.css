@@ -161,9 +161,13 @@ body.show-chatbot .chatbot-window {
 .msg-incoming {
     align-self: flex-start;
     background: var(--mg-surface);
-    color: var(--mg-text-primary);
+    color: var(--mg-text-primary) !important;
     border-bottom-left-radius: 2px;
     border: 1px solid var(--glass-border);
+}
+
+.msg-incoming * {
+    color: inherit;
 }
 
 .msg-outgoing {

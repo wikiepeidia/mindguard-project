@@ -89,14 +89,14 @@
                                     {% endif %}
                                 </div>
                                 <div>
-                                    <div class="fw-bold leaderboard-identifier">
+                                    <div class="fw-bold leaderboard-identifier text-truncate">
                                         {{ entry.identifier }}
                                     </div>
                                     <div class="small text-muted">{{ entry.name or '' }}</div>
                                 </div>
                             </div>
                         </td>
-                        <td>{{ entry.type }}</td>
+                        <td class="text-truncate" style="max-width:140px">{{ entry.type }}</td>
                         <td><span class="badge leaderboard-platform">{{
                                 entry.platform or 'N/A' }}</span></td>
                         <td>

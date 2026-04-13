@@ -106,6 +106,25 @@
     color: var(--mg-text-primary);
 }
 
+/* Tăng tương phản cho badge trên nền trắng của .scammer-item */
+.scammer-item .badge.text-info {
+    color: #0e7490 !important; /* cyan đậm — dễ đọc trên nền trắng */
+}
+.scammer-item .badge.text-danger {
+    color: #b91c1c !important; /* đỏ đậm */
+}
+.scammer-item .badge.text-success {
+    color: #15803d !important; /* xanh lá đậm */
+}
+.scammer-item .badge.text-warning {
+    color: #a16207 !important; /* vàng đậm */
+}
+.scammer-item .badge {
+    --bs-bg-opacity: 0.15;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+}
+
 .hero-section .filter-btn {
     border-color: var(--mg-border-strong) !important;
     color: var(--mg-text-secondary) !important;
@@ -142,14 +161,7 @@
     border-radius: 10px;
 }
 
-.animate-pulse {
-    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-@keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.5; }
-}
+/* .animate-pulse đã được định nghĩa trong style.css — không lặp lại ở đây */
 
 /* =============================================
    TOOLS SECTION — Cards

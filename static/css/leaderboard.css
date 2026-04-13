@@ -154,6 +154,38 @@
 
 .leaderboard-identifier {
     color: var(--mg-accent);
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+#blacklistTable {
+    table-layout: fixed;
+}
+
+#blacklistTable th:nth-child(1) {
+    width: 30%;
+}
+
+#blacklistTable th:nth-child(2) {
+    width: 14%;
+}
+
+#blacklistTable th:nth-child(3) {
+    width: 12%;
+}
+
+#blacklistTable th:nth-child(4) {
+    width: 16%;
+}
+
+#blacklistTable th:nth-child(5) {
+    width: 13%;
+}
+
+#blacklistTable th:nth-child(6) {
+    width: 15%;
 }
 
 .leaderboard-platform {

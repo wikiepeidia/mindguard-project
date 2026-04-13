@@ -198,8 +198,11 @@ Plans:
 2. `ADMIN_PASSWORD`, `REPORT_ENCRYPTION_KEY`, va `SECRET_KEY` fallback khong con hardcode trong `config.py` — tat ca lay tu Vercel environment variables.
 3. Frontend khong lo bat ky admin credential nao trong HTML, JS, hoac network response ma nguoi dung co the inspect.
 4. Deploy Vercel sau khi thay doi van tra ve 200 tren cac trang chinh (homepage, quiz, auth).
-**Plans**: TBD
-**UI hint**: yes
+**Plans**: 1 plan
+
+Plans:
+
+- [ ] 10-01-PLAN.md — Remove db.create_all() from startup and move hardcoded credentials to env vars
 
 ### Phase 11: UI Bug Fixes
 
@@ -270,7 +273,7 @@ Plans:
 | 7. PostgreSQL Configuration & Connection | 1/1 | Complete | 2026-04-03 |
 | 8. App Startup Cleanup & Data Seeding | 1/1 | Complete | 2026-04-04 |
 | 9. Vercel Deployment & Verification | 1/1 | Complete | 2026-04-04 |
-| 10. Infrastructure & Security Hardening | 0/? | Partial (1/3 reqs done by teammate, 2 remaining) | - |
+| 10. Infrastructure & Security Hardening | 0/1 | Partial (1/3 reqs done by teammate, 2 remaining) | - |
 | 11. UI Bug Fixes | 0/0 | Complete (all 5 reqs done by teammate) | 2026-04-13 |
 | 12. AI Safety | 0/? | Partial (3/4 reqs done by teammate, timeout fix remaining) | - |
 | 13. Rate Limiting & Trust Signals | 0/? | Partial (3/4 reqs done by teammate, feedback button remaining) | - |

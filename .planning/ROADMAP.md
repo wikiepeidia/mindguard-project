@@ -230,7 +230,11 @@ Plans:
 2. Khi nguoi dung hoi ve chu de chinh tri, ton giao, hoac tu hai, chatbot tra loi bang thong diep cung dinh nghia san va hien thi so hotline Cong an HN 113 thay vi tiep tuc tro chuyen.
 3. Khi AI khong chac chan ve cau tra loi, nguoi dung thay canh bao ro rang kem huong dan lien he co quan chuc nang — khong nhan thong tin co ve chinh xac nhung sai.
 4. System prompt viet bang ngon ngu binh dan, cau tra loi AI khong dung thuat ngu ky thuat trong tuong tac thuc te.
-**Plans**: TBD
+**Plans**: 1 plan
+
+Plans:
+
+- [ ] 12-01-PLAN.md — Fix chatbot timeout 8s + set Vercel env vars + redeploy
 
 ### Phase 13: Rate Limiting & Trust Signals
 

@@ -170,11 +170,19 @@
     border: 1px solid var(--mg-border);
 }
 
+/* Hero stats text — fix blurry rendering on glass backdrop */
+.hero-section h3 {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    transform: translateZ(0);
+    text-shadow: 0 0 1px currentColor;
+}
+
 /* Featured card — Chatbot */
 .tool-card-featured {
-    background: linear-gradient(135deg, #0891b2 0%, #0284c7 50%, #1d4ed8 100%);
+    background: linear-gradient(135deg, #06b6d4 0%, #0891b2 50%, #0369a1 100%);
     border: none;
-    box-shadow: 0 20px 60px rgba(8, 145, 178, 0.35);
+    box-shadow: 0 20px 60px rgba(6, 182, 212, 0.25);
     transition: all 0.35s ease;
 }
 

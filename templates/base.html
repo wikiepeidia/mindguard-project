@@ -61,14 +61,17 @@
                             href="#" data-bs-toggle="dropdown">
                             {{ session.get('registration_name') }}
                         </a>
-                        <ul class="dropdown-menu dropdown-menu-end shadow-lg border mt-1 p-2" style="min-width: 180px; z-index: 9999;">
-                            <li><a class="dropdown-item rounded py-2 px-3 d-flex align-items-center" href="{{ url_for('auth.profile') }}"><i
-                                        class="fas fa-id-card me-2 text-info"></i> Hồ sơ</a></li>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-lg border mt-1 p-2"
+                            style="min-width: 180px; z-index: 9999;">
+                            <li><a class="dropdown-item rounded py-2 px-3 d-flex align-items-center"
+                                    href="{{ url_for('auth.profile') }}"><i class="fas fa-id-card me-2 text-info"></i>
+                                    Hồ sơ</a></li>
                             <li>
                                 <hr class="dropdown-divider opacity-25 my-1">
                             </li>
-                            <li><a class="dropdown-item rounded py-2 px-3 d-flex align-items-center text-danger" href="{{ url_for('auth.logout') }}"><i
-                                        class="fas fa-power-off me-2"></i> Đăng xuất</a></li>
+                            <li><a class="dropdown-item rounded py-2 px-3 d-flex align-items-center text-danger"
+                                    href="{{ url_for('auth.logout') }}"><i class="fas fa-power-off me-2"></i> Đăng
+                                    xuất</a></li>
                         </ul>
                     </li>
                     {% else %}
@@ -86,7 +89,7 @@
     <div style="height: 80px;"></div>
 
     <div class="container mt-3 position-absolute top-0 end-0"
-        style="z-index: 9999; max-width: 400px; margin-top: 90px; margin-right: 20px;">
+        style="z-index: 10700; max-width: 400px; margin-top: 90px; margin-right: 20px;">
         {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
         {% for category, message in messages %}
@@ -130,7 +133,8 @@
         </div>
         <div class="chatbox" id="chatbox">
             <div class="chat-msg msg-incoming" id="welcomeMsg">
-                👋 Xin chào! Tôi là AI phân tích lừa đảo. Bác/anh/chị hãy copy tin nhắn hoặc đường link nghi ngờ vào đây để tôi kiểm tra nhé!
+                👋 Xin chào! Tôi là AI phân tích lừa đảo. Bác/anh/chị hãy copy tin nhắn hoặc đường link nghi ngờ vào đây
+                để tôi kiểm tra nhé!
             </div>
         </div>
         <div class="chat-input">

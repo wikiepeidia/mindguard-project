@@ -63,7 +63,7 @@ def query_ai_model(prompt, system_prompt=None):
         }
         try:
             req = urllib.request.Request(url, data=json.dumps(data).encode('utf-8'), headers=headers)
-            with urllib.request.urlopen(req, timeout=10) as response:
+            with urllib.request.urlopen(req, timeout=8) as response:
                 result = json.loads(response.read().decode('utf-8'))
                 if 'choices' in result and len(result['choices']) > 0:
                     return result['choices'][0]['message']['content']

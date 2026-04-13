@@ -71,7 +71,15 @@ Progress: [████████████████    ] 12/17 requireme
 - Teammate đã hoàn thành: rate limiting, UI fixes, AI safety (trừ timeout), privacy banner, logging baseline.
 - Còn lại: security hardening (credentials), AI timeout fix, feedback button, stress test.
 
-### Open Todos
+### Pending Todos (5 new bugs from teammate code drop)
+
+- Fix blurry red badge stats on homepage (UI)
+- Fix dark theme on featured section homepage (UI)
+- Investigate missing Cloudflare Turnstile CAPTCHA (auth)
+- Fix toast notification hidden behind header (UI)
+- Fix Vercel deployment issues (infra)
+
+### Open Requirements
 
 - Fix remaining 5 requirements (INFRA-01, INFRA-02, AISF-01, TRUST-03, INFRA-05)
 

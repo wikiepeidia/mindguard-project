@@ -15,6 +15,7 @@ def load_local_env(filename):
 
 cf_config = load_local_env('cloudflare.json')
 ai_config = load_local_env('chatbot.json')
+pg_config = load_local_env('postgresql_neondb.json')
 
 class Config:
     BASE_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -22,8 +23,13 @@ class Config:
     SECRET_KEY = os.environ.get("SECRET_KEY") or "579c3247894062d9c43f1a73d340fb55c6c25d3b9be6d8f74a20d9a2a9a0af06"
     PERMANENT_SESSION_LIFETIME = 86400 * 7 
     
-    DB_PATH = os.path.join(BASE_DIR, 'database', 'mindguard_v2.db')
-    SQLALCHEMY_DATABASE_URI = f"sqlite:///{DB_PATH}"
+    # Database: prefer PostgreSQL (env var or .env/postgresql_neondb.json), fallback to SQLite
+    _DATABASE_URL = os.environ.get("DATABASE_URL") or pg_config.get("DATABASE_URL")
+    if _DATABASE_URL:
+        SQLALCHEMY_DATABASE_URI = _DATABASE_URL
+    else:
+        DB_PATH = os.path.join(BASE_DIR, 'database', 'mindguard_v2.db')
+        SQLALCHEMY_DATABASE_URI = f"sqlite:///{DB_PATH}"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
     # Cấu hình AI (OpenRouter)

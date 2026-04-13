@@ -10,13 +10,19 @@ from routes.chatbot import chatbot_bp
 from routes.quiz import quiz_bp
 from routes.auth import auth_bp
 from routes.admin import admin_bp
+from routes.library import library_bp
+from routes.api import api_bp
 from utils.helpers import mask_sensitive_data, get_verification_badge
 
 app = Flask(__name__)
 app.config.from_object(Config)
 
 # --- REQUEST LOGGING ---
-log_dir = os.path.join(os.path.dirname(__file__), 'logs')
+# Use /tmp on Vercel (read-only filesystem), local logs/ otherwise
+if os.environ.get('VERCEL'):
+    log_dir = '/tmp/logs'
+else:
+    log_dir = os.path.join(os.path.dirname(__file__), 'logs')
 os.makedirs(log_dir, exist_ok=True)
 logging.basicConfig(
     filename=os.path.join(log_dir, 'access.log'),
@@ -73,6 +79,8 @@ app.register_blueprint(chatbot_bp)
 app.register_blueprint(quiz_bp)
 app.register_blueprint(auth_bp)
 app.register_blueprint(admin_bp)
+app.register_blueprint(library_bp)
+app.register_blueprint(api_bp)
 
 # Biến toàn cục cho template
 @app.context_processor

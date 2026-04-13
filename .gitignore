@@ -30,6 +30,8 @@ example/
 #TRAINED STUFFS
 data/images/*
 data/invoices/*
+vercel/
+.vercel/
 data/generated_invoices/*
 data/generated_invoices_quantung/*
 data/generated_invoices_quanson/*

@@ -2,7 +2,7 @@
 
 **Created:** 2026-03-19
 **Granularity:** standard
-**Coverage:** 16/16 v1.0 requirements mapped · 10/10 v1.1 requirements mapped · 17/17 v1.2 requirements mapped · 13/13 v1.3 requirements mapped
+**Coverage:** 16/16 v1.0 requirements mapped · 10/10 v1.1 requirements mapped · 17/17 v1.2 requirements mapped · 13/13 v1.3 requirements mapped · 17/17 v1.4 requirements mapped
 
 ## Phases
 
@@ -51,6 +51,14 @@
  (completed 2026-04-14)
 - [x] **Phase 19: Verification & Maintenance Setup** - Xác minh tài liệu đúng với codebase và thiết lập cơ chế chống docs drift.
  (completed 2026-04-14)
+
+### v1.4 - OTP Email Reliability & QA
+
+- [ ] **Phase 20: OTP Security Policy Core** - Loai bo OTP hardcode va chuan hoa lifecycle verify an toan.
+- [ ] **Phase 21: Production OTP Email Delivery** - Kich hoat gui OTP email that tren production voi xu ly loi ro rang.
+- [ ] **Phase 22: Resend & Verify Session Stability** - On dinh luong resend/verify va session contract khi refresh/het han.
+- [ ] **Phase 23: OTP Abuse Guardrails** - Bao ve endpoint verify/resend bang throttling nhieu lop va anti-spam telemetry.
+- [ ] **Phase 24: OTP QA Reliability Gate** - Khoa chat luong bang bo test tu dong cho cac nhanh OTP quan trong.
 
 ## Phase Details
 
@@ -368,6 +376,70 @@ Plans:
 - [x] 19-01-PLAN.md — Cross-check all facts in docs vs codebase + PLACEHOLDER audit
 - [x] 19-02-PLAN.md — Metadata headers on all docs + docs maintenance rules in CONVENTIONS.md
 
+### Phase 20: OTP Security Policy Core
+
+**Goal**: Nguoi dung nhan OTP ngau nhien, OTP co TTL/attempt/single-use va khong con bat ky duong hardcode nao.
+**Depends on**: Phase 19 (v1.3 complete)
+**Requirements**: OTPSEC-01, OTPSEC-02, OTPSEC-03, OTPPOL-01, OTPPOL-02, OTPPOL-03
+**Success Criteria** (what must be TRUE):
+
+1. Moi challenge OTP moi deu la ma 6 chu so ngau nhien va khong co gia tri fallback tinh nao co the xac thuc.
+2. OTP het hieu luc dung theo TTL cau hinh (mac dinh 5 phut) va he thong tu choi ma da het han.
+3. Nguoi dung nhap sai OTP qua nguong se bi khoa tam thoi va nhin thay thong bao thoi gian thu lai.
+4. OTP xac thuc thanh cong chi dung duoc mot lan, va OTP cu bi vo hieu ngay khi resend/new challenge.
+5. Kiem tra logs va persistence khong tim thay OTP plaintext duoc luu hoac hien thi.
+**Plans**: TBD
+
+### Phase 21: Production OTP Email Delivery
+
+**Goal**: Nguoi dung nhan OTP email that tren production va duoc huong dan retry ro rang khi gui that bai.
+**Depends on**: Phase 20
+**Requirements**: OTPMAIL-01, OTPMAIL-02, OTPMAIL-03
+**Success Criteria** (what must be TRUE):
+
+1. Sau khi dang ky/xac minh, nguoi dung nhan duoc email OTP qua provider cau hinh tren production.
+2. Neu gui email OTP that bai, tai khoan khong duoc kich hoat va nguoi dung nhan huong dan thu lai ro rang.
+3. Kiem tra runtime config xac nhan tat ca mail/OTP credentials duoc nap tu environment variables, khong hardcode secrets.
+**Plans**: TBD
+
+### Phase 22: Resend & Verify Session Stability
+
+**Goal**: Nguoi dung co the resend OTP an toan va giu duoc trang thai verify on dinh trong suot phien dang ky.
+**Depends on**: Phase 21
+**Requirements**: OTPRES-01, OTPRES-02, OTPSES-01
+**Success Criteria** (what must be TRUE):
+
+1. Tu verify flow, nguoi dung resend OTP ma khong can nhap lai toan bo form dang ky.
+2. Cooldown va resend cap duoc ap dung ro rang; nguoi dung nhin thay trang thai cho truoc khi gui lai.
+3. Refresh verify page van giu dung pending state; pending state thieu/het han se duoc redirect an toan ve dang ky.
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 23: OTP Abuse Guardrails
+
+**Goal**: Luong OTP chong brute-force/spam on dinh nho route-level rate limit va challenge-level throttling ket hop anti-spam telemetry.
+**Depends on**: Phase 22
+**Requirements**: OTPREL-01, OTPREL-02
+**Success Criteria** (what must be TRUE):
+
+1. Verify va resend requests vuot nguong bi chan boi rate limit thay vi tiep tuc xu ly OTP.
+2. Cooldown resend va lockout attempts phoi hop nhat quan voi anti-spam telemetry tren cung challenge.
+3. Nguoi dung hop le voi toc do thao tac binh thuong van hoan tat xac thuc ma khong bi chan sai.
+**Plans**: TBD
+
+### Phase 24: OTP QA Reliability Gate
+
+**Goal**: Team co bo kiem thu tu dong dang tin cay de chan hoi quy OTP truoc moi lan release.
+**Depends on**: Phase 23
+**Requirements**: OTPQA-01, OTPQA-02, OTPQA-03
+**Success Criteria** (what must be TRUE):
+
+1. Unit tests bao phu generation, expiry, resend policy va lockout transitions cho OTP logic.
+2. Route tests bao phu register -> OTP send -> verify cho ca nhanh thanh cong va that bai.
+3. Integration tests mock mail-provider failure va concurrent verify edge cases, chi chap nhan mot verify success hop le.
+4. Test suite OTP chay pass on dinh truoc khi milestone duoc xem la san sang deploy.
+**Plans**: TBD
+
 ## Progress Table
 
 | Phase | Plans Complete | Status | Completed |
@@ -391,3 +463,8 @@ Plans:
 | 17. System Documents | 2/2 | Complete    | 2026-04-14 |
 | 18. Operational SOPs | 2/2 | Complete    | 2026-04-14 |
 | 19. Verification & Maintenance Setup | 2/2 | Complete    | 2026-04-14 |
+| 20. OTP Security Policy Core | 0/TBD | Not started | - |
+| 21. Production OTP Email Delivery | 0/TBD | Not started | - |
+| 22. Resend & Verify Session Stability | 0/TBD | Not started | - |
+| 23. OTP Abuse Guardrails | 0/TBD | Not started | - |
+| 24. OTP QA Reliability Gate | 0/TBD | Not started | - |

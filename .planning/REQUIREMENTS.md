@@ -18,6 +18,12 @@
 - [ ] **OTPMAIL-02**: If OTP email send fails, user receives clear retry guidance and account is not activated.
 - [ ] **OTPMAIL-03**: Mail/OTP provider credentials are loaded from environment variables only (no hardcoded secrets).
 
+### OTP Outage Continuity (OTPOUT)
+
+- [ ] **OTPOUT-01**: When primary email provider is unavailable, OTP delivery automatically fails over to configured backup provider without forcing user to restart registration.
+- [ ] **OTPOUT-02**: If all delivery providers are unavailable, pending registration is preserved and placed into a retry queue for later resend when email service recovers.
+- [ ] **OTPOUT-03**: For prolonged outage beyond retry policy, user can complete registration via a manual admin assist path with auditable handoff and secure verification controls.
+
 ### OTP Policy and Verification (OTPPOL)
 
 - [ ] **OTPPOL-01**: OTP is rejected after configurable TTL (default 5 minutes).
@@ -37,15 +43,15 @@
 
 ### QA Coverage (OTPQA)
 
-- [ ] **OTPQA-01**: Unit tests cover OTP generation, expiry, resend policy, and lockout transitions.
+- [ ] **OTPQA-01**: Unit tests cover OTP generation, expiry, resend policy, lockout transitions.
 - [ ] **OTPQA-02**: Route tests cover register -> OTP send -> verify success/failure branches.
-- [ ] **OTPQA-03**: Integration tests mock mail-provider failure and concurrent verify edge cases.
+- [ ] **OTPQA-03**: Integration tests mock mail-provider failure, outage recovery resend, and concurrent verify edge cases.
 
 ## v2 Requirements (Deferred)
 
 ### OTP Reliability and UX Extensions
 
-- **OTPREL-03**: Multi-provider failover policy for OTP email (automatic provider fallback).
+- **OTPREL-03**: Active-active multi-provider routing and dynamic traffic balancing for OTP delivery at higher scale.
 - **OTPOBS-01**: OTP delivery/verify observability dashboard with alert thresholds.
 - **OTPUX-01**: Enhanced OTP input UX (split boxes, auto-paste handling, accessibility pass).
 
@@ -59,37 +65,40 @@
 |---------|--------|
 | SMS OTP / authenticator MFA | Scope v1.4 focuses on stabilizing email OTP only |
 | Full auth architecture refactor | High regression risk; not required to solve OTP reliability now |
-| Celery/Redis background queue for OTP | Added infra complexity not justified for current milestone |
-| Active-active multi-provider routing | Premature optimization for current usage stage |
+| Celery/Redis distributed background queue stack | v1.4 only needs DB-backed retry queue for outage continuity |
+| Active-active multi-provider routing with traffic balancing | Primary/backup failover is enough for v1.4 |
 | Non-OTP feature expansion (notifications/social/gamification) | Not related to milestone goal |
 
 ## Traceability
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| OTPSEC-01 | Unassigned | Pending |
-| OTPSEC-02 | Unassigned | Pending |
-| OTPSEC-03 | Unassigned | Pending |
-| OTPMAIL-01 | Unassigned | Pending |
-| OTPMAIL-02 | Unassigned | Pending |
-| OTPMAIL-03 | Unassigned | Pending |
-| OTPPOL-01 | Unassigned | Pending |
-| OTPPOL-02 | Unassigned | Pending |
-| OTPPOL-03 | Unassigned | Pending |
-| OTPRES-01 | Unassigned | Pending |
-| OTPRES-02 | Unassigned | Pending |
-| OTPSES-01 | Unassigned | Pending |
-| OTPREL-01 | Unassigned | Pending |
-| OTPREL-02 | Unassigned | Pending |
-| OTPQA-01 | Unassigned | Pending |
-| OTPQA-02 | Unassigned | Pending |
-| OTPQA-03 | Unassigned | Pending |
+| OTPSEC-01 | Phase 20 | Pending |
+| OTPSEC-02 | Phase 20 | Pending |
+| OTPSEC-03 | Phase 20 | Pending |
+| OTPMAIL-01 | Phase 21 | Pending |
+| OTPMAIL-02 | Phase 21 | Pending |
+| OTPMAIL-03 | Phase 21 | Pending |
+| OTPOUT-01 | Phase 22 | Pending |
+| OTPOUT-02 | Phase 22 | Pending |
+| OTPOUT-03 | Phase 22 | Pending |
+| OTPPOL-01 | Phase 20 | Pending |
+| OTPPOL-02 | Phase 20 | Pending |
+| OTPPOL-03 | Phase 20 | Pending |
+| OTPRES-01 | Phase 23 | Pending |
+| OTPRES-02 | Phase 23 | Pending |
+| OTPSES-01 | Phase 23 | Pending |
+| OTPREL-01 | Phase 24 | Pending |
+| OTPREL-02 | Phase 24 | Pending |
+| OTPQA-01 | Phase 25 | Pending |
+| OTPQA-02 | Phase 25 | Pending |
+| OTPQA-03 | Phase 25 | Pending |
 
 **Coverage:**
-- v1 requirements: 17 total
-- Mapped to phases: 0
-- Unmapped: 17 ⚠️
+- v1 requirements: 20 total
+- Mapped to phases: 20
+- Unmapped: 0 ✅
 
 ---
 *Requirements defined: 2026-04-14*
-*Last updated: 2026-04-14 after v1.4 requirement scoping from research output*
+*Last updated: 2026-04-14 after user feedback added outage continuity requirements and dedicated fallback phase scope*

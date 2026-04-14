@@ -1,181 +1,274 @@
-# Technology Stack — Documentation Milestone v1.3
+# Technology Stack — Milestone v1.4 OTP Email Reliability & QA
 
-**Project:** MindGuard v2
-**Researched:** 2026-04-14
-**Scope:** Tools and conventions for SOP reports & technical documentation only
+**Project:** MindGuard v2  
+**Researched:** 2026-04-14  
+**Scope:** Production OTP email for Flask + SQLAlchemy + NeonDB PostgreSQL + Vercel serverless
 
----
+## Current codebase findings (impacting OTP production-readiness)
 
-## Recommended Stack
+- `routes/auth.py` currently flashes OTP demo and verifies against `session.get('otp_code', '123456')`; hardcoded fallback means bypass risk.
+- OTP state is stored in Flask session, not in DB; this is weak for replay prevention, auditability, and concurrent verify/resend control.
+- `extensions.py` + `app.py` already initialize `Flask-Mail` (`mail = Mail()`, `mail.init_app(app)`), so SMTP path exists technically.
+- `config.py` has no mail provider configs yet (`MAIL_*`, `RESEND_API_KEY`, etc. are absent).
+- `models/models.py` has no OTP challenge table.
+- Existing tests in `tests/test_csrf_and_routes.py` still assert OTP `123456`, so test suite currently reinforces non-production behavior.
 
-This is a docs-only milestone. The "stack" is deliberately minimal — Markdown files in the repo, rendered by GitHub and VS Code. No static site generators, no build steps, no new dependencies.
+## Stack additions/changes needed now (for this exact environment)
 
-### Core Authoring
+### 1) Add OTP persistence and verification layer in PostgreSQL (NeonDB)
 
-| Technology | Version | Purpose | Why |
-|------------|---------|---------|-----|
-| Markdown (CommonMark + GFM) | — | All documentation format | Already in use. GitHub renders natively. Zero tooling overhead. |
-| Mermaid | 11.x | Diagrams (architecture, flows, ER) | GitHub renders mermaid fenced blocks natively since 2022. No install needed for readers. |
-| VS Code + extensions | — | Authoring environment | Team already uses VS Code. Extensions provide live preview. |
+Create a new model (and manual migration script in `database/`, per project rule) named for example `EmailOtpChallenge`:
 
-### VS Code Extensions (Authoring Aids)
+| Field | Type | Purpose |
+|---|---|---|
+| id | UUID/BigInt PK | Challenge identity |
+| email | String (indexed) | Recipient |
+| purpose | Enum/String | `register`, later extend `reset_password` |
+| otp_hash | String | Hashed OTP only (never plaintext) |
+| otp_salt | String | Per-challenge salt |
+| expires_at | DateTime (indexed) | TTL |
+| consumed_at | DateTime nullable | One-time use marker |
+| attempts_used | Integer | Failed verify count |
+| max_attempts | Integer | Lock threshold |
+| resend_count | Integer | Abuse control |
+| cooldown_until | DateTime nullable | Resend cooldown |
+| last_sent_at | DateTime | Observability |
+| provider | String | `resend`, `ses`, `smtp_gworkspace`, etc. |
+| provider_message_id | String | Delivery tracing |
+| created_at | DateTime | Audit |
+| updated_at | DateTime | Audit |
 
-| Extension | ID | Purpose |
-|-----------|----|---------|
-| Markdown All in One | yzhang.markdown-all-in-one | TOC generation, formatting shortcuts, auto-preview |
-| Mermaid Preview | bierner.markdown-mermaid | Live Mermaid diagram preview inside VS Code Markdown preview |
-| Markdown Lint | davidanson.vscode-markdownlint | Catches inconsistent heading levels, trailing spaces, broken links |
-| Code Spell Checker | streetsidesoftware.code-spell-checker | Catches English typos in code/variable references |
+Recommended indexes/constraints:
+- Unique active challenge per `(email, purpose)` where `consumed_at IS NULL` and `expires_at > now()`.
+- Index on `(email, purpose, expires_at)` for fast verify and cleanup.
 
-**Not recommended:** Vietnamese spell-checker extensions — none are mature enough to be useful. Manual review is more reliable for Vietnamese content.
+### 2) Add provider abstraction (do not hardwire route to one vendor)
 
-### Diagram Tool: Mermaid (Primary)
+Create service boundary:
+- `services/otp_service.py`: issue, resend, verify OTP, enforce limits.
+- `services/email_sender.py`: provider-agnostic send interface.
+- `services/email_providers/resend_api.py` (primary).
+- `services/email_providers/smtp.py` (fallback/dev/staging compatibility with existing Flask-Mail).
 
-**Why Mermaid over alternatives:**
+This keeps v1.4 shippable while preserving easy migration to SES/SendGrid/Postmark later.
 
-| Criterion | Mermaid | PlantUML | draw.io |
-|-----------|---------|----------|---------|
-| GitHub native rendering | Yes | No (needs image export) | No (binary files) |
-| Install required to read | None | Java runtime | Browser/app |
-| Text-based (git-diffable) | Yes | Yes | No (.drawio is XML) |
-| VS Code preview | Extension | Extension | Extension |
-| Learning curve | Low | Medium | Low (but not diffable) |
-| Vietnamese text in diagrams | Unicode support | Unicode support | Yes |
+### 3) Add config surface in `config.py`
 
-**Mermaid diagram types needed for this milestone:**
+Minimum env/config keys:
+- `EMAIL_PROVIDER` (`resend_api`, `smtp`, `ses_api`, ...)
+- `DEFAULT_FROM_EMAIL`
+- `OTP_TTL_SECONDS` (default 300)
+- `OTP_MAX_ATTEMPTS` (default 5)
+- `OTP_RESEND_COOLDOWN_SECONDS` (default 60)
+- `OTP_MAX_RESENDS_PER_WINDOW` (default 3)
+- `OTP_RESEND_WINDOW_SECONDS` (default 900)
+- `OTP_HASH_PEPPER` (secret)
+- `EMAIL_SEND_TIMEOUT_SECONDS` (default 5)
+- Provider-specific:
+  - `RESEND_API_KEY`
+  - or SMTP keys (`MAIL_SERVER`, `MAIL_PORT`, `MAIL_USE_TLS`, `MAIL_USERNAME`, `MAIL_PASSWORD`)
+  - optional future SES keys/role
 
-| Diagram Type | Use Case |
-|--------------|----------|
-| flowchart TD | SOP quy trinh (workflow steps) |
-| erDiagram | DATABASE.md (entity relationships) |
-| sequenceDiagram | API.md (request/response flows) |
-| graph LR | ARCHITECTURE.md (component relationships) |
+### 4) Update tests to match production behavior
 
-**Example — SOP workflow in Mermaid:**
+Current tests are OTP-demo oriented. Add:
+- Unit tests for OTP issue/verify/resend and expiry.
+- Route tests for:
+  - success path
+  - wrong OTP increments attempts
+  - expired OTP rejected
+  - max attempts lockout
+  - resend cooldown and resend cap
+  - one-time consume behavior
+- Provider integration tests with mocked HTTP send (Resend API) and mocked SMTP fallback.
+- Race test: two concurrent verifies, only one succeeds.
 
-    ```mermaid
-    flowchart TD
-        A[Mo hang doi xu ly] --> B{Co bao cao cho duyet?}
-        B -- Co --> C[Kiem tra bang chung]
-        B -- Khong --> D[Ket thuc]
-        C --> E{Du dieu kien?}
-        E -- Du --> F[Phe duyet]
-        E -- Khong du --> G[Tu choi]
-    ```
+## Security requirements (non-negotiable)
 
-### Documentation Structure
+| Control | v1.4 requirement |
+|---|---|
+| OTP generation | `secrets`-based cryptographic randomness, 6-digit numeric OTP |
+| Storage | Store hash only (`HMAC-SHA256` or equivalent with per-challenge salt + server pepper) |
+| TTL | 5 minutes default |
+| Attempts | Max 5 verify attempts/challenge |
+| Resend | 60s cooldown, max 3 resends per 15 minutes |
+| One-time use | Set `consumed_at` atomically on successful verify |
+| Replay prevention | Reject if `consumed_at` set or `expires_at < now()` |
+| Race prevention | Verify inside DB transaction (`SELECT ... FOR UPDATE` or atomic conditional update) |
+| Session trust | Do not store authoritative OTP in session/cookie |
+| Logging | Never log OTP plaintext; log only challenge id/provider message id |
+| Response messages | Keep generic to reduce account enumeration |
+| Transport | TLS required provider-side (SMTP TLS or HTTPS API) |
 
-No new folders needed. Use existing structure:
+Implementation note for this codebase:
+- Flask session is signed, not suitable as OTP source-of-truth. Move OTP truth to NeonDB immediately.
+- Existing `Flask-Limiter` should also be applied to `/verify-otp` and future `/resend-otp`.
 
-    documents/
-      SOP/
-        SOP_BAO_CAO.md          <- Update (exists)
-        SOP_VAN_HANH.md         <- New: operations SOP
-        SOP_QUAN_TRI.md         <- New: admin SOP
-        HUONG_DAN_BAO_CAO_NGUOI_DUNG.md  <- Existing
-        README.md               <- Update index
-    docs/
-      technical/
-        ARCHITECTURE.md         <- Update (exists, needs NeonDB/Vercel content)
-        API.md                  <- Update (exists, template only)
-        DATABASE.md             <- Update (exists, needs actual schema)
-        DECISIONS.md            <- Update (add ADRs for NeonDB, Vercel, AI safety)
-      user/
-        USER_GUIDE.md           <- Update if needed
+## Option 1: Gmail SMTP / Google Workspace SMTP
 
-## Markdown Conventions
+### Practical fit
 
-### Document Header Standard
+Good for very early stage or internal environments, but weak as long-term production OTP backbone.
 
-Every document should start with:
+### Key limits and constraints from Google docs
 
-    # Tieu de tai lieu
+- Gmail SMTP (`smtp.gmail.com`) sending limit: 2,000 messages/day.
+- Google Workspace SMTP relay (`smtp-relay.gmail.com`): up to 10,000 recipients/day per user.
+- Google can suspend sending up to 24 hours after limit breach.
+- Less secure app/password-only patterns are deprecated; OAuth-first direction and stricter policies after 2025.
+- App Password requires 2-Step Verification and is explicitly not recommended by Google as a primary long-term pattern.
+- Deliverability to Gmail now strongly depends on SPF/DKIM/DMARC and sender behavior policies.
 
-    > Cap nhat lan cuoi: YYYY-MM-DD
-    > Phien ban: X.Y
-    > Nguoi phu trach: [role/name]
+### Verdict for MindGuard v1.4
 
-    ---
+- Can be fallback or temporary bridge.
+- Should not be primary target architecture for growth scenarios.
 
-### Heading Hierarchy
+## Option 2: Transactional email providers
 
-    # H1 — Document title (one per file)
-    ## H2 — Major sections (Muc dich, Pham vi, Quy trinh...)
-    ### H3 — Subsections (Buoc 1, Buoc 2...)
-    #### H4 — Detail items (rarely needed)
+### Comparison for OTP-focused workloads
 
-### Vietnamese Language Conventions
+| Provider | Entry pricing snapshot (2026-04) | Throughput controls / limits | Deliverability posture | Complexity | MindGuard fit |
+|---|---|---|---|---|---|
+| Resend | Free: 3,000/mo + 100/day; Pro: $20/50k; Pro 100k: $35; Scale starts $90/100k | API + SMTP; batch up to 100/call; idempotency key (24h) | Strong DX for transactional, fast integration | Low | Best default for v1.4 |
+| SendGrid | Free trial 100/day for 60 days; Essentials from $19.95; Pro from $89.95 | Endpoint-specific API rate limits; headers + `429` handling | Mature ecosystem, strong enterprise path | Medium | Good growth fallback |
+| Postmark | Free dev tier 100/mo; paid starts $15; overage by plan | Batch endpoint supports up to 500 messages/call | Transactional-first reputation, strong inbox focus | Low/Medium | Excellent deliverability-first alternative |
+| Mailgun | Free 100/day; Basic $15/10k; Foundation $35/50k; Scale $90/100k | Has API rate limits (not publicly fixed in one number), SMTP+HTTP | Mature, feature-rich; good at scale | Medium | Good if team needs advanced controls |
+| AWS SES | $0.10/1,000 outbound (+ data), free tier message credits in first year | Explicit per-account quotas: `Max24HourSend`, `MaxSendRate`, sandbox vs production access | Great at high scale if configured well | Medium/High (AWS ops) | Cost leader at large volume |
 
-| Rule | Example | Reason |
-|------|---------|--------|
-| Use Vietnamese for all visible content | `## Muc dich` not `## Purpose` | Project constraint: all docs in Vietnamese |
-| Keep code/technical terms in English | `Flask`, `SQLAlchemy`, `session`, `endpoint` | Vietnamese translations of tech terms cause confusion |
-| Use backticks for code references | `session.get('is_admin')` | Distinguishes code from prose |
-| Use Vietnamese punctuation consistently | Dau phay, dau cham theo tieng Viet | Consistency across documents |
-| Avoid mixed-language sentences where possible | "Su dung endpoint `/api/reports`" (OK) | Brief English insertions for technical terms are fine |
+### SES-specific note (important)
 
-### Table Format
+- Account can be sandbox or production in each region (`ProductionAccessEnabled`).
+- In sandbox: only verified identities can receive.
+- Quotas are account-specific and queryable via CLI/API (`get-account`, `get-send-quota`), including per-second and 24h limits.
 
-Use GFM tables. Align columns for readability in source:
+## Option 3: Temporary/disposable email services
 
-    | Cot 1      | Cot 2        | Cot 3     |
-    |------------|--------------|-----------|
-    | Gia tri 1  | Gia tri 2    | Gia tri 3 |
+Examples reviewed: Mailinator, Ethereal, Mailtrap Email Sandbox.
 
-### SOP-Specific Conventions
+### Should they be used?
 
-Based on existing SOP_BAO_CAO.md patterns (maintain consistency):
+- Dev/QA/Staging: Yes, for test workflow automation and safe capture of OTP emails.
+- Production user verification: No.
 
-1. **Numbered sections** — `## 1. Muc dich`, `## 2. Pham vi ap dung`, etc.
-2. **Checklists per step** — Use `- [ ]` or bullet checklists after each procedure step
-3. **Screenshot placeholders** — `[PLACEHOLDER_HINH_XX: Mo ta]` for future screenshot insertion
-4. **Route references** — Include exact URL paths: `GET /admin/scammer-reports`
-5. **Role identification** — Each SOP names who performs each action
+### Why not for production OTP
 
-### ADR (Architecture Decision Record) Format
+- Ethereal is explicitly a fake SMTP service where emails are never delivered to real recipients.
+- Disposable/public inbox models are not trustworthy identity channels.
+- They do not represent real deliverability behavior for Gmail/Outlook/Yahoo inboxes.
+- Security/compliance risk for real user verification data.
 
-For `docs/technical/DECISIONS.md`, use this structure per decision:
+### Practical note for this codebase
 
-    ### ADR-XXX: [Tieu de quyet dinh]
+Current registration already forces `@gmail.com`, so disposable-domain abuse is partly reduced by design. Still, disposable services remain test-only tools.
 
-    - **Ngay:** YYYY-MM-DD
-    - **Trang thai:** Accepted / Superseded / Deprecated
-    - **Boi canh:** [Van de can giai quyet]
-    - **Quyet dinh:** [Phuong an duoc chon]
-    - **Ly do:** [Tai sao chon phuong an nay]
-    - **He qua:** [Tac dong, trade-offs]
+## Recommended provider strategy by stage and scale
 
-## Alternatives Considered
+| Stage | Expected scale | Recommended provider | Transport | Reason |
+|---|---|---|---|---|
+| Local dev | 0 real users | Mailtrap or Ethereal | SMTP sandbox | Fast debugging without real sends |
+| Staging/UAT | Internal QA + controlled testers | Same provider as prod (Resend) + optional Mailinator inbox assertions | HTTP API primary | Detect template/flow issues before prod |
+| Production now (v1.4) | ~50 CCU, low-to-moderate OTP volume | Resend Pro | HTTP API | Best reliability/effort ratio on Vercel serverless |
+| Growth | 100k to 1M+ OTP/month | Keep abstraction; evaluate SES or SendGrid/Postmark based on KPI | HTTP API | Control cost vs deliverability/support |
+| Very high scale | >1M OTP/month | SES (cost focus) or SendGrid/Postmark enterprise (managed deliverability focus) | HTTP/API | Long-term optimization |
 
-| Category | Recommended | Alternative | Why Not |
-|----------|-------------|-------------|---------|
-| Diagrams | Mermaid | PlantUML | Requires Java. GitHub does not render natively. More setup friction. |
-| Diagrams | Mermaid | draw.io / Excalidraw | Binary/XML files not git-diffable. Cannot review in PRs. |
-| Doc site | None (raw Markdown in repo) | MkDocs / Sphinx | Over-engineering for a team reading docs on GitHub. Adds build step. |
-| Doc site | None | Notion / Confluence | Docs drift from code. Not version-controlled. Not free for teams. |
-| Linting | markdownlint (VS Code) | remark-lint (CI) | CI linting is overkill for a docs milestone. VS Code extension is sufficient. |
-| API docs | Hand-written Markdown | Swagger/OpenAPI auto-gen | Flask app uses session auth + server-rendered pages, not a REST API. Auto-gen adds complexity for minimal benefit. |
+## Cost, throughput, deliverability tradeoffs (practical)
 
-## No Installation Required
+- Gmail/Workspace SMTP:
+  - Cost: often appears “free” under Workspace subscription.
+  - Throughput: hard daily limits; suspension risk after spikes.
+  - Deliverability: acceptable for low volume, but weaker control for app-transactional growth.
 
-This milestone adds no new Python packages, no build tools, no CI changes. Everything is:
+- Resend/Postmark:
+  - Cost: higher than SES at large volume.
+  - Throughput: sufficient for startup/SMB transactional OTP.
+  - Deliverability: generally stronger out-of-box for transactional flows and easier operationally.
 
-- **Markdown** — already supported
-- **Mermaid** — rendered by GitHub natively, previewed by VS Code extension
-- **VS Code extensions** — optional authoring aids, not required to read docs
+- SendGrid/Mailgun:
+  - Cost: mid/high depending features and volume.
+  - Throughput: enterprise-ready with mature event/rate-limit handling.
+  - Deliverability: strong when properly configured; more knobs and operational surface.
 
-    # Nothing to install. Extensions are optional:
-    # VS Code: Ctrl+Shift+X -> search "Markdown All in One" -> Install
-    # VS Code: Ctrl+Shift+X -> search "Markdown Mermaid" -> Install
+- SES:
+  - Cost: typically lowest at scale.
+  - Throughput: explicit account quotas and strong scaling path.
+  - Deliverability: excellent potential, but requires stronger AWS operational maturity and reputation management discipline.
+
+## Vercel/serverless compatibility constraints and implications
+
+| Constraint | Implication for OTP stack |
+|---|---|
+| Stateless function instances | OTP state must be in NeonDB, not session |
+| Function time budget and external I/O | Use short outbound timeout (3-5s), fail fast, retry once with jitter |
+| Read-only deployment filesystem (except temp areas) | No local durable queue/file-based mail retry |
+| High concurrency possible | Make verify consume operation atomic to prevent double-use |
+| External network call per request | Prefer provider HTTP APIs for predictable behavior over per-request SMTP handshakes |
+
+Recommended send behavior on Vercel:
+- Synchronous send in register/resend route with strict timeout and clear error handling.
+- Store challenge before send; on send failure, mark status and allow controlled retry.
+- Use idempotency key for provider API to avoid duplicates on retries.
+
+## What NOT to add now (v1.4 scope protection)
+
+1. SMS OTP or authenticator-app MFA.
+2. Multi-provider active-active routing orchestration.
+3. Dedicated IP purchase/warmup pipeline at current scale.
+4. Full async job stack (Celery/RQ + Redis) unless real timeout evidence appears in production metrics.
+5. Complex anti-fraud device fingerprint stack beyond current OTP + rate-limit + CAPTCHA baseline.
+6. Large auth refactor outside register/verify/resend OTP path.
+7. New deployment platform changes (stay with Vercel + NeonDB as required).
+
+## Recommended default for v1.4
+
+Concrete recommendation for this repository and milestone:
+
+1. Primary email provider: Resend via HTTP API.
+2. Plan choice: Pro (start at $20/50k), reassess when OTP volume exceeds current bracket.
+3. Keep Flask-Mail SMTP adapter only as fallback/dev path, not primary production route.
+4. OTP policy:
+   - 6-digit cryptographic OTP
+   - TTL 5 minutes
+   - Max 5 verify attempts
+   - Resend cooldown 60 seconds
+   - Max 3 resends per 15 minutes
+5. Persist OTP challenge in NeonDB with hashed OTP and atomic consume logic.
+6. Remove all hardcoded `123456` behavior and update tests to production semantics.
+7. Enforce provider authentication + domain setup before go-live:
+   - SPF
+   - DKIM
+   - DMARC
+   - TLS transport
+8. Add provider abstraction now so SES/SendGrid/Postmark can be switched later without route-level rewrites.
+
+This gives the fastest safe path to production OTP on current Flask + Vercel architecture while preserving scale-up flexibility.
 
 ## Sources
 
-- GitHub Mermaid support: native since Feb 2022, supports flowchart/sequence/ER/class diagrams in fenced code blocks
-- Mermaid documentation: https://mermaid.js.org — current version 11.x
-- GitHub Flavored Markdown spec: tables, task lists, fenced code blocks — all used in existing project docs
-- CommonMark spec: heading hierarchy, link references, emphasis — baseline Markdown standard
-- Existing project conventions: derived from documents/SOP/SOP_BAO_CAO.md and docs/technical/ARCHITECTURE.md in this repo
+- https://knowledge.workspace.google.com/admin/gmail/gmail-sending-limits-in-google-workspace
+- https://knowledge.workspace.google.com/admin/gmail/send-email-from-a-printer-scanner-or-app
+- https://support.google.com/accounts/answer/185833
+- https://support.google.com/mail/answer/81126
+- https://resend.com/pricing
+- https://resend.com/pricing.md
+- https://resend.com/docs/api-reference/emails/send-email
+- https://resend.com/docs/api-reference/emails/send-batch-emails
+- https://resend.com/docs/send-with-smtp
+- https://sendgrid.com/pricing/
+- https://www.twilio.com/docs/sendgrid/api-reference/how-to-use-the-sendgrid-v3-api/rate-limits
+- https://postmarkapp.com/pricing
+- https://postmarkapp.com/developer/user-guide/send-email-with-api
+- https://www.mailgun.com/pricing/
+- https://documentation.mailgun.com/docs/mailgun/user-manual/sending-messages/send-http
+- https://aws.amazon.com/ses/pricing/
+- https://docs.aws.amazon.com/cli/latest/reference/ses/get-send-quota.html
+- https://docs.aws.amazon.com/cli/latest/reference/sesv2/get-account.html
+- https://docs.aws.amazon.com/cli/latest/reference/sesv2/put-account-details.html
+- https://mailtrap.io/email-sandbox/
+- https://ethereal.email/
+- https://mailinator.com/
 
----
-
-*Confidence: HIGH — all recommendations based on tools already working in the project ecosystem (GitHub + VS Code + Markdown). No unverified claims.*
+Confidence notes:
+- HIGH: Google limits/policies, Vercel limits, Resend pricing/API, SendGrid rate-limit behavior, Postmark/Mailgun published pricing pages.
+- MEDIUM: Relative deliverability ranking across providers (depends on sender reputation and setup quality).
+- MEDIUM: SES starter quota examples (actual quota is account/region-specific and must be queried per account).

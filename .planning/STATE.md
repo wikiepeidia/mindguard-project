@@ -23,8 +23,8 @@ progress:
 
 Phase: 15 (Conventions & Redaction Setup)
 Plan: Not started
-Status: Roadmap created, ready for planning
-Last activity: 2026-04-14 — v1.3 roadmap created (5 phases: 15-19)
+Status: Context discussed, ready for planning
+Last activity: 2026-04-14 — Phase 15 context discussed (4 decisions: flat .env.example, CONVENTIONS.md in docs/technical/, minimal glossary, docs-only redaction)
 
 [░░░░░░░░░░] 0/5 phases (0%)
 
@@ -78,6 +78,6 @@ Phase 19: Verification & Maintenance Setup (cross-cutting)
 ## Session Continuity
 
 - **Last Updated**: 2026-04-14
-- **Stopped at**: v1.3 roadmap created. 5 phases (15-19) mapped, 13/13 requirements covered.
-- **Resume with**: Plan Phase 15 (Conventions & Redaction Setup)
-- **Resume file**: .planning/ROADMAP.md
+- **Stopped at**: Phase 15 context discussed. 4 gray areas resolved. Ready for planning.
+- **Resume with**: Plan Phase 15 (run `/gsd-plan-phase 15`)
+- **Resume file**: .planning/phases/15-conventions-redaction-setup/CONTEXT.md

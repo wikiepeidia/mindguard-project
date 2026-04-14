@@ -50,9 +50,12 @@ Nguoi dung co the hoc, kiem tra nhan thuc va gui bao cao lua dao mot cach de dun
 - ✓ Viết SOP vận hành hệ thống (deploy Vercel, monitoring, incident response) — v1.3 Phase 18
 - ✓ Viết SOP quản trị viên (admin dashboard, moderation workflow) — v1.3 Phase 18
 
+- ✓ Xác minh toàn bộ tài liệu v1.3 chính xác với codebase — v1.3 Phase 19
+- ✓ Thiết lập cơ chế chống docs drift (metadata headers + merge checklist) — v1.3 Phase 19
+
 ### Active
 
-(Remaining: Phase 19 — Verification & Maintenance Setup)
+(Milestone v1.3 hoàn thành — không còn requirements active)
 
 ### Out of Scope
 
@@ -86,7 +89,7 @@ Dự án đã hoàn thành v1.0 (6 phases: Privacy, Anti-Spam, Light Mode, Quiz 
 | NeonDB cho cả local và production | Đơn giản hóa config, tránh sqlite/postgres incompatibility | ✓ Good |
 | Postgres trước, Vercel fix sau | DB ổn định là tiên quyết để debug deployment | ✓ Good |
 | Code Freeze cho v1.2 Beta 1 | Ổn định trước go-live, không thêm tính năng mới | ✓ Good |
-| Docs-only milestone v1.3 | Hoàn thiện tài liệu trước khi mở rộng tính năng | — Pending |
+| Docs-only milestone v1.3 | Hoàn thiện tài liệu trước khi mở rộng tính năng | ✓ Good |
 
 ## Evolution
 
@@ -108,4 +111,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-14 after Phase 18 complete (Operational SOPs — SOP_BAO_CAO updated, SOP_VAN_HANH + SOP_QUAN_TRI created)*
+*Last updated: 2026-04-14 after Phase 19 complete (Verification & Maintenance Setup — all docs verified, metadata headers added, merge checklist established). Milestone v1.3 complete.*

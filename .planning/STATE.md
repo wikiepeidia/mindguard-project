@@ -1,16 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.0
-milestone_name: — Core Platform
-status: executing
-last_updated: "2026-04-14T06:41:23.201Z"
+milestone: v1.4
+milestone_name: OTP Email Reliability & QA
+status: planning
+last_updated: "2026-04-14T00:00:00.000Z"
 last_activity: 2026-04-14
 progress:
-  total_phases: 6
-  completed_phases: 5
-  total_plans: 10
-  completed_plans: 9
-  percent: 90
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # STATE - MindGuard v2
@@ -18,59 +18,45 @@ progress:
 ## Project Reference
 
 - **Core Value**: Người dùng có thể học, kiểm tra nhận thức và gửi báo cáo lừa đảo một cách dễ dùng, an toàn, và đáng tin cậy.
-- **Current Focus**: v1.3 Hoàn thiện Tài liệu Kỹ thuật & SOP v1
+- **Current Focus**: v1.4 OTP Email Reliability & QA
 
 ## Current Position
 
-Phase: 19
-Plan: Not started
-Status: Executing Phase 19
-Last activity: 2026-04-14
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-04-14 — Milestone v1.4 started
 
-[░░░░░░░░░░] 0/5 phases (0%)
+[░░░░░░░░░░] 0/0 phases (0%)
 
 ## Remaining Work
 
-Phase 15: Conventions & Redaction Setup (CONV-01, CONV-02)
-Phase 16: Foundation Documents (TECH-03, ADR-01 to ADR-04)
-Phase 17: System Documents (TECH-01, TECH-02)
-Phase 18: Operational SOPs (SOP-01, SOP-02, SOP-03)
-Phase 19: Verification & Maintenance Setup (cross-cutting)
+- Define scoped requirements for OTP email reliability milestone.
+- Create roadmap phases and success criteria.
+- Execute implementation phases after roadmap approval.
 
 ## Performance Metrics
 
-- **v1.3 requirements total**: 13
+- **v1.4 requirements total**: TBD
 - **Completed**: 0
-- **Remaining**: 13
-- **Coverage**: 13/13 mapped to phases
+- **Remaining**: TBD
+- **Coverage**: TBD
 - **Open blockers**: 0
 
 ## Accumulated Context
 
-### Key Decisions (from v1.0)
+### Key Decisions (from previous milestones)
 
-- Tách privacy/masking + audit thành Phase 1 để giảm rủi ro lộ dữ liệu trước khi mở rộng feature.
-- Đặt anti-spam monitor->soft-enforce thành Phase 2 để ưu tiên telemetry và giảm false-positive.
-- Session-backed one-question step flow with PRG pattern (04-01).
-- Python-level aggregation over SQLAlchemy case() to avoid version-specific syntax differences (05-01).
+- Privacy/masking và anti-spam đã là nền tảng ổn định từ v1.0.
+- PostgreSQL + Vercel là stack production cố định từ v1.1.
+- v1.2 hoàn tất hardening/rate limiting/trust signals cho Beta.
+- v1.3 hoàn tất tài liệu kỹ thuật/SOP và thiết lập cơ chế chống docs drift.
 
-### Key Decisions (v1.1)
+### New Milestone Focus (v1.4)
 
-- Migrate toàn bộ sang NeonDB PostgreSQL (không giữ SQLite cho local).
-- Postgres trước, Vercel fix sau — DB ổn định là tiên quyết.
-- NeonDB cho cả local và production — cùng connection string.
-
-### Key Decisions (v1.2)
-
-- CODE FREEZE — không thêm tính năng mới, chỉ sửa lỗi và gia cố.
-- Teammate đã hoàn thành: rate limiting, UI fixes, AI safety, privacy banner, logging baseline.
-- Beta 1 signed off: 50 CCU stable, 200 CCU rate-limited, zero 5xx.
-
-### Key Decisions (v1.3)
-
-- Docs-only milestone — không thay đổi code, chỉ viết/cập nhật tài liệu.
-- Conventions trước, viết sau — thiết lập quy ước ngôn ngữ và redaction trước khi viết bất kỳ tài liệu nào.
-- Dependency-ordered writing: DECISIONS + DATABASE → ARCHITECTURE + API → SOPs.
+- Loại bỏ OTP hardcode, đưa OTP email vào production flow.
+- Sửa lỗi resend/verify/session/UI liên quan OTP.
+- Bổ sung test để đảm bảo luồng OTP bền vững sau deploy.
 
 ### Blockers
 
@@ -79,6 +65,5 @@ Phase 19: Verification & Maintenance Setup (cross-cutting)
 ## Session Continuity
 
 - **Last Updated**: 2026-04-14
-- **Stopped at**: Phase 15 context discussed. 4 gray areas resolved. Ready for planning.
-- **Resume with**: Plan Phase 15 (run `/gsd-plan-phase 15`)
-- **Resume file**: .planning/phases/15-conventions-redaction-setup/CONTEXT.md
+- **Stopped at**: Milestone v1.4 initialized, defining requirements
+- **Resume with**: Continue `/gsd-new-milestone` requirements and roadmap gates

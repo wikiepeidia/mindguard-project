@@ -44,7 +44,7 @@
 
 - [x] **Phase 15: Conventions & Redaction Setup** - Thiết lập quy ước viết tài liệu và bảo vệ thông tin nhạy cảm trước khi viết.
  (completed 2026-04-14)
-- [ ] **Phase 16: Foundation Documents** - Document database schema và ghi nhận các quyết định kiến trúc (ADRs).
+- [x] **Phase 16: Foundation Documents** - Document database schema và ghi nhận các quyết định kiến trúc (ADRs). (completed 2026-04-14)
 - [ ] **Phase 17: System Documents** - Viết ARCHITECTURE.md và API.md phản ánh đúng hệ thống hiện tại.
 - [ ] **Phase 18: Operational SOPs** - Cập nhật và viết mới 3 SOP vận hành cho team.
 - [ ] **Phase 19: Verification & Maintenance Setup** - Xác minh tài liệu đúng với codebase và thiết lập cơ chế chống docs drift.
@@ -306,8 +306,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 16-01-PLAN.md — Viết DATABASE.md với schema đầy đủ và Mermaid ER diagram
-- [ ] 16-02-PLAN.md — Thêm ADR-002 đến ADR-005 và cập nhật ADR-001
+- [x] 16-01-PLAN.md — Viết DATABASE.md với schema đầy đủ và Mermaid ER diagram
+- [x] 16-02-PLAN.md — Thêm ADR-002 đến ADR-005 và cập nhật ADR-001
 
 ### Phase 17: System Documents (ARCHITECTURE.md + API.md)
 
@@ -368,7 +368,7 @@ Plans:
 | 13. Rate Limiting & Trust Signals | 0/? | Complete (4/4 reqs done — TRUST-03 feedback button added) | 2026-04-13 |
 | 14. Stress Test & Beta Sign-off | 1/1 | Complete | 2026-04-14 |
 | 15. Conventions & Redaction Setup | 1/1 | Complete    | 2026-04-14 |
-| 16. Foundation Documents | 0/? | Not started | - |
+| 16. Foundation Documents | 2/2 | Complete    | 2026-04-14 |
 | 17. System Documents | 0/? | Not started | - |
 | 18. Operational SOPs | 0/? | Not started | - |
 | 19. Verification & Maintenance Setup | 0/? | Not started | - |

@@ -46,7 +46,8 @@
  (completed 2026-04-14)
 - [x] **Phase 16: Foundation Documents** - Document database schema và ghi nhận các quyết định kiến trúc (ADRs).
  (completed 2026-04-14)
-- [x] **Phase 17: System Documents** - Viết ARCHITECTURE.md và API.md phản ánh đúng hệ thống hiện tại. (completed 2026-04-14)
+- [x] **Phase 17: System Documents** - Viết ARCHITECTURE.md và API.md phản ánh đúng hệ thống hiện tại.
+ (completed 2026-04-14)
 - [ ] **Phase 18: Operational SOPs** - Cập nhật và viết mới 3 SOP vận hành cho team.
 - [ ] **Phase 19: Verification & Maintenance Setup** - Xác minh tài liệu đúng với codebase và thiết lập cơ chế chống docs drift.
 
@@ -338,7 +339,11 @@ Plans:
 2. SOP Vận hành hệ thống document đầy đủ quy trình: deploy lên Vercel, xem logs trên Vercel dashboard, rollback deployment, xử lý sự cố thường gặp.
 3. SOP Quản trị viên document workflow: đăng nhập admin, duyệt/từ chối báo cáo, export data, moderation flow với các bước cụ thể.
 4. Cả 3 SOP cross-reference đúng đến API.md và DATABASE.md khi đề cập endpoints hoặc bảng dữ liệu.
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+- [ ] 18-01-PLAN.md — Cập nhật SOP_BAO_CAO.md (fix routes, cross-refs)
+- [ ] 18-02-PLAN.md — Tạo SOP_VAN_HANH.md + SOP_QUAN_TRI.md
 
 ### Phase 19: Verification & Maintenance Setup
 

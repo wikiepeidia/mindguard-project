@@ -39,6 +39,11 @@ Nguoi dung co the hoc, kiem tra nhan thuc va gui bao cao lua dao mot cach de dun
 - ✓ SOP bao cao va ML readiness — v1.0
 - ✓ .env.example với placeholder values, không chứa secrets — v1.3 Phase 15
 - ✓ Quy tắc viết tài liệu (ngôn ngữ, glossary, redaction) — v1.3 Phase 15
+- ✓ Document database schema thực tế trong DATABASE.md — v1.3 Phase 16
+- ✓ Bổ sung ADR cho NeonDB migration — v1.3 Phase 16
+- ✓ Bổ sung ADR cho Vercel deployment — v1.3 Phase 16
+- ✓ Bổ sung ADR cho AI safety decisions — v1.3 Phase 16
+- ✓ Bổ sung ADR cho rate limiting — v1.3 Phase 16
 
 ### Active
 
@@ -47,8 +52,6 @@ Nguoi dung co the hoc, kiem tra nhan thuc va gui bao cao lua dao mot cach de dun
 - [ ] Viết SOP quản trị viên (admin dashboard, moderation workflow)
 - [ ] Cập nhật ARCHITECTURE.md cho NeonDB PostgreSQL + Vercel serverless
 - [ ] Document tất cả API endpoints trong API.md
-- [ ] Document database schema thực tế trong DATABASE.md
-- [ ] Bổ sung ADR cho NeonDB migration, Vercel deployment, AI safety decisions
 
 ### Out of Scope
 
@@ -104,4 +107,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-14 after Phase 15 complete (Conventions & Redaction Setup)*
+*Last updated: 2026-04-14 after Phase 16 complete (Foundation Documents — DATABASE.md + ADRs)*

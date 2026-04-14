@@ -46,7 +46,7 @@
  (completed 2026-04-14)
 - [x] **Phase 16: Foundation Documents** - Document database schema và ghi nhận các quyết định kiến trúc (ADRs).
  (completed 2026-04-14)
-- [ ] **Phase 17: System Documents** - Viết ARCHITECTURE.md và API.md phản ánh đúng hệ thống hiện tại.
+- [x] **Phase 17: System Documents** - Viết ARCHITECTURE.md và API.md phản ánh đúng hệ thống hiện tại. (completed 2026-04-14)
 - [ ] **Phase 18: Operational SOPs** - Cập nhật và viết mới 3 SOP vận hành cho team.
 - [ ] **Phase 19: Verification & Maintenance Setup** - Xác minh tài liệu đúng với codebase và thiết lập cơ chế chống docs drift.
 
@@ -324,8 +324,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 17-01-PLAN.md — Rewrite ARCHITECTURE.md cho NeonDB + Vercel stack với 2 Mermaid diagrams
-- [ ] 17-02-PLAN.md — Rewrite API.md với đầy đủ routes từ 8 blueprints
+- [x] 17-01-PLAN.md — Rewrite ARCHITECTURE.md cho NeonDB + Vercel stack với 2 Mermaid diagrams
+- [x] 17-02-PLAN.md — Rewrite API.md với đầy đủ routes từ 8 blueprints
 
 ### Phase 18: Operational SOPs
 
@@ -374,6 +374,6 @@ Plans:
 | 14. Stress Test & Beta Sign-off | 1/1 | Complete | 2026-04-14 |
 | 15. Conventions & Redaction Setup | 1/1 | Complete    | 2026-04-14 |
 | 16. Foundation Documents | 2/2 | Complete    | 2026-04-14 |
-| 17. System Documents | 0/? | Not started | - |
+| 17. System Documents | 2/2 | Complete    | 2026-04-14 |
 | 18. Operational SOPs | 0/? | Not started | - |
 | 19. Verification & Maintenance Setup | 0/? | Not started | - |

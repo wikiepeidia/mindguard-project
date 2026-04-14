@@ -348,14 +348,22 @@ footer .input-group .btn.btn-info {
 }
 
 @keyframes toastSlideIn {
-    from { opacity: 0; transform: translateX(40px); }
-    to   { opacity: 1; transform: translateX(0); }
+    from {
+        opacity: 0;
+        transform: translateX(40px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
 }
 
 /* Override Bootstrap absolute-positioned close btn so flex layout works */
 .alert.alert-dismissible {
     padding-right: 0.75rem;
 }
+
 .alert.alert-dismissible .btn-close {
     position: static;
     padding: 0.5rem;
@@ -537,9 +545,12 @@ footer .input-group .btn.btn-info {
 
 /* Animation nhấp nháy cho chữ LIVE — không dùng opacity để tránh mờ chữ */
 @keyframes blink-live {
-    0%, 100% {
+
+    0%,
+    100% {
         box-shadow: 0 0 10px 3px rgba(185, 28, 28, 0.7);
     }
+
     50% {
         box-shadow: 0 0 3px 1px rgba(185, 28, 28, 0.2);
     }
@@ -551,7 +562,7 @@ footer .input-group .btn.btn-info {
     color: #fff !important;
     font-weight: 700;
     letter-spacing: 0.05em;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 /* Chống mờ chữ trên badge và nhãn nhỏ */
@@ -565,18 +576,22 @@ footer .input-group .btn.btn-info {
     color: #0c5e78 !important;
     border-color: #0e7490 !important;
 }
+
 .badge.text-danger {
     color: #991b1b !important;
     border-color: #b91c1c !important;
 }
+
 .badge.text-success {
     color: #166534 !important;
     border-color: #15803d !important;
 }
+
 .badge.text-warning {
     color: #854d0e !important;
     border-color: #a16207 !important;
 }
+
 .badge {
     font-weight: 700 !important;
 }
@@ -827,7 +842,7 @@ input[type="file"]::file-selector-button {
     width: 350px;
     height: 350px;
     border-radius: 50%;
-    background: radial-gradient(circle, rgba(6,182,212,0.12) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(6, 182, 212, 0.12) 0%, transparent 70%);
     top: -80px;
     right: -80px;
     pointer-events: none;
@@ -839,7 +854,7 @@ input[type="file"]::file-selector-button {
     width: 250px;
     height: 250px;
     border-radius: 50%;
-    background: radial-gradient(circle, rgba(16,185,129,0.08) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(16, 185, 129, 0.08) 0%, transparent 70%);
     bottom: -60px;
     left: -60px;
     pointer-events: none;
@@ -905,8 +920,8 @@ input[type="file"]::file-selector-button {
     width: 64px;
     height: 64px;
     border-radius: 18px;
-    background: linear-gradient(135deg, rgba(6,182,212,0.12), rgba(6,182,212,0.06));
-    border: 1px solid rgba(6,182,212,0.2);
+    background: linear-gradient(135deg, rgba(6, 182, 212, 0.12), rgba(6, 182, 212, 0.06));
+    border: 1px solid rgba(6, 182, 212, 0.2);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -929,7 +944,7 @@ input[type="file"]::file-selector-button {
     border-color: var(--mg-accent) !important;
 }
 
-.auth-input-group .form-control:focus + .input-group-text,
+.auth-input-group .form-control:focus+.input-group-text,
 .auth-input-group:focus-within .input-group-text {
     border-color: var(--mg-accent);
 }
@@ -951,6 +966,7 @@ input[type="file"]::file-selector-button {
     .auth-split-container {
         flex-direction: column;
     }
+
     .auth-form-panel {
         padding: 2rem 1rem;
         min-height: calc(100vh - 80px);

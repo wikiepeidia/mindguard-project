@@ -1,3 +1,12 @@
+<!--
+DOCUMENT METADATA
+Owner: @backend-developer
+Last updated: 2026-04-14
+Source files: routes/admin.py, routes/scammer.py, models/models.py (ScammerReport, ScamReport)
+Update trigger: Thay đổi quy trình duyệt/từ chối báo cáo, thêm trường mới vào form báo cáo
+Update scope: Cập nhật các bước quy trình, đường dẫn, và ảnh minh họa
+-->
+
 # QUY TRÌNH XỬ LÝ BÁO CÁO LỪA ĐẢO MINDGUARD
 
 ## 1. Mục đích

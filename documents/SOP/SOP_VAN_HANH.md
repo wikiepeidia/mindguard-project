@@ -1,3 +1,12 @@
+<!--
+DOCUMENT METADATA
+Owner: DevOps / Developer
+Last updated: 2026-04-14
+Source files: app.py, config.py, vercel.json, requirements.txt
+Update trigger: Thay đổi cách deploy, thêm env var mới, thay đổi infrastructure
+Update scope: Cập nhật toàn bộ — quy trình deploy, env vars, troubleshooting
+-->
+
 # SOP VẬN HÀNH HỆ THỐNG MINDGUARD
 
 > Phiên bản: 1.0 · Cập nhật: 2026-04-14 · Owner: DevOps / Developer
@@ -116,6 +125,7 @@ Hướng dẫn vận hành hệ thống MindGuard trên môi trường productio
 **Triệu chứng**: Lỗi `OperationalError`, `Connection refused`, hoặc timeout khi truy vấn database.
 
 **Xử lý**:
+
 1. Kiểm tra **NeonDB Dashboard** — xác nhận database đang hoạt động.
 2. Kiểm tra env var `DATABASE_URL` trên Vercel Dashboard đúng format.
 3. NeonDB serverless auto-suspend sau khoảng idle — request đầu có thể chậm hơn.
@@ -128,6 +138,7 @@ Hướng dẫn vận hành hệ thống MindGuard trên môi trường productio
 **Nguyên nhân**: Flask-Limiter giới hạn requests — mặc định 200/phút.
 
 **Xử lý**:
+
 1. Đợi hết cooldown period (thường 1 phút).
 2. Kiểm tra có đang bị spam/abuse không.
 3. Xem chi tiết rate limiting tại ADR-005 trong `docs/technical/DECISIONS.md`.
@@ -139,6 +150,7 @@ Hướng dẫn vận hành hệ thống MindGuard trên môi trường productio
 **Nguyên nhân**: OpenRouter API timeout (8 giây — xem ADR-004).
 
 **Xử lý**:
+
 1. Hệ thống tự động fallback sang model khác.
 2. Kiểm tra **OpenRouter Dashboard** — xem API status và credits.
 3. Kiểm tra env var `OPENROUTER_API_KEY` hợp lệ.
@@ -151,6 +163,7 @@ Hướng dẫn vận hành hệ thống MindGuard trên môi trường productio
 **Nguyên nhân**: Template thiếu CSRF token hoặc session hết hạn.
 
 **Xử lý**:
+
 1. Kiểm tra template có `{{ csrf_token() }}` trong form.
 2. Yêu cầu user refresh trang để lấy session mới.
 3. Kiểm tra `SECRET_KEY` env var đã được set.
@@ -162,6 +175,7 @@ Hướng dẫn vận hành hệ thống MindGuard trên môi trường productio
 **Nguyên nhân**: Vercel serverless filesystem là read-only.
 
 **Xử lý**:
+
 1. Chỉ ghi file vào thư mục `/tmp` (ephemeral — bị xóa sau mỗi request).
 2. Dùng database hoặc external storage cho dữ liệu persistent.
 3. Upload files hiện sử dụng thư mục `static/uploads/` — chỉ hoạt động khi chạy local.

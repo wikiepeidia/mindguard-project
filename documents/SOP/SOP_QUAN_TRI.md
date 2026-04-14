@@ -1,3 +1,12 @@
+<!--
+DOCUMENT METADATA
+Owner: @backend-developer
+Last updated: 2026-04-14
+Source files: routes/admin.py, models/models.py, services/sensitive_access_log.py
+Update trigger: Thay đổi chức năng admin dashboard, thêm/sửa admin route
+Update scope: Cập nhật các bước thao tác, đường dẫn, và bảng thông tin
+-->
+
 # SOP QUẢN TRỊ VIÊN MINDGUARD
 
 > Phiên bản: 1.0 · Cập nhật: 2026-04-14 · Owner: Admin Team
@@ -78,6 +87,7 @@ Dashboard hiển thị:
 **Đường dẫn**: `POST /admin/create-admin`
 
 **Các bước**:
+
 1. Trên Dashboard, tìm form tạo admin.
 2. Nhập thông tin: username, email, password.
 3. Nhấn **Tạo Admin**.
@@ -88,6 +98,7 @@ Dashboard hiển thị:
 **Đường dẫn**: `POST /admin/edit-user/<id>`
 
 **Các bước**:
+
 1. Trên Dashboard, tìm user cần sửa.
 2. Click nút **Sửa**.
 3. Cập nhật thông tin cần thiết.
@@ -100,6 +111,7 @@ Dashboard hiển thị:
 **Đường dẫn**: `POST /admin/delete-user/<id>`
 
 **Các bước**:
+
 1. Trên Dashboard, tìm user cần xóa.
 2. Click nút **Xóa**.
 3. Xác nhận tại hộp thoại hiện ra.
@@ -174,6 +186,7 @@ Dashboard hiển thị:
 ### 9.2 Nội dung ghi nhận
 
 Hệ thống tự động ghi nhận:
+
 - **Ai**: Admin nào thực hiện thao tác.
 - **Làm gì**: Loại action (view, export, update).
 - **Khi nào**: Timestamp.
@@ -182,6 +195,7 @@ Hệ thống tự động ghi nhận:
 ### 9.3 Cảnh báo bất thường
 
 Hệ thống tự động phát hiện access patterns bất thường:
+
 - Export nhiều lần trong thời gian ngắn (ngưỡng: 3 lần).
 - View/update vượt ngưỡng bình thường.
 - Cảnh báo hiển thị trực tiếp trên trang audit logs.

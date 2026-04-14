@@ -42,7 +42,8 @@
 
 ### v1.3 — Hoàn thiện Tài liệu Kỹ thuật & SOP v1
 
-- [x] **Phase 15: Conventions & Redaction Setup** - Thiết lập quy ước viết tài liệu và bảo vệ thông tin nhạy cảm trước khi viết. (completed 2026-04-14)
+- [x] **Phase 15: Conventions & Redaction Setup** - Thiết lập quy ước viết tài liệu và bảo vệ thông tin nhạy cảm trước khi viết.
+ (completed 2026-04-14)
 - [ ] **Phase 16: Foundation Documents** - Document database schema và ghi nhận các quyết định kiến trúc (ADRs).
 - [ ] **Phase 17: System Documents** - Viết ARCHITECTURE.md và API.md phản ánh đúng hệ thống hiện tại.
 - [ ] **Phase 18: Operational SOPs** - Cập nhật và viết mới 3 SOP vận hành cho team.
@@ -302,7 +303,11 @@ Plans:
 3. ADR-003 (Vercel deployment) giải thích serverless constraints (ephemeral filesystem, cold start, 10s timeout) và cách MindGuard thích ứng.
 4. ADR-004 (AI safety) document chiến lược hard-block chủ đề nhạy cảm + fallback khi AI không chắc chắn + timeout 8s.
 5. ADR-005 (Rate limiting) giải thích lựa chọn DB-backed @limiter thay vì in-memory counter và tại sao phù hợp serverless.
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+- [ ] 16-01-PLAN.md — Viết DATABASE.md với schema đầy đủ và Mermaid ER diagram
+- [ ] 16-02-PLAN.md — Thêm ADR-002 đến ADR-005 và cập nhật ADR-001
 
 ### Phase 17: System Documents (ARCHITECTURE.md + API.md)
 

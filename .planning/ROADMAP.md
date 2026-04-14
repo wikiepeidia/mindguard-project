@@ -47,7 +47,8 @@
  (completed 2026-04-14)
 - [x] **Phase 17: System Documents** - Viết ARCHITECTURE.md và API.md phản ánh đúng hệ thống hiện tại.
  (completed 2026-04-14)
-- [x] **Phase 18: Operational SOPs** - Cập nhật và viết mới 3 SOP vận hành cho team. (completed 2026-04-14)
+- [x] **Phase 18: Operational SOPs** - Cập nhật và viết mới 3 SOP vận hành cho team.
+ (completed 2026-04-14)
 - [ ] **Phase 19: Verification & Maintenance Setup** - Xác minh tài liệu đúng với codebase và thiết lập cơ chế chống docs drift.
 
 ## Phase Details
@@ -359,7 +360,11 @@ Plans:
 3. Mỗi tài liệu có metadata header ghi rõ owner, last updated date, và source files tham chiếu.
 4. Conventions file có quy tắc cập nhật tài liệu khi code thay đổi — team biết khi nào và file nào cần update.
 
-**Plans**: TBD
+**Plans:** 2 plans
+
+Plans:
+- [ ] 19-01-PLAN.md — Cross-check all facts in docs vs codebase + PLACEHOLDER audit
+- [ ] 19-02-PLAN.md — Metadata headers on all docs + docs maintenance rules in CONVENTIONS.md
 
 ## Progress Table
 
@@ -383,4 +388,4 @@ Plans:
 | 16. Foundation Documents | 2/2 | Complete    | 2026-04-14 |
 | 17. System Documents | 2/2 | Complete    | 2026-04-14 |
 | 18. Operational SOPs | 2/2 | Complete    | 2026-04-14 |
-| 19. Verification & Maintenance Setup | 0/? | Not started | - |
+| 19. Verification & Maintenance Setup | 0/2 | Not started | - |

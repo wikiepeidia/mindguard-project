@@ -37,6 +37,8 @@ Nguoi dung co the hoc, kiem tra nhan thuc va gui bao cao lua dao mot cach de dun
 - ✓ Anti-spam da tin hieu (IP + cookie + account) — v1.0
 - ✓ Bang vinh danh voi integrity rules — v1.0
 - ✓ SOP bao cao va ML readiness — v1.0
+- ✓ .env.example với placeholder values, không chứa secrets — v1.3 Phase 15
+- ✓ Quy tắc viết tài liệu (ngôn ngữ, glossary, redaction) — v1.3 Phase 15
 
 ### Active
 
@@ -102,4 +104,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-14 after milestone v1.3 initialization*
+*Last updated: 2026-04-14 after Phase 15 complete (Conventions & Redaction Setup)*

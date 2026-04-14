@@ -44,14 +44,14 @@ Nguoi dung co the hoc, kiem tra nhan thuc va gui bao cao lua dao mot cach de dun
 - ✓ Bổ sung ADR cho Vercel deployment — v1.3 Phase 16
 - ✓ Bổ sung ADR cho AI safety decisions — v1.3 Phase 16
 - ✓ Bổ sung ADR cho rate limiting — v1.3 Phase 16
+- ✓ Cập nhật ARCHITECTURE.md cho NeonDB PostgreSQL + Vercel serverless — v1.3 Phase 17
+- ✓ Document tất cả API endpoints trong API.md — v1.3 Phase 17
 
 ### Active
 
 - [ ] Cập nhật SOP_BAO_CAO.md cho đầy đủ theo codebase mới
 - [ ] Viết SOP vận hành hệ thống (deploy Vercel, monitoring, incident response)
 - [ ] Viết SOP quản trị viên (admin dashboard, moderation workflow)
-- [ ] Cập nhật ARCHITECTURE.md cho NeonDB PostgreSQL + Vercel serverless
-- [ ] Document tất cả API endpoints trong API.md
 
 ### Out of Scope
 
@@ -107,4 +107,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-14 after Phase 16 complete (Foundation Documents — DATABASE.md + ADRs)*
+*Last updated: 2026-04-14 after Phase 17 complete (System Documents — ARCHITECTURE.md + API.md)*

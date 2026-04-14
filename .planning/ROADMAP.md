@@ -36,7 +36,8 @@
 - [ ] **Phase 11: UI Bug Fixes** - Sua het loi UI nghiem trong va polish tong the truoc Beta.
 - [ ] **Phase 12: AI Safety** - Dam bao AI chatbot an toan, nhanh, va phu hop ngon ngu nguoi dung pho thong.
 - [ ] **Phase 13: Rate Limiting & Trust Signals** - Chong drain API budget, logging baseline, banner quyen rieng tu, va nut gop y cho Beta.
-- [ ] **Phase 14: Stress Test & Beta Sign-off** - Tim nguong CCU toi da va xac nhan toan bo he thong san sang cho Beta 1.
+- [x] **Phase 14: Stress Test & Beta Sign-off** - Tim nguong CCU toi da va xac nhan toan bo he thong san sang cho Beta 1.
+ (completed 2026-04-14)
 
 ## Phase Details
 
@@ -281,4 +282,4 @@ Plans:
 | 11. UI Bug Fixes | 0/0 | Complete (all 5 reqs done by teammate) | 2026-04-13 |
 | 12. AI Safety | 1/1 | Complete | 2026-04-13 |
 | 13. Rate Limiting & Trust Signals | 0/? | Complete (4/4 reqs done — TRUST-03 feedback button added) | 2026-04-13 |
-| 14. Stress Test & Beta Sign-off | 0/? | Not started | - |
+| 14. Stress Test & Beta Sign-off | 1/1 | Complete | 2026-04-14 |

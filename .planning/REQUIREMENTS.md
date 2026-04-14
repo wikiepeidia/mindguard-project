@@ -82,7 +82,7 @@ Requirements cho gia cố hạ tầng, sửa lỗi UI, an toàn AI, và tin cậ
 - [ ] **INFRA-02**: Di chuyển `ADMIN_PASSWORD`, `REPORT_ENCRYPTION_KEY`, `SECRET_KEY` fallback từ `config.py` sang Vercel environment variables
 - [x] **INFRA-03**: Bỏ hardcode admin credentials khỏi frontend để tránh user xâm nhập tài khoản admin *(đã hoàn thành bởi teammate)*
 - [x] **INFRA-04**: Rate limiting DB-backed trên `/chatbot/api`, `/chatbot/support`, `/chatbot/send` để chống drain API budget *(đã hoàn thành bởi teammate — @limiter.limit trên cả 3 endpoints)*
-- [ ] **INFRA-05**: Stress test với locust tìm ngưỡng CCU tối đa trước Beta 1
+- [x] **INFRA-05**: Stress test với locust tìm ngưỡng CCU tối đa trước Beta 1 *(done — 50 CCU stable, 200 CCU rate-limited, zero 5xx)*
 
 ### Sửa lỗi UI
 
@@ -183,13 +183,13 @@ Requirements cho gia cố hạ tầng, sửa lỗi UI, an toàn AI, và tin cậ
 | TRUST-01 | Phase 13 | Complete (teammate) |
 | TRUST-02 | Phase 13 | Complete (teammate) |
 | TRUST-03 | Phase 13 | Done |
-| INFRA-05 | Phase 14 | Pending |
+| INFRA-05 | Phase 14 | Complete |
 
 **Coverage:**
 
 - v1.0 requirements: 20 total — all complete ✓
 - v1.1 requirements: 10 total — all complete ✓
-- v1.2 requirements: 17 total — 12 complete (teammate), 5 remaining
+- v1.2 requirements: 17 total — 17 complete ✓
 - Mapped to phases: 47/47 total requirements
 - Unmapped: 0
 

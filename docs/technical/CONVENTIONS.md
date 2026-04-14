@@ -157,3 +157,12 @@ source_files:
 1. Khi PR thay đổi code thuộc bảng mapping ở trên → **reviewer kiểm tra** tài liệu tương ứng đã được update chưa.
 2. Nếu chưa update → yêu cầu bổ sung trong cùng PR hoặc tạo issue theo dõi.
 3. Định kỳ (mỗi milestone): chạy cross-check giữa code và tài liệu — xem Phase 19 (Verification).
+
+### Checklist review trước khi merge
+
+- [ ] Code thay đổi model → `DATABASE.md` updated?
+- [ ] Code thay đổi route → `API.md` updated?
+- [ ] Config key mới → `.env.example` + `SOP_VAN_HANH.md` updated?
+- [ ] Thay đổi admin workflow → `SOP_QUAN_TRI.md` updated?
+- [ ] Thay đổi report flow → `SOP_BAO_CAO.md` updated?
+- [ ] Metadata header `last_updated` cập nhật trong file đã sửa?

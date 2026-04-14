@@ -42,7 +42,7 @@
 
 ### v1.3 — Hoàn thiện Tài liệu Kỹ thuật & SOP v1
 
-- [ ] **Phase 15: Conventions & Redaction Setup** - Thiết lập quy ước viết tài liệu và bảo vệ thông tin nhạy cảm trước khi viết.
+- [x] **Phase 15: Conventions & Redaction Setup** - Thiết lập quy ước viết tài liệu và bảo vệ thông tin nhạy cảm trước khi viết. (completed 2026-04-14)
 - [ ] **Phase 16: Foundation Documents** - Document database schema và ghi nhận các quyết định kiến trúc (ADRs).
 - [ ] **Phase 17: System Documents** - Viết ARCHITECTURE.md và API.md phản ánh đúng hệ thống hiện tại.
 - [ ] **Phase 18: Operational SOPs** - Cập nhật và viết mới 3 SOP vận hành cho team.
@@ -288,7 +288,7 @@ Plans:
 **Plans**: 1 plan
 
 Plans:
-- [ ] 15-01-PLAN.md — Create .env.example and docs/technical/CONVENTIONS.md
+- [x] 15-01-PLAN.md — Create .env.example and docs/technical/CONVENTIONS.md
 
 ### Phase 16: Foundation Documents (DECISIONS.md + DATABASE.md)
 
@@ -362,7 +362,7 @@ Plans:
 | 12. AI Safety | 1/1 | Complete | 2026-04-13 |
 | 13. Rate Limiting & Trust Signals | 0/? | Complete (4/4 reqs done — TRUST-03 feedback button added) | 2026-04-13 |
 | 14. Stress Test & Beta Sign-off | 1/1 | Complete | 2026-04-14 |
-| 15. Conventions & Redaction Setup | 0/? | Not started | - |
+| 15. Conventions & Redaction Setup | 1/1 | Complete    | 2026-04-14 |
 | 16. Foundation Documents | 0/? | Not started | - |
 | 17. System Documents | 0/? | Not started | - |
 | 18. Operational SOPs | 0/? | Not started | - |

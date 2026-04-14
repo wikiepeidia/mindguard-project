@@ -19,9 +19,9 @@ Tài liệu này mô tả quy trình chuẩn để quản trị viên MindGuard 
 ## 4. Màn hình và đường dẫn liên quan
 
 - Trang kiểm duyệt: `/admin/scammer-reports`
-- Phê duyệt báo cáo: `POST /approve-report/<report_id>`
-- Từ chối báo cáo: `POST /reject-report/<report_id>`
-- Xuất dữ liệu: `GET /export-dataset`
+- Phê duyệt báo cáo: `POST /admin/approve-report/<report_id>`
+- Từ chối báo cáo: `POST /admin/reject-report/<report_id>`
+- Xuất dữ liệu: `GET/POST /admin/export-dataset`
 
 [PLACEHOLDER_HINH_01: Trang quản trị danh sách báo cáo với bộ lọc Tất cả / Chờ duyệt / Đã duyệt / Đã từ chối]
 [PLACEHOLDER_HINH_02: Cửa sổ xem bằng chứng trong khu vực quản trị]
@@ -210,3 +210,9 @@ Khi người dùng bị giới hạn gửi báo cáo do cooldown:
 - [ ] Đã xem bằng chứng nếu có.
 - [ ] Đã xác nhận trạng thái sau khi thao tác.
 - [ ] Nếu xuất dữ liệu, đã xác định rõ mục đích và yêu cầu bảo mật.
+
+## 11. Tài liệu liên quan
+
+- [docs/technical/API.md](../../docs/technical/API.md) — Chi tiết tất cả endpoints admin (xem section "admin Blueprint")
+- [docs/technical/DATABASE.md](../../docs/technical/DATABASE.md) — Schema bảng `scam_reports`, `scammer_reports`
+- [documents/SOP/SOP_QUAN_TRI.md](SOP_QUAN_TRI.md) — Hướng dẫn quản trị tổng thể (đăng nhập, dashboard, user management)

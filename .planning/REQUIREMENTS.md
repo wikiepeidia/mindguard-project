@@ -212,15 +212,27 @@ Requirements cho cập nhật toàn bộ tài liệu kỹ thuật và SOP dựa 
 | TRUST-02 | Phase 13 | Complete (teammate) |
 | TRUST-03 | Phase 13 | Done |
 | INFRA-05 | Phase 14 | Complete |
+| CONV-01 | Phase 15 | Pending |
+| CONV-02 | Phase 15 | Pending |
+| TECH-03 | Phase 16 | Pending |
+| ADR-01 | Phase 16 | Pending |
+| ADR-02 | Phase 16 | Pending |
+| ADR-03 | Phase 16 | Pending |
+| ADR-04 | Phase 16 | Pending |
+| TECH-01 | Phase 17 | Pending |
+| TECH-02 | Phase 17 | Pending |
+| SOP-01 | Phase 18 | Pending |
+| SOP-02 | Phase 18 | Pending |
+| SOP-03 | Phase 18 | Pending |
 
 **Coverage:**
 
 - v1.0 requirements: 20 total — all complete ✓
 - v1.1 requirements: 10 total — all complete ✓
 - v1.2 requirements: 17 total — 17 complete ✓
-- v1.3 requirements: 13 total — 0 complete
-- Mapped to phases: 47/47 (v1.0-v1.2) + 0/13 (v1.3 pending roadmap)
-- Unmapped: 13 (v1.3 — awaiting roadmap creation)
+- v1.3 requirements: 13 total — 0 complete, 13/13 mapped to phases 15-19
+- Mapped to phases: 60/60 (v1.0-v1.3 all mapped)
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-19*

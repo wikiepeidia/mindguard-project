@@ -2,7 +2,7 @@
 
 **Created:** 2026-03-19
 **Granularity:** standard
-**Coverage:** 16/16 v1.0 requirements mapped · 10/10 v1.1 requirements mapped · 17/17 v1.2 requirements mapped
+**Coverage:** 16/16 v1.0 requirements mapped · 10/10 v1.1 requirements mapped · 17/17 v1.2 requirements mapped · 13/13 v1.3 requirements mapped
 
 ## Phases
 
@@ -38,6 +38,15 @@
 - [ ] **Phase 13: Rate Limiting & Trust Signals** - Chong drain API budget, logging baseline, banner quyen rieng tu, va nut gop y cho Beta.
 - [x] **Phase 14: Stress Test & Beta Sign-off** - Tim nguong CCU toi da va xac nhan toan bo he thong san sang cho Beta 1.
  (completed 2026-04-14)
+
+
+### v1.3 — Hoàn thiện Tài liệu Kỹ thuật & SOP v1
+
+- [ ] **Phase 15: Conventions & Redaction Setup** - Thiết lập quy ước viết tài liệu và bảo vệ thông tin nhạy cảm trước khi viết.
+- [ ] **Phase 16: Foundation Documents** - Document database schema và ghi nhận các quyết định kiến trúc (ADRs).
+- [ ] **Phase 17: System Documents** - Viết ARCHITECTURE.md và API.md phản ánh đúng hệ thống hiện tại.
+- [ ] **Phase 18: Operational SOPs** - Cập nhật và viết mới 3 SOP vận hành cho team.
+- [ ] **Phase 19: Verification & Maintenance Setup** - Xác minh tài liệu đúng với codebase và thiết lập cơ chế chống docs drift.
 
 ## Phase Details
 
@@ -265,6 +274,73 @@ Plans:
 4. Tat ca 17 yeu cau v1.2 da duoc xac nhan hoat dong tren production URL truoc khi ky Beta sign-off.
 **Plans**: TBD
 
+
+### Phase 15: Conventions & Redaction Setup
+
+**Goal**: Quy ước viết tài liệu và bảo vệ thông tin nhạy cảm được thiết lập trước khi viết bất kỳ tài liệu nào.
+**Depends on**: Phase 14 (v1.2 complete)
+**Requirements**: CONV-01, CONV-02
+**Success Criteria** (what must be TRUE):
+
+1. File  tồn tại trong repo, liệt kê tất cả biến môi trường cần thiết với giá trị placeholder — không chứa secret thật.
+2. Có file quy ước ngôn ngữ Việt-Anh rõ ràng: prose viết bằng tiếng Việt, thuật ngữ kỹ thuật giữ nguyên tiếng Anh, bảng thuật ngữ (glossary) đi kèm.
+3. Tất cả tài liệu viết ở các phase sau tuân thủ quy ước ngôn ngữ và không chứa bất kỳ credential/secret thật nào.
+**Plans**: TBD
+
+### Phase 16: Foundation Documents (DECISIONS.md + DATABASE.md)
+
+**Goal**: Các quyết định kiến trúc được ghi nhận chính thức và schema database được document đầy đủ làm nền tảng tham chiếu cho mọi tài liệu sau.
+**Depends on**: Phase 15
+**Requirements**: TECH-03, ADR-01, ADR-02, ADR-03, ADR-04
+**Success Criteria** (what must be TRUE):
+
+1. DATABASE.md chứa tất cả bảng từ models.py (tên bảng, cột, kiểu dữ liệu, quan hệ) kèm ER diagram Mermaid render được trên GitHub.
+2. ADR-002 (NeonDB migration) ghi rõ context, decision, rationale, consequences — reader hiểu tại sao chuyển từ SQLite sang PostgreSQL.
+3. ADR-003 (Vercel deployment) giải thích serverless constraints (ephemeral filesystem, cold start, 10s timeout) và cách MindGuard thích ứng.
+4. ADR-004 (AI safety) document chiến lược hard-block chủ đề nhạy cảm + fallback khi AI không chắc chắn + timeout 8s.
+5. ADR-005 (Rate limiting) giải thích lựa chọn DB-backed @limiter thay vì in-memory counter và tại sao phù hợp serverless.
+**Plans**: TBD
+
+### Phase 17: System Documents (ARCHITECTURE.md + API.md)
+
+**Goal**: Team member mới có thể hiểu kiến trúc tổng thể và tất cả API endpoints của MindGuard từ tài liệu mà không cần đọc source code.
+**Depends on**: Phase 16
+**Requirements**: TECH-01, TECH-02
+**Success Criteria** (what must be TRUE):
+
+1. ARCHITECTURE.md phản ánh đúng stack hiện tại (Flask + NeonDB PostgreSQL + Vercel serverless) với ít nhất 2 Mermaid diagrams (system overview, request flow).
+2. API.md liệt kê đầy đủ tất cả routes (8 blueprints) với method, path, auth requirement, và mô tả response.
+3. API.md phân loại rõ ràng giữa HTML page routes và JSON API endpoints — reader biết endpoint nào trả HTML, endpoint nào trả JSON.
+4. Cross-references giữa ARCHITECTURE.md ↔ DATABASE.md ↔ API.md nhất quán — không có tên bảng, route, hay model nào mâu thuẫn giữa các file.
+**Plans**: TBD
+
+### Phase 18: Operational SOPs
+
+**Goal**: Bất kỳ team member nào cũng có thể vận hành, quản trị, và kiểm duyệt báo cáo trên MindGuard theo tài liệu SOP mà không cần hỏi developer gốc.
+**Depends on**: Phase 17
+**Requirements**: SOP-01, SOP-02, SOP-03
+**Success Criteria** (what must be TRUE):
+
+1. SOP_BAO_CAO.md được cập nhật đúng theo routes/models hiện tại — không còn reference đến schema SQLite cũ hay routes không tồn tại.
+2. SOP Vận hành hệ thống document đầy đủ quy trình: deploy lên Vercel, xem logs trên Vercel dashboard, rollback deployment, xử lý sự cố thường gặp.
+3. SOP Quản trị viên document workflow: đăng nhập admin, duyệt/từ chối báo cáo, export data, moderation flow với các bước cụ thể.
+4. Cả 3 SOP cross-reference đúng đến API.md và DATABASE.md khi đề cập endpoints hoặc bảng dữ liệu.
+**Plans**: TBD
+
+### Phase 19: Verification & Maintenance Setup
+
+**Goal**: Tất cả tài liệu v1.3 được xác minh chính xác với codebase hiện tại và có cơ chế ngăn docs drift trong tương lai.
+**Depends on**: Phase 18
+**Requirements**: Cross-cutting (verifies all v1.3 deliverables: CONV-01 → SOP-03)
+**Success Criteria** (what must be TRUE):
+
+1. Mỗi fact trong tài liệu (tên bảng, route path, config key, model name) đã được kiểm tra chéo với codebase — không có thông tin sai hoặc outdated.
+2. Không còn PLACEHOLDER nào chưa được xử lý trong tất cả tài liệu v1.3.
+3. Mỗi tài liệu có metadata header ghi rõ owner, last updated date, và source files tham chiếu.
+4. Conventions file có quy tắc cập nhật tài liệu khi code thay đổi — team biết khi nào và file nào cần update.
+
+**Plans**: TBD
+
 ## Progress Table
 
 | Phase | Plans Complete | Status | Completed |
@@ -283,3 +359,8 @@ Plans:
 | 12. AI Safety | 1/1 | Complete | 2026-04-13 |
 | 13. Rate Limiting & Trust Signals | 0/? | Complete (4/4 reqs done — TRUST-03 feedback button added) | 2026-04-13 |
 | 14. Stress Test & Beta Sign-off | 1/1 | Complete | 2026-04-14 |
+| 15. Conventions & Redaction Setup | 0/? | Not started | - |
+| 16. Foundation Documents | 0/? | Not started | - |
+| 17. System Documents | 0/? | Not started | - |
+| 18. Operational SOPs | 0/? | Not started | - |
+| 19. Verification & Maintenance Setup | 0/? | Not started | - |

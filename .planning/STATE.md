@@ -1,12 +1,12 @@
 ---
 gsd_state_version: 1.0
 milestone: v1.3
-milestone_name: — Hoàn thiện Tài liệu Kỹ thuật & SOP v1
+milestone_name: "— Hoàn thiện Tài liệu Kỹ thuật & SOP v1"
 status: active
 last_updated: "2026-04-14"
 last_activity: 2026-04-14
 progress:
-  total_phases: 0
+  total_phases: 5
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -21,21 +21,27 @@ progress:
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements
-Last activity: 2026-04-14 — Milestone v1.3 started
+Phase: 15 (Conventions & Redaction Setup)
+Plan: Not started
+Status: Roadmap created, ready for planning
+Last activity: 2026-04-14 — v1.3 roadmap created (5 phases: 15-19)
+
+[░░░░░░░░░░] 0/5 phases (0%)
 
 ## Remaining Work
 
-Defining requirements for v1.3 documentation milestone.
+Phase 15: Conventions & Redaction Setup (CONV-01, CONV-02)
+Phase 16: Foundation Documents (TECH-03, ADR-01 to ADR-04)
+Phase 17: System Documents (TECH-01, TECH-02)
+Phase 18: Operational SOPs (SOP-01, SOP-02, SOP-03)
+Phase 19: Verification & Maintenance Setup (cross-cutting)
 
 ## Performance Metrics
 
-- **v1.3 requirements total**: TBD
+- **v1.3 requirements total**: 13
 - **Completed**: 0
-- **Remaining**: TBD
-- **Coverage**: 0%
+- **Remaining**: 13
+- **Coverage**: 13/13 mapped to phases
 - **Open blockers**: 0
 
 ## Accumulated Context
@@ -52,26 +58,18 @@ Defining requirements for v1.3 documentation milestone.
 - Migrate toàn bộ sang NeonDB PostgreSQL (không giữ SQLite cho local).
 - Postgres trước, Vercel fix sau — DB ổn định là tiên quyết.
 - NeonDB cho cả local và production — cùng connection string.
-- Fresh seed only — không cần migrate user data từ SQLite.
-- Dùng `-pooler` endpoint để tránh connection exhaustion trên serverless.
 
 ### Key Decisions (v1.2)
 
 - CODE FREEZE — không thêm tính năng mới, chỉ sửa lỗi và gia cố.
-- Teammate đã hoàn thành: rate limiting, UI fixes, AI safety (trừ timeout), privacy banner, logging baseline.
-- Còn lại: security hardening (credentials), AI timeout fix, feedback button, stress test.
+- Teammate đã hoàn thành: rate limiting, UI fixes, AI safety, privacy banner, logging baseline.
+- Beta 1 signed off: 50 CCU stable, 200 CCU rate-limited, zero 5xx.
 
-### Pending Todos (5 new bugs from teammate code drop)
+### Key Decisions (v1.3)
 
-- ~~Fix blurry red badge stats on homepage (UI)~~ ✅ Fixed — font-smoothing + translateZ(0)
-- ~~Fix dark theme on featured section homepage (UI)~~ ✅ Fixed — lighter gradient
-- ~~Investigate missing Cloudflare Turnstile CAPTCHA (auth)~~ ✅ Not a bug — CAPTCHA renders correctly
-- ~~Fix toast notification hidden behind header (UI)~~ ✅ Fixed — z-index 10700 > navbar 10500
-- ~~Fix Vercel deployment issues (infra)~~ ✅ Fixed — PostgreSQL config, missing blueprints, logs dir, schema sync
-
-### Open Requirements
-
-None — all requirements complete.
+- Docs-only milestone — không thay đổi code, chỉ viết/cập nhật tài liệu.
+- Conventions trước, viết sau — thiết lập quy ước ngôn ngữ và redaction trước khi viết bất kỳ tài liệu nào.
+- Dependency-ordered writing: DECISIONS + DATABASE → ARCHITECTURE + API → SOPs.
 
 ### Blockers
 
@@ -80,6 +78,6 @@ None — all requirements complete.
 ## Session Continuity
 
 - **Last Updated**: 2026-04-14
-- **Stopped at**: Phase 14 complete. Stress test executed (50+200 CCU). Beta 1 signed off.
-- **Resume with**: Beta 1 launch / v2 planning
-- **Resume file**: .planning/phases/14-stress-test-beta-signoff/BETA-SIGNOFF.md
+- **Stopped at**: v1.3 roadmap created. 5 phases (15-19) mapped, 13/13 requirements covered.
+- **Resume with**: Plan Phase 15 (Conventions & Redaction Setup)
+- **Resume file**: .planning/ROADMAP.md

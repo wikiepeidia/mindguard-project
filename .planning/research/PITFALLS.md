@@ -1,3 +1,265 @@
+# Domain Pitfalls
+
+**Domain:** Adding SOP & technical documentation to an existing Flask production system (MindGuard)
+**Researched:** 2026-04-14
+
+---
+
+## Critical Pitfalls
+
+Mistakes that invalidate documentation value, create security incidents, or cause rewrites.
+
+---
+
+### Pitfall 1: Documenting Aspirational State Instead of Actual State
+
+**What goes wrong:** Writers copy template structures (generic `users` table, REST API with Bearer tokens, JSON error format) into docs without verifying against the live codebase. The documentation describes a system that doesn't exist.
+
+**Why it happens:** Template-driven doc workflows encourage filling in sections without reading code first. The writer assumes the template categories match the project. For MindGuard specifically: `docs/technical/DATABASE.md` currently has a generic `users` table with `uuid` primary keys and `gen_random_uuid()`, but the actual model is `Registration` with integer auto-increment IDs and fields like `cccd`, `is_suspended`, `bio`. `docs/technical/API.md` describes Bearer token authentication, but MindGuard uses Flask session cookies.
+
+**Consequences:**
+- New team members build against documented contracts that don't exist
+- Debugging time increases when docs say one thing, code does another
+- Trust in all documentation collapses — readers learn to ignore docs entirely
+
+**Prevention:**
+1. **Code-first workflow**: For each doc section, open the relevant source file first. `models/models.py` before DATABASE.md, `routes/*.py` before API.md
+2. **Verification pass**: After writing, grep the codebase for every class name, endpoint, and column name mentioned in docs — confirm each exists
+3. **Delete template placeholders ruthlessly**: If a template section doesn't apply (e.g., "Bearer token auth" for a session-based app), delete it rather than leaving it half-filled
+4. **Mark known gaps explicitly**: Use `[NOT YET DOCUMENTED]` or `[NEEDS VERIFICATION]` rather than leaving template defaults that look like real content
+
+**Detection:** Compare any table/column name in DATABASE.md against `models/models.py`. If they don't match, the doc is aspirational.
+
+**Phase to address:** First phase — establish the code-first verification workflow before any writing begins.
+
+---
+
+### Pitfall 2: Security Information Leakage in Documentation
+
+**What goes wrong:** Documentation accidentally includes credentials, internal URLs, connection strings, API keys, admin secrets, or infrastructure details that should never leave the `.env/` directory. This is especially dangerous when docs are committed to a git repository that may become public or shared.
+
+**Why it happens:** Writers copy configuration examples directly from `config.py` or `.env/*.json` files instead of creating sanitized examples. For MindGuard specifically: `config.py` contains a hardcoded `SECRET_KEY`, a hardcoded `ADMIN_UNSUSPEND_SECRET` hash, and a partial OpenRouter API key stub (`sk-or-v1-...`). The `.env/postgresql_neondb.json` contains a live NeonDB connection string with username and password. Any documentation that references "example configuration" might paste these real values.
+
+**Consequences:**
+- Database credentials exposed → full data breach (PII of Vietnamese users, CCCD numbers, phone numbers)
+- Admin unsuspend secret exposed → attacker can reactivate suspended admin accounts
+- API keys exposed → billing abuse on OpenRouter
+- Connection string exposed → direct database access bypassing all application security
+
+**Prevention:**
+1. **Never copy from `.env/` or `config.py` directly** — always create synthetic examples: `DATABASE_URL=postgresql://user:password@host/dbname`
+2. **Pre-commit check**: Before any doc commit, search the diff for patterns: `npg_`, `sk-or-v1-`, `neon.tech`, `@ep-`, any 64-character hex strings
+3. **Create a `.env.example` with placeholder values** and reference that in docs instead of the real config
+4. **Redact in-flight**: When writing deployment SOPs, use `$DATABASE_URL` (env var reference) not the actual connection string
+5. **Review checklist item**: "Does this document contain any string that would be valuable to an attacker?"
+
+**Detection:** `grep -rn "npg_\|sk-or-v1\|neon\.tech\|579c3247\|0f27bbb5" docs/ documents/` — any match is a leak.
+
+**Phase to address:** Immediately — create redaction guidelines and `.env.example` before documentation writing starts.
+
+---
+
+### Pitfall 3: Docs Drift from Code After Initial Writing
+
+**What goes wrong:** Documentation is accurate on day one, but within weeks the code changes and docs are never updated. The longer the drift continues, the more dangerous the docs become — they're worse than no docs because people trust them.
+
+**Why it happens:** Documentation updates aren't part of the definition of done for code changes. Developers update `routes/scammer.py` but don't touch `API.md`. A new column gets added to `ScammerReport` but `DATABASE.md` stays the same. No automated process detects the drift.
+
+**Consequences:**
+- Stale endpoint docs cause integration failures
+- Stale schema docs cause incorrect queries
+- Stale SOP docs cause operators to follow outdated procedures
+- Eventually the team stops reading docs → documentation investment is wasted
+
+**Prevention:**
+1. **CODEOWNERS / update triggers**: Every doc file should have a metadata header specifying *when* it must be updated (the templates already have this — enforce it)
+2. **Link docs to code locations**: In each doc section, add a comment like `<!-- Source: models/models.py:ScammerReport -->` so reviewers know where to verify
+3. **Quarterly freshness check**: Schedule a TODO to re-verify all docs against code every 3 months
+4. **Minimize volatile details**: Don't document exact line numbers or specific default values that change often. Document *patterns* and *contracts* instead
+5. **Convention in CLAUDE.md**: Add rule — "Any PR that changes a route, model, or service MUST update the corresponding doc file or add a `[NEEDS UPDATE]` marker"
+
+**Detection:** Run `git log --since="3 months ago" -- routes/ models/ services/` and check if any corresponding doc file was also modified in the same period.
+
+**Phase to address:** Final phase — set up maintenance conventions after all docs are written. But the *metadata headers* should be established in phase 1.
+
+---
+
+### Pitfall 4: Documenting Deprecated Architecture as Current
+
+**What goes wrong:** Documentation describes the old architecture (SQLite, local file uploads, development-only patterns) because the writer references old docs or outdated mental models instead of the current production state.
+
+**Why it happens:** MindGuard has undergone significant architecture changes: SQLite → NeonDB PostgreSQL (v1.1), local dev → Vercel serverless (v1.1), multiple AI model rotations. The existing `docs/technical/ARCHITECTURE.md` still contains the SQLite-era description ("SQLite provides persistence") while production runs PostgreSQL on NeonDB. Writers who reference existing docs propagate the stale architecture description.
+
+**Consequences:**
+- New developers set up SQLite locally when they should connect to NeonDB
+- Deployment docs describe local file operations that don't work on Vercel (read-only filesystem)
+- Architecture decisions reference constraints that no longer apply
+
+**Prevention:**
+1. **Audit existing docs first**: Before writing new docs, read ALL existing docs and mark each statement as CURRENT / STALE / UNKNOWN
+2. **Single source of truth for stack**: Maintain one canonical "current stack" section (PROJECT.md already has this) and cross-reference it
+3. **Version stamps**: Every doc section should note which version it describes: `*Accurate as of v1.2, NeonDB PostgreSQL on Vercel*`
+4. **Delete confidently**: When a section describes SQLite behavior, delete it and write the PostgreSQL equivalent — don't try to annotate both
+
+**Detection:** Search docs for "SQLite", "sqlite", "mindguard_v2.db", "local file" — any match in non-historical sections indicates stale architecture.
+
+**Phase to address:** First phase — audit all existing docs for staleness before writing new content.
+
+---
+
+## Moderate Pitfalls
+
+---
+
+### Pitfall 5: Over-Documenting Implementation Details, Under-Documenting Decisions
+
+**What goes wrong:** Docs exhaustively describe *what* the code does (every function, every parameter) but skip *why* decisions were made. Six months later, a new developer reads that anti-spam uses a 10-minute window with 3-report threshold but has no idea why those numbers were chosen or what alternatives were considered.
+
+**Why it happens:** It's easy to generate docs from code (describe the function). It's hard to capture the reasoning that happened in Slack, meetings, or developer heads. SOPs especially tend to become step-by-step click guides without explaining the principles behind each step.
+
+**Prevention:**
+1. **ADR discipline for decisions**: Use `docs/technical/DECISIONS.md` for every non-obvious choice. Template: "Context → Decision → Consequences"
+2. **SOPs need a "Why" section**: Each SOP step should have a brief rationale. SOP_BAO_CAO.md already does this well in section 6 (Nguyên tắc xử lý) — maintain this pattern
+3. **Don't document what code already says**: If reading `models/models.py` tells you the column types, don't repeat that in prose. Document relationships, constraints, and *why* the schema looks this way
+4. **Budget rule**: For every 3 "what" paragraphs, include 1 "why" paragraph
+
+**Detection:** Read a doc section and ask "Could I make the same decisions the original developers made, using only this doc?" If no, the *why* is missing.
+
+**Phase to address:** During writing phases — embed decision context alongside descriptions.
+
+---
+
+### Pitfall 6: Vietnamese Technical Writing Anti-Patterns
+
+**What goes wrong:** Documentation mixes Vietnamese prose with untranslated English technical terms inconsistently, uses academic/formal Vietnamese that obscures meaning, or creates Vietnamese terms for concepts that the developer community uses in English.
+
+**Why it happens:** Vietnamese technical writing has no single accepted standard. Different writers transliterate differently. Some force-translate terms like "database" (cơ sở dữ liệu) in every occurrence while keeping "API" in English. The result is docs that are harder to read than either pure Vietnamese or pure English.
+
+**Specific risks for MindGuard:**
+- **Inconsistent terminology**: Is it "báo cáo lừa đảo" or "tố cáo lừa đảo" or "report"? The codebase uses "scammer_reports" (English) while SOP uses "báo cáo" and "tố cáo" (Vietnamese, different words)
+- **Over-translation**: Translating "endpoint" as "điểm cuối" or "route" as "tuyến đường" makes docs unreadable for Vietnamese developers who use English terms daily
+- **Under-translation**: Writing entire SOPs in Vietnamese but keeping all status values in English ("pending", "approved", "rejected") without Vietnamese labels creates confusion for non-technical operators
+- **Diacritic inconsistency**: PROJECT.md mixes accented Vietnamese ("Cập nhật toàn bộ SOP") with unaccented romanization ("Dang ky/dang nhap nguoi dung qua email") — this looks unprofessional and causes search failures
+
+**Prevention:**
+1. **Glossary first**: Create a terminology glossary before writing. Define which terms stay English (API, endpoint, route, database, query) and which are Vietnamese (báo cáo, người dùng, quản trị viên, phê duyệt)
+2. **Status value convention**: Show both: `pending (Chờ duyệt)` in docs, so both developers and operators understand
+3. **Consistent diacritics**: All Vietnamese text must use proper diacritics (tiếng Việt có dấu). No unaccented romanization in final docs
+4. **Code stays English**: Variable names, file paths, command examples stay in English. Only prose, headings, and descriptions are Vietnamese
+5. **Test readability**: Have a Vietnamese-speaking developer read the SOP aloud. If they stumble on phrasing, simplify
+
+**Detection:** Search for unaccented Vietnamese in doc files (words like "nguoi dung" instead of "người dùng"). Search for over-translated technical terms.
+
+**Phase to address:** First phase — establish glossary and writing conventions before any doc writing begins.
+
+---
+
+### Pitfall 7: SOP Procedures That Don't Match Actual System Behavior
+
+**What goes wrong:** SOPs describe an idealized workflow (e.g., "Click the 'Export' button and enter a reason") but the actual UI doesn't have a reason field, or the button is in a different location, or the endpoint has changed. SOPs become fiction.
+
+**Why it happens:** SOPs are often written from requirements or design docs rather than by actually walking through the live system. For MindGuard: SOP_BAO_CAO.md references `POST /approve-report/<report_id>` and `GET /export-dataset` — if these routes were renamed or restructured during v1.1/v1.2, the SOP is wrong. The `[PLACEHOLDER_HINH_*]` markers in the existing SOP indicate screenshots were planned but never added, so no visual verification was done.
+
+**Prevention:**
+1. **Walkthrough-first SOP writing**: Open the running application, perform each step described in the SOP, screenshot the actual UI
+2. **Route verification**: For every URL mentioned in an SOP, `grep -rn "route_path" routes/` to confirm it exists
+3. **Screenshot currency**: Embed screenshots with version labels. Mark them stale if the UI changes
+4. **Placeholder audit**: Search for `[PLACEHOLDER` in all SOPs — every placeholder is an unfinished section
+
+**Detection:** Search for `PLACEHOLDER` in docs. Grep each documented URL against `routes/`. Attempt to follow each SOP step on the live system.
+
+**Phase to address:** During SOP writing phases — require live system walkthrough as a writing prerequisite.
+
+---
+
+### Pitfall 8: Documenting Everything, Maintaining Nothing
+
+**What goes wrong:** The team creates a comprehensive documentation set (ARCHITECTURE, API, DATABASE, SOPs, guides, ADRs) in milestone v1.3, declares victory, and never touches it again. Within two milestones, the entire corpus is stale.
+
+**Why it happens:** Documentation is treated as a one-time project rather than an ongoing practice. There's no maintenance trigger, no ownership assignment, no regular review cadence. The team moves on to feature work in v1.4+.
+
+**Prevention:**
+1. **Assign owners**: Each doc file must have a `<!-- Owner: @role -->` metadata header (the templates already support this — enforce it)
+2. **Lightweight maintenance trigger**: Add to the dev workflow: "If you change a route/model/service, add `[NEEDS UPDATE: description]` to the relevant doc file in the same PR"
+3. **Don't over-produce**: Better to have 5 accurate, maintained docs than 15 stale ones. Only document what will actually be read and maintained
+4. **Sunset docs intentionally**: If a doc hasn't been updated in 6 months and no one has complained, archive it rather than letting it mislead
+
+**Detection:** `git log --all --diff-filter=M -- docs/` — if no doc was modified in 3+ months while code changed, docs are drifting.
+
+**Phase to address:** Final phase — establish maintenance conventions, ownership, and review cadence.
+
+---
+
+## Minor Pitfalls
+
+---
+
+### Pitfall 9: Inconsistent Doc File Locations
+
+**What goes wrong:** Documentation is scattered across `documents/`, `docs/`, `documents/SOP/`, `.planning/`, and inline in `CLAUDE.md`, `README.md`, `copilot-instructions.md`. New team members don't know where to look. Some information is duplicated with conflicting versions.
+
+**Prevention:**
+1. Establish a single canonical location for each doc type (SOPs → `documents/SOP/`, technical → `docs/technical/`, user guides → `docs/user/`)
+2. Add a docs index/README at the root of each doc directory
+3. Don't duplicate information — cross-reference instead
+
+**Phase to address:** First phase — document the documentation structure itself.
+
+---
+
+### Pitfall 10: Writing Docs That No One Will Read
+
+**What goes wrong:** Team writes detailed 50-page technical docs that no one in the target audience (Vietnamese university students, part-time contributors) will read. Docs are too long, too formal, or too dense.
+
+**Prevention:**
+1. **Know your audience**: MindGuard contributors are likely students or junior developers. Keep language simple, include examples
+2. **TL;DR sections**: Every doc longer than 2 pages needs a summary at the top
+3. **Progressive disclosure**: Start with the quick version, link to details. QUICK_START.md → detailed guides
+4. **Task-oriented SOPs**: "How do I approve a report?" not "Comprehensive Report Management System Overview"
+
+**Phase to address:** During writing phases — review tone and length for each doc.
+
+---
+
+### Pitfall 11: Missing or Broken Code Examples in Docs
+
+**What goes wrong:** API docs include code examples that use the wrong endpoint, wrong request format, or wrong response shape. Database docs show SQL that doesn't match the ORM. Examples were written from imagination, not from actual tested requests.
+
+**Prevention:**
+1. Every code example should be copy-pasteable and tested against the running system
+2. For Flask routes, include the actual `curl` command or Python `requests` call that works
+3. Mark untested examples clearly: `<!-- UNTESTED: verify before publishing -->`
+
+**Phase to address:** During API and database doc writing phases.
+
+---
+
+## Phase-Specific Warnings
+
+| Phase Topic | Likely Pitfall | Mitigation |
+|-------------|---------------|------------|
+| SOP_BAO_CAO update | **#7** SOPs describe old routes/UI that changed in v1.1-v1.2 | Walk through live admin dashboard before writing |
+| System operations SOP (Vercel deploy) | **#2** Accidentally including NeonDB connection string or Vercel tokens | Create `.env.example` first; never paste from `.env/` |
+| Admin SOP | **#7** Documenting admin features that changed during v1.2 hardening | Verify each admin route exists in `routes/admin.py` |
+| ARCHITECTURE.md update | **#4** Propagating SQLite references from current doc | Delete entire current content; rewrite from scratch based on actual `config.py` + `app.py` |
+| API.md documentation | **#1** Using Bearer token template when app uses session auth | Start by reading `routes/auth.py` and `utils/helpers.py` decorator code |
+| DATABASE.md documentation | **#1** Using generic `users` template instead of actual `Registration` model | Generate table docs directly from `models/models.py`, not from template |
+| ADR writing | **#5** Writing ADRs that say what was decided but not why | Include context section with what alternatives were considered |
+| All docs (Vietnamese) | **#6** Inconsistent terminology, mixed diacritics | Create glossary in first phase, enforce in reviews |
+| All docs (maintenance) | **#3, #8** Docs accurate at v1.3, stale by v1.4 | Establish ownership + update triggers in final phase |
+
+---
+
+## Sources
+
+- Direct codebase analysis of MindGuard v1.2 (2026-04-14)
+- `config.py` — observed hardcoded secrets and configuration patterns
+- `models/models.py` — compared against `docs/technical/DATABASE.md` template content
+- `docs/technical/ARCHITECTURE.md` — observed stale SQLite references vs actual NeonDB stack
+- `docs/technical/API.md` — observed Bearer token template vs actual session-based auth
+- `documents/SOP/SOP_BAO_CAO.md` — observed placeholder markers and route references
+- `.planning/PROJECT.md` — confirmed v1.1 PostgreSQL migration and v1.2 completion
+- General domain knowledge: Flask documentation best practices, Vietnamese technical writing conventions, OWASP information disclosure risks
 # Pitfalls Research
 
 **Domain:** Flask + Vercel Serverless + NeonDB PostgreSQL hardening under Code Freeze

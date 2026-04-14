@@ -1,15 +1,15 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.0
-milestone_name: — Core Platform
-status: complete
+milestone: v1.3
+milestone_name: — Hoàn thiện Tài liệu Kỹ thuật & SOP v1
+status: active
 last_updated: "2026-04-14"
 last_activity: 2026-04-14
 progress:
-  total_phases: 14
-  completed_phases: 14
-  total_plans: 20
-  completed_plans: 20
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
 ---
 
 # STATE - MindGuard v2
@@ -17,30 +17,25 @@ progress:
 ## Project Reference
 
 - **Core Value**: Người dùng có thể học, kiểm tra nhận thức và gửi báo cáo lừa đảo một cách dễ dùng, an toàn, và đáng tin cậy.
-- **Current Focus**: v1.2 Beta 1 Go-Live — 17/17 reqs COMPLETE. Beta 1 APPROVED.
+- **Current Focus**: v1.3 Hoàn thiện Tài liệu Kỹ thuật & SOP v1
 
 ## Current Position
 
-Phase: 14
-Plan: Complete
-Status: All phases complete — Beta 1 approved
-Last activity: 2026-04-14
-
-```text
-Progress: [████████████████████] 17/17 requirements complete
-           Phase 10 ✓ → 11 ✓ → 12 ✓ → 13 ✓ → 14 ✓ (DONE)
-```
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-04-14 — Milestone v1.3 started
 
 ## Remaining Work
 
-None — all v1.2 requirements complete. Beta 1 signed off.
+Defining requirements for v1.3 documentation milestone.
 
 ## Performance Metrics
 
-- **v1.2 requirements total**: 17
-- **Completed**: 17
-- **Remaining**: 0
-- **Coverage**: 100% mapped
+- **v1.3 requirements total**: TBD
+- **Completed**: 0
+- **Remaining**: TBD
+- **Coverage**: 0%
 - **Open blockers**: 0
 
 ## Accumulated Context

@@ -8,18 +8,19 @@ MindGuard v2 la nen tang giao duc an toan mang va phong chong lua dao duoc xay d
 
 Nguoi dung co the hoc, kiem tra nhan thuc va gui bao cao lua dao mot cach de dung, an toan, va dang tin cay.
 
-## Current Milestone: v1.2 Beta 1 Go-Live (Code Freeze)
+## Current Milestone: v1.3 Hoàn thiện Tài liệu Kỹ thuật & SOP v1
 
-**Goal:** Sửa lỗi UI nghiêm trọng, gia cố hạ tầng chống quá tải, đảm bảo an toàn AI, và hoàn thiện tài liệu trước khi ra mắt Beta 1 cho người dân Hà Nội (~10 triệu người dùng tiềm năng).
+**Goal:** Cập nhật toàn bộ SOP và tài liệu kỹ thuật dựa trên codebase hiện tại để phục vụ handoff và onboarding team members.
 
 **Target features:**
 
-- Sửa lỗi UI nghiêm trọng (dropdown "Đăng xuất", hitbox "Hồ sơ", chatbot lưu lịch sử, huy hiệu Certification)
-- Rate limiting + WAF rules cho AI chatbot endpoints (chống drain API budget)
-- Xác minh logging baseline và stress test tìm ngưỡng CCU
-- Banner chính sách quyền riêng tư trên trang chủ
-- Điều chỉnh AI prompt bình dân hóa + fallback cứng cho chủ đề nhạy cảm
-- Nút "Báo cáo sai / Góp ý" cho Beta
+- Cập nhật SOP_BAO_CAO.md cho đầy đủ theo codebase mới
+- Viết SOP vận hành hệ thống (deploy Vercel, monitoring, incident response)
+- Viết SOP quản trị viên (admin dashboard, moderation workflow)
+- Cập nhật ARCHITECTURE.md cho NeonDB PostgreSQL + Vercel serverless
+- Document tất cả API endpoints trong API.md
+- Document database schema thực tế trong DATABASE.md
+- Bổ sung ADR cho NeonDB migration, Vercel deployment, AI safety decisions
 
 ## Requirements
 
@@ -39,38 +40,34 @@ Nguoi dung co the hoc, kiem tra nhan thuc va gui bao cao lua dao mot cach de dun
 
 ### Active
 
-- [ ] Sửa nút "Đăng xuất" bị chết trong dropdown menu
-- [ ] Sửa hitbox quá nhỏ của mục "Hồ sơ" trong menu
-- [ ] Sửa chatbot bubble chat không lưu lịch sử giữa các phiên
-- [ ] Thiết kế và triển khai huy hiệu "Certification Verify" đúng cách
-- [ ] Rate limiting + WAF rules trên endpoint AI chatbot
-- [ ] Xác minh logging baseline (request, error, audit logs) hoạt động và lưu trữ an toàn
-- [ ] Stress test tìm ngưỡng CCU tối đa cho Beta 1
-- [ ] Banner chính sách quyền riêng tư trên trang chủ
-- [ ] Điều chỉnh system prompt AI cho ngôn ngữ bình dân
-- [ ] Cơ chế fallback cứng cho AI khi gặp chủ đề nhạy cảm (OTP + Hotline Công an Hà Nội)
-- [ ] Nút "Báo cáo sai / Góp ý" cho Beta
+- [ ] Cập nhật SOP_BAO_CAO.md cho đầy đủ theo codebase mới
+- [ ] Viết SOP vận hành hệ thống (deploy Vercel, monitoring, incident response)
+- [ ] Viết SOP quản trị viên (admin dashboard, moderation workflow)
+- [ ] Cập nhật ARCHITECTURE.md cho NeonDB PostgreSQL + Vercel serverless
+- [ ] Document tất cả API endpoints trong API.md
+- [ ] Document database schema thực tế trong DATABASE.md
+- [ ] Bổ sung ADR cho NeonDB migration, Vercel deployment, AI safety decisions
 
 ### Out of Scope
 
-- Dark mode trong v1.2 — ưu tiên sửa lỗi và gia cố, không thêm tính năng
-- Tính năng mới (notifications, social, gamification) — CODE FREEZE cho Beta 1
-- Auto-scaling/multi-region — v1.2 chỉ cần 1 region ổn định
+- Dark mode — ưu tiên tài liệu, không thêm tính năng mới
+- Tính năng mới (notifications, social, gamification) — milestone tài liệu, không code
+- Auto-scaling/multi-region — không nằm trong scope v1.3
 - Migration tool tự động (Alembic/flask-migrate) — dùng manual scripts theo conventions
-- OAuth/2FA — không nằm trong scope Beta 1
+- Tài liệu tiếng Anh — v1.3 chỉ viết tiếng Việt, song ngữ về sau
 
 ## Context
 
-Dự án đã hoàn thành v1.0 (6 phases: Privacy, Anti-Spam, Light Mode, Quiz Flow, Leaderboard, Docs/ML) và v1.1 (3 phases: PostgreSQL migration, seeding, Vercel deployment). App đang live tại mindguard-five.vercel.app trên NeonDB PostgreSQL. Hiện tại đang trong giai đoạn CODE FREEZE chuẩn bị Beta 1 Go-Live trước ngày lễ quốc gia. MindGuard được định vị là ứng dụng AI chatbot phát hiện lừa đảo tài chính công cộng cho người dân Hà Nội (~10 triệu người dùng tiềm năng). Chỉ sửa lỗi, gia cố hạ tầng, và đảm bảo an toàn AI.
+Dự án đã hoàn thành v1.0 (6 phases: Privacy, Anti-Spam, Light Mode, Quiz Flow, Leaderboard, Docs/ML), v1.1 (3 phases: PostgreSQL migration, seeding, Vercel deployment), và v1.2 (5 phases: Infrastructure hardening, UI fixes, AI safety, Trust signals, Stress test — Beta 1 approved). App đang live tại mindguard-five.vercel.app trên NeonDB PostgreSQL. Hiện tại cần hoàn thiện tài liệu kỹ thuật và SOP dựa trên codebase hiện tại để phục vụ handoff và onboarding cho team members.
 
 ## Constraints
 
 - **Tech stack**: Flask + NeonDB PostgreSQL + SQLAlchemy + Jinja — không thay đổi stack
 - **Database**: NeonDB PostgreSQL cho cả local và production — không phân tách env
 - **Deployment**: Vercel serverless — read-only filesystem, ephemeral function instances
-- **Code Freeze**: KHÔNG thêm tính năng mới — chỉ sửa lỗi, gia cố, và an toàn AI
+- **Docs Only**: Milestone này chỉ viết/cập nhật tài liệu — không thay đổi code
 - **Security**: Connection string và credentials phải được bảo vệ trong .env/ — không commit secrets
-- **Quy mô**: Phải sẵn sàng cho ~10 triệu người dùng tiềm năng (Beta 1 Hà Nội)
+- **Ngôn ngữ**: Tất cả tài liệu viết bằng tiếng Việt
 
 ## Key Decisions
 
@@ -82,7 +79,8 @@ Dự án đã hoàn thành v1.0 (6 phases: Privacy, Anti-Spam, Light Mode, Quiz 
 | Migrate toàn bộ sang NeonDB PostgreSQL cho v1.1 | SQLite không phù hợp Vercel serverless (ephemeral /tmp), NeonDB đã có sẵn | ✓ Good |
 | NeonDB cho cả local và production | Đơn giản hóa config, tránh sqlite/postgres incompatibility | ✓ Good |
 | Postgres trước, Vercel fix sau | DB ổn định là tiên quyết để debug deployment | ✓ Good |
-| Code Freeze cho v1.2 Beta 1 | Ổn định trước go-live, không thêm tính năng mới | — Pending |
+| Code Freeze cho v1.2 Beta 1 | Ổn định trước go-live, không thêm tính năng mới | ✓ Good |
+| Docs-only milestone v1.3 | Hoàn thiện tài liệu trước khi mở rộng tính năng | — Pending |
 
 ## Evolution
 
@@ -104,4 +102,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-10 after milestone v1.2 initialization*
+*Last updated: 2026-04-14 after milestone v1.3 initialization*

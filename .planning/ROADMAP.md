@@ -285,7 +285,10 @@ Plans:
 1. File  tồn tại trong repo, liệt kê tất cả biến môi trường cần thiết với giá trị placeholder — không chứa secret thật.
 2. Có file quy ước ngôn ngữ Việt-Anh rõ ràng: prose viết bằng tiếng Việt, thuật ngữ kỹ thuật giữ nguyên tiếng Anh, bảng thuật ngữ (glossary) đi kèm.
 3. Tất cả tài liệu viết ở các phase sau tuân thủ quy ước ngôn ngữ và không chứa bất kỳ credential/secret thật nào.
-**Plans**: TBD
+**Plans**: 1 plan
+
+Plans:
+- [ ] 15-01-PLAN.md — Create .env.example and docs/technical/CONVENTIONS.md
 
 ### Phase 16: Foundation Documents (DECISIONS.md + DATABASE.md)
 

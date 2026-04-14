@@ -28,6 +28,7 @@ MindGuard sử dụng 14 bảng PostgreSQL, chia thành 6 nhóm domain:
 - **Subscriptions & Audit** — Theo dõi đối tượng và nhật ký truy cập dữ liệu nhạy cảm
 
 **Quan hệ chính**:
+
 - `registrations` là bảng trung tâm — được tham chiếu bởi `ai_chat_sessions`, `subscriptions`, `sensitive_access_logs`, `chat_feedbacks`
 - `scammer_reports` → `scammer_leaderboard`: một scammer có một leaderboard entry
 - `ai_chat_sessions` → `ai_chat_messages`: một session có nhiều messages (cascade delete)

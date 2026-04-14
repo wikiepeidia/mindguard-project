@@ -20,11 +20,13 @@ Key risks are: (1) security information leakage — `config.py` contains hardcod
 Zero new dependencies required. The entire milestone uses tools already in the project ecosystem.
 
 **Core technologies:**
+
 - **Markdown (CommonMark + GFM)**: All documentation format — already in use, GitHub renders natively
 - **Mermaid 11.x**: Diagrams (architecture, ER, flows, SOPs) — GitHub renders fenced blocks natively since 2022, no install needed
 - **VS Code + extensions**: Authoring environment — optional extensions for preview (Markdown All in One, Mermaid Preview, markdownlint)
 
 **Conventions established:**
+
 - Vietnamese for all prose; English for code identifiers and technical terms
 - SOP structure follows existing `SOP_BAO_CAO.md` pattern (numbered sections, checklists, route references)
 - ADR format: Context → Decision → Rationale → Consequences (Vietnamese headings)
@@ -35,6 +37,7 @@ Zero new dependencies required. The entire milestone uses tools already in the p
 ### Expected Features
 
 **Must have (table stakes) — 9 deliverables:**
+
 1. **SOP Báo cáo lừa đảo (cập nhật)** — existing doc references pre-migration schema, 4 PLACEHOLDER images unfilled
 2. **SOP Vận hành hệ thống** — does not exist; only 1 person can currently deploy/debug
 3. **SOP Quản trị viên** — admin dashboard has zero documentation
@@ -46,12 +49,14 @@ Zero new dependencies required. The entire milestone uses tools already in the p
 9. **ADR: AI Safety** — hard-block and fallback logic not recorded
 
 **Should have (differentiators):**
+
 - Runbook: Sự cố thường gặp (quick-reference troubleshooting)
 - Data flow diagrams (Mermaid, 4 core flows)
 - Environment variables reference table
 - ADR: Anti-Spam Architecture, ADR: Privacy & Data Masking
 
 **Defer (post-v1.3):**
+
 - English translations, User Guide rewrite, Swagger/OpenAPI, video walkthroughs, automated doc tests, separate security document
 
 *Details: [FEATURES_v1.3_docs.md](FEATURES_v1.3_docs.md)*
@@ -61,6 +66,7 @@ Zero new dependencies required. The entire milestone uses tools already in the p
 The documentation has a clear dependency graph: DECISIONS.md (why) → DATABASE.md (what data) → ARCHITECTURE.md (how it works) → API.md (contracts) → SOPs (how to operate). Writing out of order creates cross-reference errors. The codebase has 42 routes across 8 blueprints, ~9 JSON endpoints (rest are HTML), 13+ SQLAlchemy models, and 5 service modules. All extraction is from direct code reading — no external APIs or tools needed.
 
 **Major components to document:**
+
 1. **DECISIONS.md** — Foundation: ADR-002 through ADR-006 capturing NeonDB, Vercel, AI, anti-spam, privacy decisions
 2. **DATABASE.md** — Schema truth: 13 models extracted from `models/models.py`, ER diagram in Mermaid
 3. **ARCHITECTURE.md** — System view: updated tech stack, 4 data flow diagrams, Vercel/NeonDB infrastructure
@@ -86,6 +92,7 @@ The documentation has a clear dependency graph: DECISIONS.md (why) → DATABASE.
 Based on combined research, the milestone should follow a 5-phase structure with strict ordering:
 
 ### Phase 1: Conventions & Redaction Setup
+
 **Rationale:** Both PITFALLS and ARCHITECTURE research independently concluded that conventions must be established before writing. Vietnamese glossary, credential redaction rules, and verification checklists prevent the top 4 pitfalls.
 **Delivers:** Vietnamese terminology glossary, `.env.example` with placeholder values, document verification checklist, writing style guide
 **Addresses:** Pitfall #2 (security leakage), Pitfall #6 (Vietnamese quality), Pitfall #1 (aspirational docs)
@@ -93,6 +100,7 @@ Based on combined research, the milestone should follow a 5-phase structure with
 **Effort:** LOW — small artifacts, high leverage
 
 ### Phase 2: Foundation Documents (DECISIONS.md + DATABASE.md)
+
 **Rationale:** ARCHITECTURE research identified DECISIONS.md as having zero dependencies and DATABASE.md as referenced by both API.md and SOPs. These must exist first. FEATURES research confirms DATABASE.md unblocks Wave 2 and Wave 3.
 **Delivers:** ADR-002 through ADR-004 (NeonDB, Vercel, AI Safety), complete DATABASE.md with 13 models and Mermaid ER diagram
 **Addresses:** Table stakes #4, #7, #8, #9
@@ -100,6 +108,7 @@ Based on combined research, the milestone should follow a 5-phase structure with
 **Effort:** MEDIUM — DATABASE.md requires extracting all 13 models from `models/models.py`
 
 ### Phase 3: System Documents (ARCHITECTURE.md + API.md)
+
 **Rationale:** Both depend on DATABASE.md (model references in data flows, response schemas) and DECISIONS.md (ADR cross-references). API.md is the largest single deliverable by volume (42 routes) but mechanical.
 **Delivers:** Updated ARCHITECTURE.md with NeonDB/Vercel reality + 4 data flow diagrams, complete API.md with all 42 routes categorized as HTML vs JSON
 **Addresses:** Table stakes #5, #6
@@ -107,6 +116,7 @@ Based on combined research, the milestone should follow a 5-phase structure with
 **Effort:** HIGH — ARCHITECTURE.md partial rewrite + API.md from scratch (9 route files to audit)
 
 ### Phase 4: Operational SOPs
+
 **Rationale:** All 3 SOPs cross-reference technical docs. SOP Vận hành needs ARCHITECTURE.md for system context. SOP Báo cáo needs API.md for endpoint references. SOP Quản trị depends on both plus SOP Báo cáo.
 **Delivers:** Updated SOP_BAO_CAO.md, new SOP_VAN_HANH.md, new SOP_QUAN_TRI.md
 **Addresses:** Table stakes #1, #2, #3
@@ -115,6 +125,7 @@ Based on combined research, the milestone should follow a 5-phase structure with
 **Effort:** HIGH — 2 SOPs from scratch, 1 update with verification
 
 ### Phase 5: Verification & Maintenance Setup
+
 **Rationale:** PITFALLS research identified docs drift as the #1 long-term risk. After all docs are written, establish maintenance conventions so docs survive past v1.3.
 **Delivers:** Source-link comments in all docs, ownership metadata headers, update trigger convention added to CLAUDE.md, doc freshness checklist
 **Addresses:** Pitfall #3 (docs drift), Pitfall #8 (documenting everything, maintaining nothing)
@@ -132,10 +143,12 @@ Based on combined research, the milestone should follow a 5-phase structure with
 ### Research Flags
 
 Phases likely needing deeper research during planning:
+
 - **Phase 3 (API.md):** Largest volume deliverable — 42 routes across 9 files. May need sub-task breakdown per blueprint.
 - **Phase 4 (SOP Vận hành):** Requires Vercel/NeonDB operational knowledge that may not be fully captured in code. Writer needs access to Vercel dashboard and NeonDB console.
 
 Phases with standard patterns (skip research-phase):
+
 - **Phase 1 (Conventions):** Straightforward artifact creation — glossary, checklist, example file.
 - **Phase 2 (DECISIONS + DATABASE):** Mechanical extraction from `models/models.py` and decision context from PROJECT.md.
 - **Phase 5 (Verification):** Checklist-driven verification pass.
@@ -161,6 +174,7 @@ Phases with standard patterns (skip research-phase):
 ## Sources
 
 ### Primary (HIGH confidence)
+
 - `models/models.py` — 13+ SQLAlchemy models, column types, relationships, constraints
 - `routes/*.py` — 42 routes across 8 blueprints (auth, admin, chatbot, quiz, scammer, main, library, api)
 - `config.py` — NeonDB PostgreSQL config, hardcoded secrets identified, anti-spam settings
@@ -170,16 +184,19 @@ Phases with standard patterns (skip research-phase):
 - `documents/SOP/*.md` — Current state audit of existing SOPs and guides
 
 ### Secondary (MEDIUM confidence)
+
 - `.planning/PROJECT.md` — v1.3 milestone definition and requirements
 - GitHub Mermaid support documentation — native rendering confirmed since Feb 2022
 - Existing `SOP_BAO_CAO.md` patterns — used as template for SOP conventions
 
 ### Tertiary (LOW confidence)
+
 - Vietnamese technical writing conventions — no authoritative standard exists; conventions derived from existing project docs and common practice
 
 ---
 *Research completed: 2026-04-14*
 *Ready for roadmap: yes*
+
 # Project Research Summary
 
 **Project:** MindGuard v1.1 — PostgreSQL Migration & Vercel Deployment Fix

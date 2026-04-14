@@ -18,11 +18,13 @@ Mistakes that invalidate documentation value, create security incidents, or caus
 **Why it happens:** Template-driven doc workflows encourage filling in sections without reading code first. The writer assumes the template categories match the project. For MindGuard specifically: `docs/technical/DATABASE.md` currently has a generic `users` table with `uuid` primary keys and `gen_random_uuid()`, but the actual model is `Registration` with integer auto-increment IDs and fields like `cccd`, `is_suspended`, `bio`. `docs/technical/API.md` describes Bearer token authentication, but MindGuard uses Flask session cookies.
 
 **Consequences:**
+
 - New team members build against documented contracts that don't exist
 - Debugging time increases when docs say one thing, code does another
 - Trust in all documentation collapses — readers learn to ignore docs entirely
 
 **Prevention:**
+
 1. **Code-first workflow**: For each doc section, open the relevant source file first. `models/models.py` before DATABASE.md, `routes/*.py` before API.md
 2. **Verification pass**: After writing, grep the codebase for every class name, endpoint, and column name mentioned in docs — confirm each exists
 3. **Delete template placeholders ruthlessly**: If a template section doesn't apply (e.g., "Bearer token auth" for a session-based app), delete it rather than leaving it half-filled
@@ -41,12 +43,14 @@ Mistakes that invalidate documentation value, create security incidents, or caus
 **Why it happens:** Writers copy configuration examples directly from `config.py` or `.env/*.json` files instead of creating sanitized examples. For MindGuard specifically: `config.py` contains a hardcoded `SECRET_KEY`, a hardcoded `ADMIN_UNSUSPEND_SECRET` hash, and a partial OpenRouter API key stub (`sk-or-v1-...`). The `.env/postgresql_neondb.json` contains a live NeonDB connection string with username and password. Any documentation that references "example configuration" might paste these real values.
 
 **Consequences:**
+
 - Database credentials exposed → full data breach (PII of Vietnamese users, CCCD numbers, phone numbers)
 - Admin unsuspend secret exposed → attacker can reactivate suspended admin accounts
 - API keys exposed → billing abuse on OpenRouter
 - Connection string exposed → direct database access bypassing all application security
 
 **Prevention:**
+
 1. **Never copy from `.env/` or `config.py` directly** — always create synthetic examples: `DATABASE_URL=postgresql://user:password@host/dbname`
 2. **Pre-commit check**: Before any doc commit, search the diff for patterns: `npg_`, `sk-or-v1-`, `neon.tech`, `@ep-`, any 64-character hex strings
 3. **Create a `.env.example` with placeholder values** and reference that in docs instead of the real config
@@ -66,12 +70,14 @@ Mistakes that invalidate documentation value, create security incidents, or caus
 **Why it happens:** Documentation updates aren't part of the definition of done for code changes. Developers update `routes/scammer.py` but don't touch `API.md`. A new column gets added to `ScammerReport` but `DATABASE.md` stays the same. No automated process detects the drift.
 
 **Consequences:**
+
 - Stale endpoint docs cause integration failures
 - Stale schema docs cause incorrect queries
 - Stale SOP docs cause operators to follow outdated procedures
 - Eventually the team stops reading docs → documentation investment is wasted
 
 **Prevention:**
+
 1. **CODEOWNERS / update triggers**: Every doc file should have a metadata header specifying *when* it must be updated (the templates already have this — enforce it)
 2. **Link docs to code locations**: In each doc section, add a comment like `<!-- Source: models/models.py:ScammerReport -->` so reviewers know where to verify
 3. **Quarterly freshness check**: Schedule a TODO to re-verify all docs against code every 3 months
@@ -91,11 +97,13 @@ Mistakes that invalidate documentation value, create security incidents, or caus
 **Why it happens:** MindGuard has undergone significant architecture changes: SQLite → NeonDB PostgreSQL (v1.1), local dev → Vercel serverless (v1.1), multiple AI model rotations. The existing `docs/technical/ARCHITECTURE.md` still contains the SQLite-era description ("SQLite provides persistence") while production runs PostgreSQL on NeonDB. Writers who reference existing docs propagate the stale architecture description.
 
 **Consequences:**
+
 - New developers set up SQLite locally when they should connect to NeonDB
 - Deployment docs describe local file operations that don't work on Vercel (read-only filesystem)
 - Architecture decisions reference constraints that no longer apply
 
 **Prevention:**
+
 1. **Audit existing docs first**: Before writing new docs, read ALL existing docs and mark each statement as CURRENT / STALE / UNKNOWN
 2. **Single source of truth for stack**: Maintain one canonical "current stack" section (PROJECT.md already has this) and cross-reference it
 3. **Version stamps**: Every doc section should note which version it describes: `*Accurate as of v1.2, NeonDB PostgreSQL on Vercel*`
@@ -118,6 +126,7 @@ Mistakes that invalidate documentation value, create security incidents, or caus
 **Why it happens:** It's easy to generate docs from code (describe the function). It's hard to capture the reasoning that happened in Slack, meetings, or developer heads. SOPs especially tend to become step-by-step click guides without explaining the principles behind each step.
 
 **Prevention:**
+
 1. **ADR discipline for decisions**: Use `docs/technical/DECISIONS.md` for every non-obvious choice. Template: "Context → Decision → Consequences"
 2. **SOPs need a "Why" section**: Each SOP step should have a brief rationale. SOP_BAO_CAO.md already does this well in section 6 (Nguyên tắc xử lý) — maintain this pattern
 3. **Don't document what code already says**: If reading `models/models.py` tells you the column types, don't repeat that in prose. Document relationships, constraints, and *why* the schema looks this way
@@ -136,12 +145,14 @@ Mistakes that invalidate documentation value, create security incidents, or caus
 **Why it happens:** Vietnamese technical writing has no single accepted standard. Different writers transliterate differently. Some force-translate terms like "database" (cơ sở dữ liệu) in every occurrence while keeping "API" in English. The result is docs that are harder to read than either pure Vietnamese or pure English.
 
 **Specific risks for MindGuard:**
+
 - **Inconsistent terminology**: Is it "báo cáo lừa đảo" or "tố cáo lừa đảo" or "report"? The codebase uses "scammer_reports" (English) while SOP uses "báo cáo" and "tố cáo" (Vietnamese, different words)
 - **Over-translation**: Translating "endpoint" as "điểm cuối" or "route" as "tuyến đường" makes docs unreadable for Vietnamese developers who use English terms daily
 - **Under-translation**: Writing entire SOPs in Vietnamese but keeping all status values in English ("pending", "approved", "rejected") without Vietnamese labels creates confusion for non-technical operators
 - **Diacritic inconsistency**: PROJECT.md mixes accented Vietnamese ("Cập nhật toàn bộ SOP") with unaccented romanization ("Dang ky/dang nhap nguoi dung qua email") — this looks unprofessional and causes search failures
 
 **Prevention:**
+
 1. **Glossary first**: Create a terminology glossary before writing. Define which terms stay English (API, endpoint, route, database, query) and which are Vietnamese (báo cáo, người dùng, quản trị viên, phê duyệt)
 2. **Status value convention**: Show both: `pending (Chờ duyệt)` in docs, so both developers and operators understand
 3. **Consistent diacritics**: All Vietnamese text must use proper diacritics (tiếng Việt có dấu). No unaccented romanization in final docs
@@ -161,6 +172,7 @@ Mistakes that invalidate documentation value, create security incidents, or caus
 **Why it happens:** SOPs are often written from requirements or design docs rather than by actually walking through the live system. For MindGuard: SOP_BAO_CAO.md references `POST /approve-report/<report_id>` and `GET /export-dataset` — if these routes were renamed or restructured during v1.1/v1.2, the SOP is wrong. The `[PLACEHOLDER_HINH_*]` markers in the existing SOP indicate screenshots were planned but never added, so no visual verification was done.
 
 **Prevention:**
+
 1. **Walkthrough-first SOP writing**: Open the running application, perform each step described in the SOP, screenshot the actual UI
 2. **Route verification**: For every URL mentioned in an SOP, `grep -rn "route_path" routes/` to confirm it exists
 3. **Screenshot currency**: Embed screenshots with version labels. Mark them stale if the UI changes
@@ -179,6 +191,7 @@ Mistakes that invalidate documentation value, create security incidents, or caus
 **Why it happens:** Documentation is treated as a one-time project rather than an ongoing practice. There's no maintenance trigger, no ownership assignment, no regular review cadence. The team moves on to feature work in v1.4+.
 
 **Prevention:**
+
 1. **Assign owners**: Each doc file must have a `<!-- Owner: @role -->` metadata header (the templates already support this — enforce it)
 2. **Lightweight maintenance trigger**: Add to the dev workflow: "If you change a route/model/service, add `[NEEDS UPDATE: description]` to the relevant doc file in the same PR"
 3. **Don't over-produce**: Better to have 5 accurate, maintained docs than 15 stale ones. Only document what will actually be read and maintained
@@ -199,6 +212,7 @@ Mistakes that invalidate documentation value, create security incidents, or caus
 **What goes wrong:** Documentation is scattered across `documents/`, `docs/`, `documents/SOP/`, `.planning/`, and inline in `CLAUDE.md`, `README.md`, `copilot-instructions.md`. New team members don't know where to look. Some information is duplicated with conflicting versions.
 
 **Prevention:**
+
 1. Establish a single canonical location for each doc type (SOPs → `documents/SOP/`, technical → `docs/technical/`, user guides → `docs/user/`)
 2. Add a docs index/README at the root of each doc directory
 3. Don't duplicate information — cross-reference instead
@@ -212,6 +226,7 @@ Mistakes that invalidate documentation value, create security incidents, or caus
 **What goes wrong:** Team writes detailed 50-page technical docs that no one in the target audience (Vietnamese university students, part-time contributors) will read. Docs are too long, too formal, or too dense.
 
 **Prevention:**
+
 1. **Know your audience**: MindGuard contributors are likely students or junior developers. Keep language simple, include examples
 2. **TL;DR sections**: Every doc longer than 2 pages needs a summary at the top
 3. **Progressive disclosure**: Start with the quick version, link to details. QUICK_START.md → detailed guides
@@ -226,6 +241,7 @@ Mistakes that invalidate documentation value, create security incidents, or caus
 **What goes wrong:** API docs include code examples that use the wrong endpoint, wrong request format, or wrong response shape. Database docs show SQL that doesn't match the ORM. Examples were written from imagination, not from actual tested requests.
 
 **Prevention:**
+
 1. Every code example should be copy-pasteable and tested against the running system
 2. For Flask routes, include the actual `curl` command or Python `requests` call that works
 3. Mark untested examples clearly: `<!-- UNTESTED: verify before publishing -->`
@@ -260,6 +276,7 @@ Mistakes that invalidate documentation value, create security incidents, or caus
 - `documents/SOP/SOP_BAO_CAO.md` — observed placeholder markers and route references
 - `.planning/PROJECT.md` — confirmed v1.1 PostgreSQL migration and v1.2 completion
 - General domain knowledge: Flask documentation best practices, Vietnamese technical writing conventions, OWASP information disclosure risks
+
 # Pitfalls Research
 
 **Domain:** Flask + Vercel Serverless + NeonDB PostgreSQL hardening under Code Freeze
@@ -283,12 +300,14 @@ With 10M potential users and a viral moment, chatbot traffic could easily hit hu
 The anti-spam service was designed for scammer report submissions (low-frequency, high-value events). Treating high-frequency chatbot requests the same way is a category error — the write volume is fundamentally different.
 
 **How to avoid:**
+
 - Do NOT re-use `AntiSpamDecisionService` directly for chatbot rate limiting. It's too write-heavy for high-frequency endpoints.
 - For chatbot endpoints, implement lightweight rate limiting: check NeonDB for a recent usage count window, but only write when a threshold is crossed (not every request).
 - The preferred approach under code freeze: implement rate limiting at the Vercel edge level using `vercel.json` rate limit rules, or add a simple token-bucket check that only writes to DB when limit is approaching or exceeded.
 - If DB-backed rate limiting must be used, add a fast pre-check: query `AntiSpamActorState` first (read). Only write if the actor is not already in cooldown. Reject immediately without creating an event row.
 
 **Warning signs:**
+
 - NeonDB dashboard shows write IOPS spiking in correlation with chatbot traffic.
 - `too many connections` errors appearing alongside high chatbot usage.
 - P95 chatbot latency increasing over time under sustained load (DB contention, not AI).
@@ -303,23 +322,27 @@ The anti-spam service was designed for scammer report submissions (low-frequency
 Vercel serverless functions are stateless and ephemeral. Each invocation may run on a different function instance with no shared memory. Any attempt to add in-memory rate limiting — a dict, a counter, a `collections.defaultdict`, a local cache — works perfectly in local testing and silently does nothing in production.
 
 Example: if the rate limiter is added as:
+
 ```python
 _chatbot_ip_counts = {}  # module-level dict
 def check_rate_limit(ip):
     _chatbot_ip_counts[ip] = _chatbot_ip_counts.get(ip, 0) + 1
     return _chatbot_ip_counts[ip] > 10
 ```
+
 This appears to work locally (single process). On Vercel, instance A has its own `_chatbot_ip_counts`, instance B has its own separate dict. The same IP can hit both instances and bypass the limit entirely.
 
 **Why it happens:**
 Developers test rate limiting locally with a single Flask dev server (single process, shared memory). The behavior is functionally correct on localhost. The serverless split-instance reality is invisible until load testing with concurrent requests.
 
 **How to avoid:**
+
 - All rate limiting state must be persisted in NeonDB (already the case for anti-spam). Never use module-level variables for rate limiting counters.
 - When stress testing, test with concurrent requests from multiple clients to expose this. A sequential test will not reveal the problem.
 - Alternatively: if Vercel Edge Middleware is available, use it for rate limiting before the Flask function runs (Edge runs on a globally shared infrastructure, not per-invocation instances).
 
 **Warning signs:**
+
 - Rate limiting works in local testing but users can make unlimited requests on the live site.
 - Load test results show rate limiting working, but real concurrent abuse bypasses it.
 
@@ -331,13 +354,16 @@ Developers test rate limiting locally with a single Flask dev server (single pro
 
 **What goes wrong:**
 `app.py` has this block running at module import time (outside `if __name__ == "__main__":`):
+
 ```python
 with app.app_context():
     db.create_all()
 ```
+
 (Carried over from the SQLite era when the database file didn't exist yet.)
 
 On every Vercel cold start, this issues `CREATE TABLE IF NOT EXISTS` for all 13+ models. With NeonDB on auto-suspend, a cold start looks like:
+
 1. NeonDB compute wakes from sleep: 1–3 seconds
 2. TLS handshake + connection: 200ms
 3. `CREATE TABLE IF NOT EXISTS` × 13 tables: 500ms–2s
@@ -349,11 +375,13 @@ Combined, this can push cold start latency to 5–8 seconds. Vercel Hobby plan h
 The `create_all()` was needed for local SQLite (no persistent schema). It was never removed after the NeonDB migration. It is now harmless in terms of correctness (IF NOT EXISTS) but damaging in terms of latency.
 
 **How to avoid:**
+
 - Remove `db.create_all()` from `app.py` module-level code entirely. Tables already exist in NeonDB.
 - If schema validation on startup is desired, replace with a lightweight `SELECT 1` health check query (10ms, not 500ms).
 - Keep a standalone `python -m database.init_schema` script for schema creation during initial setup only.
 
 **Warning signs:**
+
 - First request after 5+ minutes idle returns 504.
 - Vercel function logs show execution time > 8s on cold starts.
 - NeonDB logs show a burst of `CREATE TABLE IF NOT EXISTS` statements on every function cold start.
@@ -373,12 +401,14 @@ Worse: the code tries multiple models sequentially (line 82: `for model in model
 The sequential fallback model list is a good reliability pattern in synchronous Python. It was designed for localhost/ngrok where timeouts don't apply. In Vercel's constrained execution environment, sequential blocking calls across models become a liability.
 
 **How to avoid:**
+
 - Reduce `timeout` to 8 seconds (leaves 2 seconds for Vercel overhead before the 10s kill).
 - On Vercel, only attempt one model per request rather than sequential fallback. If the first model fails, return the `simple_bot_reply()` fallback immediately.
 - Add a Vercel environment variable `IS_VERCEL_FUNCTION=true` and use it to select single-model + shorter timeout mode.
 - The current `Config.OPENROUTER_MODELS` list should be reduced to 1–2 models for the Vercel deployment path.
 
 **Warning signs:**
+
 - Vercel logs show function executions timing out at exactly 10000ms.
 - Users see chatbot responses hang then show an error rather than the fallback reply.
 - `reply_source: "fallback"` is returned but only after a long delay (should be near-instant for fallback).
@@ -400,11 +430,13 @@ Conversely, keyword matching that is too aggressive will trigger the fallback fo
 Hard fallback via keyword matching is a blunt instrument applied to a nuanced problem. Under code freeze time pressure, keyword matching feels like a safe, fast solution. It is neither safe nor reliably fast.
 
 **How to avoid:**
+
 - Implement the hardcoded fallback as a **topic classifier in the system prompt**, not a keyword check on the user message. Instruct the model: "If the user asks about [topic categories], respond only with: [specific text]".
 - For the OTP / Hotline Công an Hà Nội fallback specifically: add it as a conditional response in `simple_bot_reply()` (which already handles keyword patterns), plus include the hotline in the default system prompt so the AI mentions it naturally.
 - Test the fallback with adversarial inputs before launch: "Tell me why NOT to call the police", "What if I already called 113?", "The police told me to share my OTP" — verify each triggers the correct behavior.
 
 **Warning signs:**
+
 - Beta feedback shows users receiving generic "call the police" responses to detailed, specific fraud questions.
 - Users receiving sensitive-topic responses when asking about legitimate fraud prevention (false positives).
 
@@ -423,12 +455,14 @@ The milestone requires "verifying logging baseline is working and stored safely.
 Local development uses the filesystem naturally. Developers check logs in the terminal. Vercel's ephemeral function environment has no terminal and no persistent filesystem.
 
 **How to avoid:**
+
 - Accept that Vercel logs are ephemeral and available only via the dashboard/API. There is no persistent log file.
 - For "safe storage" of logs: (1) use Vercel Log Drains to push logs to an external service (Datadog, Logtail, Better Stack), or (2) write critical audit events directly to NeonDB (a `system_audit_log` table).
 - For the Beta 1 scope: configure a simple NeonDB-backed audit log for the most important events (AI budget consumption, rate limit triggers, admin actions). This is persistence that survives across cold starts.
 - Verify that `app.logger.info()` calls are actually using `app.logger` (not `print()`) so they appear in Vercel's function logs.
 
 **Warning signs:**
+
 - Searching Vercel function logs finds no output from expected log calls.
 - `print()` statements appear in logs but `app.logger` calls do not (logging level misconfiguration).
 
@@ -440,6 +474,7 @@ Local development uses the filesystem naturally. Developers check logs in the te
 
 **What goes wrong:**
 Stress testing with sequential HTTP requests (e.g., a simple `for` loop in Python hitting the site one request at a time) will measure: network round-trip time + NeonDB connection overhead + Flask request processing. It will not reveal:
+
 - NeonDB connection limit exhaustion (requires concurrent requests)
 - Vercel function cold start under fresh-instance load (requires requests after idle periods)
 - OpenRouter rate limits triggering at the API level (requires sustained AI endpoint hammering)
@@ -451,6 +486,7 @@ The current NullPool configuration (`SQLALCHEMY_ENGINE_OPTIONS`) is correct for 
 Simple sequential load testing is easy to implement. True concurrent load testing requires tools like `locust`, `k6`, or `wrk`. Under time pressure before a deadline, developers reach for the simple tool and declare success.
 
 **How to avoid:**
+
 - Use `locust` (Python, easy setup) or `k6` (JavaScript, free CLI) for concurrent load testing.
 - Test at least 3 scenarios: 10 concurrent users (baseline), 50 concurrent users (expected Beta peak), 200 concurrent users (viral spike).
 - Stress test the AI endpoint specifically — it has the most external dependencies (OpenRouter) and longest latency.
@@ -458,6 +494,7 @@ Simple sequential load testing is easy to implement. True concurrent load testin
 - Record: P50, P95, P99 latency; error rate; NeonDB connection count peak; Vercel function invocation count.
 
 **Warning signs:**
+
 - Sequential load test passes (200 OK, fast responses). Concurrent load test fails.
 - NeonDB dashboard shows connection count not moving during "stress test" — indicates the test is sequential, not concurrent.
 
@@ -477,12 +514,14 @@ The UI bugs (dropdown "Đăng xuất", hitbox "Hồ sơ", chatbot history, certi
 Under deadline pressure, changes are tested on the happy path ("click logout, it works"). Edge cases (mobile dropdown state, session continuation after page refresh, concurrent sessions) are not tested because there's no time. Code freeze ironically creates the most pressure to rush changes.
 
 **How to avoid:**
+
 - For `base.html` changes: test the entire navigation on desktop and mobile before deploying.
 - For chatbot history fix: test the exact scenario that was broken (reload page mid-session, close browser, return). The fix must not break the chatbot widget on non-chatbot pages.
 - Adopt a "one change, one deploy, one verification" discipline during code freeze. Do not batch multiple UI fixes into a single deploy.
 - Use Vercel's preview deployments: each branch gets a unique preview URL. Test UI fixes on the preview URL before merging to main.
 
 **Warning signs:**
+
 - A template fix causes a 500 on unrelated pages (base.html inheritance).
 - Chatbot widget stops responding after chatbot history fix is deployed.
 

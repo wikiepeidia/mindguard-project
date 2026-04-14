@@ -25,6 +25,7 @@
 ### Key problem: Template mismatch
 
 API.md and DATABASE.md use generic SaaS REST API templates (Bearer tokens, JSON error format, UUID primary keys, `users`/`sessions` tables). MindGuard is **not** a REST API — it's a server-rendered Flask app with:
+
 - Session-cookie authentication (not Bearer tokens)
 - HTML responses for most routes (not JSON)
 - Integer auto-increment primary keys (not UUIDs)
@@ -78,6 +79,7 @@ DATABASE.md ──────────> ARCHITECTURE.md ──────> 
 **1. DECISIONS.md** — Add missing ADRs
 
 Source in codebase:
+
 - `config.py` lines 30-37 → ADR-002: NeonDB PostgreSQL migration (DATABASE_URL preference, fallback logic)
 - `app.py` lines 22-27 → ADR-003: Vercel serverless deployment (ephemeral filesystem, /tmp for logs)
 - `utils/ai_agent.py` → ADR-004: OpenRouter free-tier AI models (fallback strategy, model list)
@@ -89,9 +91,11 @@ Extraction method: Read each source file, document the decision context (what pr
 **2. DATABASE.md** — Document actual schema
 
 Source in codebase:
+
 - `models/models.py` (complete file, ~180 lines) → All 13+ models with columns, types, constraints, relationships
 
 Models to document (in dependency order):
+
 1. `Registration` — core user entity (referenced by 4 other models via ForeignKey)
 2. `ScamReport` — educational scam case studies
 3. `ScammerReport` — user-submitted scammer reports (core domain entity)
@@ -166,6 +170,7 @@ MindGuard has **42 routes** across 8 blueprints. Most return HTML. Only `routes/
 ```
 
 Source in codebase (route count per blueprint):
+
 - `routes/auth.py` — 7 routes (login, register, verify-otp, onboarding, complete-onboarding, profile, profile/edit, logout)
 - `routes/admin.py` — 10 routes (login, dashboard, logout, unsuspend, create-admin, delete-user, edit-user, scammer-reports, approve-report, reject-report, export-dataset, sensitive-access-logs)
 - `routes/chatbot.py` — 7 routes (index, new, send, api, rename, support, feedback)
@@ -184,6 +189,7 @@ Extraction method: For each route, read the handler to document: HTTP method, UR
 **5. SOP_BAO_CAO.md** — Update existing
 
 Current SOP references correct endpoints but may need:
+
 - Verification against current `routes/admin.py` route signatures
 - Screenshots update (PLACEHOLDER_HINH tags already exist)
 - Anti-spam section (new since original SOP was written)
@@ -193,6 +199,7 @@ Source: Compare SOP endpoints against `routes/admin.py` route decorators.
 **6. SOP_VAN_HANH.md** — New: System Operations SOP
 
 Content to extract from codebase:
+
 - Vercel deployment: `app.py` lines 22-27 (VERCEL env check), `vercel.json` if exists
 - Config management: `config.py` JSON loader pattern for `.env/*.json`
 - Logging: `app.py` lines 28-36 (access logging setup)
@@ -202,6 +209,7 @@ Content to extract from codebase:
 **7. SOP_QUAN_TRI.md** — New: Admin Operations SOP
 
 Content to extract from codebase:
+
 - Admin auth: `routes/admin.py` login handler + `session.get('is_admin')` checks
 - User management: create-admin, edit-user, delete-user, unsuspend routes
 - Report moderation: scammer-reports, approve-report, reject-report
@@ -281,12 +289,14 @@ This enables future verification: if code changes, you can grep for the source c
 ### Pattern 2: Two-audience API docs
 
 Since MindGuard has both HTML pages and JSON endpoints, split API.md into two sections:
+
 1. **Page Routes** — for developers understanding navigation flow (URL, method, auth, template rendered)
 2. **JSON API** — for frontend JS developers (URL, method, request format, response format, error codes)
 
 ### Pattern 3: Vietnamese-first with English anchors
 
 All docs in Vietnamese per project convention. But use English for:
+
 - Code identifiers (`ScammerReport`, `status`, `pending`)
 - Technical terms where Vietnamese equivalent is ambiguous
 - Section anchors (for cross-doc linking)
@@ -294,6 +304,7 @@ All docs in Vietnamese per project convention. But use English for:
 ### Pattern 4: ADR numbering convention
 
 Current: ADR-001. New ADRs should follow:
+
 - ADR-002: NeonDB PostgreSQL migration
 - ADR-003: Vercel serverless deployment
 - ADR-004: OpenRouter AI model selection
@@ -307,21 +318,25 @@ Each ADR uses the existing template in DECISIONS.md (Context → Options → Dec
 ## Anti-Patterns to Avoid
 
 ### Anti-Pattern 1: Filling templates blindly
+
 **What:** Trying to populate the existing API.md/DATABASE.md templates as-is
 **Why bad:** Templates assume REST API + UUID PKs + users/sessions — fundamentally wrong for MindGuard
 **Instead:** Rewrite templates to match MindGuard's actual patterns (session auth, HTML responses, integer PKs, 13 domain models)
 
 ### Anti-Pattern 2: Documenting aspirational state
+
 **What:** Writing docs for what the system *should* be rather than what it *is*
 **Why bad:** Misleads onboarding developers; creates trust gap
 **Instead:** Document actual current state. Use "Known Constraints" or "Future Work" sections for aspirational items.
 
 ### Anti-Pattern 3: Duplicating code in docs
+
 **What:** Copy-pasting entire model definitions or route handlers into docs
 **Why bad:** Docs go stale immediately on next code change
 **Instead:** Document the contract (what columns exist, types, constraints) not the implementation (SQLAlchemy syntax). Link to source files.
 
 ### Anti-Pattern 4: One giant doc
+
 **What:** Putting everything in ARCHITECTURE.md
 **Why bad:** Becomes unmaintainable; nobody reads 2000-line docs
 **Instead:** ARCHITECTURE.md is the system overview. Detailed schema → DATABASE.md. Endpoint contracts → API.md. Why decisions → DECISIONS.md.

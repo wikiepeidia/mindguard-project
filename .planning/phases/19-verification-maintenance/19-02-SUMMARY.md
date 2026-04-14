@@ -46,7 +46,9 @@ completed: 2026-04-14
 ## What Was Done
 
 ### Task 1: Metadata headers on SOP files
+
 Added HTML comment `DOCUMENT METADATA` blocks to:
+
 - **SOP_BAO_CAO.md**: Owner @backend-developer, source: routes/admin.py, routes/scammer.py, models/models.py
 - **SOP_VAN_HANH.md**: Owner DevOps/Developer, source: app.py, config.py, vercel.json
 - **SOP_QUAN_TRI.md**: Owner @backend-developer, source: routes/admin.py, models/models.py, services/sensitive_access_log.py
@@ -54,7 +56,9 @@ Added HTML comment `DOCUMENT METADATA` blocks to:
 Tech docs already had metadata: CONVENTIONS.md (YAML), DATABASE.md, DECISIONS.md, ARCHITECTURE.md, API.md (HTML comments).
 
 ### Task 2: Merge checklist in CONVENTIONS.md
+
 Added "Checklist review trước khi merge" subsection with 6 checkboxes covering:
+
 - model → DATABASE.md
 - route → API.md
 - config key → .env.example + SOP_VAN_HANH.md

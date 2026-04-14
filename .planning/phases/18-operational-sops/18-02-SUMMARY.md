@@ -45,6 +45,7 @@ completed: 2026-04-14
 ## What Was Built
 
 ### SOP_VAN_HANH.md (System Operations)
+
 - System info table (Vercel, NeonDB, OpenRouter, Cloudflare)
 - Deploy process: auto-deploy via `main` push, build logs, deployment check
 - Logs: Vercel Dashboard + local access.log
@@ -53,6 +54,7 @@ completed: 2026-04-14
 - Environment variables reference table (9 vars with descriptions)
 
 ### SOP_QUAN_TRI.md (Admin Operations)
+
 - Admin login: `/admin/login` with CAPTCHA, rate limit, session details
 - Dashboard overview: user list, stats, management buttons
 - User management: create admin, edit user, delete user with routes
@@ -62,6 +64,7 @@ completed: 2026-04-14
 - Admin unsuspend: secret-key based recovery
 
 ### Cross-references
+
 Both SOPs link to API.md, DATABASE.md, and each other.
 
 ## Deviations from Plan

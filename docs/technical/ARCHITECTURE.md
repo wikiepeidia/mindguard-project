@@ -80,6 +80,7 @@ Frontend sử dụng *server-side rendering* với Jinja2 *templates* và Bootst
 **Template hierarchy**: Tất cả *page templates* kế thừa từ `templates/base.html` (cung cấp HTML shell, navigation, footer). Các *templates* nằm phẳng trong `templates/` (không có thư mục con theo *blueprint*).
 
 **Client-side JavaScript**: Sử dụng hạn chế cho các tính năng cần tương tác động:
+
 - *Quiz flow* (câu hỏi có giới hạn thời gian, submit đáp án)
 - Giao diện *chatbot* (gửi/nhận tin nhắn)
 - Hiệu ứng *leaderboard*
@@ -110,6 +111,7 @@ routes/
 ```
 
 **Middleware / request pipeline**:
+
 1. **Security headers** — `X-Frame-Options`, `X-Content-Type-Options`, `X-XSS-Protection`, `Referrer-Policy`, `Permissions-Policy` (đặt trong `app.py` `@app.after_request`)
 2. **CSRF protection** — Flask-WTF `CSRFProtect` bảo vệ mọi POST *form*
 3. **Flask *session*** — xác thực người dùng qua *session cookie* (cookie-based, signed)
@@ -118,12 +120,14 @@ routes/
 6. **Anti-spam** — đánh giá rủi ro đa tín hiệu (account + cookie + IP) với trọng số cấu hình
 
 **Services layer** (`services/`): Logic nghiệp vụ phức tạp:
+
 - `anti_spam.py` — rate limiting đa tín hiệu và chấm điểm rủi ro
 - `leaderboard_integrity.py` — tính toán và xác minh bảng xếp hạng
 - `sensitive_access_log.py` — audit trail cho admin operations
 - `admin_guard.py` — bảo vệ tài khoản admin (suspend/unsuspend)
 
 **Utils layer** (`utils/`): Tiện ích dùng chung:
+
 - `ai_agent.py` — OpenRouter API client cho tương tác AI
 - `chatbot.py` — format tin nhắn, quản lý *conversation*
 - `encryption.py` — mã hóa/giải mã dữ liệu nhạy cảm
@@ -145,6 +149,7 @@ routes/
 | Local | `http://localhost:5000` | `python app.py`, Flask development server |
 
 **Vercel *serverless* deployment**:
+
 - Flask app chạy dưới dạng *serverless function* (cấu hình trong `vercel.json`)
 - *Filesystem* read-only — file tạm chỉ ghi được vào `/tmp`
 - *Cold start* khoảng 1-3 giây cho lần khởi động đầu tiên
@@ -243,18 +248,21 @@ MindGuard sử dụng Bootstrap 5 *utility classes* kết hợp custom CSS — c
 **Phân quyền**: Hai vai trò — *user* (đăng nhập qua `session['registration_email']`) và *admin* (đăng nhập qua `session['is_admin']`). *Route decorators* kiểm tra quyền trước khi cho phép truy cập admin-only *endpoints*.
 
 **Bảo vệ dữ liệu**:
+
 - Mật khẩu *hash* bằng Werkzeug `generate_password_hash` (PBKDF2-SHA256)
 - PII nhạy cảm (số điện thoại, email, CCCD) ẩn qua `privacy_policy.py` trong *views* công khai
 - Mã hóa dữ liệu nhạy cảm bằng `encryption.py` (sử dụng `REPORT_ENCRYPTION_KEY`)
 - Danh tính người báo cáo scammer được *hash* để bảo vệ ẩn danh
 
 **Chống spam và bot**:
+
 - **Anti-spam đa tín hiệu** (`anti_spam.py`): chấm điểm rủi ro dựa trên account (70%), cookie (20%), và IP (10%) với cooldown cấu hình được
 - **Cloudflare Turnstile** CAPTCHA trên forms đăng ký, báo cáo
 - **Flask-Limiter** — mặc định 200 *request*/phút theo IP, *per-route limits* cho *endpoints* nhạy cảm (xem [ADR-005](DECISIONS.md))
 - **CSRF protection** — Flask-WTF `CSRFProtect` bảo vệ mọi POST *request*
 
 **Security headers** (đặt trong `app.py`):
+
 - `X-Frame-Options: SAMEORIGIN`
 - `X-Content-Type-Options: nosniff`
 - `X-XSS-Protection: 1; mode=block`

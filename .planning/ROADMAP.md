@@ -49,7 +49,8 @@
  (completed 2026-04-14)
 - [x] **Phase 18: Operational SOPs** - Cập nhật và viết mới 3 SOP vận hành cho team.
  (completed 2026-04-14)
-- [x] **Phase 19: Verification & Maintenance Setup** - Xác minh tài liệu đúng với codebase và thiết lập cơ chế chống docs drift. (completed 2026-04-14)
+- [x] **Phase 19: Verification & Maintenance Setup** - Xác minh tài liệu đúng với codebase và thiết lập cơ chế chống docs drift.
+ (completed 2026-04-14)
 
 ## Phase Details
 
@@ -363,6 +364,7 @@ Plans:
 **Plans:** 2/2 plans complete
 
 Plans:
+
 - [x] 19-01-PLAN.md — Cross-check all facts in docs vs codebase + PLACEHOLDER audit
 - [x] 19-02-PLAN.md — Metadata headers on all docs + docs maintenance rules in CONVENTIONS.md
 

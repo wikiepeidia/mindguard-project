@@ -76,6 +76,7 @@ completed: 2026-04-14
 ## Decisions Made
 
 None — followed plan as specified. All 4 decisions from CONTEXT.md implemented:
+
 - D-01: Flat .env.example (Vercel-oriented)
 - D-02: Conventions at docs/technical/CONVENTIONS.md
 - D-03: Minimal glossary (28 terms)

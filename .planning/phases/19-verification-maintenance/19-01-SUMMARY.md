@@ -51,7 +51,9 @@ completed: 2026-04-14
 ## What Was Done
 
 ### Task 1: Automated cross-check
+
 Ran comprehensive Python verification script checking:
+
 1. **Table names** (DATABASE.md vs models/models.py `__tablename__`): 14/14 match ✓
 2. **Route paths** (API.md vs routes/*.py + blueprint prefixes): 42/42 match ✓
 3. **Config keys** (SOP_VAN_HANH.md vs config.py `os.environ.get`): 9/9 match ✓
@@ -59,7 +61,9 @@ Ran comprehensive Python verification script checking:
 5. **PLACEHOLDER audit**: Zero in tech docs, 4 image placeholders in SOP_BAO_CAO.md (acceptable per D-04) ✓
 
 ### Task 2: Fix mismatches
+
 No mismatches found. Spot-checked 3 random facts to confirm:
+
 - Table `scammer_reports` ↔ DATABASE.md ✓
 - Route `/chatbot/send` ↔ API.md ✓
 - Config `ADMIN_UNSUSPEND_SECRET` ↔ SOP_QUAN_TRI.md ✓

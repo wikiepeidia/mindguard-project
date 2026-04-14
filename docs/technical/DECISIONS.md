@@ -108,6 +108,7 @@ MindGuard needed a deployment platform with zero budget. The app is a Flask serv
 Vercel chosen because: (1) free tier generous enough for a student project (100 GB bandwidth, unlimited deploys), (2) GitHub integration provides auto-deploy on push, (3) global edge network improves latency for Vietnamese users, (4) Python supported via serverless functions with `vercel.json` routing.
 
 Adaptations for Vercel constraints:
+
 - **Ephemeral filesystem**: All persistence via NeonDB (ADR-002), no local file writes
 - **10s timeout**: AI chatbot timeout set to 8s (see ADR-004) to stay under limit
 - **Cold start**: NeonDB pooler with `pool_pre_ping=True` handles connection recovery
@@ -175,6 +176,7 @@ MindGuard's chatbot endpoints (`/chatbot/api`, `/chatbot/support`, `/chatbot/sen
 DB-backed rate limiting via Flask-Limiter (`@limiter`) decorator chosen because: (1) reuses existing NeonDB connection — no additional infrastructure, (2) Flask-Limiter provides declarative syntax (`@limiter.limit("20/minute;3/second")`), (3) acceptable latency for current scale.
 
 Applied limits:
+
 - `/chatbot/api` (AI chat): `20/minute; 3/second`
 - `/chatbot/support` (support chat): `10/minute; 2/second`
 - `/chatbot/send` (send message): `10/minute`

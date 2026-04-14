@@ -35,26 +35,32 @@ Success criteria yêu cầu phân loại rõ HTML page routes vs JSON API endpoi
 ## Decisions
 
 ### D-01: Rewrite ARCHITECTURE.md cho stack hiện tại
+
 **Decision:** Rewrite toàn bộ các section liên quan (Tech Stack, Infrastructure, Data Flow, Known Constraints, Performance) để phản ánh đúng NeonDB + Vercel. Giữ lại cấu trúc section và các phần vẫn đúng (Frontend Architecture, Security Architecture phần lớn vẫn đúng). Xóa placeholder sections (Design System tokens chưa điền).
 **Rationale:** Tài liệu cũ có thông tin sai (SQLite, localhost only, ngrok) — sửa từng dòng tốn nhiều hơn rewrite có chọn lọc.
 
 ### D-02: 2 Mermaid diagrams — flowchart + sequence
+
 **Decision:** (1) System Overview — `flowchart TD` thể hiện Browser → Vercel → Flask → Services/DB/External. (2) Request Flow — `sequenceDiagram` thể hiện lifecycle 1 request từ browser qua Vercel Function → Flask → DB → response. Không thêm diagram thứ 3.
 **Rationale:** 2 diagrams đủ cho success criteria. Flowchart cho big picture, sequence cho chi tiết runtime.
 
 ### D-03: API.md liệt kê theo blueprint, phân loại HTML vs JSON trong mỗi section
+
 **Decision:** Tổ chức API.md theo 8 blueprints (giống cấu trúc code). Mỗi blueprint section có 2 sub-groups: "Page Routes (HTML)" và "API Endpoints (JSON)" nếu có cả hai loại. Đầu tài liệu có bảng tổng hợp (summary table) liệt kê tất cả routes.
 **Rationale:** Theo blueprint giữ trực quan 1-1 với codebase. Sub-groups giải quyết success criteria phân loại HTML vs JSON.
 
 ### D-04: Response mô tả ngắn gọn, không full schema
+
 **Decision:** Mỗi route/endpoint listing gồm: Method, Path, Auth requirement, Response type (HTML/JSON), Mô tả ngắn 1 dòng tiếng Việt. Cho JSON endpoints: thêm key fields trong response (không full schema). Cho HTML page routes: thêm template name.
 **Rationale:** MindGuard không có public API — routes chủ yếu nội bộ. Full schema quá chi tiết cho docs-only milestone, dễ lỗi thời.
 
 ### D-05: Cross-references giữa 3 tài liệu
+
 **Decision:** ARCHITECTURE.md link sang DATABASE.md và API.md ở các section liên quan. API.md link sang DATABASE.md khi nói về models. Dùng relative Markdown links (`[DATABASE.md](DATABASE.md)`). Cuối mỗi tài liệu có section "Xem thêm" (See Also) liệt kê các file liên quan.
 **Rationale:** Success criteria #4 yêu cầu cross-references nhất quán.
 
 ### D-06: Prose viết tiếng Việt theo CONVENTIONS.md
+
 **Decision:** Tuân thủ doc conventions (Phase 15): prose tiếng Việt, thuật ngữ kỹ thuật giữ tiếng Anh, dùng glossary terms, redaction rules cho credentials.
 **Rationale:** Nhất quán với DATABASE.md và DECISIONS.md đã viết ở Phase 16.
 

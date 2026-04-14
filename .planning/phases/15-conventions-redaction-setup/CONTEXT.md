@@ -11,12 +11,14 @@
 **Decision**: Tạo một file `.env.example` phẳng liệt kê tất cả env vars cần thiết — không tạo example JSON files.
 
 **Rationale**:
+
 - Vercel deployment dùng env vars, không dùng JSON files.
 - JSON pattern (`.env/*.json`) là legacy cho local dev — team đã quen, không cần document lại.
 - Một file duy nhất đơn giản hơn để maintain.
 - Comments trong file sẽ giải thích nguồn gốc (Vercel Dashboard, OpenRouter, Cloudflare).
 
 **Env vars cần liệt kê** (từ `config.py`):
+
 - `SECRET_KEY` — Flask session secret
 - `DATABASE_URL` — NeonDB PostgreSQL connection string
 - `OPENROUTER_API_KEY` — AI chatbot API key
@@ -38,6 +40,7 @@
 **Decision**: Đặt file quy ước ngôn ngữ tại `docs/technical/CONVENTIONS.md`.
 
 **Rationale**:
+
 - `.planning/codebase/CONVENTIONS.md` là file GSD-internal (code conventions), không phải doc conventions.
 - `docs/technical/` là nơi tự nhiên cho tài liệu kỹ thuật dành cho team.
 - Tách biệt rõ: code conventions (GSD) vs doc conventions (team-facing).
@@ -47,6 +50,7 @@
 **Decision**: Bảng thuật ngữ chỉ bao gồm ~20-30 thuật ngữ kỹ thuật cốt lõi.
 
 **Rationale**:
+
 - Team nhỏ, đọc code hàng ngày — không cần glossary dài.
 - Tập trung vào thuật ngữ dễ nhầm (vd: "blueprint" vs "route", "serverless function" vs "endpoint").
 - Dễ maintain hơn comprehensive glossary.
@@ -56,6 +60,7 @@
 **Decision**: Phase 15 chỉ thiết lập rules ngăn secrets xuất hiện trong tài liệu. Không chỉnh sửa `config.py`.
 
 **Rationale**:
+
 - v1.3 là docs-only milestone — không thay đổi code.
 - `config.py` hardcoded fallbacks (SECRET_KEY, ADMIN_UNSUSPEND_SECRET) là vấn đề INFRA-02 thuộc v1.2.
 - Redaction rules sẽ bao gồm: never copy real values, use `<PLACEHOLDER>` format, list known danger patterns.
@@ -63,11 +68,13 @@
 ## Codebase References
 
 ### Config pattern (`config.py`)
+
 - `load_local_env()` reads `.env/*.json` (cloudflare.json, chatbot.json, postgresql_neondb.json, ngrok.json)
 - Env vars take priority: `os.environ.get("KEY") or json_config.get("KEY")`
 - Anti-spam vars have default values via `int(os.environ.get("KEY", default))`
 
 ### Existing docs state
+
 - `docs/technical/ARCHITECTURE.md` — Outdated (says SQLite)
 - `docs/technical/API.md` — Empty template, wrong assumptions
 - `docs/technical/DATABASE.md` — Empty template, wrong schema
@@ -75,6 +82,7 @@
 - `documents/SOP/SOP_BAO_CAO.md` — Exists, needs update
 
 ### Existing conventions
+
 - `.planning/codebase/CONVENTIONS.md` — GSD-internal code conventions (snake_case, Flask patterns, etc.)
 - Vietnamese comments in code, Vietnamese flash messages
 - No formal doc-writing conventions exist yet

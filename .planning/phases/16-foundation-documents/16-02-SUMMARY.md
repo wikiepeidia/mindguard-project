@@ -22,6 +22,7 @@ Updated `docs/technical/DECISIONS.md` with 4 new ADRs and an ADR-001 status upda
 ## ADR Format
 
 All ADRs follow ADR-001 format (Michael Nygard style):
+
 - Context → Options Considered → Decision → Consequences
 - Written in English (per D-07, consistent with ADR-001)
 - Decision Index table updated with all 5 entries

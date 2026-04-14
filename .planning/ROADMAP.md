@@ -44,7 +44,8 @@
 
 - [x] **Phase 15: Conventions & Redaction Setup** - Thiết lập quy ước viết tài liệu và bảo vệ thông tin nhạy cảm trước khi viết.
  (completed 2026-04-14)
-- [x] **Phase 16: Foundation Documents** - Document database schema và ghi nhận các quyết định kiến trúc (ADRs). (completed 2026-04-14)
+- [x] **Phase 16: Foundation Documents** - Document database schema và ghi nhận các quyết định kiến trúc (ADRs).
+ (completed 2026-04-14)
 - [ ] **Phase 17: System Documents** - Viết ARCHITECTURE.md và API.md phản ánh đúng hệ thống hiện tại.
 - [ ] **Phase 18: Operational SOPs** - Cập nhật và viết mới 3 SOP vận hành cho team.
 - [ ] **Phase 19: Verification & Maintenance Setup** - Xác minh tài liệu đúng với codebase và thiết lập cơ chế chống docs drift.
@@ -320,7 +321,11 @@ Plans:
 2. API.md liệt kê đầy đủ tất cả routes (8 blueprints) với method, path, auth requirement, và mô tả response.
 3. API.md phân loại rõ ràng giữa HTML page routes và JSON API endpoints — reader biết endpoint nào trả HTML, endpoint nào trả JSON.
 4. Cross-references giữa ARCHITECTURE.md ↔ DATABASE.md ↔ API.md nhất quán — không có tên bảng, route, hay model nào mâu thuẫn giữa các file.
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+- [ ] 17-01-PLAN.md — Rewrite ARCHITECTURE.md cho NeonDB + Vercel stack với 2 Mermaid diagrams
+- [ ] 17-02-PLAN.md — Rewrite API.md với đầy đủ routes từ 8 blueprints
 
 ### Phase 18: Operational SOPs
 

@@ -39,7 +39,6 @@
 - [x] **Phase 14: Stress Test & Beta Sign-off** - Tim nguong CCU toi da va xac nhan toan bo he thong san sang cho Beta 1.
  (completed 2026-04-14)
 
-
 ### v1.3 — Hoàn thiện Tài liệu Kỹ thuật & SOP v1
 
 - [x] **Phase 15: Conventions & Redaction Setup** - Thiết lập quy ước viết tài liệu và bảo vệ thông tin nhạy cảm trước khi viết.
@@ -48,7 +47,7 @@
  (completed 2026-04-14)
 - [x] **Phase 17: System Documents** - Viết ARCHITECTURE.md và API.md phản ánh đúng hệ thống hiện tại.
  (completed 2026-04-14)
-- [ ] **Phase 18: Operational SOPs** - Cập nhật và viết mới 3 SOP vận hành cho team.
+- [x] **Phase 18: Operational SOPs** - Cập nhật và viết mới 3 SOP vận hành cho team. (completed 2026-04-14)
 - [ ] **Phase 19: Verification & Maintenance Setup** - Xác minh tài liệu đúng với codebase và thiết lập cơ chế chống docs drift.
 
 ## Phase Details
@@ -277,7 +276,6 @@ Plans:
 4. Tat ca 17 yeu cau v1.2 da duoc xac nhan hoat dong tren production URL truoc khi ky Beta sign-off.
 **Plans**: TBD
 
-
 ### Phase 15: Conventions & Redaction Setup
 
 **Goal**: Quy ước viết tài liệu và bảo vệ thông tin nhạy cảm được thiết lập trước khi viết bất kỳ tài liệu nào.
@@ -291,6 +289,7 @@ Plans:
 **Plans**: 1 plan
 
 Plans:
+
 - [x] 15-01-PLAN.md — Create .env.example and docs/technical/CONVENTIONS.md
 
 ### Phase 16: Foundation Documents (DECISIONS.md + DATABASE.md)
@@ -308,6 +307,7 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
+
 - [x] 16-01-PLAN.md — Viết DATABASE.md với schema đầy đủ và Mermaid ER diagram
 - [x] 16-02-PLAN.md — Thêm ADR-002 đến ADR-005 và cập nhật ADR-001
 
@@ -325,6 +325,7 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
+
 - [x] 17-01-PLAN.md — Rewrite ARCHITECTURE.md cho NeonDB + Vercel stack với 2 Mermaid diagrams
 - [x] 17-02-PLAN.md — Rewrite API.md với đầy đủ routes từ 8 blueprints
 
@@ -342,8 +343,9 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 18-01-PLAN.md — Cập nhật SOP_BAO_CAO.md (fix routes, cross-refs)
-- [ ] 18-02-PLAN.md — Tạo SOP_VAN_HANH.md + SOP_QUAN_TRI.md
+
+- [x] 18-01-PLAN.md — Cập nhật SOP_BAO_CAO.md (fix routes, cross-refs)
+- [x] 18-02-PLAN.md — Tạo SOP_VAN_HANH.md + SOP_QUAN_TRI.md
 
 ### Phase 19: Verification & Maintenance Setup
 
@@ -380,5 +382,5 @@ Plans:
 | 15. Conventions & Redaction Setup | 1/1 | Complete    | 2026-04-14 |
 | 16. Foundation Documents | 2/2 | Complete    | 2026-04-14 |
 | 17. System Documents | 2/2 | Complete    | 2026-04-14 |
-| 18. Operational SOPs | 0/? | Not started | - |
+| 18. Operational SOPs | 2/2 | Complete   | 2026-04-14 |
 | 19. Verification & Maintenance Setup | 0/? | Not started | - |

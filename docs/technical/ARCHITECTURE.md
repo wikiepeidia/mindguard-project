@@ -1,280 +1,300 @@
 <!--
 DOCUMENT METADATA
-Owner: @systems-architect (all sections except Design System)
-Update trigger: System architecture changes, new integrations, component additions, design system updates
-Update scope:
-  @systems-architect: All sections except "Design System"
-  @ui-ux-designer: "Design System" section only
-  @frontend-developer: May append to "Frontend Architecture" (never overwrite)
-  @backend-developer: May append to "Backend Architecture" (never overwrite)
-Read by: All agents. Always read before making implementation decisions.
+Owner: @systems-architect
+Update trigger: Thay đổi kiến trúc hệ thống, thêm integration, thay đổi stack
+Update scope: Toàn bộ tài liệu
+Read by: Tất cả team members. Đọc trước khi đưa ra quyết định kiến trúc.
 -->
 
-# System Architecture
+# Kiến trúc hệ thống (System Architecture)
 
-> Last updated: 2026-03-28
-> Version: 1.0.0
+> **Last updated**: 2026-04-14
+> **Version**: 2.0.0 (NeonDB + Vercel)
 
 ---
 
-## Overview
+## Tổng quan (Overview)
 
-MindGuard is a fraud awareness platform that educates users about online scams through interactive quizzes, AI-powered conversations, and a community-driven scammer reporting system. It serves everyday internet users who want to learn how to recognize and avoid fraud, as well as administrators who moderate reported scammer profiles.
+MindGuard là nền tảng nâng cao nhận thức phòng chống lừa đảo trực tuyến cho người dùng Việt Nam. Hệ thống cung cấp *quiz* tương tác, *chatbot* AI hướng dẫn, và hệ thống báo cáo *scammer* có kiểm duyệt cộng đồng.
 
-The application is a monolithic Flask web application using server-side rendering with Jinja2 templates. It follows a blueprints-based architecture with separate modules for routing, models, services, and utilities. SQLite provides persistence, while external integrations (OpenRouter for AI, Cloudflare Turnstile for bot protection, Flask-Mail for OTP delivery) extend the core functionality. The architectural posture is deliberately simple: a modular monolith that can be deployed as a single process, with clear internal boundaries that allow future extraction if scale demands it.
+Ứng dụng là một *modular monolith* Flask được deploy dưới dạng *serverless function* trên Vercel. Frontend sử dụng *server-side rendering* với Jinja2 + Bootstrap 5. Dữ liệu lưu trên NeonDB PostgreSQL (*serverless* PostgreSQL). Các dịch vụ bên ngoài bao gồm OpenRouter (AI), Cloudflare Turnstile (CAPTCHA), và Flask-Mail (OTP).
 
-```
-  [Browser]
-     |
-     v
-[Flask App (app.py)]
-     |
-     +-- [Blueprints / Routes]
-     |     +-- main.py (homepage, stats, leaderboard)
-     |     +-- auth.py (login, register, password reset)
-     |     +-- quiz.py (quiz flow, AI questions)
-     |     +-- scammer.py (reporting, profiles)
-     |     +-- chatbot.py (AI chat interface)
-     |     +-- admin.py (dashboard, moderation)
-     |     +-- library.py (knowledge base)
-     |     +-- api.py (internal API endpoints)
-     |
-     +-- [Services Layer]
-     |     +-- anti_spam.py (rate limiting, risk scoring)
-     |     +-- leaderboard_integrity.py (rankings, verification)
-     |     +-- sensitive_access_log.py (audit trail)
-     |
-     +-- [Models (SQLAlchemy)]
-     |     +-- models.py (13 models)
-     |
-     +-- [Utils]
-     |     +-- ai_agent.py (OpenRouter API)
-     |     +-- chatbot.py (message handling)
-     |     +-- encryption.py (data encryption)
-     |     +-- helpers.py (risk scoring, badges)
-     |     +-- privacy_policy.py (data masking)
-     |     +-- quiz_data.py (question bank)
-     |
-     +-- [External Services]
-           +-- OpenRouter API (AI chatbot + quiz generation)
-           +-- Cloudflare Turnstile (CAPTCHA)
-           +-- Flask-Mail (OTP emails)
-           +-- ngrok (public tunneling for demos)
+Kiến trúc được thiết kế đơn giản có chủ đích: một *monolith* có ranh giới nội bộ rõ ràng (*blueprints*, *services*, *utils*), đủ linh hoạt để tách module nếu cần mở rộng.
+
+### Sơ đồ tổng thể (System Overview)
+
+```mermaid
+flowchart TD
+    Browser[Browser / Client]
+    Vercel[Vercel Edge Network]
+    Flask[Flask App - app.py]
+    BP[8 Blueprints]
+    SVC[Services Layer]
+    Models[SQLAlchemy Models - 14 models]
+    NeonDB[(NeonDB PostgreSQL)]
+    OpenRouter[OpenRouter AI API]
+    Cloudflare[Cloudflare Turnstile]
+    FlaskMail[Flask-Mail SMTP]
+
+    Browser --> Vercel
+    Vercel --> Flask
+    Flask --> BP
+    BP --> SVC
+    BP --> Models
+    SVC --> Models
+    Models --> NeonDB
+    Flask --> OpenRouter
+    Flask --> Cloudflare
+    Flask --> FlaskMail
 ```
 
 ---
 
 ## Tech Stack
 
-| Layer | Technology | Version | Why Chosen |
+| Layer | Công nghệ | Version | Lý do chọn |
 |-------|-----------|---------|------------|
-| Frontend | Jinja2 + Bootstrap 5 | Flask 3.0.3 built-in | Server-side rendering, simple deployment, no build step |
-| Styling | Bootstrap 5 + Custom CSS | 5.x | Rapid UI development, responsive out of the box |
-| Backend | Python + Flask | 3.12.10 / 3.0.3 | Lightweight, easy to learn, large ecosystem |
-| Database | SQLite | 3 | Zero-config, file-based, sufficient for initial scale |
-| ORM | Flask-SQLAlchemy | 3.1.1 | Pythonic ORM, tight Flask integration |
-| Auth | Flask sessions + Werkzeug | 3.0.3 | Built-in password hashing, session management |
-| AI | OpenRouter API | Latest | Access to free LLM models (Mistral, Qwen, Llama) |
-| Anti-Bot | Cloudflare Turnstile | Latest | Free, privacy-respecting CAPTCHA alternative |
-| Email | Flask-Mail | 0.9.1 | OTP delivery, notifications |
-| Hosting | localhost + ngrok | Latest | Development: local; tunneled for demo access |
+| Frontend | Jinja2 + Bootstrap 5 | Flask 3.0.3 built-in | *Server-side rendering*, không cần build step |
+| Styling | Bootstrap 5 + Custom CSS | 5.x | Phát triển UI nhanh, *responsive* sẵn |
+| Backend | Python + Flask | 3.12.10 / 3.0.3 | Nhẹ, dễ học, hệ sinh thái lớn |
+| Database | NeonDB PostgreSQL | 15 (*serverless*) | *Serverless* PostgreSQL, tương thích Vercel, không cần quản lý server |
+| ORM | Flask-SQLAlchemy | 3.1.1 | ORM Pythonic, tích hợp chặt với Flask |
+| Auth | Flask *sessions* + Werkzeug | 3.0.3 | *Password hashing* + *session management* tích hợp sẵn |
+| AI | OpenRouter API | Latest | Truy cập nhiều *model* LLM miễn phí (Liquid, Gemini, Molmo) |
+| Anti-Bot | Cloudflare Turnstile | Latest | CAPTCHA miễn phí, tôn trọng quyền riêng tư |
+| Email | Flask-Mail | 0.9.1 | Gửi OTP và thông báo |
+| Rate Limiting | Flask-Limiter | Latest | Giới hạn *request* theo IP, mặc định 200/phút |
+| CSRF | Flask-WTF CSRFProtect | Latest | Bảo vệ *form* khỏi tấn công *CSRF* |
+| Hosting | Vercel | Latest | *Serverless deployment*, CDN tích hợp, CI/CD tự động |
 
 ---
 
-## System Components
+## Các thành phần hệ thống (System Components)
 
 ### Frontend Architecture
 
-The frontend uses server-side rendered Jinja2 templates with Bootstrap 5 for styling. All HTML is generated on the server; there is no frontend build step, no SPA framework, and no client-side routing.
+Frontend sử dụng *server-side rendering* với Jinja2 *templates* và Bootstrap 5. Toàn bộ HTML được tạo trên server — không có SPA *framework*, không có *client-side routing*, không cần *build step*.
 
-**Routing**: Flask blueprints define all routes server-side. Each blueprint corresponds to a feature area (auth, quiz, chatbot, etc.). URLs map directly to blueprint handler functions.
+**Routing**: Flask *blueprints* định nghĩa tất cả *routes* phía server. Mỗi *blueprint* tương ứng một nhóm chức năng (auth, quiz, chatbot, v.v.).
 
-**Template hierarchy**: All page templates inherit from `templates/base.html`, which provides the common HTML shell, navigation, and footer. Feature-specific templates live alongside their blueprint (e.g., `templates/quiz/`, `templates/chatbot/`).
+**Template hierarchy**: Tất cả *page templates* kế thừa từ `templates/base.html` (cung cấp HTML shell, navigation, footer). Các *templates* nằm phẳng trong `templates/` (không có thư mục con theo *blueprint*).
 
-**Client-side JavaScript**: Used sparingly for interactive features that require dynamic behavior without a full page reload:
-- Quiz flow (timed questions, answer submission)
-- Chatbot interface (message sending/receiving)
-- Leaderboard animations
-- Form validation and CAPTCHA integration
+**Client-side JavaScript**: Sử dụng hạn chế cho các tính năng cần tương tác động:
+- *Quiz flow* (câu hỏi có giới hạn thời gian, submit đáp án)
+- Giao diện *chatbot* (gửi/nhận tin nhắn)
+- Hiệu ứng *leaderboard*
+- *Form validation* và tích hợp CAPTCHA
 
-**Styling**: Bootstrap 5 utility classes supplemented by custom CSS. Light-mode semantic tokens are used. No CSS preprocessor or build pipeline.
+**Styling**: Bootstrap 5 utility classes kết hợp custom CSS trong `static/css/`. Không có CSS preprocessor hay build pipeline.
 
 ---
 
 ### Backend Architecture
 
-The backend is a Flask application organized around blueprints, with a services layer for business logic and a utils layer for cross-cutting concerns.
+Backend là Flask application tổ chức theo *blueprints*, với *services layer* cho logic nghiệp vụ và *utils layer* cho các tiện ích dùng chung.
 
-**API style**: Primarily server-rendered HTML responses. The `api.py` blueprint provides a small set of internal JSON endpoints consumed by client-side JavaScript (e.g., chatbot messages, quiz answer submission).
+**API style**: Chủ yếu trả HTML *server-rendered*. *Blueprint* `api` cung cấp một số JSON *endpoints* cho JavaScript phía client (chatbot, tìm kiếm scammer). Một số *routes* trong các *blueprints* khác (chatbot, scammer) cũng trả JSON.
 
-**Blueprint organization** (route layer):
+**Tổ chức *Blueprint*** (route layer):
+
 ```
 routes/
-  main.py        # Homepage, statistics, leaderboard
-  auth.py        # Login, register, password reset, OTP verification
-  quiz.py        # Quiz flow, AI-generated questions
-  scammer.py     # Scammer reporting, profile viewing
-  chatbot.py     # AI chatbot interface
-  admin.py       # Admin dashboard, moderation tools
-  library.py     # Knowledge base articles
-  api.py         # Internal JSON API endpoints
+  main.py        # Trang chủ, thống kê, bảng xếp hạng, tìm kiếm
+  auth.py        # Đăng nhập, đăng ký, OTP, profile
+  quiz.py        # Luồng quiz, câu hỏi AI
+  scammer.py     # Báo cáo lừa đảo, theo dõi scammer
+  chatbot.py     # Giao diện chatbot AI
+  admin.py       # Dashboard admin, kiểm duyệt
+  library.py     # Thư viện kiến thức
+  api.py         # JSON API endpoints (public)
 ```
 
 **Middleware / request pipeline**:
-1. Flask session management -- authenticates user via session cookie
-2. Role-based authorization -- route decorators check `user.role` for admin-only endpoints
-3. Cloudflare Turnstile verification -- validated server-side on form submissions
-4. Anti-spam checks -- rate limiting by account, cookie, and IP with configurable weights
+1. **Security headers** — `X-Frame-Options`, `X-Content-Type-Options`, `X-XSS-Protection`, `Referrer-Policy`, `Permissions-Policy` (đặt trong `app.py` `@app.after_request`)
+2. **CSRF protection** — Flask-WTF `CSRFProtect` bảo vệ mọi POST *form*
+3. **Flask *session*** — xác thực người dùng qua *session cookie* (cookie-based, signed)
+4. **Rate limiting** — Flask-Limiter mặc định 200 *request*/phút theo IP, có *per-route limits* cho các *routes* nhạy cảm
+5. **Cloudflare Turnstile** — xác thực server-side trên *forms* đăng ký, báo cáo
+6. **Anti-spam** — đánh giá rủi ro đa tín hiệu (account + cookie + IP) với trọng số cấu hình
 
-**Services layer** (`services/`): Encapsulates business logic that spans multiple routes or requires complex orchestration:
-- `anti_spam.py` -- multi-signal rate limiting and risk scoring
-- `leaderboard_integrity.py` -- ranking calculations and verification
-- `sensitive_access_log.py` -- audit trail for admin operations
+**Services layer** (`services/`): Logic nghiệp vụ phức tạp:
+- `anti_spam.py` — rate limiting đa tín hiệu và chấm điểm rủi ro
+- `leaderboard_integrity.py` — tính toán và xác minh bảng xếp hạng
+- `sensitive_access_log.py` — audit trail cho admin operations
+- `admin_guard.py` — bảo vệ tài khoản admin (suspend/unsuspend)
 
-**Utils layer** (`utils/`): Cross-cutting utilities shared across blueprints:
-- `ai_agent.py` -- OpenRouter API client for AI interactions
-- `chatbot.py` -- message formatting and conversation management
-- `encryption.py` -- data encryption/decryption helpers
-- `helpers.py` -- risk scoring algorithms, badge calculation
-- `privacy_policy.py` -- PII masking (phone, email, CCCD)
-- `quiz_data.py` -- static question bank and quiz configuration
+**Utils layer** (`utils/`): Tiện ích dùng chung:
+- `ai_agent.py` — OpenRouter API client cho tương tác AI
+- `chatbot.py` — format tin nhắn, quản lý *conversation*
+- `encryption.py` — mã hóa/giải mã dữ liệu nhạy cảm
+- `helpers.py` — thuật toán chấm điểm rủi ro, tính *badge*
+- `privacy_policy.py` — ẩn PII (số điện thoại, email, CCCD)
+- `quiz_data.py` — ngân hàng câu hỏi và cấu hình quiz
 
-**Configuration**: `config.py` holds application settings. Extensions (SQLAlchemy, Mail) are initialized in `extensions.py` and registered with the app in `app.py`.
-
----
-
-### Infrastructure
-
-**Environments**:
-| Environment | URL | Branch | Notes |
-|-------------|-----|--------|-------|
-| Production | TBD | `main` | Deployment target not yet decided |
-| Local | `localhost:5000` | any | `python app.py` |
-| Public Demo | ngrok tunnel URL | any | Generated dynamically on startup |
-
-**CI/CD**: Not yet configured. Manual deployment via `python app.py`. GitHub Actions pipeline is planned (see Known Constraints below).
+**Configuration**: `config.py` chứa cài đặt ứng dụng. *Extensions* (SQLAlchemy, Mail, Limiter, CSRF) khởi tạo trong `extensions.py` và đăng ký với app trong `app.py`.
 
 ---
 
-## Data Flow
+### Hạ tầng (Infrastructure)
 
-> To be documented as implementation stabilizes. The following flows should be captured:
+**Môi trường triển khai**:
 
-### User Authentication Flow
+| Môi trường | URL | Ghi chú |
+|------------|-----|---------|
+| Production | `https://mindguard-five.vercel.app` | Vercel *serverless*, auto-deploy từ `main` branch |
+| Local | `http://localhost:5000` | `python app.py`, Flask development server |
 
-```
-[To be filled: login/register -> OTP verification -> session creation -> role-based access]
-```
+**Vercel *serverless* deployment**:
+- Flask app chạy dưới dạng *serverless function* (cấu hình trong `vercel.json`)
+- *Filesystem* read-only — file tạm chỉ ghi được vào `/tmp`
+- *Cold start* khoảng 1-3 giây cho lần khởi động đầu tiên
+- Logs xem qua Vercel Dashboard > Functions > Logs
 
-### Quiz Flow
-
-```
-[To be filled: quiz start -> AI question generation via OpenRouter -> answer submission -> scoring -> leaderboard update]
-```
-
-### Scammer Report Flow
-
-```
-[To be filled: report submission -> Turnstile verification -> anti-spam check -> reporter anonymization -> admin moderation queue]
-```
-
-### AI Chatbot Flow
-
-```
-[To be filled: user message -> message formatting -> OpenRouter API call -> response rendering -> conversation history]
-```
+**CI/CD**: Chưa cấu hình GitHub Actions. Hiện tại deploy tự động qua Vercel khi push lên `main`.
 
 ---
 
-## Design System
+## Vòng đời Request (Request Lifecycle)
 
-<!--
-This section is owned by @ui-ux-designer.
-Other agents: read-only. Do not modify.
--->
+```mermaid
+sequenceDiagram
+    participant B as Browser
+    participant V as Vercel Edge
+    participant F as Flask App
+    participant C as CSRF Check
+    participant S as Session
+    participant L as Rate Limiter
+    participant BP as Blueprint Handler
+    participant SVC as Service Layer
+    participant DB as NeonDB PostgreSQL
+    participant J as Jinja2 Template
 
-### Color Tokens
+    B->>V: HTTP Request
+    V->>F: Forward to serverless function
+    F->>C: Validate CSRF token (POST)
+    F->>S: Check session authentication
+    F->>L: Rate limit check (200/min)
+    F->>BP: Route to blueprint handler
+    BP->>SVC: Business logic
+    SVC->>DB: Query database
+    DB-->>SVC: Result
+    SVC-->>BP: Response data
+    BP->>J: Render template
+    J-->>B: HTML Response
+```
 
-| Token | Value | Usage |
-|-------|-------|-------|
-| `color-primary-500` | [#XXXXXX] | Primary actions, links |
-| `color-primary-600` | [#XXXXXX] | Primary hover states |
-| `color-neutral-100` | [#XXXXXX] | Background surfaces |
-| `color-neutral-900` | [#XXXXXX] | Body text |
-| `color-error-500` | [#XXXXXX] | Error states |
-| `color-success-500` | [#XXXXXX] | Success states |
-
-### Typography Scale
-
-| Token | Size | Weight | Usage |
-|-------|------|--------|-------|
-| `text-heading-1` | [32px] | [700] | Page headings |
-| `text-heading-2` | [24px] | [600] | Section headings |
-| `text-body` | [16px] | [400] | Body copy |
-| `text-small` | [14px] | [400] | Labels, captions |
-
-### Spacing System
-
-[e.g., 4px base unit — all spacing is multiples of 4: 4, 8, 12, 16, 24, 32, 48, 64]
-
-### Component Inventory
-
-| Component | Location | Status | Notes |
-|-----------|----------|--------|-------|
-| Button | `src/components/ui/Button` | [Stable] | Primary, secondary, ghost variants |
-| Input | `src/components/ui/Input` | [Stable] | |
-| Modal | `src/components/ui/Modal` | [Stable] | |
-| [Component] | | [Draft/Stable/Deprecated] | |
-
-### Interaction Patterns
-
-- **Loading states**: [e.g., skeleton screens for content, spinner for actions]
-- **Error states**: [e.g., inline error messages below form fields, toast for async errors]
-- **Empty states**: [e.g., illustrated empty state with CTA for first-use scenarios]
-- **Confirmation dialogs**: [e.g., required for destructive actions, not for saves]
+> **Ghi chú**: Với JSON *endpoints* (chatbot, api), bước render Jinja2 được thay bằng `jsonify()` trả JSON trực tiếp.
 
 ---
 
-## Security Architecture
+## Luồng dữ liệu (Data Flow)
 
-**Authentication model**: Flask server-side sessions with Werkzeug password hashing. Users authenticate via username/password; sessions are stored server-side and tracked via a session cookie. OTP verification via Flask-Mail for password reset flows.
+### Luồng xác thực (Authentication Flow)
 
-**Authorization**: Role-based access control with two roles: `user` and `admin`. Route decorators check the current user's role before granting access to admin-only endpoints (dashboard, moderation, sensitive data viewing).
+1. Người dùng truy cập `/register` → nhập email + mật khẩu → CAPTCHA Turnstile xác thực
+2. Server tạo bản ghi `Registration` (mật khẩu *hash* bằng Werkzeug PBKDF2-SHA256)
+3. OTP gửi qua Flask-Mail → người dùng nhập OTP tại `/verify-otp`
+4. Xác thực thành công → `session['registration_email']` được đặt → chuyển đến *onboarding*
+5. Các *route* được bảo vệ kiểm tra `session` qua `@login_required` *decorator*
+6. Admin đăng nhập riêng tại `/admin/login` → `session['is_admin']` = True
 
-**Data protection**:
-- Passwords hashed using Werkzeug's `generate_password_hash` (PBKDF2-SHA256 by default)
-- Sensitive PII (phone numbers, email addresses, CCCD/national ID) masked in public-facing views via `privacy_policy.py`
-- Encryption utilities in `encryption.py` for data-at-rest protection of sensitive fields
-- Reporter anonymization: scammer report submissions use hashed identifiers to protect reporter identity
+### Luồng Quiz
 
-**Anti-spam and bot protection**:
-- Multi-signal rate limiting (`anti_spam.py`): scores requests based on account activity, cookie fingerprint, and IP address with configurable weights and cooldown periods
-- Cloudflare Turnstile CAPTCHA integrated on public-facing forms (registration, reporting, contact)
+1. Người dùng chọn danh mục tại `/quiz` → bắt đầu phiên quiz
+2. AI sinh câu hỏi qua OpenRouter API (hoặc dùng ngân hàng câu hỏi tĩnh nếu API lỗi)
+3. Trả lời từng câu tại `/quiz/step/<idx>` → đáp án lưu trong `session`
+4. Hoàn thành → `/quiz/finalize` tính điểm → lưu `QuizResult` vào database
+5. Kết quả hiển thị tại `/quiz/result` → đạt ≥75% nhận chứng nhận tại `/certificate`
 
-**Audit trail**: `sensitive_access_log.py` records admin operations on sensitive data (viewing masked PII, moderation actions) for accountability.
+### Luồng báo cáo Scammer
 
-**Key security decisions**: See `docs/technical/DECISIONS.md` for rationale behind auth and data protection choices.
+1. Người dùng truy cập `/scammer/report` → nhập thông tin scammer + bằng chứng
+2. CAPTCHA Turnstile xác thực → Anti-spam kiểm tra rủi ro đa tín hiệu (IP, cookie, account)
+3. Nếu vượt *threshold* → cooldown, thông báo cho người dùng
+4. Nếu hợp lệ → lưu `ScammerReport` + cập nhật `ScamReport` (thông tin scammer tổng hợp)
+5. Danh tính người báo cáo được *hash* → Admin kiểm duyệt tại `/admin/scammer-reports`
+6. Admin duyệt/từ chối → cập nhật trạng thái, ảnh hưởng *leaderboard*
+
+### Luồng AI Chatbot
+
+1. Người dùng truy cập `/chatbot/` → hiển thị danh sách *session* cũ hoặc tạo mới
+2. Gửi tin nhắn qua `/chatbot/send` (POST, JSON)
+3. Server gửi *prompt* (system prompt + lịch sử chat + tin nhắn mới) đến OpenRouter API
+4. **Timeout 8 giây** (xem [ADR-004](DECISIONS.md)) — nếu quá hạn, trả *fallback* tĩnh
+5. **Hard-block**: Từ chối trả lời chủ đề nhạy cảm (chính trị, tôn giáo, tự hại)
+6. Phản hồi AI lưu vào `AIChatMessage` → hiển thị cho người dùng
 
 ---
 
-## Performance Considerations
+## Hệ thống thiết kế (Design System)
 
-- **Database**: SQLite runs in-process with zero network overhead. Single-writer limitation is acceptable at current scale but will become the first bottleneck under concurrent write load.
-- **AI calls**: OpenRouter API calls (quiz generation, chatbot responses) run inline in the request cycle. P95 latency for these endpoints is dominated by external API response time (typically 2-5 seconds). No caching layer exists for AI responses yet.
-- **Server-side rendering**: All pages are rendered server-side via Jinja2. No client-side hydration cost. Page load times are fast for static content but depend on database query performance for dynamic pages (leaderboard, scammer profiles).
-- **Static assets**: CSS, JavaScript, and images served directly by Flask's static file handler. No CDN configured. For production, a reverse proxy (nginx) or CDN should serve static assets.
-- **Anti-spam scoring**: Risk scoring runs on every form submission but is lightweight (in-memory lookups against recent activity). No measurable impact on request latency.
+MindGuard sử dụng Bootstrap 5 *utility classes* kết hợp custom CSS — chưa có formal *design token* system.
+
+- **Styles**: Xem `static/css/` cho các file CSS custom
+- **JavaScript**: Xem `static/js/` cho các file JS custom
+- **Light mode**: Giao diện light mode thống nhất trên toàn bộ trang (triển khai ở v1.0 Phase 3)
 
 ---
 
-## Known Constraints and Technical Debt
+## Kiến trúc bảo mật (Security Architecture)
 
-| Item | Impact | Plan |
-|------|--------|------|
-| SQLite single-writer limitation | Cannot handle high concurrent writes; risks `database is locked` errors under load | Migrate to PostgreSQL when scale requires (deliberate/strategic debt) |
-| No background job queue | AI quiz generation and chatbot calls run inline, blocking the request thread for 2-5s | Consider Celery or RQ for v2 to offload AI calls |
-| Hardcoded admin credentials in config | Security risk if config file is exposed in production | Move to environment variables before any production deployment |
-| No CI/CD pipeline | Manual deployment, no automated testing on PRs | Set up GitHub Actions for lint, test, and deploy |
-| No linter or formatter configured | Inconsistent code style across contributors | Add Ruff or Black; enforce in CI |
-| No CDN or reverse proxy | Static assets served by Flask directly, inefficient under load | Add nginx or Cloudflare CDN for production |
-| Flask development server used in production | Not suitable for production traffic (single-threaded, no graceful shutdown) | Deploy behind Gunicorn or uWSGI for production |
+**Mô hình xác thực**: Flask *server-side sessions* với Werkzeug *password hashing*. Người dùng xác thực qua email/mật khẩu; *sessions* được quản lý qua *cookie* có chữ ký (cookie-based, signed bằng `SECRET_KEY`). OTP gửi qua Flask-Mail để xác thực đăng ký.
+
+**Phân quyền**: Hai vai trò — *user* (đăng nhập qua `session['registration_email']`) và *admin* (đăng nhập qua `session['is_admin']`). *Route decorators* kiểm tra quyền trước khi cho phép truy cập admin-only *endpoints*.
+
+**Bảo vệ dữ liệu**:
+- Mật khẩu *hash* bằng Werkzeug `generate_password_hash` (PBKDF2-SHA256)
+- PII nhạy cảm (số điện thoại, email, CCCD) ẩn qua `privacy_policy.py` trong *views* công khai
+- Mã hóa dữ liệu nhạy cảm bằng `encryption.py` (sử dụng `REPORT_ENCRYPTION_KEY`)
+- Danh tính người báo cáo scammer được *hash* để bảo vệ ẩn danh
+
+**Chống spam và bot**:
+- **Anti-spam đa tín hiệu** (`anti_spam.py`): chấm điểm rủi ro dựa trên account (70%), cookie (20%), và IP (10%) với cooldown cấu hình được
+- **Cloudflare Turnstile** CAPTCHA trên forms đăng ký, báo cáo
+- **Flask-Limiter** — mặc định 200 *request*/phút theo IP, *per-route limits* cho *endpoints* nhạy cảm (xem [ADR-005](DECISIONS.md))
+- **CSRF protection** — Flask-WTF `CSRFProtect` bảo vệ mọi POST *request*
+
+**Security headers** (đặt trong `app.py`):
+- `X-Frame-Options: SAMEORIGIN`
+- `X-Content-Type-Options: nosniff`
+- `X-XSS-Protection: 1; mode=block`
+- `Referrer-Policy: strict-origin-when-cross-origin`
+- `Permissions-Policy: geolocation=(), microphone=(), camera=()`
+
+**Audit trail**: `sensitive_access_log.py` ghi lại thao tác admin trên dữ liệu nhạy cảm.
+
+**Quyết định bảo mật chi tiết**: Xem [DECISIONS.md](DECISIONS.md) cho các ADR liên quan.
+
+---
+
+## Cân nhắc hiệu năng (Performance Considerations)
+
+- **Database**: NeonDB PostgreSQL chạy *serverless* — có độ trễ mạng (~50-100ms cho *cold connection*). *Connection pooling* qua NeonDB *built-in pooler*. Hiệu năng tốt cho quy mô hiện tại.
+- **AI calls**: OpenRouter API chạy inline trong *request cycle*. *Timeout* 8 giây (xem [ADR-004](DECISIONS.md)). P95 latency phụ thuộc vào *response time* của *model* bên ngoài (thường 2-5 giây). Chưa có *caching layer* cho AI responses.
+- **Server-side rendering**: Tất cả trang render server-side qua Jinja2. Không có *hydration* phía client. Thời gian tải trang phụ thuộc vào *query* database cho trang động (*leaderboard*, *scammer profiles*).
+- **Vercel *serverless***: *Cold start* 1-3 giây cho lần chạy đầu. Các lần tiếp theo trong cùng *instance* nhanh hơn. *Filesystem* read-only, chỉ `/tmp` ghi được.
+- **Static assets**: CSS, JS, hình ảnh serve qua Vercel CDN — tối ưu hơn so với Flask static handler trực tiếp.
+- **Anti-spam scoring**: Chấm điểm rủi ro chạy trên mỗi *form submission* nhưng rất nhẹ (tra cứu trong database). Không ảnh hưởng đáng kể đến *latency*.
+
+---
+
+## Hạn chế và nợ kỹ thuật (Known Constraints)
+
+| Hạn chế | Ảnh hưởng | Kế hoạch |
+|---------|-----------|----------|
+| Vercel *filesystem* read-only | Không ghi file vào disk (logs, uploads) — chỉ dùng `/tmp` (ephemeral) | Dùng `/tmp` cho logs; uploads lưu database hoặc cloud storage |
+| Vercel *cold start* | Lần truy cập đầu tiên sau idle chậm 1-3 giây | Chấp nhận — đặc trưng *serverless* |
+| AI calls inline (không có *background job*) | OpenRouter API chặn *request thread* 2-8 giây | Xem xét *task queue* nếu cần tối ưu sau |
+| Chưa có CI/CD pipeline | Chưa có *automated testing* trên PR | Lên kế hoạch GitHub Actions |
+| Chưa có *linter/formatter* | Code style không nhất quán | Xem xét thêm Ruff hoặc Black |
+| NeonDB *connection limits* | *Serverless* PostgreSQL có giới hạn *concurrent connections* | Theo dõi usage trên NeonDB Dashboard |
+| Chưa có *background job queue* | Quiz AI và chatbot chạy *synchronous* | Xem xét Celery/RQ nếu quy mô tăng |
+
+---
+
+## Xem thêm (See Also)
+
+- [DATABASE.md](DATABASE.md) — Schema database chi tiết (14 bảng, ER diagram)
+- [API.md](API.md) — Danh sách đầy đủ tất cả *routes* và *endpoints*
+- [DECISIONS.md](DECISIONS.md) — Architecture Decision Records (5 ADRs)
+- [CONVENTIONS.md](CONVENTIONS.md) — Quy ước viết tài liệu, thuật ngữ, *redaction rules*

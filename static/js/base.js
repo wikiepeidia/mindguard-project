@@ -48,16 +48,24 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Auto-hide flash alerts after a short delay for cleaner UX.
     document.querySelectorAll('.alert.alert-dismissible').forEach((alertElement) => {
-        const timer = setTimeout(() => {
-            if (window.bootstrap && window.bootstrap.Alert) {
-                window.bootstrap.Alert.getOrCreateInstance(alertElement).close();
-            } else {
-                alertElement.classList.remove('show');
-                alertElement.remove();
-            }
-        }, 2800);
+        const DISMISS_DELAY = 4000;
+        let timer = null;
 
-        alertElement.addEventListener('mouseenter', () => clearTimeout(timer), { once: true });
+        function scheduleClose() {
+            timer = setTimeout(() => {
+                if (window.bootstrap && window.bootstrap.Alert) {
+                    window.bootstrap.Alert.getOrCreateInstance(alertElement).close();
+                } else {
+                    alertElement.classList.remove('show');
+                    alertElement.remove();
+                }
+            }, DISMISS_DELAY);
+        }
+
+        scheduleClose();
+
+        alertElement.addEventListener('mouseenter', () => { if (timer) clearTimeout(timer); });
+        alertElement.addEventListener('mouseleave', () => { scheduleClose(); });
     });
 
     // --- CHATBOT WIDGET LOGIC ---

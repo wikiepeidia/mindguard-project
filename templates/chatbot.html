@@ -12,9 +12,19 @@
   {% if messages %}
   <div class="px-4 pt-3">
     {% for category, message in messages %}
-    <div class="alert alert-{{ category }} alert-dismissible fade show shadow-sm" role="alert">
-      {{ message }}
-      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    <div class="alert alert-{{ category }} alert-dismissible fade show shadow-sm d-flex align-items-center"
+      role="alert">
+      {% if category == 'success' %}
+      <i class="fas fa-check-circle me-2 flex-shrink-0" style="color: var(--mg-success);"></i>
+      {% elif category in ('danger', 'error') %}
+      <i class="fas fa-exclamation-circle me-2 flex-shrink-0" style="color: var(--mg-danger);"></i>
+      {% elif category == 'warning' %}
+      <i class="fas fa-exclamation-triangle me-2 flex-shrink-0" style="color: var(--mg-warning);"></i>
+      {% else %}
+      <i class="fas fa-info-circle me-2 flex-shrink-0 text-info"></i>
+      {% endif %}
+      <span class="flex-grow-1">{{ message }}</span>
+      <button type="button" class="btn-close flex-shrink-0 ms-2" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
     {% endfor %}
   </div>
@@ -162,16 +172,20 @@
           <div class="mb-3">
             <label class="form-label fw-semibold">Loại góp ý</label>
             <div class="d-flex flex-wrap gap-2" id="feedbackTypeGroup">
-              <button type="button" class="btn btn-outline-danger btn-sm rounded-pill feedback-type-btn" data-type="incorrect">
+              <button type="button" class="btn btn-outline-danger btn-sm rounded-pill feedback-type-btn"
+                data-type="incorrect">
                 <i class="fas fa-times-circle me-1"></i> Trả lời sai
               </button>
-              <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill feedback-type-btn" data-type="unclear">
+              <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill feedback-type-btn"
+                data-type="unclear">
                 <i class="fas fa-question-circle me-1"></i> Khó hiểu
               </button>
-              <button type="button" class="btn btn-outline-dark btn-sm rounded-pill feedback-type-btn" data-type="offensive">
+              <button type="button" class="btn btn-outline-dark btn-sm rounded-pill feedback-type-btn"
+                data-type="offensive">
                 <i class="fas fa-exclamation-circle me-1"></i> Không phù hợp
               </button>
-              <button type="button" class="btn btn-outline-primary btn-sm rounded-pill feedback-type-btn" data-type="other">
+              <button type="button" class="btn btn-outline-primary btn-sm rounded-pill feedback-type-btn"
+                data-type="other">
                 <i class="fas fa-comment me-1"></i> Khác
               </button>
             </div>

@@ -93,9 +93,19 @@
         {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
         {% for category, message in messages %}
-        <div class="alert alert-{{ category }} alert-dismissible fade show shadow glass-card p-3 mb-2" role="alert">
-            <i class="fas fa-info-circle me-2 text-info"></i> {{ message }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        <div class="alert alert-{{ category }} alert-dismissible fade show shadow glass-card p-3 mb-2 d-flex align-items-center"
+            role="alert">
+            {% if category == 'success' %}
+            <i class="fas fa-check-circle me-2 flex-shrink-0" style="color: var(--mg-success);"></i>
+            {% elif category in ('danger', 'error') %}
+            <i class="fas fa-exclamation-circle me-2 flex-shrink-0" style="color: var(--mg-danger);"></i>
+            {% elif category == 'warning' %}
+            <i class="fas fa-exclamation-triangle me-2 flex-shrink-0" style="color: var(--mg-warning);"></i>
+            {% else %}
+            <i class="fas fa-info-circle me-2 flex-shrink-0 text-info"></i>
+            {% endif %}
+            <span class="flex-grow-1">{{ message }}</span>
+            <button type="button" class="btn-close flex-shrink-0 ms-2" data-bs-dismiss="alert"></button>
         </div>
         {% endfor %}
         {% endif %}

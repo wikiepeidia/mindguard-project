@@ -105,6 +105,34 @@ Requirements cho gia cố hạ tầng, sửa lỗi UI, an toàn AI, và tin cậ
 - [x] **TRUST-02**: Xác minh logging baseline (request, error, audit logs) hoạt động và lưu trữ an toàn trên Vercel *(đã hoàn thành bởi teammate — access logging trong app.py)*
 - [x] **TRUST-03**: Nút "Báo cáo sai / Góp ý" trên giao diện chatbot để thu thập dữ liệu tinh chỉnh cho Beta *(done — prominent button + modal + DB)*
 
+## v1.3 Requirements — Hoàn thiện Tài liệu Kỹ thuật & SOP v1
+
+Requirements cho cập nhật toàn bộ tài liệu kỹ thuật và SOP dựa trên codebase hiện tại.
+
+### Conventions & Setup
+
+- [ ] **CONV-01**: Tạo file `.env.example` liệt kê tất cả biến môi trường cần thiết (không chứa giá trị thật)
+- [ ] **CONV-02**: Định nghĩa quy ước ngôn ngữ Việt-Anh cho tài liệu (prose tiếng Việt, thuật ngữ kỹ thuật tiếng Anh)
+
+### Technical Documentation
+
+- [ ] **TECH-01**: Viết lại ARCHITECTURE.md phản ánh đúng NeonDB PostgreSQL + Vercel serverless + Mermaid diagrams
+- [ ] **TECH-02**: Viết API.md document tất cả routes (42 routes, 8 blueprints) với method, path, auth, response
+- [ ] **TECH-03**: Viết DATABASE.md document schema thực tế từ models.py (tên bảng, cột, quan hệ, ER diagram)
+
+### Architecture Decision Records
+
+- [ ] **ADR-01**: Viết ADR-002 cho quyết định migrate từ SQLite sang NeonDB PostgreSQL
+- [ ] **ADR-02**: Viết ADR-003 cho quyết định deploy lên Vercel serverless
+- [ ] **ADR-03**: Viết ADR-004 cho quyết định AI safety (hard-block + fallback + timeout)
+- [ ] **ADR-04**: Viết ADR-005 cho quyết định rate limiting strategy (DB-backed @limiter)
+
+### SOP Documents
+
+- [ ] **SOP-01**: Cập nhật SOP_BAO_CAO.md theo codebase mới (routes, models, workflow hiện tại)
+- [ ] **SOP-02**: Viết SOP vận hành hệ thống (deploy Vercel, monitoring logs, incident response)
+- [ ] **SOP-03**: Viết SOP quản trị viên (admin dashboard, moderation workflow, export data)
+
 ## v2 Requirements (Deferred)
 
 ### Anti-Fraud Nang Cao
@@ -190,9 +218,10 @@ Requirements cho gia cố hạ tầng, sửa lỗi UI, an toàn AI, và tin cậ
 - v1.0 requirements: 20 total — all complete ✓
 - v1.1 requirements: 10 total — all complete ✓
 - v1.2 requirements: 17 total — 17 complete ✓
-- Mapped to phases: 47/47 total requirements
-- Unmapped: 0
+- v1.3 requirements: 13 total — 0 complete
+- Mapped to phases: 47/47 (v1.0-v1.2) + 0/13 (v1.3 pending roadmap)
+- Unmapped: 13 (v1.3 — awaiting roadmap creation)
 
 ---
 *Requirements defined: 2026-03-19*
-*Last updated: 2026-04-13 after teammate code drop verification*
+*Last updated: 2026-04-14 after v1.3 milestone requirements definition*

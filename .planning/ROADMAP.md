@@ -382,5 +382,5 @@ Plans:
 | 15. Conventions & Redaction Setup | 1/1 | Complete    | 2026-04-14 |
 | 16. Foundation Documents | 2/2 | Complete    | 2026-04-14 |
 | 17. System Documents | 2/2 | Complete    | 2026-04-14 |
-| 18. Operational SOPs | 2/2 | Complete   | 2026-04-14 |
+| 18. Operational SOPs | 2/2 | Complete    | 2026-04-14 |
 | 19. Verification & Maintenance Setup | 0/? | Not started | - |

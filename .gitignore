@@ -15,6 +15,7 @@ tests/*
 !tests/leaderboard/test_*.py
 !tests/test_otp_security.py
 !tests/test_otp_auth_integration.py
+!tests/test_csrf_and_routes.py
 
 # One-time patch/write scripts (generated during development)
 patch_*.py

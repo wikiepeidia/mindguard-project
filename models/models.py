@@ -183,3 +183,30 @@ class ChatFeedback(db.Model):
     feedback_text = db.Column(db.Text, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
+
+class OtpChallenge(db.Model):
+    """
+    State machine for OTP lifecycle. No plaintext OTP persisted.
+    Stores attempts and handles lockout logic.
+    """
+    __tablename__ = 'otp_challenges'
+
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(120), nullable=False, index=True)
+    purpose = db.Column(db.String(50), nullable=False) # e.g., 'register', 'login'
+    otp_hash = db.Column(db.String(128), nullable=False)
+    otp_salt = db.Column(db.String(64), nullable=False)
+    pepper_version = db.Column(db.String(20), default='v1')
+    
+    attempts_used = db.Column(db.Integer, default=0)
+    max_attempts = db.Column(db.Integer, default=5)
+    
+    issued_at = db.Column(db.DateTime, default=datetime.utcnow)
+    expires_at = db.Column(db.DateTime, nullable=False, index=True)
+    locked_until = db.Column(db.DateTime, nullable=True)
+    
+    used_at = db.Column(db.DateTime, nullable=True)
+    invalidated_at = db.Column(db.DateTime, nullable=True)
+    invalidation_reason = db.Column(db.String(100), nullable=True) # e.g., 'superseded', 'max_attempts'
+    
+    status = db.Column(db.String(30), default='active', index=True) # 'active', 'used', 'expired', 'locked', 'invalidated'

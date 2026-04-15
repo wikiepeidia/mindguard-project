@@ -93,6 +93,22 @@ def send_otp_email(
 
         config = current_app.config
 
+    # Deterministic test mode -- avoids external network dependency in unit/route tests.
+    if bool(_cfg_get(config, "TESTING", False)):
+        if bool(_cfg_get(config, "OTP_EMAIL_TEST_FORCE_FAIL", False)):
+            return {
+                "ok": False,
+                "category": "test_failure",
+                "message": "Không thể gửi mã OTP lúc này. Vui lòng thử lại sau vài phút.",
+                "provider_message_id": None,
+            }
+        return {
+            "ok": True,
+            "category": "sent",
+            "message": "Mã OTP đã được gửi đến email của bạn.",
+            "provider_message_id": "test-delivery-id",
+        }
+
     status = otp_email_delivery_status(config)
     if not status["ok"]:
         return {

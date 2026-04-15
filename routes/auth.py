@@ -6,6 +6,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from extensions import limiter
 from datetime import datetime
 from utils.otp_security import issue_otp_challenge, verify_otp_submission
+from services.otp_email_delivery import send_otp_email
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -189,13 +190,34 @@ def register():
         challenge, plaintext_code = issue_otp_challenge(
             db.session, email, 'register', current_app.config
         )
+
+        send_result = send_otp_email(
+            email=email,
+            otp_code=plaintext_code,
+            context={
+                "purpose": "register",
+                "challenge_id": challenge.id,
+            },
+            config=current_app.config,
+        )
+
+        if not send_result.get("ok"):
+            challenge.status = "invalidated"
+            challenge.invalidated_at = datetime.utcnow()
+            challenge.invalidation_reason = f"delivery_failed:{send_result.get('category', 'unknown')}"
+            db.session.commit()
+
+            session.pop('pending_registration', None)
+            session.pop('pending_otp_challenge_id', None)
+            session.pop('pending_verification_email', None)
+
+            flash("Không thể gửi mã OTP lúc này. Vui lòng thử đăng ký lại sau vài phút.", "danger")
+            return redirect(url_for("auth.register"))
+
         db.session.commit()
 
         session['pending_otp_challenge_id'] = challenge.id
         session['pending_verification_email'] = email
-
-        # TODO: Send plaintext_code via email (Phase 21)
-        # For now the code is generated but not delivered -- no hardcoded fallback.
 
         flash("Mã OTP đã được gửi đến email của bạn.", "info")
         return redirect(url_for('auth.verify_otp'))

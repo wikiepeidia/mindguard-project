@@ -33,9 +33,12 @@
 ### v1.2 — Beta 1 Go-Live (Code Freeze)
 
 - [x] **Phase 10: Infrastructure & Security Hardening** - Loai bo startup risk va di chuyen credentials sang env vars truoc khi Beta go-live. (completed 2026-04-13)
-- [ ] **Phase 11: UI Bug Fixes** - Sua het loi UI nghiem trong va polish tong the truoc Beta.
-- [ ] **Phase 12: AI Safety** - Dam bao AI chatbot an toan, nhanh, va phu hop ngon ngu nguoi dung pho thong.
-- [ ] **Phase 13: Rate Limiting & Trust Signals** - Chong drain API budget, logging baseline, banner quyen rieng tu, va nut gop y cho Beta.
+- [x] **Phase 11: UI Bug Fixes** - Sua het loi UI nghiem trong va polish tong the truoc Beta.
+ (completed 2026-04-13)
+- [x] **Phase 12: AI Safety** - Dam bao AI chatbot an toan, nhanh, va phu hop ngon ngu nguoi dung pho thong.
+ (completed 2026-04-13)
+- [x] **Phase 13: Rate Limiting & Trust Signals** - Chong drain API budget, logging baseline, banner quyen rieng tu, va nut gop y cho Beta.
+ (completed 2026-04-13)
 - [x] **Phase 14: Stress Test & Beta Sign-off** - Tim nguong CCU toi da va xac nhan toan bo he thong san sang cho Beta 1.
  (completed 2026-04-14)
 
@@ -388,7 +391,13 @@ Plans:
 3. Nguoi dung nhap sai OTP qua nguong se bi khoa tam thoi va nhin thay thong bao thoi gian thu lai.
 4. OTP xac thuc thanh cong chi dung duoc mot lan, va OTP cu bi vo hieu ngay khi resend/new challenge.
 5. Kiem tra logs va persistence khong tim thay OTP plaintext duoc luu hoac hien thi.
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+
+- [x] 20-01-PLAN.md — OTP challenge schema + crypto helper foundation.
+- [ ] 20-02-PLAN.md — Register/verify lifecycle enforcement (TTL, lockout, single-use).
+- [ ] 20-03-PLAN.md — OTP security regression tests + validation evidence update.
 
 ### Phase 21: Production OTP Email Delivery
 
@@ -463,7 +472,7 @@ Plans:
 | 17. System Documents | 2/2 | Complete    | 2026-04-14 |
 | 18. Operational SOPs | 2/2 | Complete    | 2026-04-14 |
 | 19. Verification & Maintenance Setup | 2/2 | Complete    | 2026-04-14 |
-| 20. OTP Security Policy Core | 0/TBD | Not started | - |
+| 20. OTP Security Policy Core | 1/3 | In Progress|  |
 | 21. Production OTP Email Delivery | 0/TBD | Not started | - |
 | 22. Resend & Verify Session Stability | 0/TBD | Not started | - |
 | 23. OTP Abuse Guardrails | 0/TBD | Not started | - |

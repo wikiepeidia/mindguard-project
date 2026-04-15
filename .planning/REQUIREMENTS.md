@@ -8,8 +8,8 @@
 
 ### OTP Security (OTPSEC)
 
-- [ ] **OTPSEC-01**: User receives a cryptographically random 6-digit OTP for each challenge, with no static fallback values.
-- [ ] **OTPSEC-02**: OTP is stored and compared as hash (salt/pepper), never persisted or logged in plaintext.
+- [x] **OTPSEC-01**: User receives a cryptographically random 6-digit OTP for each challenge, with no static fallback values.
+- [x] **OTPSEC-02**: OTP is stored and compared as hash (salt/pepper), never persisted or logged in plaintext.
 - [ ] **OTPSEC-03**: When OTP is re-issued (resend/new challenge), previously active OTP is invalidated.
 
 ### OTP Email Delivery (OTPMAIL)
@@ -73,8 +73,8 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| OTPSEC-01 | Phase 20 | Pending |
-| OTPSEC-02 | Phase 20 | Pending |
+| OTPSEC-01 | Phase 20 | Complete |
+| OTPSEC-02 | Phase 20 | Complete |
 | OTPSEC-03 | Phase 20 | Pending |
 | OTPMAIL-01 | Phase 21 | Pending |
 | OTPMAIL-02 | Phase 21 | Pending |

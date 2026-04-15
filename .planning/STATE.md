@@ -1,16 +1,15 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.4
-milestone_name: OTP Email Reliability & QA
-status: planning
-last_updated: "2026-04-14T00:00:00.000Z"
-last_activity: 2026-04-14
+milestone: v1.0
+milestone_name: — Core Platform
+status: executing
+last_updated: "2026-04-15T03:51:56.809Z"
+last_activity: 2026-04-15
 progress:
-  total_phases: 6
-  completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
-  percent: 0
+  total_phases: 7
+  completed_phases: 5
+  total_plans: 13
+  completed_plans: 10
 ---
 
 # STATE - MindGuard v2
@@ -22,12 +21,12 @@ progress:
 
 ## Current Position
 
-Phase: 20 - OTP Security Policy Core (planned)
-Plan: Roadmap revised, detailed plan files pending
-Status: Ready for phase planning
-Last activity: 2026-04-14 - Roadmap v1.4 revised with dedicated outage continuity phase (20-25)
+Phase: 20 (otp-security-policy-core) — EXECUTING
+Plan: 2 of 3
+Status: Executing Phase 20
+Last activity: 2026-04-15 -- Completed 20-01-PLAN.md
 
-[░░░░░░░░░░] 0/6 phases (0%)
+[████████░░] 10/13 plans (77%)
 
 ## Remaining Work
 
@@ -41,8 +40,8 @@ Last activity: 2026-04-14 - Roadmap v1.4 revised with dedicated outage continuit
 ## Performance Metrics
 
 - **v1.4 requirements total**: 20
-- **Completed**: 0
-- **Remaining**: 20
+- **Completed**: 2 (OTPSEC-01, OTPSEC-02)
+- **Remaining**: 18
 - **Coverage**: 20/20 mapped to roadmap phases
 - **Open blockers**: 0
 
@@ -54,6 +53,7 @@ Last activity: 2026-04-14 - Roadmap v1.4 revised with dedicated outage continuit
 - PostgreSQL + Vercel remains the fixed production stack from v1.1.
 - v1.2 completed hardening/rate limiting/trust signals for Beta.
 - v1.3 completed technical docs/SOPs and docs-drift controls.
+- (Phase 20-01) PBKDF2-HMAC-SHA256 with 100k iterations for OTP hashing; pepper versioned (v1) for future rotation.
 
 ### New Milestone Structure (v1.4)
 
@@ -67,6 +67,7 @@ Last activity: 2026-04-14 - Roadmap v1.4 revised with dedicated outage continuit
 
 ## Session Continuity
 
-- **Last Updated**: 2026-04-14
-- **Stopped at**: Session resumed after editor crash, proceeding to Phase 20 context step
-- **Resume with**: /gsd-discuss-phase 20
+- **Last Session**: 2026-04-15
+- **Stopped at**: Completed 20-01-PLAN.md
+- **Resume with**: /gsd-execute-phase 20 (continue from plan 02)
+- **Resume file**: None

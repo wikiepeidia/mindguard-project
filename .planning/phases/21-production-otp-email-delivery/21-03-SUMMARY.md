@@ -41,6 +41,7 @@ completed: 2026-04-15
 Completed requirement-level automated verification for OTP email delivery behavior.
 
 ## Accomplishments
+
 - Added tests/test_otp_email_delivery.py covering:
   - success response,
   - timeout retry exhaustion,
@@ -53,11 +54,13 @@ Completed requirement-level automated verification for OTP email delivery behavi
 - Created 21-VALIDATION.md mapping OTPMAIL requirements to executable checks.
 
 ## Task Commits
+
 1. Task 1: `1788abd` — delivery unit tests
 2. Task 2: `f6616dd` — auth integration branch tests
 3. Task 3: `89fd8fa` — validation evidence
 
 ## Verification
+
 - `python -m pytest tests/test_otp_email_delivery.py`
 - `python -m pytest tests/test_otp_auth_integration.py -k "register or otp"`
 

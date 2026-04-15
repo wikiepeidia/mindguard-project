@@ -9,16 +9,18 @@
             <div class="card-body">
                 <h3 class="fw-bold mb-3 text-center">Xác thực tài khoản</h3>
                 <p class="text-muted text-center mb-4">
-                    Một mã OTP đã được gửi đến email <strong>{{ session.get('pending_verification_email', session.get('pending_registration', {}).get('email', '')) }}</strong>.
+                    Một mã OTP đã được gửi đến email <strong>{{ session.get('pending_verification_email',
+                        session.get('pending_registration', {}).get('email', '')) }}</strong>.
                     <br><small>Vui lòng kiểm tra hộp thư đến (và thư mục spam).</small>
                     <br><small>Nếu chưa nhận được mã, vui lòng quay lại trang đăng ký để thử lại.</small>
                 </p>
-                
+
                 <form method="POST">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <div class="mb-3">
                         <label class="form-label">Nhập mã OTP</label>
-                        <input type="text" class="form-control text-center text-uppercase fs-4" name="otp" placeholder="******" maxlength="6" required>
+                        <input type="text" class="form-control text-center text-uppercase fs-4" name="otp"
+                            placeholder="******" maxlength="6" required>
                     </div>
                     <button type="submit" class="btn btn-primary w-100">Xác thực</button>
                 </form>

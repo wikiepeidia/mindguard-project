@@ -41,6 +41,7 @@ completed: 2026-04-15
 Integrated Resend delivery into registration and enforced fail-closed account activation behavior.
 
 ## Accomplishments
+
 - Updated register flow in routes/auth.py to call send_otp_email immediately after challenge issuance.
 - Added fail-closed branch:
   - invalidates challenge on send failure,
@@ -50,9 +51,11 @@ Integrated Resend delivery into registration and enforced fail-closed account ac
 - Added deterministic TESTING behavior in delivery service to avoid external network dependency during route tests.
 
 ## Task Commit
+
 - Combined implementation commit: `e5099d8`
 
 ## Verification
+
 - `python -m py_compile routes/auth.py services/otp_email_delivery.py`
 - `python -m pytest tests/test_otp_auth_integration.py -k "register"`
 

@@ -40,6 +40,7 @@ completed: 2026-04-15
 Defined the Resend email delivery foundation for Phase 21.
 
 ## Accomplishments
+
 - Added Resend-specific config contract in config.py (`EMAIL_PROVIDER`, `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, `OTP_EMAIL_TIMEOUT_SECONDS`, `OTP_EMAIL_RETRY_ATTEMPTS`) with readiness helpers.
 - Created services/otp_email_delivery.py implementing send_otp_email with:
   - provider readiness checks,
@@ -49,10 +50,12 @@ Defined the Resend email delivery foundation for Phase 21.
 - Exported delivery helpers from services/__init__.py.
 
 ## Task Commits
+
 1. Task 1: `d549eac` — config contract
 2. Task 2: `1bc55f6` — delivery service
 
 ## Verification
+
 - `python -m py_compile config.py services/otp_email_delivery.py services/__init__.py`
 
 ## Self-Check: PASSED

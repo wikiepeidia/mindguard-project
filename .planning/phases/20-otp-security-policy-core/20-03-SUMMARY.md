@@ -49,6 +49,7 @@ completed: 2026-04-15
 - **Files modified:** 3
 
 ## Accomplishments
+
 - Created `tests/test_otp_security_policy.py` containing individual scenarios handling Generation bounds, DB persistence verification against plaintext disclosure, Challenge Expiration, Max attempt Lockout triggering, and Challenge Re-issuance validity logic. Tests now utilize proper Mock dict overrides.
 - Updated `tests/test_csrf_and_routes.py` to ensure route success explicitly tests for state transitions inside the mock database objects (`challenge.status = 'used'`).
 - Filled out `20-VALIDATION.md` map setting its coverage checks against live CLI commands mapping cleanly to the `green` output of pytest. `nyquist_compliant` enabled.
@@ -60,38 +61,47 @@ completed: 2026-04-15
 3. **Task 3: Refresh validation map** - `f9ac67b` (docs)
 
 ## Files Created/Modified
+
 - `tests/test_otp_security_policy.py` (Created) - Holds specific `otppol` and `otpsec` checks
 - `tests/test_csrf_and_routes.py` (Modified) - Updated assertions
 - `.planning/phases/20-otp-security-policy-core/20-VALIDATION.md` (Modified) - Matrix filled
 
 ## Decisions Made
+
 - Chose to patch `app.app_context` logic locally inside test's `setUp` to dodge DB object unbounding alongside mock setups. Then shifted directly to mock dictionaries over objects to fulfill constraints inside helpers.
 - Adjusted query string references inside `20-VALIDATION.md` to reflect properly constructed test names internally (`single_use` replaced `replay`).
 
 ## Deviations from Plan
 
 ### Auto-fixed Issues
+
 **1. [Rule 1 - Bug] Fixed Flask Context Mismatch in Mocks**
+
 - **Found during:** Task 1 Execution
 - **Issue:** Attempting to patch Alchemy models led to `RuntimeError: Working outside of application context.`  
 - **Fix:** Switched `setUp` logic to leverage initialized app context directly.
 
 **2. [Rule 1 - Bug] Fixed Mock iteration Error inside _cfg_get**
+
 - **Found during:** Task 1 Execution
 - **Issue:** `TypeError: unsupported type for timedelta seconds component: MagicMock`
 - **Fix:** Replaced mock Config payload with explicit hardcoded dictionary `mock_config`.
 
 ## Issues Encountered
+
 - Missing `test_otp_security_policy.py` bypass handling for ignored scopes in `.gitignore` was overridden with `git add -f`.
 
 ## Known Stubs
+
 - `test_csrf_and_routes.py` continues referring to a placeholder Send OTP behavior which is normal as this requires Phase 21 resolution.
 
 ## Next Phase Readiness
+
 - Phase 20 is complete.
 - We have fully decoupled the baseline logic and policies while backing them fully with tests.
 - Ready to jump right into Phase 21 (Production OTP Email Delivery).
 
 ## Self-Check: PASSED
+
 - `tests/test_otp_security_policy.py` exists
 - Commits `82a6309`, `b759925` and `f9ac67b` exist.

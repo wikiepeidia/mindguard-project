@@ -50,7 +50,7 @@ created: 2026-04-15
 
 ## Wave 0 Requirements
 
-- [x] `tests/test_otp_security_policy.py` - add OTP challenge lifecycle tests   
+- [x] `tests/test_otp_security_policy.py` - add OTP challenge lifecycle tests
 - [x] `tests/fixtures/otp_security.py` - reusable fixture builders for challenge states
 
 ---
@@ -66,10 +66,10 @@ created: 2026-04-15
 ## Validation Sign-Off
 
 - [x] All tasks have automated verify or Wave 0 dependency
-- [x] Sampling continuity: no 3 consecutive tasks without automated verify      
+- [x] Sampling continuity: no 3 consecutive tasks without automated verify
 - [x] Wave 0 covers all MISSING references
 - [x] No watch-mode flags
 - [x] Feedback latency < 45s
-- [x] `nyquist_compliant: true` set in frontmatter after execution verification 
+- [x] `nyquist_compliant: true` set in frontmatter after execution verification
 
 **Approval:** approved

@@ -62,3 +62,10 @@ class Config:
     ABUS_ACCOUNT_WEIGHT = int(os.environ.get("ABUS_ACCOUNT_WEIGHT", 70))
     ABUS_COOKIE_WEIGHT = int(os.environ.get("ABUS_COOKIE_WEIGHT", 20))
     ABUS_IP_WEIGHT = int(os.environ.get("ABUS_IP_WEIGHT", 10))
+
+    # OTP security policy
+    OTP_TTL_SECONDS = int(os.environ.get("OTP_TTL_SECONDS", 300))
+    OTP_MAX_ATTEMPTS = int(os.environ.get("OTP_MAX_ATTEMPTS", 5))
+    OTP_LOCKOUT_SECONDS = int(os.environ.get("OTP_LOCKOUT_SECONDS", 900))
+    OTP_PEPPER = os.environ.get("OTP_PEPPER", "")
+    OTP_PEPPER_VERSION = os.environ.get("OTP_PEPPER_VERSION", "v1")

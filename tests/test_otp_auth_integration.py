@@ -49,6 +49,7 @@ def create_test_app():
         'CLOUDFLARE_SECRET_KEY': None,
         'CLOUDFLARE_SITE_KEY': None,
         'ABUS_MODE': 'monitor',
+        'RATELIMIT_ENABLED': False,
         'OTP_TTL_SECONDS': 300,
         'OTP_MAX_ATTEMPTS': 3,
         'OTP_LOCKOUT_SECONDS': 900,
@@ -81,9 +82,19 @@ def create_test_app():
 
     from routes.main import main_bp
     from routes.auth import auth_bp
+    from routes.scammer import scammer_bp
+    from routes.quiz import quiz_bp
+    from routes.chatbot import chatbot_bp
+    from routes.admin import admin_bp
+    from routes.library import library_bp
 
     app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp)
+    app.register_blueprint(scammer_bp)
+    app.register_blueprint(quiz_bp)
+    app.register_blueprint(chatbot_bp)
+    app.register_blueprint(admin_bp)
+    app.register_blueprint(library_bp)
 
     with app.app_context():
         db.create_all()

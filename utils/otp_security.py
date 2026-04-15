@@ -44,6 +44,24 @@ def hash_otp(code, salt, pepper):
     return digest.hex()
 
 
+def _cfg_get(config, key, default=None):
+    """Read a config value from either a class (getattr) or dict-like (Flask config).
+
+    Flask's app.config is a dict subclass -- getattr won't find dynamic keys.
+    This helper tries dict-style first, then falls back to getattr.
+    """
+    # Dict-like access (Flask config, plain dict)
+    if hasattr(config, "get") and callable(config.get):
+        val = config.get(key)
+        if val is not None:
+            return val
+    # Class attribute access (Config class)
+    val = getattr(config, key, None)
+    if val is not None:
+        return val
+    return default
+
+
 def issue_otp_challenge(session, email, purpose, config):
     """Create a new OTP challenge and persist it to the database.
 
@@ -54,7 +72,7 @@ def issue_otp_challenge(session, email, purpose, config):
         session: SQLAlchemy database session (db.session).
         email: User email address.
         purpose: Challenge purpose (e.g., 'register', 'login').
-        config: Application config object with OTP_* keys.
+        config: Application config object or Flask config dict with OTP_* keys.
 
     Returns:
         tuple: (OtpChallenge instance, plaintext_otp_code)
@@ -79,12 +97,12 @@ def issue_otp_challenge(session, email, purpose, config):
     # Generate new OTP
     plaintext_code = generate_otp_code()
     salt = secrets.token_hex(32)
-    pepper = getattr(config, "OTP_PEPPER", "")
-    pepper_version = getattr(config, "OTP_PEPPER_VERSION", "v1")
+    pepper = _cfg_get(config, "OTP_PEPPER", "")
+    pepper_version = _cfg_get(config, "OTP_PEPPER_VERSION", "v1")
     otp_hash = hash_otp(plaintext_code, salt, pepper)
 
-    ttl = getattr(config, "OTP_TTL_SECONDS", 300)
-    max_attempts = getattr(config, "OTP_MAX_ATTEMPTS", 5)
+    ttl = _cfg_get(config, "OTP_TTL_SECONDS", 300)
+    max_attempts = _cfg_get(config, "OTP_MAX_ATTEMPTS", 5)
 
     challenge = OtpChallenge(
         email=email,
@@ -144,7 +162,7 @@ def verify_otp_submission(challenge, submitted_code, now, config):
         return "locked"
 
     # Perform constant-time hash comparison
-    pepper = getattr(config, "OTP_PEPPER", "")
+    pepper = _cfg_get(config, "OTP_PEPPER", "")
     submitted_hash = hash_otp(submitted_code, challenge.otp_salt, pepper)
 
     is_match = hmac.compare_digest(
@@ -161,7 +179,7 @@ def verify_otp_submission(challenge, submitted_code, now, config):
     challenge.attempts_used += 1
 
     if challenge.attempts_used >= challenge.max_attempts:
-        lockout_seconds = getattr(config, "OTP_LOCKOUT_SECONDS", 900)
+        lockout_seconds = _cfg_get(config, "OTP_LOCKOUT_SECONDS", 900)
         challenge.status = "locked"
         challenge.locked_until = now + timedelta(seconds=lockout_seconds)
         challenge.invalidation_reason = "max_attempts"

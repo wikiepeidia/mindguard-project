@@ -1,9 +1,11 @@
 """Routes for user registration."""
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash
 from models import db, Registration
+from models.models import OtpChallenge
 from werkzeug.security import generate_password_hash, check_password_hash
 from extensions import limiter
-import random
+from datetime import datetime
+from utils.otp_security import issue_otp_challenge, verify_otp_submission
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -181,8 +183,21 @@ def register():
             'occupation': occupation,
             'city': city
         }
-        
-        flash("Mã OTP đã được gửi đến email của bạn. (Demo: 123456)", "info")
+
+        # Issue OTP challenge (invalidates any prior active challenge for this email)
+        from flask import current_app
+        challenge, plaintext_code = issue_otp_challenge(
+            db.session, email, 'register', current_app.config
+        )
+        db.session.commit()
+
+        session['pending_otp_challenge_id'] = challenge.id
+        session['pending_verification_email'] = email
+
+        # TODO: Send plaintext_code via email (Phase 21)
+        # For now the code is generated but not delivered -- no hardcoded fallback.
+
+        flash("Mã OTP đã được gửi đến email của bạn.", "info")
         return redirect(url_for('auth.verify_otp'))
 
     return render_template("register.html", site_key=Config.CLOUDFLARE_SITE_KEY)
@@ -190,23 +205,33 @@ def register():
 
 @auth_bp.route("/verify-otp", methods=["GET", "POST"])
 def verify_otp():
-    """OTP Verification page."""
+    """OTP Verification page with challenge-based lifecycle enforcement."""
     if request.method == "POST":
         otp = request.form.get("otp")
         pending_data = session.get('pending_registration')
-        
-        if not pending_data:
+        challenge_id = session.get('pending_otp_challenge_id')
+
+        if not pending_data or not challenge_id:
             flash("Phiên đăng ký đã hết hạn. Vui lòng đăng ký lại.", "danger")
             return redirect(url_for("auth.register"))
 
-        expected_otp = session.get('otp_code', '123456')
-        if otp == expected_otp:
+        challenge = db.session.get(OtpChallenge, challenge_id)
+        if not challenge:
+            flash("Phiên đăng ký đã hết hạn. Vui lòng đăng ký lại.", "danger")
+            return redirect(url_for("auth.register"))
+
+        now = datetime.utcnow()
+        from flask import current_app
+        result = verify_otp_submission(challenge, otp, now, current_app.config)
+        db.session.commit()
+
+        if result == 'valid':
             reg = Registration(
                 name=pending_data['name'],
                 email=pending_data['email'],
                 password_hash=generate_password_hash(pending_data['password']),
                 date_of_birth=pending_data.get('date_of_birth'),
-                city=pending_data['city'],
+                city=pending_data.get('city'),
                 occupation=pending_data.get('occupation'),
                 role='user'
             )
@@ -216,15 +241,36 @@ def verify_otp():
             session.permanent = True
             session["registration_name"] = pending_data['name']
             session["registration_email"] = pending_data['email']
-            
-            session.pop('pending_registration', None)
-            session.pop('captcha_answer', None)
 
-            flash("✅ Đăng ký thành công!", "success")
+            session.pop('pending_registration', None)
+            session.pop('pending_otp_challenge_id', None)
+            session.pop('pending_verification_email', None)
+
+            flash("Đăng ký thành công!", "success")
             return redirect(url_for("auth.onboarding"))
+        elif result == 'expired':
+            flash("Mã OTP đã hết hạn. Vui lòng đăng ký lại.", "danger")
+            session.pop('pending_registration', None)
+            session.pop('pending_otp_challenge_id', None)
+            session.pop('pending_verification_email', None)
+            return redirect(url_for("auth.register"))
+        elif result == 'locked':
+            flash("Bạn đã nhập sai quá nhiều lần. Vui lòng thử lại sau.", "danger")
+        elif result == 'already_used':
+            flash("Mã OTP này đã được sử dụng. Vui lòng đăng ký lại.", "danger")
+            session.pop('pending_registration', None)
+            session.pop('pending_otp_challenge_id', None)
+            session.pop('pending_verification_email', None)
+            return redirect(url_for("auth.register"))
+        elif result == 'invalidated':
+            flash("Mã OTP không còn hiệu lực. Vui lòng đăng ký lại.", "danger")
+            session.pop('pending_registration', None)
+            session.pop('pending_otp_challenge_id', None)
+            session.pop('pending_verification_email', None)
+            return redirect(url_for("auth.register"))
         else:
             flash("Mã OTP không đúng.", "danger")
-    
+
     return render_template("verify_otp.html")
 
 

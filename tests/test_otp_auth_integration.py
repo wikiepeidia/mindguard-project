@@ -224,6 +224,59 @@ class OtpAuthRegisterTests(unittest.TestCase):
         self.assertEqual(first_challenge.status, 'invalidated')
         self.assertIsNotNone(first_challenge.invalidated_at)
 
+    @patch('routes.auth.send_otp_email')
+    def test_register_send_success_redirects_verify(self, mock_send_otp_email):
+        """When delivery succeeds, flow should redirect to verify page."""
+        mock_send_otp_email.return_value = {
+            'ok': True,
+            'category': 'sent',
+            'message': 'sent',
+            'provider_message_id': 'msg-1',
+        }
+
+        resp = self.client.post('/register', data={
+            'name': 'Send Success',
+            'email': 'sendsuccess@gmail.com',
+            'password': 'securepass',
+            'math_answer': '42',
+        }, follow_redirects=False)
+
+        self.assertEqual(resp.status_code, 302)
+        self.assertIn('/verify-otp', resp.location)
+
+    @patch('routes.auth.send_otp_email')
+    def test_register_send_failure_fails_closed_and_cleans_state(self, mock_send_otp_email):
+        """When delivery fails, account activation must not proceed and pending state is cleared."""
+        mock_send_otp_email.return_value = {
+            'ok': False,
+            'category': 'timeout',
+            'message': 'timeout',
+            'provider_message_id': None,
+        }
+
+        resp = self.client.post('/register', data={
+            'name': 'Send Failure',
+            'email': 'sendfail@gmail.com',
+            'password': 'securepass',
+            'math_answer': '42',
+        }, follow_redirects=True)
+
+        self.assertEqual(resp.status_code, 200)
+        html = resp.get_data(as_text=True)
+        self.assertIn('Không thể gửi mã OTP lúc này', html)
+
+        user = Registration.query.filter_by(email='sendfail@gmail.com').first()
+        self.assertIsNone(user, 'User must not be created when OTP send fails')
+
+        challenge = OtpChallenge.query.filter_by(email='sendfail@gmail.com', purpose='register').first()
+        self.assertIsNotNone(challenge)
+        self.assertEqual(challenge.status, 'invalidated')
+
+        with self.client.session_transaction() as sess:
+            self.assertNotIn('pending_registration', sess)
+            self.assertNotIn('pending_otp_challenge_id', sess)
+            self.assertNotIn('pending_verification_email', sess)
+
 
 class OtpAuthVerifyTests(unittest.TestCase):
     """Task 2: Verify route enforces TTL, attempts, lockout, single-use."""

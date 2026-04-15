@@ -57,7 +57,7 @@
 
 ### v1.4 - OTP Email Reliability & QA
 
-- [ ] **Phase 20: OTP Security Policy Core** - Loai bo OTP hardcode va chuan hoa lifecycle verify an toan.
+- [x] **Phase 20: OTP Security Policy Core** - Loai bo OTP hardcode va chuan hoa lifecycle verify an toan. (completed 2026-04-15)
 - [ ] **Phase 21: Production OTP Email Delivery** - Kich hoat gui OTP email that tren production voi xu ly loi ro rang.
 - [ ] **Phase 22: Resend & Verify Session Stability** - On dinh luong resend/verify va session contract khi refresh/het han.
 - [ ] **Phase 23: OTP Abuse Guardrails** - Bao ve endpoint verify/resend bang throttling nhieu lop va anti-spam telemetry.
@@ -397,7 +397,7 @@ Plans:
 
 - [x] 20-01-PLAN.md — OTP challenge schema + crypto helper foundation.
 - [x] 20-02-PLAN.md — Register/verify lifecycle enforcement (TTL, lockout, single-use).
-- [ ] 20-03-PLAN.md — OTP security regression tests + validation evidence update.
+- [x] 20-03-PLAN.md — OTP security regression tests + validation evidence update.
 
 ### Phase 21: Production OTP Email Delivery
 
@@ -472,7 +472,7 @@ Plans:
 | 17. System Documents | 2/2 | Complete    | 2026-04-14 |
 | 18. Operational SOPs | 2/2 | Complete    | 2026-04-14 |
 | 19. Verification & Maintenance Setup | 2/2 | Complete    | 2026-04-14 |
-| 20. OTP Security Policy Core | 2/3 | In Progress|  |
+| 20. OTP Security Policy Core | 3/3 | Complete   | 2026-04-15 |
 | 21. Production OTP Email Delivery | 0/TBD | Not started | - |
 | 22. Resend & Verify Session Stability | 0/TBD | Not started | - |
 | 23. OTP Abuse Guardrails | 0/TBD | Not started | - |

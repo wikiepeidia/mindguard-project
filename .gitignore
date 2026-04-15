@@ -13,6 +13,7 @@ tests/*
 !tests/leaderboard/
 !tests/leaderboard/__init__.py
 !tests/leaderboard/test_*.py
+!tests/test_otp_security.py
 
 # One-time patch/write scripts (generated during development)
 patch_*.py

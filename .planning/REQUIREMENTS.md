@@ -10,7 +10,7 @@
 
 - [x] **OTPSEC-01**: User receives a cryptographically random 6-digit OTP for each challenge, with no static fallback values.
 - [x] **OTPSEC-02**: OTP is stored and compared as hash (salt/pepper), never persisted or logged in plaintext.
-- [ ] **OTPSEC-03**: When OTP is re-issued (resend/new challenge), previously active OTP is invalidated.
+- [x] **OTPSEC-03**: When OTP is re-issued (resend/new challenge), previously active OTP is invalidated.
 
 ### OTP Email Delivery (OTPMAIL)
 
@@ -26,9 +26,9 @@
 
 ### OTP Policy and Verification (OTPPOL)
 
-- [ ] **OTPPOL-01**: OTP is rejected after configurable TTL (default 5 minutes).
-- [ ] **OTPPOL-02**: Wrong OTP attempts are counted and temporary lockout is enforced after threshold.
-- [ ] **OTPPOL-03**: OTP verify is single-use and replay-safe (successful OTP cannot be reused).
+- [x] **OTPPOL-01**: OTP is rejected after configurable TTL (default 5 minutes).
+- [x] **OTPPOL-02**: Wrong OTP attempts are counted and temporary lockout is enforced after threshold.
+- [x] **OTPPOL-03**: OTP verify is single-use and replay-safe (successful OTP cannot be reused).
 
 ### OTP Resend and Session Flow (OTPRES, OTPSES)
 
@@ -75,16 +75,16 @@
 |-------------|-------|--------|
 | OTPSEC-01 | Phase 20 | Complete |
 | OTPSEC-02 | Phase 20 | Complete |
-| OTPSEC-03 | Phase 20 | Pending |
+| OTPSEC-03 | Phase 20 | Complete |
 | OTPMAIL-01 | Phase 21 | Pending |
 | OTPMAIL-02 | Phase 21 | Pending |
 | OTPMAIL-03 | Phase 21 | Pending |
 | OTPOUT-01 | Phase 22 | Pending |
 | OTPOUT-02 | Phase 22 | Pending |
 | OTPOUT-03 | Phase 22 | Pending |
-| OTPPOL-01 | Phase 20 | Pending |
-| OTPPOL-02 | Phase 20 | Pending |
-| OTPPOL-03 | Phase 20 | Pending |
+| OTPPOL-01 | Phase 20 | Complete |
+| OTPPOL-02 | Phase 20 | Complete |
+| OTPPOL-03 | Phase 20 | Complete |
 | OTPRES-01 | Phase 23 | Pending |
 | OTPRES-02 | Phase 23 | Pending |
 | OTPSES-01 | Phase 23 | Pending |

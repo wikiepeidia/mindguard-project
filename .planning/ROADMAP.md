@@ -396,7 +396,7 @@ Plans:
 Plans:
 
 - [x] 20-01-PLAN.md — OTP challenge schema + crypto helper foundation.
-- [ ] 20-02-PLAN.md — Register/verify lifecycle enforcement (TTL, lockout, single-use).
+- [x] 20-02-PLAN.md — Register/verify lifecycle enforcement (TTL, lockout, single-use).
 - [ ] 20-03-PLAN.md — OTP security regression tests + validation evidence update.
 
 ### Phase 21: Production OTP Email Delivery
@@ -472,7 +472,7 @@ Plans:
 | 17. System Documents | 2/2 | Complete    | 2026-04-14 |
 | 18. Operational SOPs | 2/2 | Complete    | 2026-04-14 |
 | 19. Verification & Maintenance Setup | 2/2 | Complete    | 2026-04-14 |
-| 20. OTP Security Policy Core | 1/3 | In Progress|  |
+| 20. OTP Security Policy Core | 2/3 | In Progress|  |
 | 21. Production OTP Email Delivery | 0/TBD | Not started | - |
 | 22. Resend & Verify Session Stability | 0/TBD | Not started | - |
 | 23. OTP Abuse Guardrails | 0/TBD | Not started | - |

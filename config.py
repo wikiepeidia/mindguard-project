@@ -69,3 +69,30 @@ class Config:
     OTP_LOCKOUT_SECONDS = int(os.environ.get("OTP_LOCKOUT_SECONDS", 900))
     OTP_PEPPER = os.environ.get("OTP_PEPPER", "")
     OTP_PEPPER_VERSION = os.environ.get("OTP_PEPPER_VERSION", "v1")
+
+    # OTP email delivery (Phase 21)
+    EMAIL_PROVIDER = os.environ.get("EMAIL_PROVIDER", "resend_api").strip().lower()
+    RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "").strip()
+    RESEND_FROM_EMAIL = os.environ.get("RESEND_FROM_EMAIL", "").strip()
+    OTP_EMAIL_TIMEOUT_SECONDS = int(os.environ.get("OTP_EMAIL_TIMEOUT_SECONDS", 5))
+    OTP_EMAIL_RETRY_ATTEMPTS = int(os.environ.get("OTP_EMAIL_RETRY_ATTEMPTS", 1))
+
+    @classmethod
+    def otp_email_missing_config(cls):
+        """Return missing config keys required for the selected OTP provider."""
+        provider = (cls.EMAIL_PROVIDER or "").strip().lower()
+
+        if provider != "resend_api":
+            return ["EMAIL_PROVIDER(resend_api)"]
+
+        missing = []
+        if not cls.RESEND_API_KEY:
+            missing.append("RESEND_API_KEY")
+        if not cls.RESEND_FROM_EMAIL:
+            missing.append("RESEND_FROM_EMAIL")
+        return missing
+
+    @classmethod
+    def otp_email_config_ready(cls):
+        """Whether OTP email delivery configuration is complete."""
+        return len(cls.otp_email_missing_config()) == 0

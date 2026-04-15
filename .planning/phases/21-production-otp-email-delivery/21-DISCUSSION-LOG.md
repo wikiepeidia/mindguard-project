@@ -14,12 +14,12 @@
 
 | Option | Description | Selected |
 |--------|-------------|----------|
-| Google SMTP + App Password | Quickest production path with existing Flask-Mail wiring | ✓ |
-| API provider (Resend/SendGrid) | Better long-term abstraction, but needs extra wiring now | |
+| Google SMTP + App Password | Quickest production path with existing Flask-Mail wiring | |
+| API provider (Resend) | Better long-term stability for transactional OTP and clear provider diagnostics | ✓ |
 | Keep demo/no real send | Violates Phase 21 goals | |
 
-**User's choice:** Continue quickly with pragmatic default path.
-**Notes:** Selected Google SMTP + App Password as phase baseline.
+**User's choice:** Switch to Resend API before planning.
+**Notes:** Resend API is now the locked provider decision for Phase 21.
 
 ---
 
@@ -40,12 +40,12 @@
 
 | Option | Description | Selected |
 |--------|-------------|----------|
-| Env-only MAIL_* credentials | Matches milestone constraints and production safety | ✓ |
+| Env-only Resend credentials (`EMAIL_PROVIDER`, `RESEND_API_KEY`, `RESEND_FROM_EMAIL`) | Matches milestone constraints and production safety | ✓ |
 | JSON fallback for production credentials | Increases secret risk and config drift | |
 | Hardcoded fallback credentials | Disallowed | |
 
 **User's choice:** Continue with secure default.
-**Notes:** Enforce `MAIL_SERVER`, `MAIL_PORT`, `MAIL_USE_TLS`, `MAIL_USERNAME`, `MAIL_PASSWORD`, `MAIL_DEFAULT_SENDER`.
+**Notes:** Enforce `EMAIL_PROVIDER`, `RESEND_API_KEY`, `RESEND_FROM_EMAIL` in runtime env.
 
 ---
 

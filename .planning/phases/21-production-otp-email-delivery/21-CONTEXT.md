@@ -21,8 +21,8 @@ Khong mo rong sang resend UX/cooldown, outage fallback, abuse guardrails, hoac O
 ## Implementation Decisions
 
 ### Provider va Kenh Gui Mail
-- **D-01:** Su dung Google SMTP (`smtp.gmail.com`) voi mot admin mailbox rieng va App Password lam provider chinh cho Phase 21.
-- **D-02:** Tai su dung `Flask-Mail` da co san (`extensions.py`, `app.py`) va bo sung service gui OTP ro rang de route auth goi qua service thay vi hardcode trong route.
+- **D-01:** Su dung Resend API lam provider chinh cho Phase 21.
+- **D-02:** Tao service gui OTP qua HTTP API (Resend) va de route auth chi goi qua service; khong goi truc tiep provider trong route.
 
 ### Failure Handling (OTPMAIL-02)
 - **D-03:** Dang ky chi duoc xem la hoan tat khi email OTP gui thanh cong. Neu gui that bai, khong tao tai khoan active, khong dat `registration_email` vao session dang nhap.
@@ -30,7 +30,7 @@ Khong mo rong sang resend UX/cooldown, outage fallback, abuse guardrails, hoac O
 - **D-05:** Chinh sach retry cho gui OTP: toi da 1 lan retry trong cung request (tong cong 2 lan gui), moi lan gui timeout ngan (mac dinh 5 giay) de phu hop serverless.
 
 ### Runtime Config va Secrets (OTPMAIL-03)
-- **D-06:** Mail credentials phai lay tu environment variables tren runtime production: `MAIL_SERVER`, `MAIL_PORT`, `MAIL_USE_TLS`, `MAIL_USERNAME`, `MAIL_PASSWORD`, `MAIL_DEFAULT_SENDER`.
+- **D-06:** Mail credentials phai lay tu environment variables tren runtime production: `EMAIL_PROVIDER`, `RESEND_API_KEY`, `RESEND_FROM_EMAIL`.
 - **D-07:** Khong su dung credentials hardcoded hoac fallback plaintext trong code. Neu thieu bien moi truong bat buoc, he thong fail closed cho OTP send va tra thong bao huong dan ro rang.
 
 ### Noi dung Email OTP
@@ -60,9 +60,10 @@ Khong mo rong sang resend UX/cooldown, outage fallback, abuse guardrails, hoac O
 - `utils/otp_security.py` — OTP challenge/verify policy da duoc hardening o Phase 20.
 
 ### Mail Integration Hien Co
-- `extensions.py` — `mail = Mail()` extension singleton.
-- `app.py` — `mail.init_app(app)` va startup wiring.
-- `config.py` — Noi dat env config key cho OTP va bo sung `MAIL_*`.
+- `extensions.py` — `mail = Mail()` da ton tai (co the giu lai cho fallback tuong lai, khong la duong chinh cua phase nay).
+- `app.py` — startup wiring hien co de doi chieu integration points.
+- `config.py` — Noi dat env config key cho OTP va bo sung `EMAIL_PROVIDER`, `RESEND_API_KEY`, `RESEND_FROM_EMAIL`.
+- `.env/RESEND.json` — Local secret artifact (khong dung lam source of truth production).
 
 ### Research Notes Lien Quan
 - `.planning/research/FEATURES.md` — Feature table stakes cho OTPMAIL.
@@ -75,9 +76,10 @@ Khong mo rong sang resend UX/cooldown, outage fallback, abuse guardrails, hoac O
 ## Existing Code Insights
 
 ### Reusable Assets
-- `extensions.py` + `app.py`: Flask-Mail da duoc khoi tao, co the noi truc tiep vao service gui OTP.
+- `extensions.py` + `app.py`: Co san integration layer de dat fallback SMTP neu can o phase sau.
 - `routes/auth.py`: Register flow da issue challenge va luu `pending_otp_challenge_id`, chi con thieu step gui email OTP that.
 - `utils/otp_security.py`: Da co challenge lifecycle (TTL/attempt/lockout/single-use) nen Phase 21 tap trung vao delivery.
+- `requests`: da duoc su dung san trong auth routes, co the tai su dung cho Resend API client.
 
 ### Established Patterns
 - Blueprint auth dang xu ly toan bo register/verify flow trong `routes/auth.py`.
@@ -87,14 +89,14 @@ Khong mo rong sang resend UX/cooldown, outage fallback, abuse guardrails, hoac O
 ### Integration Points
 - Diem chen gui mail: ngay sau `issue_otp_challenge(...)` trong register flow.
 - Diem fail handling: register POST branch truoc redirect den verify page.
-- Diem config: bo sung `MAIL_*` vao `Config` de `mail.send` co runtime config ro rang.
+- Diem config: bo sung `EMAIL_PROVIDER`, `RESEND_API_KEY`, `RESEND_FROM_EMAIL` vao `Config`.
 
 </code_context>
 
 <specifics>
 ## Specific Ideas
 
-- Uu tien huong di nhanh va on dinh cho production: Google SMTP + App Password voi mailbox rieng cua he thong (khong dung mailbox ca nhan hoc tap).
+- Uu tien huong di nhanh va on dinh cho production: Resend API (transactional email) de giam rui ro SMTP quota/relay drift.
 - Message toi nguoi dung khi send fail phai de hieu va co hanh dong tiep theo, nhung khong lo stack trace/provider internals.
 - Cac log van hanh nen gan challenge id va email da mask (neu can), tuyet doi khong ghi OTP plaintext.
 

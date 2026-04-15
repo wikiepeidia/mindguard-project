@@ -57,7 +57,8 @@
 
 ### v1.4 - OTP Email Reliability & QA
 
-- [x] **Phase 20: OTP Security Policy Core** - Loai bo OTP hardcode va chuan hoa lifecycle verify an toan. (completed 2026-04-15)
+- [x] **Phase 20: OTP Security Policy Core** - Loai bo OTP hardcode va chuan hoa lifecycle verify an toan.
+ (completed 2026-04-15)
 - [ ] **Phase 21: Production OTP Email Delivery** - Kich hoat gui OTP email that tren production voi xu ly loi ro rang.
 - [ ] **Phase 22: Resend & Verify Session Stability** - On dinh luong resend/verify va session contract khi refresh/het han.
 - [ ] **Phase 23: OTP Abuse Guardrails** - Bao ve endpoint verify/resend bang throttling nhieu lop va anti-spam telemetry.
@@ -409,7 +410,13 @@ Plans:
 1. Sau khi dang ky/xac minh, nguoi dung nhan duoc email OTP qua provider cau hinh tren production.
 2. Neu gui email OTP that bai, tai khoan khong duoc kich hoat va nguoi dung nhan huong dan thu lai ro rang.
 3. Kiem tra runtime config xac nhan tat ca mail/OTP credentials duoc nap tu environment variables, khong hardcode secrets.
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+
+- [ ] 21-01-PLAN.md - Resend provider config + OTP email delivery service foundation.
+- [ ] 21-02-PLAN.md - Register flow integration with fail-closed OTP delivery handling.
+- [ ] 21-03-PLAN.md - OTP delivery tests + validation evidence mapping.
 
 ### Phase 22: Resend & Verify Session Stability
 
@@ -473,7 +480,7 @@ Plans:
 | 18. Operational SOPs | 2/2 | Complete    | 2026-04-14 |
 | 19. Verification & Maintenance Setup | 2/2 | Complete    | 2026-04-14 |
 | 20. OTP Security Policy Core | 3/3 | Complete   | 2026-04-15 |
-| 21. Production OTP Email Delivery | 0/TBD | Not started | - |
+| 21. Production OTP Email Delivery | 0/3 | Not started | - |
 | 22. Resend & Verify Session Stability | 0/TBD | Not started | - |
 | 23. OTP Abuse Guardrails | 0/TBD | Not started | - |
 | 24. OTP QA Reliability Gate | 0/TBD | Not started | - |

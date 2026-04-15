@@ -566,9 +566,10 @@ class TestAuthFlows(unittest.TestCase):
         # User created in DB
         user = Registration.query.filter_by(email='otp@gmail.com').first()
         self.assertIsNotNone(user)
-
-    def test_verify_otp_wrong_code(self):
-        from models.models import OtpChallenge
+        
+        # Challenge must be marked as used
+        db.session.refresh(challenge)
+        self.assertIn(challenge.status, ['used', 'invalidated', 'expired'])
         from utils.otp_security import hash_otp
         import secrets as sec
         from datetime import datetime, timedelta

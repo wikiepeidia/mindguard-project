@@ -82,7 +82,7 @@ def _cfg_get(config, key, default=None):
     This helper tries dict-style first, then falls back to getattr.
     """
     # Dict-like access (Flask config, plain dict)
-    if hasattr(config, "get") and callable(config.get):
+    if isinstance(config, dict):
         val = config.get(key)
         if val is not None:
             return val

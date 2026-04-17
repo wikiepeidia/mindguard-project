@@ -351,6 +351,18 @@ class OtpAuthVerifyTests(unittest.TestCase):
         self.assertIn('refreshsafe@gmail.com', html)
         self.assertIn('Gửi lại mã OTP', html)
 
+    def test_verify_get_shows_cooldown_notice_and_disables_resend(self):
+        """GET /verify-otp should show resend wait-state while cooldown is active."""
+        challenge, _ = self._create_challenge(email='cooldownnotice@gmail.com')
+        self._set_pending_session(challenge, name='Cooldown Notice User')
+
+        resp = self.client.get('/verify-otp')
+        html = resp.get_data(as_text=True)
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn('Bạn có thể gửi lại mã sau', html)
+        self.assertIn('disabled aria-disabled="true"', html)
+
     def test_verify_get_without_pending_session_redirects_register(self):
         """GET /verify-otp should redirect safely when pending state is missing."""
         resp = self.client.get('/verify-otp', follow_redirects=False)

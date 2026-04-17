@@ -9,11 +9,16 @@
             <div class="card-body">
                 <h3 class="fw-bold mb-3 text-center">Xác thực tài khoản</h3>
                 <p class="text-muted text-center mb-4">
-                    Một mã OTP đã được gửi đến email <strong>{{ session.get('pending_verification_email',
-                        session.get('pending_registration', {}).get('email', '')) }}</strong>.
+                    Một mã OTP đã được gửi đến email <strong>{{ pending_email }}</strong>.
                     <br><small>Vui lòng kiểm tra hộp thư đến (và thư mục spam).</small>
-                    <br><small>Nếu chưa nhận được mã, vui lòng quay lại trang đăng ký để thử lại.</small>
+                    <br><small>Nếu thư đến chậm, bạn có thể gửi lại mã ngay trong trang này.</small>
                 </p>
+
+                {% if resend_notice %}
+                <div class="alert alert-{{ resend_notice_tone }} py-2 small" role="alert">
+                    {{ resend_notice }}
+                </div>
+                {% endif %}
 
                 <form method="POST">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
@@ -24,6 +29,16 @@
                     </div>
                     <button type="submit" class="btn btn-primary w-100">Xác thực</button>
                 </form>
+
+                <div class="text-center mt-3">
+                    <p class="small text-muted mb-2">Chưa nhận được mã OTP?</p>
+                    <form method="POST" action="{{ url_for('auth.resend_verify_otp') }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn btn-outline-secondary btn-sm" {% if not resend_enabled %}disabled aria-disabled="true"{% endif %}>
+                            Gửi lại mã OTP
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>

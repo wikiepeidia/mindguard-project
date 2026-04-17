@@ -1,14 +1,98 @@
 """Routes for user registration."""
-from flask import Blueprint, render_template, request, redirect, url_for, session, flash
+from flask import Blueprint, render_template, request, redirect, url_for, session, flash, current_app
 from models import db, Registration
 from models.models import OtpChallenge
 from werkzeug.security import generate_password_hash, check_password_hash
 from extensions import limiter
 from datetime import datetime
-from utils.otp_security import issue_otp_challenge, verify_otp_submission
+from utils.otp_security import (
+    activate_replacement_otp_challenge,
+    get_resend_otp_policy,
+    issue_otp_challenge,
+    prepare_resend_otp_challenge,
+    verify_otp_submission,
+)
 from services.otp_email_delivery import send_otp_email
 
 auth_bp = Blueprint('auth', __name__)
+
+
+def _clear_pending_otp_session():
+    session.pop('pending_registration', None)
+    session.pop('pending_otp_challenge_id', None)
+    session.pop('pending_verification_email', None)
+
+
+def _format_wait_time(wait_seconds):
+    wait_seconds = max(0, int(wait_seconds or 0))
+    minutes, seconds = divmod(wait_seconds, 60)
+    parts = []
+    if minutes:
+        parts.append(f"{minutes} phút")
+    if seconds or not parts:
+        parts.append(f"{seconds} giây")
+    return " ".join(parts)
+
+
+def _get_resend_notice(policy):
+    if policy.get("ok"):
+        return True, "Nếu chưa nhận được mã, bạn có thể yêu cầu gửi lại ngay.", "muted"
+
+    wait_text = _format_wait_time(policy.get("wait_seconds", 0))
+    if policy.get("reason") == "cooldown":
+        return False, f"Bạn có thể gửi lại mã sau {wait_text}.", "warning"
+
+    return False, f"Bạn đã yêu cầu gửi lại mã quá nhiều lần. Vui lòng chờ {wait_text} rồi thử lại.", "warning"
+
+
+def _load_pending_verification_context():
+    pending_data = session.get('pending_registration')
+    challenge_id = session.get('pending_otp_challenge_id')
+    pending_email = (pending_data or {}).get('email')
+
+    if not pending_data or not challenge_id:
+        flash("Phiên xác thực đã hết hạn. Vui lòng đăng ký lại.", "danger")
+        return None, None, redirect(url_for("auth.register"))
+
+    challenge = db.session.get(OtpChallenge, challenge_id)
+    if not challenge or not pending_email or challenge.email != pending_email or challenge.purpose != 'register':
+        _clear_pending_otp_session()
+        flash("Phiên xác thực không còn hiệu lực. Vui lòng đăng ký lại.", "danger")
+        return None, None, redirect(url_for("auth.register"))
+
+    now = datetime.utcnow()
+    if challenge.status in {'used', 'invalidated'}:
+        _clear_pending_otp_session()
+        flash("Phiên xác thực không còn hiệu lực. Vui lòng đăng ký lại.", "danger")
+        return None, None, redirect(url_for("auth.register"))
+
+    if challenge.status == 'expired' or now > challenge.expires_at:
+        challenge.status = 'expired'
+        db.session.commit()
+        _clear_pending_otp_session()
+        flash("Phiên xác thực đã hết hạn. Vui lòng đăng ký lại.", "danger")
+        return None, None, redirect(url_for("auth.register"))
+
+    return pending_data, challenge, None
+
+
+def _render_verify_otp_page(pending_data, challenge):
+    resend_policy = get_resend_otp_policy(
+        db.session,
+        challenge.email,
+        challenge.purpose,
+        datetime.utcnow(),
+        current_app.config,
+    )
+    resend_enabled, resend_notice, resend_notice_tone = _get_resend_notice(resend_policy)
+    pending_email = session.get('pending_verification_email') or pending_data.get('email', '')
+    return render_template(
+        "verify_otp.html",
+        pending_email=pending_email,
+        resend_enabled=resend_enabled,
+        resend_notice=resend_notice,
+        resend_notice_tone=resend_notice_tone,
+    )
 
 
 @auth_bp.route("/login", methods=["GET", "POST"])
@@ -186,7 +270,6 @@ def register():
         }
 
         # Issue OTP challenge (invalidates any prior active challenge for this email)
-        from flask import current_app
         challenge, plaintext_code = issue_otp_challenge(
             db.session, email, 'register', current_app.config
         )
@@ -207,9 +290,7 @@ def register():
             challenge.invalidation_reason = f"delivery_failed:{send_result.get('category', 'unknown')}"
             db.session.commit()
 
-            session.pop('pending_registration', None)
-            session.pop('pending_otp_challenge_id', None)
-            session.pop('pending_verification_email', None)
+            _clear_pending_otp_session()
 
             flash("Không thể gửi mã OTP lúc này. Vui lòng thử đăng ký lại sau vài phút.", "danger")
             return redirect(url_for("auth.register"))
@@ -228,22 +309,13 @@ def register():
 @auth_bp.route("/verify-otp", methods=["GET", "POST"])
 def verify_otp():
     """OTP Verification page with challenge-based lifecycle enforcement."""
+    pending_data, challenge, redirect_response = _load_pending_verification_context()
+    if redirect_response:
+        return redirect_response
+
     if request.method == "POST":
         otp = request.form.get("otp")
-        pending_data = session.get('pending_registration')
-        challenge_id = session.get('pending_otp_challenge_id')
-
-        if not pending_data or not challenge_id:
-            flash("Phiên đăng ký đã hết hạn. Vui lòng đăng ký lại.", "danger")
-            return redirect(url_for("auth.register"))
-
-        challenge = db.session.get(OtpChallenge, challenge_id)
-        if not challenge:
-            flash("Phiên đăng ký đã hết hạn. Vui lòng đăng ký lại.", "danger")
-            return redirect(url_for("auth.register"))
-
         now = datetime.utcnow()
-        from flask import current_app
         result = verify_otp_submission(challenge, otp, now, current_app.config)
         db.session.commit()
 
@@ -264,36 +336,85 @@ def verify_otp():
             session["registration_name"] = pending_data['name']
             session["registration_email"] = pending_data['email']
 
-            session.pop('pending_registration', None)
-            session.pop('pending_otp_challenge_id', None)
-            session.pop('pending_verification_email', None)
+            _clear_pending_otp_session()
 
             flash("Đăng ký thành công!", "success")
             return redirect(url_for("auth.onboarding"))
         elif result == 'expired':
-            flash("Mã OTP đã hết hạn. Vui lòng đăng ký lại.", "danger")
-            session.pop('pending_registration', None)
-            session.pop('pending_otp_challenge_id', None)
-            session.pop('pending_verification_email', None)
+            flash("Phiên xác thực đã hết hạn. Vui lòng đăng ký lại.", "danger")
+            _clear_pending_otp_session()
             return redirect(url_for("auth.register"))
         elif result == 'locked':
             flash("Bạn đã nhập sai quá nhiều lần. Vui lòng thử lại sau.", "danger")
         elif result == 'already_used':
             flash("Mã OTP này đã được sử dụng. Vui lòng đăng ký lại.", "danger")
-            session.pop('pending_registration', None)
-            session.pop('pending_otp_challenge_id', None)
-            session.pop('pending_verification_email', None)
+            _clear_pending_otp_session()
             return redirect(url_for("auth.register"))
         elif result == 'invalidated':
             flash("Mã OTP không còn hiệu lực. Vui lòng đăng ký lại.", "danger")
-            session.pop('pending_registration', None)
-            session.pop('pending_otp_challenge_id', None)
-            session.pop('pending_verification_email', None)
+            _clear_pending_otp_session()
             return redirect(url_for("auth.register"))
         else:
             flash("Mã OTP không đúng.", "danger")
 
-    return render_template("verify_otp.html")
+    return _render_verify_otp_page(pending_data, challenge)
+
+
+@auth_bp.route("/verify-otp/resend", methods=["POST"])
+def resend_verify_otp():
+    """Issue and send a replacement OTP without forcing a full re-registration."""
+    pending_data, challenge, redirect_response = _load_pending_verification_context()
+    if redirect_response:
+        return redirect_response
+
+    now = datetime.utcnow()
+    resend_policy = get_resend_otp_policy(
+        db.session,
+        challenge.email,
+        challenge.purpose,
+        now,
+        current_app.config,
+    )
+    if not resend_policy.get("ok"):
+        wait_text = _format_wait_time(resend_policy.get("wait_seconds", 0))
+        if resend_policy.get("reason") == "cooldown":
+            flash(f"Vui lòng chờ {wait_text} trước khi gửi lại mã OTP.", "warning")
+        else:
+            flash(f"Bạn đã yêu cầu gửi lại mã quá nhiều lần. Vui lòng chờ {wait_text} rồi thử lại.", "warning")
+        return redirect(url_for("auth.verify_otp"))
+
+    replacement_challenge, plaintext_code = prepare_resend_otp_challenge(
+        db.session,
+        challenge.email,
+        challenge.purpose,
+        current_app.config,
+        now=now,
+    )
+
+    send_result = send_otp_email(
+        email=challenge.email,
+        otp_code=plaintext_code,
+        context={
+            "purpose": challenge.purpose,
+            "challenge_id": replacement_challenge.id,
+            "resend": True,
+        },
+        config=current_app.config,
+    )
+
+    if not send_result.get("ok"):
+        db.session.rollback()
+        flash("Không thể gửi lại mã OTP lúc này. Vui lòng thử lại sau ít phút.", "danger")
+        return redirect(url_for("auth.verify_otp"))
+
+    activate_replacement_otp_challenge(db.session, replacement_challenge, now=now)
+    db.session.commit()
+
+    session['pending_otp_challenge_id'] = replacement_challenge.id
+    session['pending_verification_email'] = pending_data.get('email', challenge.email)
+
+    flash("Mã OTP mới đã được gửi đến email của bạn.", "info")
+    return redirect(url_for("auth.verify_otp"))
 
 
 @auth_bp.route("/onboarding")

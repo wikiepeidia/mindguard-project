@@ -1,4 +1,24 @@
-# Architecture: Milestone v1.4 OTP Email Reliability and QA
+# Architecture Research — v1.5 SMTP Pivot
+
+## Integration points
+
+- `config.py`: add SMTP-specific config contract.
+- `extensions.py`: reuse `mail = Mail()` initialized from app config.
+- `services/otp_email_delivery.py`: add SMTP transport branch while preserving normalized result contract.
+- `routes/auth.py`: keep current register/resend call sites unchanged except for provider selection readiness.
+- `tests/`: extend current OTP unit and integration coverage around SMTP success/failure.
+
+## Suggested build order
+
+1. Define SMTP config contract and readiness checks.
+2. Add SMTP send path in `services/otp_email_delivery.py`.
+3. Wire auth flows to the new provider selection.
+4. Add focused tests for SMTP success/failure.
+5. Run production smoke verification on Vercel.
+
+## Architecture rule
+
+Routes should continue to consume a normalized delivery result. Provider-specific logic belongs in the mail service layer.# Architecture: Milestone v1.4 OTP Email Reliability and QA
 
 Domain: OTP email verification for signup on Flask monolith (Vercel serverless + NeonDB/PostgreSQL fallback to SQLite)
 Researched: 2026-04-14

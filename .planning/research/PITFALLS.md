@@ -1,4 +1,19 @@
-# Domain Pitfalls: v1.4 OTP Email Reliability & QA
+# Pitfalls Research — v1.5 SMTP Pivot
+
+## Pitfalls to avoid
+
+1. Confusing TLS and SSL settings for SMTP ports.
+2. Treating a missing app password as a transient provider outage instead of configuration failure.
+3. Logging SMTP credentials or full connection details.
+4. Changing auth-route behavior while swapping transports.
+5. Assuming Gmail SMTP scales indefinitely without quotas or account limits.
+
+## Prevention strategy
+
+- Validate SMTP config before attempting delivery.
+- Keep outcome categories explicit (`misconfigured`, `timeout`, `network_error`, `provider_rejected`).
+- Preserve the existing register/resend/session contract and prove it with regression tests.
+- Document Gmail App Password prerequisites before the production cutover step.# Domain Pitfalls: v1.4 OTP Email Reliability & QA
 
 **Domain:** Email OTP in Flask auth on Vercel  
 **Researched:** 2026-04-14  

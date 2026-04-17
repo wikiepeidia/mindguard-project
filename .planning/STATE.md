@@ -1,16 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.4
-milestone_name: OTP Email Reliability & QA
+milestone: v1.5
+milestone_name: Vercel-Compatible OTP Mail Pivot
 status: ready
-last_updated: "2026-04-17T03:58:39.955238+00:00"
-last_activity: 2026-04-17 -- Phase 24 completed and OTP milestone verification passed
+last_updated: "2026-04-17T05:05:00.000000+00:00"
+last_activity: 2026-04-17 -- Milestone v1.5 defined and roadmap created
 progress:
-  total_phases: 5
-  completed_phases: 5
-  total_plans: 12
-  completed_plans: 12
-  percent: 100
+  total_phases: 3
+  completed_phases: 0
+  total_plans: 6
+  completed_plans: 0
+  percent: 0
 ---
 
 # STATE - MindGuard v2
@@ -18,27 +18,29 @@ progress:
 ## Project Reference
 
 - **Core Value**: Nguoi dung co the hoc, kiem tra nhan thuc va gui bao cao lua dao mot cach de dung, an toan, va dang tin cay.
-- **Current Focus**: v1.4 OTP Email Reliability & QA
+- **Current Focus**: v1.5 Vercel-Compatible OTP Mail Pivot
 
 ## Current Position
 
-Phase: 24 (OTP QA Reliability Gate) — COMPLETE
-Plan: 2 of 2 complete
-Status: Milestone v1.4 ready for closeout
-Last activity: 2026-04-17 -- Phase 24 completed and OTP milestone verification passed
+Phase: Not started (next: Phase 25 SMTP Provider Core & Config)
+Plan: —
+Status: Ready to plan Phase 25
+Last activity: 2026-04-17 -- Milestone v1.5 defined and roadmap created
 
-[████████████████████] 20/20 requirements (100%)
+[░░░░░░░░░░░░░░░░░░░░] 0/11 requirements (0%)
 
 ## Remaining Work
 
-- None inside v1.4. Milestone is ready for `/gsd-complete-milestone`.
+- Phase 25: SMTP Provider Core & Config
+- Phase 26: Auth Flow SMTP Cutover
+- Phase 27: SMTP QA & Production Verification
 
 ## Performance Metrics
 
-- **v1.4 requirements total**: 20
-- **Completed**: 20 (OTPSEC-01..03, OTPPOL-01..03, OTPMAIL-01..03, OTPRES-01..02, OTPSES-01, OTPREL-01..02, OTPQA-01..03)
-- **Remaining**: 0
-- **Coverage**: 20/20 mapped to roadmap phases
+- **v1.5 requirements total**: 11
+- **Completed**: 0
+- **Remaining**: 11
+- **Coverage**: 11/11 mapped to roadmap phases
 - **Open blockers**: 0
 
 ## Accumulated Context
@@ -49,21 +51,21 @@ Last activity: 2026-04-17 -- Phase 24 completed and OTP milestone verification p
 - PostgreSQL + Vercel remains the fixed production stack from v1.1.
 - v1.2 completed hardening/rate limiting/trust signals for Beta.
 - v1.3 completed technical docs/SOPs and docs-drift controls.
-- (Phase 20-01) PBKDF2-HMAC-SHA256 with 100k iterations for OTP hashing; pepper versioned (v1) for future rotation.
+- v1.4 completed OTP lifecycle, resend/session stability, abuse guardrails, and regression coverage.
 
-### New Milestone Structure (v1.4)
+### New Milestone Structure (v1.5)
 
-- Phase numbering continues from milestone history: starts at Phase 20.
-- Requirement groups OTPSEC/OTPMAIL/OTPOUT/OTPPOL/OTPRES/OTPSES/OTPREL/OTPQA are fully mapped.
-- Coverage target achieved in planning: 20/20 mapped, 0 unmapped.
+- Phase numbering continues from milestone history: starts at Phase 25.
+- Requirement groups SMTPP/SMTPC/SMTPO/SMTPQ are fully mapped.
+- This milestone assumes no custom sending domain and pivots OTP mail toward generic SMTP/Gmail App Password on Vercel.
 
 ### Blockers
 
-(None)
+(None at planning stage; execution will require a mailbox account plus SMTP credentials/app password.)
 
 ## Session Continuity
 
 - **Last Session**: 2026-04-17
-- **Stopped at**: Phase 24 completed and milestone ready for archival/closeout
-- **Resume with**: /gsd-complete-milestone
+- **Stopped at**: Milestone v1.5 defined and ready for detailed phase planning
+- **Resume with**: /gsd-plan-phase 25
 - **Resume file**: .planning/ROADMAP.md

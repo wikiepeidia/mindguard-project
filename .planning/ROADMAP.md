@@ -2,7 +2,7 @@
 
 **Created:** 2026-03-19
 **Granularity:** standard
-**Coverage:** 16/16 v1.0 requirements mapped · 10/10 v1.1 requirements mapped · 17/17 v1.2 requirements mapped · 13/13 v1.3 requirements mapped · 17/17 v1.4 requirements mapped
+**Coverage:** 16/16 v1.0 requirements mapped · 10/10 v1.1 requirements mapped · 17/17 v1.2 requirements mapped · 13/13 v1.3 requirements mapped · 20/20 v1.4 requirements mapped · 11/11 v1.5 requirements mapped
 
 ## Phases
 
@@ -67,6 +67,12 @@
  (completed 2026-04-17)
 - [x] **Phase 24: OTP QA Reliability Gate** - Khoa chat luong bang bo test tu dong cho cac nhanh OTP quan trong.
  (completed 2026-04-17)
+
+### v1.5 - Vercel-Compatible OTP Mail Pivot
+
+- [ ] **Phase 25: SMTP Provider Core & Config** - Chuan hoa duong gui OTP generic SMTP/Gmail App Password khong phu thuoc custom domain.
+- [ ] **Phase 26: Auth Flow SMTP Cutover** - Noi provider SMTP vao register/resend ma khong doi UX, session, hay guardrails OTP.
+- [ ] **Phase 27: SMTP QA & Production Verification** - Khoa regression va xac nhan cutover SMTP tren Vercel bang evidence production.
 
 ## Phase Details
 
@@ -473,7 +479,65 @@ Plans:
 2. Route tests bao phu register -> OTP send -> verify cho ca nhanh thanh cong va that bai.
 3. Integration tests mock mail-provider failure va concurrent verify edge cases, chi chap nhan mot verify success hop le.
 4. Test suite OTP chay pass on dinh truoc khi milestone duoc xem la san sang deploy.
-**Plans**: TBD
+**Plans**: 2/2 plans complete
+
+Plans:
+
+- [x] 24-01-PLAN.md - Add dedicated resend policy and replacement challenge unit coverage.
+- [x] 24-02-PLAN.md - Add resend failure and concurrent verify integration coverage, then capture OTP QA validation evidence.
+
+### Phase 25: SMTP Provider Core & Config
+
+**Goal**: He thong OTP co provider generic SMTP chay duoc tren Vercel ma khong can custom sending domain.
+**Depends on**: Phase 24
+**Requirements**: SMTPP-01, SMTPP-02, SMTPP-03, SMTPO-01
+**Success Criteria** (what must be TRUE):
+
+1. Config cho provider SMTP duoc dinh nghia ro rang bang env vars (host, port, auth, TLS/SSL, sender) va khong phu thuoc Resend domain verification.
+2. OTP delivery layer tra ve ket qua chuan hoa cho sent, misconfigured, timeout, provider_rejected, va network_error.
+3. Neu sender/credentials sai, register va resend fail closed ma khong kich hoat account hay lam hu pending challenge.
+4. Provider path co the dung mailbox sender thong thuong (vi du Gmail App Password) tren Vercel.
+**Plans**: 2 plans
+
+Plans:
+
+- [ ] 25-01-PLAN.md - Add generic SMTP config contract and provider adapter over Flask-Mail.
+- [ ] 25-02-PLAN.md - Add unit coverage for SMTP config validation and normalized delivery outcomes.
+
+### Phase 26: Auth Flow SMTP Cutover
+
+**Goal**: Luong dang ky va resend OTP chuyen sang SMTP nhung van giu nguyen UX, session, va abuse guardrails hien tai.
+**Depends on**: Phase 25
+**Requirements**: SMTPC-01, SMTPC-02, SMTPC-03, SMTPO-02
+**Success Criteria** (what must be TRUE):
+
+1. Register flow gui OTP qua provider SMTP moi va redirect dung sang verify khi gui thanh cong.
+2. Resend flow dung chung provider SMTP va giu nguyen challenge/session neu send that bai.
+3. Cooldown, lockout, rate limit, va pending-session contract van hoat dong nhu truoc khi doi provider.
+4. Operators co readiness/checklist ro rang cho Gmail App Password va generic SMTP tren Vercel.
+**Plans**: 2 plans
+
+Plans:
+
+- [ ] 26-01-PLAN.md - Wire SMTP provider into auth register/resend flows with fail-closed compatibility.
+- [ ] 26-02-PLAN.md - Add operator-facing config/readiness diagnostics and route regression coverage.
+
+### Phase 27: SMTP QA & Production Verification
+
+**Goal**: Team co evidence test va production smoke de go-live OTP SMTP tren Vercel ma khong can Resend domain setup.
+**Depends on**: Phase 26
+**Requirements**: SMTPQ-01, SMTPQ-02, SMTPQ-03
+**Success Criteria** (what must be TRUE):
+
+1. Unit + route + integration tests bao phu nhanh SMTP success/failure cho register va resend.
+2. Production smoke checklist xac nhan OTP SMTP gui duoc tren Vercel voi mailbox that.
+3. OTP go-live checklist khong con phu thuoc Resend custom-domain verification.
+**Plans**: 2 plans
+
+Plans:
+
+- [ ] 27-01-PLAN.md - Expand SMTP-focused unit/integration coverage and validation evidence.
+- [ ] 27-02-PLAN.md - Run production cutover checklist and record release evidence.
 
 ## Progress Table
 
@@ -488,18 +552,21 @@ Plans:
 | 7. PostgreSQL Configuration & Connection | 1/1 | Complete | 2026-04-03 |
 | 8. App Startup Cleanup & Data Seeding | 1/1 | Complete | 2026-04-04 |
 | 9. Vercel Deployment & Verification | 1/1 | Complete | 2026-04-04 |
-| 10. Infrastructure & Security Hardening | 1/1 | Complete    | 2026-04-13 |
+| 10. Infrastructure & Security Hardening | 1/1 | Complete | 2026-04-13 |
 | 11. UI Bug Fixes | 0/0 | Complete (all 5 reqs done by teammate) | 2026-04-13 |
 | 12. AI Safety | 1/1 | Complete | 2026-04-13 |
 | 13. Rate Limiting & Trust Signals | 0/? | Complete (4/4 reqs done — TRUST-03 feedback button added) | 2026-04-13 |
 | 14. Stress Test & Beta Sign-off | 1/1 | Complete | 2026-04-14 |
-| 15. Conventions & Redaction Setup | 1/1 | Complete    | 2026-04-14 |
-| 16. Foundation Documents | 2/2 | Complete    | 2026-04-14 |
-| 17. System Documents | 2/2 | Complete    | 2026-04-14 |
-| 18. Operational SOPs | 2/2 | Complete    | 2026-04-14 |
-| 19. Verification & Maintenance Setup | 2/2 | Complete    | 2026-04-14 |
-| 20. OTP Security Policy Core | 3/3 | Complete   | 2026-04-15 |
-| 21. Production OTP Email Delivery | 3/3 | Complete    | 2026-04-15 |
+| 15. Conventions & Redaction Setup | 1/1 | Complete | 2026-04-14 |
+| 16. Foundation Documents | 2/2 | Complete | 2026-04-14 |
+| 17. System Documents | 2/2 | Complete | 2026-04-14 |
+| 18. Operational SOPs | 2/2 | Complete | 2026-04-14 |
+| 19. Verification & Maintenance Setup | 2/2 | Complete | 2026-04-14 |
+| 20. OTP Security Policy Core | 3/3 | Complete | 2026-04-15 |
+| 21. Production OTP Email Delivery | 3/3 | Complete | 2026-04-15 |
 | 22. Resend & Verify Session Stability | 2/2 | Complete | 2026-04-17 |
 | 23. OTP Abuse Guardrails | 2/2 | Complete | 2026-04-17 |
 | 24. OTP QA Reliability Gate | 2/2 | Complete | 2026-04-17 |
+| 25. SMTP Provider Core & Config | 0/2 | Not started | - |
+| 26. Auth Flow SMTP Cutover | 0/2 | Not started | - |
+| 27. SMTP QA & Production Verification | 0/2 | Not started | - |

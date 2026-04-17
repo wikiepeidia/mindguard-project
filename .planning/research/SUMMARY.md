@@ -1,82 +1,68 @@
-# Milestone v1.4 OTP Research Summary
+# Milestone v1.5 SMTP Pivot Research Summary
 
-Date: 2026-04-14  
-Scope: OTP email reliability, outage continuity fallback, and QA for current Flask monolith on Vercel + NeonDB.
+Date: 2026-04-17  
+Scope: Replace Resend-specific OTP delivery with a Vercel-compatible SMTP path that does not require a verified custom sending domain.
 
-## 1) Stack additions for v1.4
+## 1) Stack additions for v1.5
 
-- Add server-side OTP persistence in PostgreSQL (NeonDB) via new `otp_challenges` table and manual migration script in `database/`.
-- Add `services/otp_service.py` as OTP lifecycle boundary: issue, resend, verify, lockout, consume.
-- Add `services/mail_adapter.py` (provider-agnostic) plus provider modules (Resend API primary, SMTP/API backup).
-- Add outage continuity components: provider failover policy, DB-backed retry queue for pending registration resend, and auditable manual admin assist handoff.
-- Extend `config.py` with `EMAIL_PROVIDER`, backup provider keys, `DEFAULT_FROM_EMAIL`, and OTP policy keys (`OTP_TTL_SECONDS`, `OTP_MAX_ATTEMPTS`, resend cooldown/caps).
-- Keep Flask-Mail available for local fallback paths, but treat HTTP API provider as production path.
-- Expand automated tests for OTP state transitions, failover behavior, outage recovery resend, and provider failure handling.
+- Reuse `Flask-Mail` as the generic SMTP transport instead of introducing a new mail library.
+- Extend `config.py` with provider-neutral SMTP keys such as `SMTP_HOST`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSWORD`, `SMTP_USE_TLS`, `SMTP_USE_SSL`, and `SMTP_FROM_EMAIL`.
+- Keep `services/otp_email_delivery.py` as the normalized delivery boundary, but add a generic SMTP branch beside the current Resend branch.
+- Support Gmail App Password as the immediate operational path; Google requires 2-Step Verification before an app password can be created.
+- Keep the auth routes thin and preserve current resend/session/guardrail behavior while swapping the transport.
 
-## 2) v1.4 table-stakes feature shortlist
+## 2) Table-stakes feature shortlist
 
-- Remove all hardcoded OTP behavior (`123456`) and generate cryptographically random 6-digit OTP.
-- Send real OTP emails in production, with clear error handling when provider send fails.
-- Enforce OTP lifecycle policy: short TTL, max verify attempts, temporary lockout, and strict single-use.
-- Add resend endpoint with cooldown + resend cap and user-visible countdown feedback.
-- Normalize session contract from register -> verify so refresh/timeout behavior is deterministic.
-- Add route-level protections for `/verify-otp` and resend endpoint (rate limit + abuse guardrails).
-- Implement outage continuity path: automatic backup-provider failover, preserved pending registration in retry queue, and manual admin assist route for prolonged outage.
-- Ship OTP reliability QA: happy path, wrong OTP, expired OTP, lockout, resend cooldown, provider failure, outage continuity, and concurrent verify.
+- OTP can be sent through generic SMTP on Vercel without owning a custom sending domain.
+- Gmail App Password and generic SMTP providers can be configured entirely via environment variables.
+- Register and resend keep the same user-visible OTP flow and fail closed if delivery fails.
+- Operators can tell the difference between bad config and transient provider/network failures.
+- SMTP-specific unit, route, and production smoke evidence exists before cutover is considered complete.
 
 ## 3) Key architecture decisions
 
-- OTP source of truth must move from Flask session to DB-backed challenge records.
-- Auth routes stay thin; OTP business rules live in service layer.
-- Verification must be atomic and idempotent to prevent replay/double activation under concurrency.
-- Use provider abstraction now so later switch to SES/SendGrid/Postmark does not touch route logic.
-- Keep request-path send synchronous with strict timeout budget; if send paths are down, preserve pending registration and enqueue DB-backed retry jobs (no Celery/Redis in v1.4).
-- Emit structured OTP events (`challenge.created`, `send.success/failure`, `failover.used`, `retry.queued`, `verify.success/failure`, `locked`, `expired`) for operations and QA.
+- Delivery transport should remain behind `services/otp_email_delivery.py`; routes should not know whether transport is Resend or SMTP.
+- `Flask-Mail` should be initialized from standard Flask config before use, rather than hand-rolling raw SMTP handling.
+- Gmail App Password is the immediate compatibility path, but the config contract should stay generic enough for Outlook/Brevo/other SMTP providers later.
+- The milestone should pivot provider transport only; OTP security, resend policy, abuse limits, and session lifecycle stay unchanged.
 
 ## 4) Top pitfalls and mitigations
 
-| Pitfall | Why it is risky here | Mitigation for v1.4 |
+| Pitfall | Why it is risky here | Mitigation for v1.5 |
 |---|---|---|
-| Hardcoded/default OTP path remains reachable | Enables bypass and invalidates verification trust | Remove fallback OTP values, fail closed if challenge missing, rotate OTP on resend |
-| OTP lifecycle kept only in session | Stateless runtime and replay risks; weak auditability | Persist hashed OTP challenge in DB with expiry, attempts, consume marker |
-| Missing verify/resend throttling | Brute-force and spam abuse on auth endpoints | Layer route limits + challenge-level cooldown/attempt lockout |
-| Email provider outage leaves no user path | Registration dead-end during provider incidents | Add provider failover + retry queue + manual admin assist continuity path |
-| Race conditions on verify | Duplicate/parallel submits can create inconsistent account state | Use transaction-safe consume logic and handle uniqueness races deterministically |
+| Assuming `vercel.app` counts as a sending domain | Resend requires a domain you own, so the current production path remains blocked | Stop planning around Resend domain verification and move to mailbox-based SMTP |
+| Gmail app password missing or unsupported | Gmail SMTP will reject login without 2-Step Verification and a valid app password | Treat Gmail setup as explicit operator prerequisite and document it in readiness checks |
+| TLS/SSL config mismatch | Port/TLS confusion can produce false "provider down" diagnoses | Keep config explicit (`MAIL_USE_TLS` vs `MAIL_USE_SSL`) and validate before sending |
+| Secrets leaking in config or logs | Mail credentials are sensitive and easy to mishandle during debugging | Environment-only secrets, redact logs, fail closed on misconfiguration |
+| SMTP cutover regressing OTP behavior | Provider swap could silently break resend/session/lockout flows | Keep auth route contract stable and require focused regression coverage before release |
 
-## 5) Recommended provider strategy (dev/staging/prod/growth)
+## 5) Recommended provider strategy
 
 | Stage | Provider choice | Transport | Practical intent |
 |---|---|---|---|
-| Dev | Mailtrap or Ethereal | SMTP sandbox | Safe debugging without real user delivery |
-| Staging/UAT | Resend (same path as prod), optional inbox assertion tool | HTTP API primary | Catch template/policy regressions before release |
-| Prod (v1.4) | Resend Pro + configured backup provider | HTTP API primary | Best speed-to-reliability fit with outage continuity fallback |
-| Growth (100k-1M OTP/mo) | Keep abstraction; evaluate SES vs SendGrid/Postmark | HTTP/API | Rebalance cost, quotas, and deliverability support as volume grows |
+| Immediate unblock | Gmail mailbox with App Password | SMTP | Works on Vercel without owning a sending domain |
+| Short-term alternative | Generic SMTP account (Outlook/Brevo/etc.) | SMTP | Same adapter contract, different mailbox/provider |
+| Future growth | Revisit API provider after domain ownership exists | API or SMTP | Better deliverability and provider features once domain control is solved |
 
-Provider rule: keep SMTP adapter for fallback/dev only, not as primary production backbone.
+## 6) What to defer out of v1.5
 
-## 6) What to defer out of v1.4
-
-- SMS OTP, TOTP, or broader MFA expansion.
-- Active-active multi-provider orchestration and advanced routing policies.
-- Celery/Redis distributed queue stack (v1.4 uses DB-backed retry queue only).
-- Dedicated IP warmup program and enterprise deliverability tuning.
-- Full auth system refactor beyond register/verify/resend OTP flow.
-- CI test stages that depend on real external inboxes and flaky provider quota behavior.
+- Resend custom-domain onboarding.
+- Multi-provider failover or retry queues.
+- Non-OTP transactional email features.
+- Broader auth redesign beyond the mail transport pivot.
 
 ## Requirements input
 
 Candidate requirement IDs:
 
-- OTPSEC-01: Generate 6-digit OTP via cryptographic randomness and never use static fallback values.
-- OTPSEC-02: Store OTP as hash+salt(+pepper), never plaintext in session, DB, logs, or UI.
-- OTPPOL-01: Enforce OTP TTL (default 5 minutes) and reject expired challenges.
-- OTPPOL-02: Enforce max verify attempts and temporary lockout after threshold.
-- OTPPOL-03: Mark OTP consumed atomically and reject replay.
-- OTPMAIL-01: Send OTP through provider adapter with timeout and normalized error mapping.
-- OTPRES-01: Provide resend endpoint with cooldown and rolling resend cap.
-- OTPSES-01: Persist and use challenge_id in session as the only client-side OTP reference.
-- OTPOUT-01: Add automatic primary->backup provider failover during email outage.
-- OTPOUT-02: Preserve pending registration in DB-backed retry queue and resend automatically on recovery.
-- OTPOUT-03: Add manual admin assist completion path for prolonged outage.
-- OTPREL-01: Add route-level and challenge-level throttling for verify/resend abuse control.
-- OTPQA-01: Add automated tests for expiry, lockout, resend policy, provider failure, outage continuity, and concurrency.
+- SMTPP-01: Send OTP through generic SMTP on Vercel without requiring a verified custom sending domain.
+- SMTPP-02: Normalize SMTP send outcomes and keep config-driven TLS/SSL/auth settings.
+- SMTPP-03: Fail closed on sender/credential misconfiguration.
+- SMTPC-01: Keep register flow behavior stable under the SMTP transport.
+- SMTPC-02: Keep resend flow behavior stable under the SMTP transport.
+- SMTPC-03: Preserve resend/session/abuse-guardrail behavior while swapping transports.
+- SMTPO-01: Load all SMTP secrets from environment variables only.
+- SMTPO-02: Provide operator-facing readiness diagnostics and Gmail/generic SMTP config contract.
+- SMTPQ-01: Add SMTP unit coverage.
+- SMTPQ-02: Add SMTP route/integration coverage.
+- SMTPQ-03: Record production smoke evidence on Vercel.

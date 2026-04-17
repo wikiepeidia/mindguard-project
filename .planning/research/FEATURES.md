@@ -1,4 +1,24 @@
-# Feature Landscape
+# Feature Research — v1.5 SMTP Pivot
+
+## Table stakes
+
+- Generic SMTP OTP sending on Vercel.
+- Gmail App Password support.
+- Fail-closed behavior on delivery errors.
+- Clear operator config contract.
+- Regression coverage for register/resend SMTP paths.
+
+## Differentiators
+
+- Provider-neutral SMTP config instead of Gmail-only special cases.
+- Readiness diagnostics that separate misconfiguration from transient send errors.
+- Production smoke evidence captured as part of milestone closeout.
+
+## Anti-features for this milestone
+
+- Resend domain verification work.
+- Backup-provider orchestration.
+- Broader email platform work outside OTP.# Feature Landscape
 
 **Domain:** v1.4 OTP Email Reliability & QA
 **Researched:** 2026-04-14

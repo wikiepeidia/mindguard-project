@@ -1,104 +1,73 @@
 # Requirements: MindGuard v2
 
-**Defined:** 2026-04-14
-**Milestone:** v1.4 OTP Email Reliability & QA
+**Defined:** 2026-04-17
+**Milestone:** v1.5 Vercel-Compatible OTP Mail Pivot
 **Core Value:** Người dùng có thể học, kiểm tra nhận thức và gửi báo cáo lừa đảo một cách dễ dùng, an toàn, và đáng tin cậy.
 
-## v1 Requirements (Milestone v1.4)
+## v1 Requirements (Milestone v1.5)
 
-### OTP Security (OTPSEC)
+### SMTP Provider Core (SMTPP)
 
-- [x] **OTPSEC-01**: User receives a cryptographically random 6-digit OTP for each challenge, with no static fallback values.
-- [x] **OTPSEC-02**: OTP is stored and compared as hash (salt/pepper), never persisted or logged in plaintext.
-- [x] **OTPSEC-03**: When OTP is re-issued (resend/new challenge), previously active OTP is invalidated.
+- [ ] **SMTPP-01**: User receives OTP email through a generic SMTP provider path that can run on Vercel without a verified custom sending domain.
+- [ ] **SMTPP-02**: OTP delivery supports config-driven SMTP auth + TLS/SSL settings and normalizes send outcomes (`sent`, `misconfigured`, `provider_rejected`, `network_error`, `timeout`).
+- [ ] **SMTPP-03**: If SMTP sender or credentials are invalid, OTP issue/resend fails closed and does not activate or corrupt pending account state.
 
-### OTP Email Delivery (OTPMAIL)
+### Auth Flow Compatibility (SMTPC)
 
-- [ ] **OTPMAIL-01**: User receives OTP email through configured provider in production (primary provider path enabled on Vercel).
-- [ ] **OTPMAIL-02**: If OTP email send fails, user receives clear retry guidance and account is not activated.
-- [ ] **OTPMAIL-03**: Mail/OTP provider credentials are loaded from environment variables only (no hardcoded secrets).
+- [ ] **SMTPC-01**: Register flow still issues OTP and redirects to verify page successfully when SMTP delivery succeeds.
+- [ ] **SMTPC-02**: Resend flow uses the same SMTP delivery path and preserves the current challenge/session when send fails.
+- [ ] **SMTPC-03**: Existing resend cooldown, verify lockout, session continuity, and abuse guardrails remain intact after the provider swap.
 
-### OTP Outage Continuity (OTPOUT)
+### Operations & Vercel Config (SMTPO)
 
-- [ ] **OTPOUT-01**: When primary email provider is unavailable, OTP delivery automatically fails over to configured backup provider without forcing user to restart registration.
-- [ ] **OTPOUT-02**: If all delivery providers are unavailable, pending registration is preserved and placed into a retry queue for later resend when email service recovers.
-- [ ] **OTPOUT-03**: For prolonged outage beyond retry policy, user can complete registration via a manual admin assist path with auditable handoff and secure verification controls.
+- [ ] **SMTPO-01**: All SMTP credentials and sender settings are loaded from Vercel environment variables only.
+- [ ] **SMTPO-02**: Operators have a clear, tested production config contract for Gmail App Password and generic SMTP providers, including readiness diagnostics that distinguish misconfiguration from transient send failures.
 
-### OTP Policy and Verification (OTPPOL)
+### QA & Cutover (SMTPQ)
 
-- [x] **OTPPOL-01**: OTP is rejected after configurable TTL (default 5 minutes).
-- [x] **OTPPOL-02**: Wrong OTP attempts are counted and temporary lockout is enforced after threshold.
-- [x] **OTPPOL-03**: OTP verify is single-use and replay-safe (successful OTP cannot be reused).
-
-### OTP Resend and Session Flow (OTPRES, OTPSES)
-
-- [ ] **OTPRES-01**: User can request OTP resend from verify flow without re-submitting full registration.
-- [ ] **OTPRES-02**: Resend enforces cooldown and resend cap per time window.
-- [ ] **OTPSES-01**: Register -> verify session contract is stable on refresh; missing/expired pending state redirects user safely.
-
-### Reliability and Abuse Controls (OTPREL)
-
-- [ ] **OTPREL-01**: `/verify-otp` and resend endpoint are protected with route-level rate limits.
-- [ ] **OTPREL-02**: OTP challenge-level throttling (cooldown/attempt lockout) works together with anti-spam telemetry.
-
-### QA Coverage (OTPQA)
-
-- [ ] **OTPQA-01**: Unit tests cover OTP generation, expiry, resend policy, lockout transitions.
-- [ ] **OTPQA-02**: Route tests cover register -> OTP send -> verify success/failure branches.
-- [ ] **OTPQA-03**: Integration tests mock mail-provider failure, outage recovery resend, and concurrent verify edge cases.
+- [ ] **SMTPQ-01**: Unit tests cover SMTP configuration validation and normalized send-result mapping.
+- [ ] **SMTPQ-02**: Route/integration tests cover register/resend SMTP success and failure branches without weakening OTP security behavior.
+- [ ] **SMTPQ-03**: Production cutover evidence proves the SMTP OTP path works on Vercel with a real mailbox account.
 
 ## v2 Requirements (Deferred)
 
-### OTP Reliability and UX Extensions
+### Provider Expansion
 
-- **OTPREL-03**: Active-active multi-provider routing and dynamic traffic balancing for OTP delivery at higher scale.
-- **OTPOBS-01**: OTP delivery/verify observability dashboard with alert thresholds.
-- **OTPUX-01**: Enhanced OTP input UX (split boxes, auto-paste handling, accessibility pass).
-
-### Authentication Expansion
-
-- **OTP2FA-01**: Add optional MFA methods (SMS OTP / authenticator app) after v1.4 stability.
+- **SMTPX-01**: Add backup-provider failover and retry queue once the primary SMTP cutover is stable.
+- **SMTPX-02**: Reintroduce Resend or another API provider only after the team controls a verified sending domain.
+- **SMTPX-03**: Add operator dashboard metrics for OTP delivery, bounce, and retry health.
 
 ## Out of Scope
 
 | Feature | Reason |
-|---------|--------|
-| SMS OTP / authenticator MFA | Scope v1.4 focuses on stabilizing email OTP only |
-| Full auth architecture refactor | High regression risk; not required to solve OTP reliability now |
-| Celery/Redis distributed background queue stack | v1.4 only needs DB-backed retry queue for outage continuity |
-| Active-active multi-provider routing with traffic balancing | Primary/backup failover is enough for v1.4 |
-| Non-OTP feature expansion (notifications/social/gamification) | Not related to milestone goal |
+| ------- | ------ |
+| Buying/verifying a custom sending domain for Resend | This milestone exists specifically because the team cannot depend on domain ownership right now |
+| Multi-provider failover or background retry queue | Higher complexity than needed for the immediate provider pivot |
+| Non-OTP transactional email expansion | Milestone is limited to unblocking OTP delivery only |
+| Full auth architecture refactor | Existing OTP/session/security behavior should stay intact |
 
 ## Traceability
 
 | Requirement | Phase | Status |
-|-------------|-------|--------|
-| OTPSEC-01 | Phase 20 | Complete |
-| OTPSEC-02 | Phase 20 | Complete |
-| OTPSEC-03 | Phase 20 | Complete |
-| OTPMAIL-01 | Phase 21 | Pending |
-| OTPMAIL-02 | Phase 21 | Pending |
-| OTPMAIL-03 | Phase 21 | Pending |
-| OTPOUT-01 | Phase 22 | Pending |
-| OTPOUT-02 | Phase 22 | Pending |
-| OTPOUT-03 | Phase 22 | Pending |
-| OTPPOL-01 | Phase 20 | Complete |
-| OTPPOL-02 | Phase 20 | Complete |
-| OTPPOL-03 | Phase 20 | Complete |
-| OTPRES-01 | Phase 23 | Pending |
-| OTPRES-02 | Phase 23 | Pending |
-| OTPSES-01 | Phase 23 | Pending |
-| OTPREL-01 | Phase 24 | Pending |
-| OTPREL-02 | Phase 24 | Pending |
-| OTPQA-01 | Phase 25 | Pending |
-| OTPQA-02 | Phase 25 | Pending |
-| OTPQA-03 | Phase 25 | Pending |
+| ----------- | ----- | ------ |
+| SMTPP-01 | Phase 25 | Pending |
+| SMTPP-02 | Phase 25 | Pending |
+| SMTPP-03 | Phase 25 | Pending |
+| SMTPO-01 | Phase 25 | Pending |
+| SMTPC-01 | Phase 26 | Pending |
+| SMTPC-02 | Phase 26 | Pending |
+| SMTPC-03 | Phase 26 | Pending |
+| SMTPO-02 | Phase 26 | Pending |
+| SMTPQ-01 | Phase 27 | Pending |
+| SMTPQ-02 | Phase 27 | Pending |
+| SMTPQ-03 | Phase 27 | Pending |
 
 **Coverage:**
-- v1 requirements: 20 total
-- Mapped to phases: 20
+
+- v1 requirements: 11 total
+- Mapped to phases: 11
 - Unmapped: 0 ✅
 
 ---
-*Requirements defined: 2026-04-14*
-*Last updated: 2026-04-14 after user feedback added outage continuity requirements and dedicated fallback phase scope*
+*Requirements defined: 2026-04-17*
+*Last updated: 2026-04-17 after milestone v1.5 was scoped around generic SMTP/Gmail App Password instead of Resend domain verification*

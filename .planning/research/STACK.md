@@ -1,4 +1,27 @@
-# Technology Stack — Milestone v1.4 OTP Email Reliability & QA
+# Stack Research — v1.5 SMTP Pivot
+
+## Existing stack to reuse
+
+- `Flask-Mail` is already installed and initialized in `extensions.py`.
+- `services/otp_email_delivery.py` already centralizes OTP delivery status normalization.
+- `config.py` already owns provider/env configuration for OTP delivery.
+
+## Recommended stack additions
+
+- Use `Flask-Mail` as the SMTP transport layer.
+- Add provider-neutral env keys for SMTP host, port, username, password, TLS/SSL, and default sender.
+- Keep `EMAIL_PROVIDER` as the transport selector, but add `smtp` as the production path.
+
+## Gmail App Password compatibility notes
+
+- Gmail app passwords require Google 2-Step Verification.
+- Gmail app passwords are mailbox credentials, not OAuth tokens.
+- This path does not require owning a sending domain, so it works with the current Vercel-only setup.
+
+## Do not add
+
+- Another mail library unless `Flask-Mail` proves technically insufficient.
+- Domain-dependent API providers as the new primary path for this milestone.# Technology Stack — Milestone v1.4 OTP Email Reliability & QA
 
 **Project:** MindGuard v2  
 **Researched:** 2026-04-14  

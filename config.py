@@ -69,6 +69,9 @@ class Config:
     OTP_LOCKOUT_SECONDS = int(os.environ.get("OTP_LOCKOUT_SECONDS", 900))
     OTP_PEPPER = os.environ.get("OTP_PEPPER", "")
     OTP_PEPPER_VERSION = os.environ.get("OTP_PEPPER_VERSION", "v1")
+    OTP_RESEND_COOLDOWN_SECONDS = int(os.environ.get("OTP_RESEND_COOLDOWN_SECONDS", 60))
+    OTP_RESEND_WINDOW_SECONDS = int(os.environ.get("OTP_RESEND_WINDOW_SECONDS", 900))
+    OTP_RESEND_MAX_PER_WINDOW = int(os.environ.get("OTP_RESEND_MAX_PER_WINDOW", 3))
 
     # OTP email delivery (Phase 21)
     EMAIL_PROVIDER = os.environ.get("EMAIL_PROVIDER", "resend_api").strip().lower()

@@ -11,6 +11,37 @@ import secrets
 from datetime import datetime, timedelta
 
 
+def _create_otp_challenge(session, email, purpose, config, now=None):
+    """Create and flush a new OTP challenge without invalidating existing ones."""
+    from models.models import OtpChallenge
+
+    issued_at = now or datetime.utcnow()
+    plaintext_code = generate_otp_code()
+    salt = secrets.token_hex(32)
+    pepper = _cfg_get(config, "OTP_PEPPER", "")
+    pepper_version = _cfg_get(config, "OTP_PEPPER_VERSION", "v1")
+    otp_hash = hash_otp(plaintext_code, salt, pepper)
+
+    ttl = int(_cfg_get(config, "OTP_TTL_SECONDS", 300) or 300)
+    max_attempts = int(_cfg_get(config, "OTP_MAX_ATTEMPTS", 5) or 5)
+
+    challenge = OtpChallenge(
+        email=email,
+        purpose=purpose,
+        otp_hash=otp_hash,
+        otp_salt=salt,
+        pepper_version=pepper_version,
+        attempts_used=0,
+        max_attempts=max_attempts,
+        issued_at=issued_at,
+        expires_at=issued_at + timedelta(seconds=ttl),
+        status="active",
+    )
+    session.add(challenge)
+    session.flush()
+    return challenge, plaintext_code
+
+
 def generate_otp_code():
     """Generate a cryptographically secure 6-digit OTP code.
 
@@ -62,7 +93,7 @@ def _cfg_get(config, key, default=None):
     return default
 
 
-def issue_otp_challenge(session, email, purpose, config):
+def issue_otp_challenge(session, email, purpose, config, now=None):
     """Create a new OTP challenge and persist it to the database.
 
     Invalidates any existing active challenges for the same email+purpose
@@ -81,7 +112,7 @@ def issue_otp_challenge(session, email, purpose, config):
     """
     from models.models import OtpChallenge
 
-    now = datetime.utcnow()
+    issued_at = now or datetime.utcnow()
 
     # Invalidate existing active challenges for this email+purpose
     active_challenges = OtpChallenge.query.filter_by(
@@ -91,35 +122,88 @@ def issue_otp_challenge(session, email, purpose, config):
     ).all()
     for ch in active_challenges:
         ch.status = "invalidated"
-        ch.invalidated_at = now
+        ch.invalidated_at = issued_at
         ch.invalidation_reason = "superseded"
 
-    # Generate new OTP
-    plaintext_code = generate_otp_code()
-    salt = secrets.token_hex(32)
-    pepper = _cfg_get(config, "OTP_PEPPER", "")
-    pepper_version = _cfg_get(config, "OTP_PEPPER_VERSION", "v1")
-    otp_hash = hash_otp(plaintext_code, salt, pepper)
+    return _create_otp_challenge(session, email, purpose, config, now=issued_at)
 
-    ttl = _cfg_get(config, "OTP_TTL_SECONDS", 300)
-    max_attempts = _cfg_get(config, "OTP_MAX_ATTEMPTS", 5)
 
-    challenge = OtpChallenge(
-        email=email,
-        purpose=purpose,
-        otp_hash=otp_hash,
-        otp_salt=salt,
-        pepper_version=pepper_version,
-        attempts_used=0,
-        max_attempts=max_attempts,
-        issued_at=now,
-        expires_at=now + timedelta(seconds=ttl),
+def get_resend_otp_policy(session, email, purpose, now, config):
+    """Evaluate whether resend is allowed for the current OTP flow.
+
+    The resend cap counts resend operations, not the initial challenge issue.
+    This is derived from challenge issuance history in the active resend window.
+    """
+    from models.models import OtpChallenge
+
+    cooldown_seconds = int(_cfg_get(config, "OTP_RESEND_COOLDOWN_SECONDS", 60) or 60)
+    window_seconds = int(_cfg_get(config, "OTP_RESEND_WINDOW_SECONDS", 900) or 900)
+    max_per_window = int(_cfg_get(config, "OTP_RESEND_MAX_PER_WINDOW", 3) or 3)
+
+    window_start = now - timedelta(seconds=window_seconds)
+    recent_challenges = OtpChallenge.query.filter(
+        OtpChallenge.email == email,
+        OtpChallenge.purpose == purpose,
+        OtpChallenge.issued_at >= window_start,
+    ).order_by(OtpChallenge.issued_at.asc(), OtpChallenge.id.asc()).all()
+
+    resend_count = max(0, len(recent_challenges) - 1)
+    latest_issue = recent_challenges[-1].issued_at if recent_challenges else None
+    if latest_issue is not None:
+        cooldown_remaining = int(max(0, (latest_issue + timedelta(seconds=cooldown_seconds) - now).total_seconds()))
+        if cooldown_remaining > 0:
+            return {
+                "ok": False,
+                "reason": "cooldown",
+                "wait_seconds": cooldown_remaining,
+                "resend_count": resend_count,
+                "max_per_window": max_per_window,
+            }
+
+    if resend_count >= max_per_window and recent_challenges:
+        window_reset = recent_challenges[0].issued_at + timedelta(seconds=window_seconds)
+        wait_seconds = int(max(1, (window_reset - now).total_seconds()))
+        return {
+            "ok": False,
+            "reason": "cap",
+            "wait_seconds": wait_seconds,
+            "resend_count": resend_count,
+            "max_per_window": max_per_window,
+        }
+
+    return {
+        "ok": True,
+        "reason": "allowed",
+        "wait_seconds": 0,
+        "resend_count": resend_count,
+        "max_per_window": max_per_window,
+    }
+
+
+def prepare_resend_otp_challenge(session, email, purpose, config, now=None):
+    """Create a replacement challenge but keep the current active one intact until send succeeds."""
+    return _create_otp_challenge(session, email, purpose, config, now=now)
+
+
+def activate_replacement_otp_challenge(session, replacement_challenge, now=None):
+    """Invalidate prior active challenges only after replacement delivery succeeds."""
+    from models.models import OtpChallenge
+
+    activated_at = now or datetime.utcnow()
+    active_challenges = OtpChallenge.query.filter_by(
+        email=replacement_challenge.email,
+        purpose=replacement_challenge.purpose,
         status="active",
-    )
-    session.add(challenge)
-    session.flush()  # Get id assigned without full commit
+    ).all()
+    for challenge in active_challenges:
+        if challenge.id == replacement_challenge.id:
+            continue
+        challenge.status = "invalidated"
+        challenge.invalidated_at = activated_at
+        challenge.invalidation_reason = "superseded"
 
-    return challenge, plaintext_code
+    replacement_challenge.status = "active"
+    return replacement_challenge
 
 
 def verify_otp_submission(challenge, submitted_code, now, config):

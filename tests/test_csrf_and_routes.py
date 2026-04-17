@@ -56,6 +56,11 @@ def create_csrf_test_app(csrf_enabled=True):
         'CLOUDFLARE_SECRET_KEY': None,   # disable captcha in tests
         'CLOUDFLARE_SITE_KEY': None,
         'ABUS_MODE': 'monitor',
+        'OTP_PEPPER': 'test-pepper',
+        'OTP_PEPPER_VERSION': 'v1',
+        'OTP_RESEND_COOLDOWN_SECONDS': 60,
+        'OTP_RESEND_WINDOW_SECONDS': 900,
+        'OTP_RESEND_MAX_PER_WINDOW': 3,
     })
 
     db.init_app(app)
@@ -174,6 +179,45 @@ class TestCSRFProtection(unittest.TestCase):
             sess['is_admin'] = True
             sess['admin_email'] = 'admin@test.com'
 
+    def _seed_pending_otp_challenge(self, email='csrf-otp@gmail.com', issued_at=None):
+        from datetime import datetime, timedelta
+        import secrets as sec
+
+        from models.models import OtpChallenge
+        from utils.otp_security import hash_otp
+
+        challenge_issued_at = issued_at or (datetime.utcnow() - timedelta(seconds=120))
+        otp_code = '654321'
+        salt = sec.token_hex(32)
+        otp_hash = hash_otp(otp_code, salt, self.app.config.get('OTP_PEPPER', ''))
+
+        challenge = OtpChallenge(
+            email=email,
+            purpose='register',
+            otp_hash=otp_hash,
+            otp_salt=salt,
+            pepper_version='v1',
+            attempts_used=0,
+            max_attempts=5,
+            issued_at=challenge_issued_at,
+            expires_at=challenge_issued_at + timedelta(seconds=300),
+            status='active',
+        )
+        db.session.add(challenge)
+        db.session.commit()
+
+        with self.client.session_transaction() as sess:
+            sess['pending_registration'] = {
+                'name': 'CSRF OTP User',
+                'email': email,
+                'password': 'pass',
+                'city': 'Ha Noi',
+            }
+            sess['pending_otp_challenge_id'] = challenge.id
+            sess['pending_verification_email'] = email
+
+        return challenge
+
     # ------ Attack: POST without CSRF token must fail (400) ----------- #
 
     def test_login_post_without_csrf_rejected(self):
@@ -192,6 +236,24 @@ class TestCSRFProtection(unittest.TestCase):
     def test_verify_otp_without_csrf_rejected(self):
         resp = self.client.post('/verify-otp', data={'otp': '123456'})
         self.assertEqual(resp.status_code, 400)
+
+    def test_verify_otp_resend_without_csrf_rejected(self):
+        self._seed_pending_otp_challenge()
+        resp = self.client.post('/verify-otp/resend')
+        self.assertEqual(resp.status_code, 400)
+
+    def test_verify_otp_resend_with_csrf_allowed(self):
+        self._seed_pending_otp_challenge()
+        csrf_token = _get_csrf_token(self.client)
+
+        resp = self.client.post(
+            '/verify-otp/resend',
+            data={'csrf_token': csrf_token},
+            follow_redirects=False,
+        )
+
+        self.assertEqual(resp.status_code, 302)
+        self.assertIn('/verify-otp', resp.location)
 
     def test_profile_edit_without_csrf_rejected(self):
         self._login()

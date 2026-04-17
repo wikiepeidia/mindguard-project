@@ -22,14 +22,14 @@ from sqlalchemy.pool import StaticPool
 from extensions import db, csrf, limiter
 from config import Config
 from models import Registration
-from models.models import OtpChallenge
+from models.models import AntiSpamActorState, OtpChallenge
 
 
 # ---------------------------------------------------------------------------
 # Test app factory
 # ---------------------------------------------------------------------------
 
-def create_test_app():
+def create_test_app(overrides=None):
     """Create a test Flask app with in-memory SQLite."""
     app = Flask(
         'mindguard_otp_auth_test',
@@ -58,7 +58,15 @@ def create_test_app():
         'OTP_RESEND_COOLDOWN_SECONDS': 60,
         'OTP_RESEND_WINDOW_SECONDS': 900,
         'OTP_RESEND_MAX_PER_WINDOW': 3,
+        'OTP_VERIFY_RATE_LIMIT': '10/minute;3/second',
+        'OTP_RESEND_RATE_LIMIT': '5/minute;1/second',
+        'OTP_ABUSE_WINDOW_MINUTES': 10,
+        'OTP_ABUSE_THRESHOLD_COUNT': 3,
+        'OTP_ABUSE_COOLDOWN_MINUTES': 15,
     })
+
+    if overrides:
+        app.config.update(overrides)
 
     db.init_app(app)
     limiter.init_app(app)
@@ -297,8 +305,9 @@ class OtpAuthVerifyTests(unittest.TestCase):
         db.session.rollback()
         self.ctx.pop()
 
-    def _set_pending_session(self, challenge, name='Pending User', password='pass', city='HN'):
-        with self.client.session_transaction() as sess:
+    def _set_pending_session(self, challenge, name='Pending User', password='pass', city='HN', client=None):
+        target_client = client or self.client
+        with target_client.session_transaction() as sess:
             sess['pending_registration'] = {
                 'name': name,
                 'email': challenge.email,
@@ -512,6 +521,165 @@ class OtpAuthVerifyTests(unittest.TestCase):
         self.assertIn('/register', resp.location)
         mock_send_otp_email.assert_not_called()
 
+
+class OtpAuthAbuseGuardrailTests(unittest.TestCase):
+    def setUp(self):
+        self.app = create_test_app({
+            'RATELIMIT_ENABLED': True,
+            'OTP_VERIFY_RATE_LIMIT': '2/minute',
+            'OTP_RESEND_RATE_LIMIT': '2/minute',
+            'OTP_RESEND_COOLDOWN_SECONDS': 60,
+            'OTP_RESEND_MAX_PER_WINDOW': 3,
+            'OTP_MAX_ATTEMPTS': 10,
+            'OTP_ABUSE_THRESHOLD_COUNT': 2,
+        })
+        self.client = self.app.test_client()
+        self.ctx = self.app.app_context()
+        self.ctx.push()
+
+    def tearDown(self):
+        db.session.rollback()
+        db.drop_all()
+        self.ctx.pop()
+
+    def _set_pending_session(self, challenge, name='Guardrail User', password='pass', city='HN', client=None):
+        target_client = client or self.client
+        with target_client.session_transaction() as sess:
+            sess['pending_registration'] = {
+                'name': name,
+                'email': challenge.email,
+                'password': password,
+                'city': city,
+            }
+            sess['pending_otp_challenge_id'] = challenge.id
+            sess['pending_verification_email'] = challenge.email
+
+    def _create_challenge(self, email='guardrail@gmail.com', status='active', otp_code='654321', issued_at=None):
+        from utils.otp_security import hash_otp
+        import secrets as sec
+
+        salt = sec.token_hex(32)
+        otp_hash = hash_otp(otp_code, salt, self.app.config.get('OTP_PEPPER', ''))
+        now = issued_at or datetime.utcnow()
+
+        challenge = OtpChallenge(
+            email=email,
+            purpose='register',
+            otp_hash=otp_hash,
+            otp_salt=salt,
+            pepper_version='v1',
+            attempts_used=0,
+            max_attempts=self.app.config.get('OTP_MAX_ATTEMPTS', 10),
+            issued_at=now,
+            expires_at=now + timedelta(seconds=300),
+            status=status,
+        )
+        db.session.add(challenge)
+        db.session.commit()
+        return challenge, otp_code
+
+    def test_verify_invalid_attempts_sync_anti_spam_cooldown_to_challenge(self):
+        from services.otp_abuse_guard import build_otp_actor_id
+
+        challenge, _ = self._create_challenge(email='abuseverify@gmail.com')
+        self._set_pending_session(challenge, name='Abuse Verify User')
+
+        first = self.client.post('/verify-otp', data={'otp': '000000'}, follow_redirects=False)
+        second = self.client.post('/verify-otp', data={'otp': '000000'}, follow_redirects=False)
+
+        actor_state = AntiSpamActorState.query.filter_by(
+            actor_key=f"acct:{build_otp_actor_id('abuseverify@gmail.com')}"
+        ).first()
+
+        self.assertEqual(first.status_code, 200)
+        self.assertEqual(second.status_code, 302)
+        self.assertIsNotNone(actor_state)
+
+        db.session.refresh(challenge)
+        self.assertEqual(challenge.status, 'locked')
+        self.assertIsNotNone(challenge.locked_until)
+        self.assertEqual(challenge.locked_until, actor_state.cooldown_until)
+
+    def test_verify_get_uses_anti_spam_cooldown_to_disable_resend(self):
+        from services.otp_abuse_guard import build_otp_actor_id
+
+        challenge, _ = self._create_challenge(email='cooldownrender@gmail.com')
+        self._set_pending_session(challenge, name='Cooldown Render User')
+
+        actor_state = AntiSpamActorState(
+            actor_key=f"acct:{build_otp_actor_id('cooldownrender@gmail.com')}",
+            actor_type='account',
+            cooldown_until=datetime.utcnow() + timedelta(minutes=5),
+            window_count=2,
+            last_risk_score=100,
+            last_risk_level='high',
+        )
+        db.session.add(actor_state)
+        db.session.commit()
+
+        resp = self.client.get('/verify-otp')
+        html = resp.get_data(as_text=True)
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn('Bạn có thể gửi lại mã sau', html)
+        self.assertIn('disabled aria-disabled="true"', html)
+
+    def test_verify_normal_success_still_passes_under_guardrails(self):
+        challenge, code = self._create_challenge(email='guardrailsuccess@gmail.com')
+        self._set_pending_session(challenge, name='Guardrail Success User')
+
+        resp = self.client.post('/verify-otp', data={'otp': code}, follow_redirects=False)
+
+        self.assertEqual(resp.status_code, 302)
+        user = Registration.query.filter_by(email='guardrailsuccess@gmail.com').first()
+        self.assertIsNotNone(user)
+
+    def test_verify_post_rate_limit_returns_429(self):
+        challenge, _ = self._create_challenge(email='verifylimit@gmail.com')
+        self._set_pending_session(challenge, name='Verify Limit User')
+
+        first = self.client.post('/verify-otp', data={'otp': '000000'}, follow_redirects=False)
+        second = self.client.post('/verify-otp', data={'otp': '000000'}, follow_redirects=False)
+        third = self.client.post('/verify-otp', data={'otp': '000000'}, follow_redirects=False)
+
+        self.assertEqual(first.status_code, 200)
+        self.assertEqual(second.status_code, 302)
+        self.assertEqual(third.status_code, 429)
+
+    @patch('routes.auth.send_otp_email')
+    def test_resend_post_rate_limit_returns_429(self, mock_send_otp_email):
+        mock_send_otp_email.return_value = {
+            'ok': True,
+            'category': 'sent',
+            'message': 'sent',
+            'provider_message_id': 'msg-rate',
+        }
+        first_challenge, _ = self._create_challenge(
+            email='resendlimit1@gmail.com',
+            issued_at=datetime.utcnow() - timedelta(seconds=120),
+        )
+        self._set_pending_session(first_challenge, name='Resend Limit User 1')
+        first = self.client.post('/verify-otp/resend', follow_redirects=False)
+
+        second_challenge, _ = self._create_challenge(
+            email='resendlimit2@gmail.com',
+            issued_at=datetime.utcnow() - timedelta(seconds=120),
+        )
+        self._set_pending_session(second_challenge, name='Resend Limit User 2')
+        second = self.client.post('/verify-otp/resend', follow_redirects=False)
+
+        third_challenge, _ = self._create_challenge(
+            email='resendlimit3@gmail.com',
+            issued_at=datetime.utcnow() - timedelta(seconds=120),
+        )
+        self._set_pending_session(third_challenge, name='Resend Limit User 3')
+        third = self.client.post('/verify-otp/resend', follow_redirects=False)
+
+        self.assertEqual(first.status_code, 302)
+        self.assertEqual(second.status_code, 302)
+        self.assertEqual(third.status_code, 429)
+        self.assertEqual(mock_send_otp_email.call_count, 2)
+
     @patch('routes.auth.send_otp_email')
     def test_resend_success_replaces_challenge_and_updates_session(self, mock_send_otp_email):
         """Successful resend should activate a replacement challenge and update session state."""
@@ -545,6 +713,41 @@ class OtpAuthVerifyTests(unittest.TestCase):
         with self.client.session_transaction() as sess:
             self.assertEqual(sess.get('pending_otp_challenge_id'), replacement_challenge.id)
             self.assertEqual(sess.get('pending_verification_email'), 'resendsuccess@gmail.com')
+
+        mock_send_otp_email.assert_called_once()
+
+    @patch('routes.auth.send_otp_email')
+    def test_resend_send_failure_rolls_back_and_keeps_current_challenge(self, mock_send_otp_email):
+        """Delivery failure during resend must keep the existing challenge/session intact."""
+        mock_send_otp_email.return_value = {
+            'ok': False,
+            'category': 'timeout',
+            'message': 'timeout',
+            'provider_message_id': None,
+        }
+        current_challenge, _ = self._create_challenge(
+            email='resendfail@gmail.com',
+            issued_at=datetime.utcnow() - timedelta(seconds=120),
+        )
+        self._set_pending_session(current_challenge, name='Resend Failure User')
+
+        resp = self.client.post('/verify-otp/resend', follow_redirects=True)
+        html = resp.get_data(as_text=True)
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn('Không thể gửi lại mã OTP lúc này', html)
+
+        challenges = OtpChallenge.query.filter_by(
+            email='resendfail@gmail.com',
+            purpose='register',
+        ).order_by(OtpChallenge.issued_at.asc(), OtpChallenge.id.asc()).all()
+        self.assertEqual(len(challenges), 1)
+        db.session.refresh(current_challenge)
+        self.assertEqual(current_challenge.status, 'active')
+
+        with self.client.session_transaction() as sess:
+            self.assertEqual(sess.get('pending_otp_challenge_id'), current_challenge.id)
+            self.assertEqual(sess.get('pending_verification_email'), 'resendfail@gmail.com')
 
         mock_send_otp_email.assert_called_once()
 
@@ -607,6 +810,32 @@ class OtpAuthVerifyTests(unittest.TestCase):
             self.assertEqual(sess.get('pending_otp_challenge_id'), current_challenge.id)
 
         mock_send_otp_email.assert_not_called()
+
+    def test_concurrent_verify_allows_only_one_successful_use(self):
+        """Two clients using the same pending challenge should yield only one successful verification."""
+        challenge, code = self._create_challenge(email='concurrent@gmail.com')
+
+        first_client = self.app.test_client()
+        second_client = self.app.test_client()
+        self._set_pending_session(challenge, name='Concurrent User', client=first_client)
+        self._set_pending_session(challenge, name='Concurrent User', client=second_client)
+
+        first = first_client.post('/verify-otp', data={'otp': code}, follow_redirects=False)
+        second = second_client.post('/verify-otp', data={'otp': code}, follow_redirects=False)
+
+        self.assertEqual(first.status_code, 302)
+        self.assertIn('/onboarding', first.location)
+        self.assertEqual(second.status_code, 302)
+        self.assertIn('/register', second.location)
+        self.assertEqual(Registration.query.filter_by(email='concurrent@gmail.com').count(), 1)
+
+        db.session.refresh(challenge)
+        self.assertEqual(challenge.status, 'used')
+
+        with second_client.session_transaction() as sess:
+            self.assertNotIn('pending_registration', sess)
+            self.assertNotIn('pending_otp_challenge_id', sess)
+            self.assertNotIn('pending_verification_email', sess)
 
 
 if __name__ == '__main__':

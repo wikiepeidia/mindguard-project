@@ -61,9 +61,12 @@
  (completed 2026-04-15)
 - [x] **Phase 21: Production OTP Email Delivery** - Kich hoat gui OTP email that tren production voi xu ly loi ro rang.
  (completed 2026-04-15)
-- [ ] **Phase 22: Resend & Verify Session Stability** - On dinh luong resend/verify va session contract khi refresh/het han.
-- [ ] **Phase 23: OTP Abuse Guardrails** - Bao ve endpoint verify/resend bang throttling nhieu lop va anti-spam telemetry.
-- [ ] **Phase 24: OTP QA Reliability Gate** - Khoa chat luong bang bo test tu dong cho cac nhanh OTP quan trong.
+- [x] **Phase 22: Resend & Verify Session Stability** - On dinh luong resend/verify va session contract khi refresh/het han.
+ (completed 2026-04-17)
+- [x] **Phase 23: OTP Abuse Guardrails** - Bao ve endpoint verify/resend bang throttling nhieu lop va anti-spam telemetry.
+ (completed 2026-04-17)
+- [x] **Phase 24: OTP QA Reliability Gate** - Khoa chat luong bang bo test tu dong cho cac nhanh OTP quan trong.
+ (completed 2026-04-17)
 
 ## Phase Details
 
@@ -199,7 +202,12 @@ Plans:
 2. `db.create_all()` tao thanh cong tat ca tables trong NeonDB (xac nhan bang query).
 3. Seed data (quiz questions, scam types, admin user) ton tai trong NeonDB sau khi chay script 1 lan.
 4. App khoi dong va serve pages voi du lieu tu NeonDB (cac trang quiz, leaderboard, report tra ve ket qua).
-**Plans**: TBD
+**Plans**: 2/2 plans complete
+
+Plans:
+
+- [x] 24-01-PLAN.md - Add dedicated resend policy and replacement challenge unit coverage.
+- [x] 24-02-PLAN.md - Add resend failure and concurrent verify integration coverage, then capture OTP QA validation evidence.
 
 ### Phase 9: Vercel Deployment & Verification
 
@@ -447,7 +455,12 @@ Plans:
 1. Verify va resend requests vuot nguong bi chan boi rate limit thay vi tiep tuc xu ly OTP.
 2. Cooldown resend va lockout attempts phoi hop nhat quan voi anti-spam telemetry tren cung challenge.
 3. Nguoi dung hop le voi toc do thao tac binh thuong van hoan tat xac thuc ma khong bi chan sai.
-**Plans**: TBD
+**Plans**: 2/2 plans complete
+
+Plans:
+
+- [x] 23-01-PLAN.md - Add config-backed OTP limiter and anti-spam cooldown enforcement in the auth flow.
+- [x] 23-02-PLAN.md - Add OTP abuse regression tests and validation evidence mapping.
 
 ### Phase 24: OTP QA Reliability Gate
 
@@ -488,5 +501,5 @@ Plans:
 | 20. OTP Security Policy Core | 3/3 | Complete   | 2026-04-15 |
 | 21. Production OTP Email Delivery | 3/3 | Complete    | 2026-04-15 |
 | 22. Resend & Verify Session Stability | 2/2 | Complete | 2026-04-17 |
-| 23. OTP Abuse Guardrails | 0/TBD | Not started | - |
-| 24. OTP QA Reliability Gate | 0/TBD | Not started | - |
+| 23. OTP Abuse Guardrails | 2/2 | Complete | 2026-04-17 |
+| 24. OTP QA Reliability Gate | 2/2 | Complete | 2026-04-17 |

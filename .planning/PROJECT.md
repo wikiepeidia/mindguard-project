@@ -8,7 +8,7 @@ MindGuard v2 là nền tảng giáo dục an toàn mạng và phòng chống l�
 
 Người dùng có thể học, kiểm tra nhận thức và gửi báo cáo lừa đảo một cách dễ dùng, an toàn, và đáng tin cậy.
 
-## Current Milestone: v1.4 OTP Email Reliability & QA
+## Current Milestone: v1.4 OTP Email Reliability & QA - Completed
 
 **Goal:** Triển khai OTP email thật cho luồng xác thực tài khoản, sửa toàn bộ lỗi OTP hiện có, và tăng độ tin cậy bằng test tự động.
 
@@ -34,14 +34,15 @@ Người dùng có thể học, kiểm tra nhận thức và gửi báo cáo l�
 - ✓ Migration sang NeonDB PostgreSQL + deploy Vercel ổn định.
 - ✓ AI safety baseline + trust signals cho Beta.
 - ✓ Bộ tài liệu kỹ thuật/SOP v1.3 hoàn chỉnh và đã verify.
+- ✓ OTP được tạo ngẫu nhiên và không còn hardcode trong bất kỳ luồng xác thực nào.
+- ✓ Người dùng nhận OTP qua email thật khi đăng ký/xác minh tài khoản trên môi trường production khi runtime được cấp đủ secrets.
+- ✓ Luồng resend/verify OTP hoạt động ổn định với expiry, cooldown và rate-limit rõ ràng.
+- ✓ Các bug OTP liên quan gửi mail, validate, session và UI đã được khóa bằng regression test và hành vi ổn định.
+- ✓ Có bộ test tự động bao phủ helper, route và integration cho các nhánh OTP quan trọng.
 
 ### Active
 
-- [ ] OTP được tạo ngẫu nhiên và không còn hardcode trong bất kỳ luồng xác thực nào.
-- [ ] Người dùng nhận OTP qua email thật khi đăng ký/xác minh tài khoản trên môi trường production.
-- [ ] Luồng resend/verify OTP hoạt động ổn định với expiry, cooldown và rate-limit rõ ràng.
-- [ ] Các bug OTP liên quan gửi mail, validate, session và UI được sửa triệt để.
-- [ ] Có bộ test tự động bao phủ end-to-end logic OTP từ tạo account đến xác thực.
+- None. Scope v1.4 đã hoàn tất sau Phase 24; phạm vi milestone tiếp theo chưa được chốt.
 
 ### Out of Scope
 
@@ -52,7 +53,7 @@ Người dùng có thể học, kiểm tra nhận thức và gửi báo cáo l�
 
 ## Context
 
-Dự án đã hoàn thành v1.0 (core platform), v1.1 (PostgreSQL + Vercel), v1.2 (Beta hardening), và v1.3 (tài liệu kỹ thuật/SOP). App đang live trên Vercel với NeonDB PostgreSQL. Luồng OTP hiện tại còn hardcode `123456`, chưa đáp ứng production security và reliability; milestone v1.4 tập trung xử lý OTP email thật, sửa lỗi OTP và bổ sung test để tránh regression.
+Dự án đã hoàn thành v1.0 (core platform), v1.1 (PostgreSQL + Vercel), v1.2 (Beta hardening), và v1.3 (tài liệu kỹ thuật/SOP). App đang live trên Vercel với NeonDB PostgreSQL. Milestone v1.4 đã hoàn tất việc loại bỏ OTP hardcode, đưa OTP email thật vào flow, ổn định resend/verify/session, thêm abuse guardrails, và khóa các nhánh OTP quan trọng bằng bộ test tự động trước khi sang milestone tiếp theo.
 
 ## Constraints
 
@@ -71,13 +72,14 @@ Dự án đã hoàn thành v1.0 (core platform), v1.1 (PostgreSQL + Vercel), v1.
 | Migrate toàn bộ sang NeonDB PostgreSQL + Vercel | Phù hợp serverless production và vận hành thực tế | ✓ Good |
 | Ưu tiên hardening trước mở rộng tính năng | Ổn định hệ thống trước khi tăng scope | ✓ Good |
 | Docs-only milestone v1.3 | Hoàn thiện nền tảng tài liệu trước handoff/mở rộng | ✓ Good |
-| Chuẩn hóa OTP email production trong v1.4 | OTP hardcode không an toàn và không dùng được thực tế | — Pending |
+| Chuẩn hóa OTP email production trong v1.4 | OTP hardcode không an toàn và không dùng được thực tế | ✓ Good |
 
 ## Evolution
 
 This document evolves at phase transitions and milestone boundaries.
 
 **After each phase transition** (via `/gsd-transition`):
+
 1. Requirements invalidated? -> Move to Out of Scope with reason
 2. Requirements validated? -> Move to Validated with phase reference
 3. New requirements emerged? -> Add to Active
@@ -85,10 +87,11 @@ This document evolves at phase transitions and milestone boundaries.
 5. "What This Is" still accurate? -> Update if drifted
 
 **After each milestone** (via `/gsd-complete-milestone`):
+
 1. Full review of all sections
 2. Core Value check -> still the right priority?
 3. Audit Out of Scope -> reasons still valid?
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-14 after milestone v1.4 started (OTP email reliability, OTP bug fixes, and test hardening scope confirmed).* 
+*Last updated: 2026-04-17 after Phase 24 completed and milestone v1.4 OTP scope was fully verified.*

@@ -34,7 +34,8 @@
                     <p class="small text-muted mb-2">Chưa nhận được mã OTP?</p>
                     <form method="POST" action="{{ url_for('auth.resend_verify_otp') }}">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                        <button type="submit" class="btn btn-outline-secondary btn-sm" {% if not resend_enabled %}disabled aria-disabled="true"{% endif %}>
+                        <button type="submit" class="btn btn-outline-secondary btn-sm" {% if not resend_enabled
+                            %}disabled aria-disabled="true" {% endif %}>
                             Gửi lại mã OTP
                         </button>
                     </form>

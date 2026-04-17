@@ -16,6 +16,7 @@ def load_local_env(filename):
 cf_config = load_local_env('cloudflare.json')
 ai_config = load_local_env('chatbot.json')
 pg_config = load_local_env('postgresql_neondb.json')
+resend_config = load_local_env('RESEND.json') or load_local_env('resend.json')
 
 class Config:
     BASE_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -72,11 +73,16 @@ class Config:
     OTP_RESEND_COOLDOWN_SECONDS = int(os.environ.get("OTP_RESEND_COOLDOWN_SECONDS", 60))
     OTP_RESEND_WINDOW_SECONDS = int(os.environ.get("OTP_RESEND_WINDOW_SECONDS", 900))
     OTP_RESEND_MAX_PER_WINDOW = int(os.environ.get("OTP_RESEND_MAX_PER_WINDOW", 3))
+    OTP_VERIFY_RATE_LIMIT = os.environ.get("OTP_VERIFY_RATE_LIMIT", "10/minute;3/second")
+    OTP_RESEND_RATE_LIMIT = os.environ.get("OTP_RESEND_RATE_LIMIT", "5/minute;1/second")
+    OTP_ABUSE_WINDOW_MINUTES = int(os.environ.get("OTP_ABUSE_WINDOW_MINUTES", 10))
+    OTP_ABUSE_THRESHOLD_COUNT = int(os.environ.get("OTP_ABUSE_THRESHOLD_COUNT", 3))
+    OTP_ABUSE_COOLDOWN_MINUTES = int(os.environ.get("OTP_ABUSE_COOLDOWN_MINUTES", 15))
 
     # OTP email delivery (Phase 21)
-    EMAIL_PROVIDER = os.environ.get("EMAIL_PROVIDER", "resend_api").strip().lower()
-    RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "").strip()
-    RESEND_FROM_EMAIL = os.environ.get("RESEND_FROM_EMAIL", "").strip()
+    EMAIL_PROVIDER = (os.environ.get("EMAIL_PROVIDER") or resend_config.get("EMAIL_PROVIDER") or "resend_api").strip().lower()
+    RESEND_API_KEY = (os.environ.get("RESEND_API_KEY") or resend_config.get("RESEND_API_KEY") or resend_config.get("API_KEY") or "").strip()
+    RESEND_FROM_EMAIL = (os.environ.get("RESEND_FROM_EMAIL") or resend_config.get("RESEND_FROM_EMAIL") or resend_config.get("FROM_EMAIL") or "").strip()
     OTP_EMAIL_TIMEOUT_SECONDS = int(os.environ.get("OTP_EMAIL_TIMEOUT_SECONDS", 5))
     OTP_EMAIL_RETRY_ATTEMPTS = int(os.environ.get("OTP_EMAIL_RETRY_ATTEMPTS", 1))
 

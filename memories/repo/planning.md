@@ -1,0 +1,1 @@
+- `.planning/REQUIREMENTS.md` is stale for v1.4 OTP phases; use `.planning/ROADMAP.md` and the latest phase CONTEXT/PLAN/SUMMARY artifacts as the source of truth for phases 20-24.

@@ -5,6 +5,12 @@ from models.models import OtpChallenge
 from werkzeug.security import generate_password_hash, check_password_hash
 from extensions import limiter
 from datetime import datetime
+from services.otp_abuse_guard import (
+    get_active_otp_cooldown,
+    merge_resend_guardrail,
+    record_otp_abuse_event,
+    sync_otp_challenge_cooldown,
+)
 from utils.otp_security import (
     activate_replacement_otp_challenge,
     get_resend_otp_policy,
@@ -15,6 +21,21 @@ from utils.otp_security import (
 from services.otp_email_delivery import send_otp_email
 
 auth_bp = Blueprint('auth', __name__)
+
+
+def _otp_verify_rate_limit():
+    return current_app.config.get("OTP_VERIFY_RATE_LIMIT", "10/minute;3/second")
+
+
+def _otp_resend_rate_limit():
+    return current_app.config.get("OTP_RESEND_RATE_LIMIT", "5/minute;1/second")
+
+
+def _client_ip():
+    forwarded_for = request.headers.get("X-Forwarded-For", "")
+    if forwarded_for:
+        return forwarded_for.split(",")[0].strip()
+    return request.remote_addr or "unknown"
 
 
 def _clear_pending_otp_session():
@@ -77,13 +98,15 @@ def _load_pending_verification_context():
 
 
 def _render_verify_otp_page(pending_data, challenge):
+    current_time = datetime.utcnow()
     resend_policy = get_resend_otp_policy(
         db.session,
         challenge.email,
         challenge.purpose,
-        datetime.utcnow(),
+        current_time,
         current_app.config,
     )
+    resend_policy = merge_resend_guardrail(challenge.email, resend_policy, now=current_time)
     resend_enabled, resend_notice, resend_notice_tone = _get_resend_notice(resend_policy)
     pending_email = session.get('pending_verification_email') or pending_data.get('email', '')
     return render_template(
@@ -307,6 +330,7 @@ def register():
 
 
 @auth_bp.route("/verify-otp", methods=["GET", "POST"])
+@limiter.limit(_otp_verify_rate_limit, methods=["POST"])
 def verify_otp():
     """OTP Verification page with challenge-based lifecycle enforcement."""
     pending_data, challenge, redirect_response = _load_pending_verification_context()
@@ -318,6 +342,20 @@ def verify_otp():
         now = datetime.utcnow()
         result = verify_otp_submission(challenge, otp, now, current_app.config)
         db.session.commit()
+
+        if result in {'invalid', 'locked'}:
+            abuse_decision = record_otp_abuse_event(
+                email=challenge.email,
+                ip_address=_client_ip(),
+                config=current_app.config,
+                submitted_at=now,
+            )
+            if abuse_decision.should_cooldown and abuse_decision.cooldown_until and abuse_decision.cooldown_until > now:
+                effective_until = sync_otp_challenge_cooldown(challenge, abuse_decision.cooldown_until)
+                db.session.commit()
+                wait_text = _format_wait_time((effective_until - now).total_seconds())
+                flash(f"Bạn thao tác quá nhanh. Vui lòng chờ {wait_text} rồi thử lại.", "warning")
+                return redirect(url_for("auth.verify_otp"))
 
         if result == 'valid':
             reg = Registration(
@@ -345,7 +383,11 @@ def verify_otp():
             _clear_pending_otp_session()
             return redirect(url_for("auth.register"))
         elif result == 'locked':
-            flash("Bạn đã nhập sai quá nhiều lần. Vui lòng thử lại sau.", "danger")
+            wait_seconds = 0
+            if challenge.locked_until and challenge.locked_until > now:
+                wait_seconds = (challenge.locked_until - now).total_seconds()
+            wait_text = _format_wait_time(wait_seconds)
+            flash(f"Bạn đã nhập sai quá nhiều lần. Vui lòng chờ {wait_text} rồi thử lại.", "danger")
         elif result == 'already_used':
             flash("Mã OTP này đã được sử dụng. Vui lòng đăng ký lại.", "danger")
             _clear_pending_otp_session()
@@ -361,6 +403,7 @@ def verify_otp():
 
 
 @auth_bp.route("/verify-otp/resend", methods=["POST"])
+@limiter.limit(_otp_resend_rate_limit, methods=["POST"])
 def resend_verify_otp():
     """Issue and send a replacement OTP without forcing a full re-registration."""
     pending_data, challenge, redirect_response = _load_pending_verification_context()
@@ -368,6 +411,14 @@ def resend_verify_otp():
         return redirect_response
 
     now = datetime.utcnow()
+    active_abuse_cooldown = get_active_otp_cooldown(challenge.email, now=now)
+    if active_abuse_cooldown:
+        effective_until = sync_otp_challenge_cooldown(challenge, active_abuse_cooldown)
+        db.session.commit()
+        wait_text = _format_wait_time((effective_until - now).total_seconds())
+        flash(f"Bạn thao tác quá nhanh. Vui lòng chờ {wait_text} rồi thử lại.", "warning")
+        return redirect(url_for("auth.verify_otp"))
+
     resend_policy = get_resend_otp_policy(
         db.session,
         challenge.email,
@@ -376,7 +427,22 @@ def resend_verify_otp():
         current_app.config,
     )
     if not resend_policy.get("ok"):
-        wait_text = _format_wait_time(resend_policy.get("wait_seconds", 0))
+        abuse_decision = record_otp_abuse_event(
+            email=challenge.email,
+            ip_address=_client_ip(),
+            config=current_app.config,
+            submitted_at=now,
+        )
+        effective_wait_seconds = int(resend_policy.get("wait_seconds", 0) or 0)
+        if abuse_decision.should_cooldown and abuse_decision.cooldown_until and abuse_decision.cooldown_until > now:
+            effective_until = sync_otp_challenge_cooldown(challenge, abuse_decision.cooldown_until)
+            db.session.commit()
+            effective_wait_seconds = max(
+                effective_wait_seconds,
+                int((effective_until - now).total_seconds()),
+            )
+
+        wait_text = _format_wait_time(effective_wait_seconds)
         if resend_policy.get("reason") == "cooldown":
             flash(f"Vui lòng chờ {wait_text} trước khi gửi lại mã OTP.", "warning")
         else:

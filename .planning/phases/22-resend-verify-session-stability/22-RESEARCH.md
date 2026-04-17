@@ -28,23 +28,23 @@ Out of phase for this plan set:
 - routes/auth.py only validates `pending_registration` and `pending_otp_challenge_id` during POST `/verify-otp`
 - GET `/verify-otp` always renders the template, even when pending state is gone or the referenced challenge is expired/invalid
 
-2. There is no resend path from the verify flow.
+1. There is no resend path from the verify flow.
 
 - templates/verify_otp.html tells the user to go back to register if email is delayed
 - routes/auth.py has no dedicated resend endpoint and no resend cooldown/cap policy
 
-3. Existing challenge issuance is correct for replacement semantics, but not yet safe for resend failure handling.
+1. Existing challenge issuance is correct for replacement semantics, but not yet safe for resend failure handling.
 
 - utils/otp_security.py `issue_otp_challenge()` invalidates prior active challenges immediately
 - that behavior is fine for initial register and for successful resend replacement
 - for resend, using it before delivery succeeds would strand the user if the new email fails to send and the old active challenge has already been invalidated
 
-4. Phase 21 already established a reusable delivery contract.
+1. Phase 21 already established a reusable delivery contract.
 
 - services/otp_email_delivery.py returns normalized `ok/category/message/provider_message_id`
 - tests can patch `routes.auth.send_otp_email` and keep delivery deterministic with no real network dependency
 
-5. Test coverage exists for register/verify basics, but not for resend/session stability.
+1. Test coverage exists for register/verify basics, but not for resend/session stability.
 
 - tests/test_otp_auth_integration.py covers register send success/failure and core verify lifecycle behavior
 - tests/test_csrf_and_routes.py covers POST `/verify-otp` CSRF enforcement, but no resend endpoint exists yet
@@ -66,14 +66,14 @@ Out of phase for this plan set:
 - require `pending_registration`, `pending_otp_challenge_id`, and `pending_verification_email`
 - keep the user inside the verify flow rather than sending them back through `/register`
 
-2. Success-gated replacement challenge swap
+1. Success-gated replacement challenge swap
 
 - resend must create a fresh OTP challenge only after resend policy allows it
 - the current active challenge should remain usable until the replacement send succeeds
 - once delivery succeeds, invalidate the previous active challenge, persist the new one, and update `session['pending_otp_challenge_id']`
 - if resend delivery fails, keep the pending registration session intact and do not force the user to restart registration
 
-3. Server-side resend policy driven by existing challenge timestamps
+1. Server-side resend policy driven by existing challenge timestamps
 
 - add config-backed resend controls in `config.py`
 - recommended defaults:
@@ -83,13 +83,13 @@ Out of phase for this plan set:
 - derive cooldown and per-window cap from `OtpChallenge.issued_at` history for the same `email` + `purpose='register'`
 - do not rely on client-side countdown alone for enforcement
 
-4. GET `/verify-otp` should validate pending state before rendering
+1. GET `/verify-otp` should validate pending state before rendering
 
 - if `pending_registration` is missing: redirect to `/register` with Vietnamese guidance
 - if referenced challenge is missing or expired: clear pending OTP session keys and redirect safely to `/register`
 - if referenced challenge is active or locked-but-still-pending: render the verify page and keep the session stable on refresh
 
-5. Minimal UI changes only
+1. Minimal UI changes only
 
 - keep the existing OTP input and verify submit path
 - add a small resend form/button plus explicit Vietnamese wait-state message

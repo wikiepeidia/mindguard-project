@@ -4,4 +4,4 @@ Flask-Mail==0.9.1
 Werkzeug==3.0.3
 MarkupSafe==2.1.5
 pyngrok==7.1.5
-requests==2.31.0
+requests==2.32.4

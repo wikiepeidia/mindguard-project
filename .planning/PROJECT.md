@@ -38,13 +38,15 @@ Người dùng có thể học, kiểm tra nhận thức và gửi báo cáo l�
 - ✓ Luồng resend/verify OTP hoạt động ổn định với expiry, cooldown và rate-limit rõ ràng.
 - ✓ Các bug OTP liên quan gửi mail, validate, session và UI đã được khóa bằng regression test và hành vi ổn định.
 - ✓ Có bộ test tự động bao phủ helper, route và integration cho các nhánh OTP quan trọng.
+- ✓ Generic SMTP provider core cho OTP đã được thêm qua Flask-Mail mà không phụ thuộc custom sending domain.
+- ✓ OTP mail giờ phân biệt rõ `misconfigured`, `provider_rejected`, `timeout`, và `network_error` cho nhánh SMTP.
+- ✓ Register/resend auth flow giờ chạy đúng qua `EMAIL_PROVIDER=smtp` mà không làm đổi UX, session contract, hay guardrails OTP.
+- ✓ Repo đã có runbook Gmail App Password / generic SMTP miễn phí trong `TODO.mD` cho operator.
+- ✓ Route/integration test giờ khóa các nhánh SMTP success/failure cho register và resend.
 
 ### Active
 
-- [ ] Chuyển OTP production khỏi Resend sang generic SMTP path tương thích Vercel và không cần custom domain gửi mail.
-- [ ] Chuẩn hóa env contract cho Gmail App Password/generic SMTP và readiness check vận hành.
-- [ ] Giữ nguyên auth/OTP UX hiện tại trong khi thay backend gửi mail.
-- [ ] Bổ sung regression test và production smoke evidence cho SMTP cutover.
+- [ ] Thu thập production smoke evidence trên Vercel với mailbox thật để hoàn tất go-live SMTP.
 
 ### Out of Scope
 
@@ -75,7 +77,7 @@ Dự án đã hoàn thành v1.0 (core platform), v1.1 (PostgreSQL + Vercel), v1.
 | Ưu tiên hardening trước mở rộng tính năng | Ổn định hệ thống trước khi tăng scope | ✓ Good |
 | Docs-only milestone v1.3 | Hoàn thiện nền tảng tài liệu trước handoff/mở rộng | ✓ Good |
 | Chuẩn hóa OTP email production trong v1.4 | OTP hardcode không an toàn và không dùng được thực tế | ✓ Good |
-| Pivot OTP khỏi Resend sang generic SMTP/Gmail ở v1.5 | Team không có custom sending domain; `vercel.app` không verify được với Resend | — Pending |
+| Pivot OTP khỏi Resend sang generic SMTP/Gmail ở v1.5 | Team không có custom sending domain; `vercel.app` không verify được với Resend | ✓ Good |
 
 ## Evolution
 
@@ -97,4 +99,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-17 after milestone v1.5 scope was defined to replace Resend with a Vercel-compatible SMTP path.*
+*Last updated: 2026-04-17 after Phase 26 completed the SMTP auth-flow cutover, route diagnostics, and operator runbook for the v1.5 pivot.*

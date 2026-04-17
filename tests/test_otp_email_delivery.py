@@ -1,6 +1,8 @@
 """Unit tests for OTP email delivery service (Phase 21)."""
 
 import os
+import smtplib
+import socket
 import sys
 import unittest
 
@@ -38,12 +40,65 @@ class OtpEmailDeliveryStatusTests(unittest.TestCase):
 
     def test_unsupported_provider_rejected(self):
         cfg = {
-            'EMAIL_PROVIDER': 'smtp',
+            'EMAIL_PROVIDER': 'ses_api',
             'TESTING': False,
         }
         status = otp_email_delivery_status(cfg)
         self.assertFalse(status['ok'])
         self.assertEqual(status['category'], 'unsupported_provider')
+
+    def test_smtp_ready_status(self):
+        cfg = {
+            'EMAIL_PROVIDER': 'smtp',
+            'SMTP_HOST': 'smtp.gmail.com',
+            'SMTP_PORT': 587,
+            'SMTP_USERNAME': 'mindguard@gmail.com',
+            'SMTP_PASSWORD': 'app-password',
+            'SMTP_USE_TLS': True,
+            'SMTP_USE_SSL': False,
+            'SMTP_FROM_EMAIL': 'mindguard@gmail.com',
+            'TESTING': False,
+        }
+        status = otp_email_delivery_status(cfg)
+        self.assertTrue(status['ok'])
+        self.assertEqual(status['category'], 'ready')
+
+    def test_smtp_missing_config_returns_fail_closed(self):
+        cfg = {
+            'EMAIL_PROVIDER': 'smtp',
+            'SMTP_HOST': '',
+            'SMTP_PORT': 587,
+            'SMTP_USERNAME': '',
+            'SMTP_PASSWORD': '',
+            'SMTP_USE_TLS': True,
+            'SMTP_USE_SSL': False,
+            'SMTP_FROM_EMAIL': '',
+            'TESTING': False,
+        }
+        status = otp_email_delivery_status(cfg)
+        self.assertFalse(status['ok'])
+        self.assertEqual(status['category'], 'misconfigured')
+        self.assertIn('SMTP_HOST', status['missing'])
+        self.assertIn('SMTP_USERNAME', status['missing'])
+        self.assertIn('SMTP_PASSWORD', status['missing'])
+        self.assertIn('SMTP_FROM_EMAIL', status['missing'])
+
+    def test_smtp_rejects_conflicting_tls_and_ssl(self):
+        cfg = {
+            'EMAIL_PROVIDER': 'smtp',
+            'SMTP_HOST': 'smtp.gmail.com',
+            'SMTP_PORT': 465,
+            'SMTP_USERNAME': 'mindguard@gmail.com',
+            'SMTP_PASSWORD': 'app-password',
+            'SMTP_USE_TLS': True,
+            'SMTP_USE_SSL': True,
+            'SMTP_FROM_EMAIL': 'mindguard@gmail.com',
+            'TESTING': False,
+        }
+        status = otp_email_delivery_status(cfg)
+        self.assertFalse(status['ok'])
+        self.assertEqual(status['category'], 'misconfigured')
+        self.assertIn('SMTP_USE_TLS/SMTP_USE_SSL(conflict)', status['missing'])
 
 
 class OtpEmailDeliverySendTests(unittest.TestCase):
@@ -127,6 +182,93 @@ class OtpEmailDeliverySendTests(unittest.TestCase):
 
         self.assertFalse(result['ok'])
         self.assertEqual(result['category'], 'test_failure')
+
+    def _smtp_cfg(self):
+        return {
+            'EMAIL_PROVIDER': 'smtp',
+            'SMTP_HOST': 'smtp.gmail.com',
+            'SMTP_PORT': 587,
+            'SMTP_USERNAME': 'mindguard@gmail.com',
+            'SMTP_PASSWORD': 'app-password',
+            'SMTP_USE_TLS': True,
+            'SMTP_USE_SSL': False,
+            'SMTP_FROM_EMAIL': 'mindguard@gmail.com',
+            'OTP_TTL_SECONDS': 300,
+            'TESTING': False,
+        }
+
+    def test_smtp_send_success(self):
+        cfg = self._smtp_cfg()
+        captured = {}
+
+        def transport(message):
+            captured['message'] = message
+
+        result = send_otp_email(
+            email='user@example.com',
+            otp_code='654321',
+            context={'purpose': 'register'},
+            config=cfg,
+            transport=transport,
+        )
+
+        self.assertTrue(result['ok'])
+        self.assertEqual(result['category'], 'sent')
+        self.assertIsNone(result['provider_message_id'])
+        self.assertEqual(captured['message'].sender, 'mindguard@gmail.com')
+        self.assertEqual(captured['message'].recipients, ['user@example.com'])
+        self.assertIn('654321', captured['message'].body)
+
+    def test_smtp_send_provider_rejected(self):
+        cfg = self._smtp_cfg()
+
+        def transport(message):
+            raise smtplib.SMTPAuthenticationError(535, b'5.7.8 Authentication failed')
+
+        result = send_otp_email(
+            email='user@example.com',
+            otp_code='654321',
+            context={'purpose': 'register'},
+            config=cfg,
+            transport=transport,
+        )
+
+        self.assertFalse(result['ok'])
+        self.assertEqual(result['category'], 'provider_rejected')
+
+    def test_smtp_send_timeout(self):
+        cfg = self._smtp_cfg()
+
+        def transport(message):
+            raise socket.timeout('timed out')
+
+        result = send_otp_email(
+            email='user@example.com',
+            otp_code='654321',
+            context={'purpose': 'register'},
+            config=cfg,
+            transport=transport,
+        )
+
+        self.assertFalse(result['ok'])
+        self.assertEqual(result['category'], 'timeout')
+
+    def test_smtp_send_network_error(self):
+        cfg = self._smtp_cfg()
+
+        def transport(message):
+            raise OSError('network unreachable')
+
+        result = send_otp_email(
+            email='user@example.com',
+            otp_code='654321',
+            context={'purpose': 'register'},
+            config=cfg,
+            transport=transport,
+        )
+
+        self.assertFalse(result['ok'])
+        self.assertEqual(result['category'], 'network_error')
 
 
 if __name__ == '__main__':

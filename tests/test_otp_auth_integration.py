@@ -7,6 +7,7 @@ Validates that:
 """
 
 import os
+import socket
 import sys
 import unittest
 from unittest.mock import patch, MagicMock
@@ -836,6 +837,183 @@ class OtpAuthAbuseGuardrailTests(unittest.TestCase):
             self.assertNotIn('pending_registration', sess)
             self.assertNotIn('pending_otp_challenge_id', sess)
             self.assertNotIn('pending_verification_email', sess)
+
+
+class OtpAuthSmtpCutoverTests(unittest.TestCase):
+    def setUp(self):
+        self.app = create_test_app({
+            'TESTING': False,
+            'EMAIL_PROVIDER': 'smtp',
+            'SMTP_HOST': 'smtp.gmail.com',
+            'SMTP_PORT': 587,
+            'SMTP_USERNAME': 'mindguard.smtp@gmail.com',
+            'SMTP_PASSWORD': 'app-password-1234',
+            'SMTP_USE_TLS': True,
+            'SMTP_USE_SSL': False,
+            'SMTP_FROM_EMAIL': 'mindguard.smtp@gmail.com',
+            'MAIL_SERVER': 'smtp.gmail.com',
+            'MAIL_PORT': 587,
+            'MAIL_USERNAME': 'mindguard.smtp@gmail.com',
+            'MAIL_PASSWORD': 'app-password-1234',
+            'MAIL_USE_TLS': True,
+            'MAIL_USE_SSL': False,
+            'MAIL_DEFAULT_SENDER': 'mindguard.smtp@gmail.com',
+        })
+        self.client = self.app.test_client()
+        self.ctx = self.app.app_context()
+        self.ctx.push()
+        with self.client.session_transaction() as sess:
+            sess['math_captcha_answer_register'] = '42'
+
+    def tearDown(self):
+        db.session.rollback()
+        db.drop_all()
+        self.ctx.pop()
+
+    def _set_pending_session(self, challenge, name='SMTP User', password='pass', city='HN', client=None):
+        target_client = client or self.client
+        with target_client.session_transaction() as sess:
+            sess['pending_registration'] = {
+                'name': name,
+                'email': challenge.email,
+                'password': password,
+                'city': city,
+            }
+            sess['pending_otp_challenge_id'] = challenge.id
+            sess['pending_verification_email'] = challenge.email
+
+    def _create_challenge(self, email='smtpuser@gmail.com', status='active', otp_code='654321', issued_at=None):
+        from utils.otp_security import hash_otp
+        import secrets as sec
+
+        salt = sec.token_hex(32)
+        otp_hash = hash_otp(otp_code, salt, self.app.config.get('OTP_PEPPER', ''))
+        now = issued_at or datetime.utcnow()
+
+        challenge = OtpChallenge(
+            email=email,
+            purpose='register',
+            otp_hash=otp_hash,
+            otp_salt=salt,
+            pepper_version='v1',
+            attempts_used=0,
+            max_attempts=self.app.config.get('OTP_MAX_ATTEMPTS', 3),
+            issued_at=now,
+            expires_at=now + timedelta(seconds=300),
+            status=status,
+        )
+        db.session.add(challenge)
+        db.session.commit()
+        return challenge, otp_code
+
+    @patch('services.otp_email_delivery.mail.send')
+    def test_register_smtp_success_redirects_verify_and_uses_mail_transport(self, mock_mail_send):
+        resp = self.client.post('/register', data={
+            'name': 'SMTP Success',
+            'email': 'smtpregistersuccess@gmail.com',
+            'password': 'securepass',
+            'math_answer': '42',
+        }, follow_redirects=False)
+
+        self.assertEqual(resp.status_code, 302)
+        self.assertIn('/verify-otp', resp.location)
+        mock_mail_send.assert_called_once()
+        message = mock_mail_send.call_args.args[0]
+        self.assertEqual(message.sender, 'mindguard.smtp@gmail.com')
+        self.assertEqual(message.recipients, ['smtpregistersuccess@gmail.com'])
+
+        challenge = OtpChallenge.query.filter_by(
+            email='smtpregistersuccess@gmail.com',
+            purpose='register',
+        ).first()
+        self.assertIsNotNone(challenge)
+        self.assertEqual(challenge.status, 'active')
+
+    def test_register_smtp_misconfigured_fails_closed_and_logs_diagnostic(self):
+        self.app.config.update({
+            'SMTP_HOST': '',
+            'MAIL_SERVER': '',
+        })
+
+        with self.assertLogs(self.app.logger.name, level='WARNING') as captured:
+            resp = self.client.post('/register', data={
+                'name': 'SMTP Broken',
+                'email': 'smtpmisconfigured@gmail.com',
+                'password': 'securepass',
+                'math_answer': '42',
+            }, follow_redirects=True)
+
+        self.assertEqual(resp.status_code, 200)
+        html = resp.get_data(as_text=True)
+        self.assertIn('Không thể gửi mã OTP lúc này', html)
+        self.assertIn('category=misconfigured', '\n'.join(captured.output))
+        self.assertIn('missing=SMTP_HOST', '\n'.join(captured.output))
+
+        challenge = OtpChallenge.query.filter_by(
+            email='smtpmisconfigured@gmail.com',
+            purpose='register',
+        ).first()
+        self.assertIsNotNone(challenge)
+        self.assertEqual(challenge.status, 'invalidated')
+
+    @patch('services.otp_email_delivery.mail.send')
+    def test_resend_smtp_success_replaces_challenge_and_updates_session(self, mock_mail_send):
+        current_challenge, _ = self._create_challenge(
+            email='smtpresendsuccess@gmail.com',
+            issued_at=datetime.utcnow() - timedelta(seconds=120),
+        )
+        self._set_pending_session(current_challenge, name='SMTP Resend Success')
+
+        resp = self.client.post('/verify-otp/resend', follow_redirects=False)
+
+        self.assertEqual(resp.status_code, 302)
+        self.assertIn('/verify-otp', resp.location)
+        mock_mail_send.assert_called_once()
+        message = mock_mail_send.call_args.args[0]
+        self.assertEqual(message.sender, 'mindguard.smtp@gmail.com')
+        self.assertEqual(message.recipients, ['smtpresendsuccess@gmail.com'])
+
+        challenges = OtpChallenge.query.filter_by(
+            email='smtpresendsuccess@gmail.com', purpose='register'
+        ).order_by(OtpChallenge.issued_at.asc(), OtpChallenge.id.asc()).all()
+        self.assertEqual(len(challenges), 2)
+        original_challenge, replacement_challenge = challenges
+        self.assertEqual(original_challenge.status, 'invalidated')
+        self.assertEqual(replacement_challenge.status, 'active')
+
+        with self.client.session_transaction() as sess:
+            self.assertEqual(sess.get('pending_otp_challenge_id'), replacement_challenge.id)
+
+    @patch('services.otp_email_delivery.mail.send', side_effect=socket.timeout('timed out'))
+    def test_resend_smtp_timeout_keeps_current_challenge_and_logs_diagnostic(self, mock_mail_send):
+        current_challenge, _ = self._create_challenge(
+            email='smtpresendtimeout@gmail.com',
+            issued_at=datetime.utcnow() - timedelta(seconds=120),
+        )
+        self._set_pending_session(current_challenge, name='SMTP Resend Timeout')
+
+        with self.assertLogs(self.app.logger.name, level='WARNING') as captured:
+            resp = self.client.post('/verify-otp/resend', follow_redirects=True)
+
+        self.assertEqual(resp.status_code, 200)
+        html = resp.get_data(as_text=True)
+        self.assertIn('Không thể gửi lại mã OTP lúc này', html)
+        self.assertIn('provider=smtp', '\n'.join(captured.output))
+        self.assertIn('provider_hint=gmail_app_password', '\n'.join(captured.output))
+        self.assertIn('category=timeout', '\n'.join(captured.output))
+
+        challenges = OtpChallenge.query.filter_by(
+            email='smtpresendtimeout@gmail.com',
+            purpose='register',
+        ).order_by(OtpChallenge.issued_at.asc(), OtpChallenge.id.asc()).all()
+        self.assertEqual(len(challenges), 1)
+        db.session.refresh(current_challenge)
+        self.assertEqual(current_challenge.status, 'active')
+
+        with self.client.session_transaction() as sess:
+            self.assertEqual(sess.get('pending_otp_challenge_id'), current_challenge.id)
+
+        mock_mail_send.assert_called_once()
 
 
 if __name__ == '__main__':

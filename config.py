@@ -2,6 +2,38 @@
 import os
 import json
 
+
+def _first_value(*values):
+    for value in values:
+        if value is None:
+            continue
+        if isinstance(value, str):
+            value = value.strip()
+            if not value:
+                continue
+        return value
+    return None
+
+
+def _as_bool(value, default=False):
+    if value is None:
+        return default
+    if isinstance(value, bool):
+        return value
+    text = str(value).strip().lower()
+    if text in {"1", "true", "yes", "on"}:
+        return True
+    if text in {"0", "false", "no", "off"}:
+        return False
+    return default
+
+
+def _as_int(value, default):
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return default
+
 def load_local_env(filename):
     """Utility to load keys from .env/filename.json"""
     try:
@@ -17,6 +49,7 @@ cf_config = load_local_env('cloudflare.json')
 ai_config = load_local_env('chatbot.json')
 pg_config = load_local_env('postgresql_neondb.json')
 resend_config = load_local_env('RESEND.json') or load_local_env('resend.json')
+smtp_config = load_local_env('SMTP.json') or load_local_env('smtp.json') or load_local_env('mail.json')
 
 class Config:
     BASE_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -79,10 +112,83 @@ class Config:
     OTP_ABUSE_THRESHOLD_COUNT = int(os.environ.get("OTP_ABUSE_THRESHOLD_COUNT", 3))
     OTP_ABUSE_COOLDOWN_MINUTES = int(os.environ.get("OTP_ABUSE_COOLDOWN_MINUTES", 15))
 
-    # OTP email delivery (Phase 21)
-    EMAIL_PROVIDER = (os.environ.get("EMAIL_PROVIDER") or resend_config.get("EMAIL_PROVIDER") or "resend_api").strip().lower()
-    RESEND_API_KEY = (os.environ.get("RESEND_API_KEY") or resend_config.get("RESEND_API_KEY") or resend_config.get("API_KEY") or "").strip()
-    RESEND_FROM_EMAIL = (os.environ.get("RESEND_FROM_EMAIL") or resend_config.get("RESEND_FROM_EMAIL") or resend_config.get("FROM_EMAIL") or "").strip()
+    # OTP email delivery (Phases 21 + 25)
+    EMAIL_PROVIDER = str(_first_value(
+        os.environ.get("EMAIL_PROVIDER"),
+        smtp_config.get("EMAIL_PROVIDER"),
+        resend_config.get("EMAIL_PROVIDER"),
+        "resend_api",
+    ) or "resend_api").strip().lower()
+    RESEND_API_KEY = str(_first_value(
+        os.environ.get("RESEND_API_KEY"),
+        resend_config.get("RESEND_API_KEY"),
+        resend_config.get("API_KEY"),
+        "",
+    ) or "").strip()
+    RESEND_FROM_EMAIL = str(_first_value(
+        os.environ.get("RESEND_FROM_EMAIL"),
+        resend_config.get("RESEND_FROM_EMAIL"),
+        resend_config.get("FROM_EMAIL"),
+        "",
+    ) or "").strip()
+    SMTP_HOST = str(_first_value(
+        os.environ.get("SMTP_HOST"),
+        os.environ.get("MAIL_SERVER"),
+        smtp_config.get("SMTP_HOST"),
+        smtp_config.get("MAIL_SERVER"),
+        "",
+    ) or "").strip()
+    SMTP_PORT = _as_int(_first_value(
+        os.environ.get("SMTP_PORT"),
+        os.environ.get("MAIL_PORT"),
+        smtp_config.get("SMTP_PORT"),
+        smtp_config.get("MAIL_PORT"),
+        587,
+    ), 587)
+    SMTP_USERNAME = str(_first_value(
+        os.environ.get("SMTP_USERNAME"),
+        os.environ.get("MAIL_USERNAME"),
+        smtp_config.get("SMTP_USERNAME"),
+        smtp_config.get("MAIL_USERNAME"),
+        "",
+    ) or "").strip()
+    SMTP_PASSWORD = str(_first_value(
+        os.environ.get("SMTP_PASSWORD"),
+        os.environ.get("MAIL_PASSWORD"),
+        smtp_config.get("SMTP_PASSWORD"),
+        smtp_config.get("MAIL_PASSWORD"),
+        "",
+    ) or "").strip()
+    SMTP_USE_TLS = _as_bool(_first_value(
+        os.environ.get("SMTP_USE_TLS"),
+        os.environ.get("MAIL_USE_TLS"),
+        smtp_config.get("SMTP_USE_TLS"),
+        smtp_config.get("MAIL_USE_TLS"),
+        True,
+    ), True)
+    SMTP_USE_SSL = _as_bool(_first_value(
+        os.environ.get("SMTP_USE_SSL"),
+        os.environ.get("MAIL_USE_SSL"),
+        smtp_config.get("SMTP_USE_SSL"),
+        smtp_config.get("MAIL_USE_SSL"),
+        False,
+    ), False)
+    SMTP_FROM_EMAIL = str(_first_value(
+        os.environ.get("SMTP_FROM_EMAIL"),
+        os.environ.get("MAIL_DEFAULT_SENDER"),
+        smtp_config.get("SMTP_FROM_EMAIL"),
+        smtp_config.get("MAIL_DEFAULT_SENDER"),
+        "",
+    ) or "").strip()
+
+    MAIL_SERVER = SMTP_HOST or ""
+    MAIL_PORT = SMTP_PORT
+    MAIL_USERNAME = SMTP_USERNAME or None
+    MAIL_PASSWORD = SMTP_PASSWORD or None
+    MAIL_USE_TLS = SMTP_USE_TLS
+    MAIL_USE_SSL = SMTP_USE_SSL
+    MAIL_DEFAULT_SENDER = SMTP_FROM_EMAIL or None
+
     OTP_EMAIL_TIMEOUT_SECONDS = int(os.environ.get("OTP_EMAIL_TIMEOUT_SECONDS", 5))
     OTP_EMAIL_RETRY_ATTEMPTS = int(os.environ.get("OTP_EMAIL_RETRY_ATTEMPTS", 1))
 
@@ -91,15 +197,31 @@ class Config:
         """Return missing config keys required for the selected OTP provider."""
         provider = (cls.EMAIL_PROVIDER or "").strip().lower()
 
-        if provider != "resend_api":
-            return ["EMAIL_PROVIDER(resend_api)"]
+        if provider == "resend_api":
+            missing = []
+            if not cls.RESEND_API_KEY:
+                missing.append("RESEND_API_KEY")
+            if not cls.RESEND_FROM_EMAIL:
+                missing.append("RESEND_FROM_EMAIL")
+            return missing
 
-        missing = []
-        if not cls.RESEND_API_KEY:
-            missing.append("RESEND_API_KEY")
-        if not cls.RESEND_FROM_EMAIL:
-            missing.append("RESEND_FROM_EMAIL")
-        return missing
+        if provider == "smtp":
+            missing = []
+            if not cls.SMTP_HOST:
+                missing.append("SMTP_HOST")
+            if cls.SMTP_PORT <= 0 or cls.SMTP_PORT > 65535:
+                missing.append("SMTP_PORT")
+            if not cls.SMTP_USERNAME:
+                missing.append("SMTP_USERNAME")
+            if not cls.SMTP_PASSWORD:
+                missing.append("SMTP_PASSWORD")
+            if not cls.SMTP_FROM_EMAIL:
+                missing.append("SMTP_FROM_EMAIL")
+            if cls.SMTP_USE_TLS and cls.SMTP_USE_SSL:
+                missing.append("SMTP_USE_TLS/SMTP_USE_SSL(conflict)")
+            return missing
+
+        return ["EMAIL_PROVIDER(resend_api|smtp)"]
 
     @classmethod
     def otp_email_config_ready(cls):

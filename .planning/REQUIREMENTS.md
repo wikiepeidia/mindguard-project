@@ -8,25 +8,25 @@
 
 ### SMTP Provider Core (SMTPP)
 
-- [ ] **SMTPP-01**: User receives OTP email through a generic SMTP provider path that can run on Vercel without a verified custom sending domain.
-- [ ] **SMTPP-02**: OTP delivery supports config-driven SMTP auth + TLS/SSL settings and normalizes send outcomes (`sent`, `misconfigured`, `provider_rejected`, `network_error`, `timeout`).
-- [ ] **SMTPP-03**: If SMTP sender or credentials are invalid, OTP issue/resend fails closed and does not activate or corrupt pending account state.
+- [x] **SMTPP-01**: User receives OTP email through a generic SMTP provider path that can run on Vercel without a verified custom sending domain.
+- [x] **SMTPP-02**: OTP delivery supports config-driven SMTP auth + TLS/SSL settings and normalizes send outcomes (`sent`, `misconfigured`, `provider_rejected`, `network_error`, `timeout`).
+- [x] **SMTPP-03**: If SMTP sender or credentials are invalid, OTP issue/resend fails closed and does not activate or corrupt pending account state.
 
 ### Auth Flow Compatibility (SMTPC)
 
-- [ ] **SMTPC-01**: Register flow still issues OTP and redirects to verify page successfully when SMTP delivery succeeds.
-- [ ] **SMTPC-02**: Resend flow uses the same SMTP delivery path and preserves the current challenge/session when send fails.
-- [ ] **SMTPC-03**: Existing resend cooldown, verify lockout, session continuity, and abuse guardrails remain intact after the provider swap.
+- [x] **SMTPC-01**: Register flow still issues OTP and redirects to verify page successfully when SMTP delivery succeeds.
+- [x] **SMTPC-02**: Resend flow uses the same SMTP delivery path and preserves the current challenge/session when send fails.
+- [x] **SMTPC-03**: Existing resend cooldown, verify lockout, session continuity, and abuse guardrails remain intact after the provider swap.
 
 ### Operations & Vercel Config (SMTPO)
 
-- [ ] **SMTPO-01**: All SMTP credentials and sender settings are loaded from Vercel environment variables only.
-- [ ] **SMTPO-02**: Operators have a clear, tested production config contract for Gmail App Password and generic SMTP providers, including readiness diagnostics that distinguish misconfiguration from transient send failures.
+- [x] **SMTPO-01**: SMTP credentials and sender settings are environment-first, with Vercel environment variables as the production source of truth and optional local JSON fallback only for local development.
+- [x] **SMTPO-02**: Operators have a clear, tested production config contract for Gmail App Password and generic SMTP providers, including readiness diagnostics that distinguish misconfiguration from transient send failures.
 
 ### QA & Cutover (SMTPQ)
 
-- [ ] **SMTPQ-01**: Unit tests cover SMTP configuration validation and normalized send-result mapping.
-- [ ] **SMTPQ-02**: Route/integration tests cover register/resend SMTP success and failure branches without weakening OTP security behavior.
+- [x] **SMTPQ-01**: Unit tests cover SMTP configuration validation and normalized send-result mapping.
+- [x] **SMTPQ-02**: Route/integration tests cover register/resend SMTP success and failure branches without weakening OTP security behavior.
 - [ ] **SMTPQ-03**: Production cutover evidence proves the SMTP OTP path works on Vercel with a real mailbox account.
 
 ## v2 Requirements (Deferred)
@@ -50,16 +50,16 @@
 
 | Requirement | Phase | Status |
 | ----------- | ----- | ------ |
-| SMTPP-01 | Phase 25 | Pending |
-| SMTPP-02 | Phase 25 | Pending |
-| SMTPP-03 | Phase 25 | Pending |
-| SMTPO-01 | Phase 25 | Pending |
-| SMTPC-01 | Phase 26 | Pending |
-| SMTPC-02 | Phase 26 | Pending |
-| SMTPC-03 | Phase 26 | Pending |
-| SMTPO-02 | Phase 26 | Pending |
-| SMTPQ-01 | Phase 27 | Pending |
-| SMTPQ-02 | Phase 27 | Pending |
+| SMTPP-01 | Phase 25 | Complete |
+| SMTPP-02 | Phase 25 | Complete |
+| SMTPP-03 | Phase 25 | Complete |
+| SMTPO-01 | Phase 25 | Complete |
+| SMTPC-01 | Phase 26 | Complete |
+| SMTPC-02 | Phase 26 | Complete |
+| SMTPC-03 | Phase 26 | Complete |
+| SMTPO-02 | Phase 26 | Complete |
+| SMTPQ-01 | Phase 25 | Complete |
+| SMTPQ-02 | Phase 26 | Complete |
 | SMTPQ-03 | Phase 27 | Pending |
 
 **Coverage:**
@@ -70,4 +70,4 @@
 
 ---
 *Requirements defined: 2026-04-17*
-*Last updated: 2026-04-17 after milestone v1.5 was scoped around generic SMTP/Gmail App Password instead of Resend domain verification*
+*Last updated: 2026-04-17 after Phase 26 completed SMTP auth-flow compatibility, operator diagnostics, and route regression coverage*

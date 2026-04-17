@@ -18,7 +18,7 @@ from utils.otp_security import (
     prepare_resend_otp_challenge,
     verify_otp_submission,
 )
-from services.otp_email_delivery import send_otp_email
+from services.otp_email_delivery import otp_email_delivery_status, send_otp_email
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -64,6 +64,37 @@ def _get_resend_notice(policy):
         return False, f"Bạn có thể gửi lại mã sau {wait_text}.", "warning"
 
     return False, f"Bạn đã yêu cầu gửi lại mã quá nhiều lần. Vui lòng chờ {wait_text} rồi thử lại.", "warning"
+
+
+def _otp_delivery_provider_hint():
+    provider = str(current_app.config.get("EMAIL_PROVIDER", "resend_api") or "resend_api").strip().lower()
+    if provider != 'smtp':
+        return provider
+
+    smtp_host = str(
+        current_app.config.get('SMTP_HOST')
+        or current_app.config.get('MAIL_SERVER')
+        or ''
+    ).strip().lower()
+    if 'gmail' in smtp_host:
+        return 'gmail_app_password'
+    return 'generic_smtp'
+
+
+def _log_otp_delivery_failure(flow_name, recipient_email, send_result):
+    readiness = otp_email_delivery_status(current_app.config)
+    missing = ",".join(readiness.get('missing', [])) or '-'
+    provider = str(current_app.config.get('EMAIL_PROVIDER', 'resend_api') or 'resend_api').strip().lower()
+    current_app.logger.warning(
+        'OTP delivery failed flow=%s provider=%s provider_hint=%s category=%s ready=%s missing=%s recipient=%s',
+        flow_name,
+        provider,
+        _otp_delivery_provider_hint(),
+        send_result.get('category', 'unknown'),
+        readiness.get('ok', False),
+        missing,
+        recipient_email,
+    )
 
 
 def _load_pending_verification_context():
@@ -308,6 +339,7 @@ def register():
         )
 
         if not send_result.get("ok"):
+            _log_otp_delivery_failure('register', email, send_result)
             challenge.status = "invalidated"
             challenge.invalidated_at = datetime.utcnow()
             challenge.invalidation_reason = f"delivery_failed:{send_result.get('category', 'unknown')}"
@@ -469,6 +501,7 @@ def resend_verify_otp():
     )
 
     if not send_result.get("ok"):
+        _log_otp_delivery_failure('resend', challenge.email, send_result)
         db.session.rollback()
         flash("Không thể gửi lại mã OTP lúc này. Vui lòng thử lại sau ít phút.", "danger")
         return redirect(url_for("auth.verify_otp"))

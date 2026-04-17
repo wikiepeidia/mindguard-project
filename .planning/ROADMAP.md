@@ -70,8 +70,10 @@
 
 ### v1.5 - Vercel-Compatible OTP Mail Pivot
 
-- [ ] **Phase 25: SMTP Provider Core & Config** - Chuan hoa duong gui OTP generic SMTP/Gmail App Password khong phu thuoc custom domain.
-- [ ] **Phase 26: Auth Flow SMTP Cutover** - Noi provider SMTP vao register/resend ma khong doi UX, session, hay guardrails OTP.
+- [x] **Phase 25: SMTP Provider Core & Config** - Chuan hoa duong gui OTP generic SMTP/Gmail App Password khong phu thuoc custom domain.
+ (completed 2026-04-17)
+- [x] **Phase 26: Auth Flow SMTP Cutover** - Noi provider SMTP vao register/resend ma khong doi UX, session, hay guardrails OTP.
+ (completed 2026-04-17)
 - [ ] **Phase 27: SMTP QA & Production Verification** - Khoa regression va xac nhan cutover SMTP tren Vercel bang evidence production.
 
 ## Phase Details
@@ -497,12 +499,12 @@ Plans:
 2. OTP delivery layer tra ve ket qua chuan hoa cho sent, misconfigured, timeout, provider_rejected, va network_error.
 3. Neu sender/credentials sai, register va resend fail closed ma khong kich hoat account hay lam hu pending challenge.
 4. Provider path co the dung mailbox sender thong thuong (vi du Gmail App Password) tren Vercel.
-**Plans**: 2 plans
+**Plans**: 2/2 plans complete
 
 Plans:
 
-- [ ] 25-01-PLAN.md - Add generic SMTP config contract and provider adapter over Flask-Mail.
-- [ ] 25-02-PLAN.md - Add unit coverage for SMTP config validation and normalized delivery outcomes.
+- [x] 25-01-PLAN.md - Add generic SMTP config contract and provider adapter over Flask-Mail.
+- [x] 25-02-PLAN.md - Add unit coverage for SMTP config validation and normalized delivery outcomes.
 
 ### Phase 26: Auth Flow SMTP Cutover
 
@@ -515,28 +517,27 @@ Plans:
 2. Resend flow dung chung provider SMTP va giu nguyen challenge/session neu send that bai.
 3. Cooldown, lockout, rate limit, va pending-session contract van hoat dong nhu truoc khi doi provider.
 4. Operators co readiness/checklist ro rang cho Gmail App Password va generic SMTP tren Vercel.
-**Plans**: 2 plans
+**Plans**: 2/2 plans complete
 
 Plans:
 
-- [ ] 26-01-PLAN.md - Wire SMTP provider into auth register/resend flows with fail-closed compatibility.
-- [ ] 26-02-PLAN.md - Add operator-facing config/readiness diagnostics and route regression coverage.
+- [x] 26-01-PLAN.md - Wire SMTP provider into auth register/resend flows with fail-closed compatibility.
+- [x] 26-02-PLAN.md - Add operator-facing config/readiness diagnostics and route regression coverage.
 
 ### Phase 27: SMTP QA & Production Verification
 
 **Goal**: Team co evidence test va production smoke de go-live OTP SMTP tren Vercel ma khong can Resend domain setup.
 **Depends on**: Phase 26
-**Requirements**: SMTPQ-01, SMTPQ-02, SMTPQ-03
+**Requirements**: SMTPQ-03
 **Success Criteria** (what must be TRUE):
 
-1. Unit + route + integration tests bao phu nhanh SMTP success/failure cho register va resend.
-2. Production smoke checklist xac nhan OTP SMTP gui duoc tren Vercel voi mailbox that.
-3. OTP go-live checklist khong con phu thuoc Resend custom-domain verification.
+1. Production smoke checklist xac nhan OTP SMTP gui duoc tren Vercel voi mailbox that.
+2. Evidence bundle chot go-live xac nhan app da thoat phu thuoc Resend custom-domain verification.
 **Plans**: 2 plans
 
 Plans:
 
-- [ ] 27-01-PLAN.md - Expand SMTP-focused unit/integration coverage and validation evidence.
+- [ ] 27-01-PLAN.md - Run final SMTP regression gate and collect Vercel cutover validation evidence.
 - [ ] 27-02-PLAN.md - Run production cutover checklist and record release evidence.
 
 ## Progress Table
@@ -567,6 +568,6 @@ Plans:
 | 22. Resend & Verify Session Stability | 2/2 | Complete | 2026-04-17 |
 | 23. OTP Abuse Guardrails | 2/2 | Complete | 2026-04-17 |
 | 24. OTP QA Reliability Gate | 2/2 | Complete | 2026-04-17 |
-| 25. SMTP Provider Core & Config | 0/2 | Not started | - |
-| 26. Auth Flow SMTP Cutover | 0/2 | Not started | - |
+| 25. SMTP Provider Core & Config | 2/2 | Complete | 2026-04-17 |
+| 26. Auth Flow SMTP Cutover | 2/2 | Complete | 2026-04-17 |
 | 27. SMTP QA & Production Verification | 0/2 | Not started | - |

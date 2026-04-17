@@ -429,8 +429,13 @@ Plans:
 1. Tu verify flow, nguoi dung resend OTP ma khong can nhap lai toan bo form dang ky.
 2. Cooldown va resend cap duoc ap dung ro rang; nguoi dung nhin thay trang thai cho truoc khi gui lai.
 3. Refresh verify page van giu dung pending state; pending state thieu/het han se duoc redirect an toan ve dang ky.
-**Plans**: TBD
+**Plans**: 2/2 plans complete
 **UI hint**: yes
+
+Plans:
+
+- [x] 22-01-PLAN.md - Resend/session contract and minimal verify-page stability implementation.
+- [x] 22-02-PLAN.md - Route plus CSRF regression tests and Phase 22 validation evidence.
 
 ### Phase 23: OTP Abuse Guardrails
 
@@ -482,6 +487,6 @@ Plans:
 | 19. Verification & Maintenance Setup | 2/2 | Complete    | 2026-04-14 |
 | 20. OTP Security Policy Core | 3/3 | Complete   | 2026-04-15 |
 | 21. Production OTP Email Delivery | 3/3 | Complete    | 2026-04-15 |
-| 22. Resend & Verify Session Stability | 0/TBD | Not started | - |
+| 22. Resend & Verify Session Stability | 2/2 | Complete | 2026-04-17 |
 | 23. OTP Abuse Guardrails | 0/TBD | Not started | - |
 | 24. OTP QA Reliability Gate | 0/TBD | Not started | - |

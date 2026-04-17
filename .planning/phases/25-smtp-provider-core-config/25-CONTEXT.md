@@ -40,6 +40,7 @@ This phase does not expand route UX, readiness UI, or production smoke steps. Th
 </decisions>
 
 <code_context>
+
 ## Existing Code Insights
 
 - `services/otp_email_delivery.py` currently supports only `resend_api` and already owns normalized delivery results.

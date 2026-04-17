@@ -91,12 +91,12 @@ OWASP explicitly flags temporary email abuse and recommends risk-based controls.
 
 ## Sources
 
-- OWASP Authentication Cheat Sheet (login throttling, anti-enumeration, logging): https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html
-- OWASP Multifactor Authentication Cheat Sheet (OTP handling and storage): https://cheatsheetseries.owasp.org/cheatsheets/Multifactor_Authentication_Cheat_Sheet.html
-- OWASP Email Validation and Verification Cheat Sheet (temporary email abuse): https://cheatsheetseries.owasp.org/cheatsheets/Email_Validation_and_Verification_Cheat_Sheet.html
-- Flask Sessions / Config docs (secret key and cookie semantics): https://flask.palletsprojects.com/en/3.0.x/quickstart/#sessions and https://flask.palletsprojects.com/en/3.0.x/config/#builtin-configuration-values
-- Flask-Limiter docs (production storage and route-level limits): https://flask-limiter.readthedocs.io/en/stable/
-- Vercel Python Runtime and Function Limits: https://vercel.com/docs/functions/runtimes/python and https://vercel.com/docs/functions/limitations
+- OWASP Authentication Cheat Sheet (login throttling, anti-enumeration, logging): <https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html>
+- OWASP Multifactor Authentication Cheat Sheet (OTP handling and storage): <https://cheatsheetseries.owasp.org/cheatsheets/Multifactor_Authentication_Cheat_Sheet.html>
+- OWASP Email Validation and Verification Cheat Sheet (temporary email abuse): <https://cheatsheetseries.owasp.org/cheatsheets/Email_Validation_and_Verification_Cheat_Sheet.html>
+- Flask Sessions / Config docs (secret key and cookie semantics): <https://flask.palletsprojects.com/en/3.0.x/quickstart/#sessions> and <https://flask.palletsprojects.com/en/3.0.x/config/#builtin-configuration-values>
+- Flask-Limiter docs (production storage and route-level limits): <https://flask-limiter.readthedocs.io/en/stable/>
+- Vercel Python Runtime and Function Limits: <https://vercel.com/docs/functions/runtimes/python> and <https://vercel.com/docs/functions/limitations>
 
 ## Top 5 non-negotiables for v1.4
 

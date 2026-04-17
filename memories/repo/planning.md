@@ -1,4 +1,5 @@
 - `gsd-tools.cjs init milestone-op` still reports stale v1.0 metadata in this repo; use `.planning/STATE.md` and `.planning/ROADMAP.md` as the source of truth for v1.5 progress.
 - `.planning/REQUIREMENTS.md` is current again for the v1.5 SMTP pivot. The older stale-requirements warning only applied to the v1.4 OTP phases before the v1.5 reset.
 - `TODO.mD` is now the operator runbook for the free Gmail App Password SMTP path in v1.5.
-
+- Phase 27 showed that Production Neon can still lag manual schema scripts even when local tests are green; when protected live OTP smoke fails, pull Production envs with `vercel env pull` and run the repo's idempotent migration scripts against the real DB.
+- Protected Vercel smoke in this repo should use stepwise `vercel curl` GET/POST flows with cookie reuse and CSRF parsing; avoid `--location` on form POSTs because redirect replay can create false CSRF failures.

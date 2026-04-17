@@ -45,7 +45,7 @@ Implication: the safest low-disruption path is to keep existing auth blueprint a
 | services/otp_service.py (new) | OTP lifecycle and signup activation transaction | New |
 | services/mail_adapter.py (new) | Provider-agnostic mail send interface via Flask-Mail | New |
 | models/models.py | Persistence models | Add OtpChallenge model |
-| config.py | Runtime tuning via env vars | Add MAIL_* and OTP_* knobs |
+| config.py | Runtime tuning via env vars | Add MAIL_*and OTP_* knobs |
 | database/migrate_otp_challenge.py (new) | Manual idempotent schema migration | New |
 
 Design rule: routes stay thin, services own business rules, DB owns shared OTP state so Vercel stateless runtime is safe.
@@ -258,7 +258,7 @@ Exit criteria: table exists, migration re-run is safe.
 
 ### Phase 2: Mail and config boundary
 
-1. Add MAIL_* and OTP_* config keys.
+1. Add MAIL_*and OTP_* config keys.
 2. Implement mail_adapter with mocked tests.
 3. Validate provider failure mapping.
 

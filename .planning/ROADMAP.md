@@ -74,7 +74,7 @@
  (completed 2026-04-17)
 - [x] **Phase 26: Auth Flow SMTP Cutover** - Noi provider SMTP vao register/resend ma khong doi UX, session, hay guardrails OTP.
  (completed 2026-04-17)
-- [ ] **Phase 27: SMTP QA & Production Verification** - Khoa regression va xac nhan cutover SMTP tren Vercel bang evidence production.
+- [x] **Phase 27: SMTP QA & Production Verification** - Khoa regression va xac nhan cutover SMTP tren Vercel bang evidence production.
 
 ## Phase Details
 
@@ -533,12 +533,12 @@ Plans:
 
 1. Production smoke checklist xac nhan OTP SMTP gui duoc tren Vercel voi mailbox that.
 2. Evidence bundle chot go-live xac nhan app da thoat phu thuoc Resend custom-domain verification.
-**Plans**: 2 plans
+**Plans**: 2/2 plans complete
 
 Plans:
 
-- [ ] 27-01-PLAN.md - Run final SMTP regression gate and collect Vercel cutover validation evidence.
-- [ ] 27-02-PLAN.md - Run production cutover checklist and record release evidence.
+- [x] 27-01-PLAN.md - Run final SMTP regression gate and collect Vercel cutover validation evidence.
+- [x] 27-02-PLAN.md - Run production cutover checklist and record release evidence.
 
 ## Progress Table
 
@@ -570,4 +570,4 @@ Plans:
 | 24. OTP QA Reliability Gate | 2/2 | Complete | 2026-04-17 |
 | 25. SMTP Provider Core & Config | 2/2 | Complete | 2026-04-17 |
 | 26. Auth Flow SMTP Cutover | 2/2 | Complete | 2026-04-17 |
-| 27. SMTP QA & Production Verification | 0/2 | Not started | - |
+| 27. SMTP QA & Production Verification | 2/2 | Complete | 2026-04-17 |

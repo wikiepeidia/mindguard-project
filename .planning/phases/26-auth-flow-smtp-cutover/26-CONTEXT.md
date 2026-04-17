@@ -38,6 +38,7 @@ This phase does not include production smoke or final go-live evidence. That sta
 </decisions>
 
 <code_context>
+
 ## Existing Code Insights
 
 - `routes/auth.py` already routes register/resend through `send_otp_email()` and already fails closed on `ok=False`.

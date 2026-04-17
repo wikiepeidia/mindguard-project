@@ -32,11 +32,11 @@ Set các biến sau trong project Vercel:
 EMAIL_PROVIDER=smtp
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
-SMTP_USERNAME=mindguard.smtp@gmail.com
+SMTP_USERNAME=
 SMTP_PASSWORD=your-16-char-app-password
 SMTP_USE_TLS=true
 SMTP_USE_SSL=false
-SMTP_FROM_EMAIL=mindguard.smtp@gmail.com
+SMTP_FROM_EMAIL
 ```
 
 Ghi chú:
@@ -51,14 +51,14 @@ Tạo file `.env/SMTP.json` với nội dung:
 
 ```json
 {
-	"EMAIL_PROVIDER": "smtp",
-	"SMTP_HOST": "smtp.gmail.com",
-	"SMTP_PORT": 587,
-	"SMTP_USERNAME": "mail@gmail.com",
-	"SMTP_PASSWORD": "your-16-char-app-password",
-	"SMTP_USE_TLS": true,
-	"SMTP_USE_SSL": false,
-	"SMTP_FROM_EMAIL": "mail@gmail.com"
+ "EMAIL_PROVIDER": "smtp",
+ "SMTP_HOST": "smtp.gmail.com",
+ "SMTP_PORT": 587,
+ "SMTP_USERNAME": "mail@gmail.com",
+ "SMTP_PASSWORD": "your-16-char-app-password",
+ "SMTP_USE_TLS": true,
+ "SMTP_USE_SSL": false,
+ "SMTP_FROM_EMAIL": "mail@gmail.com"
 }
 ```
 
@@ -69,14 +69,14 @@ Prod vẫn phải ưu tiên Vercel env vars. JSON này chỉ để test local nh
 App hiện đã phân loại lỗi SMTP theo các category dưới đây:
 
 - `misconfigured`: thiếu env hoặc config mâu thuẫn.
-	- Cần kiểm tra `SMTP_HOST`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSWORD`, `SMTP_FROM_EMAIL`.
-	- Cũng sẽ dính nếu bật cả TLS và SSL cùng lúc.
+  - Cần kiểm tra `SMTP_HOST`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSWORD`, `SMTP_FROM_EMAIL`.
+  - Cũng sẽ dính nếu bật cả TLS và SSL cùng lúc.
 - `provider_rejected`: Gmail từ chối đăng nhập hoặc từ chối người gửi.
-	- Thường là app password sai, 2FA chưa bật, hoặc `SMTP_FROM_EMAIL` không khớp account gửi.
+  - Thường là app password sai, 2FA chưa bật, hoặc `SMTP_FROM_EMAIL` không khớp account gửi.
 - `timeout`: Gmail SMTP phản hồi quá chậm hoặc network bị nghẽn tạm thời.
-	- Thử lại sau trước khi đổi config.
+  - Thử lại sau trước khi đổi config.
 - `network_error`: lỗi mạng/outbound từ runtime.
-	- Kiểm tra lại deploy, network, hoặc provider có đang chặn kết nối không.
+  - Kiểm tra lại deploy, network, hoặc provider có đang chặn kết nối không.
 
 ## Checklist cutover Phase 26
 
@@ -100,4 +100,3 @@ App hiện đã phân loại lỗi SMTP theo các category dưới đây:
 - Cần smoke test thật trên Vercel sau khi set env xong.
 - Cần chụp evidence: register thành công, nhận mail, resend thành công.
 - Nếu log báo `misconfigured`, sửa env trước khi test lại.
-

@@ -62,12 +62,14 @@ Create a new model (and manual migration script in `database/`, per project rule
 | updated_at | DateTime | Audit |
 
 Recommended indexes/constraints:
+
 - Unique active challenge per `(email, purpose)` where `consumed_at IS NULL` and `expires_at > now()`.
 - Index on `(email, purpose, expires_at)` for fast verify and cleanup.
 
 ### 2) Add provider abstraction (do not hardwire route to one vendor)
 
 Create service boundary:
+
 - `services/otp_service.py`: issue, resend, verify OTP, enforce limits.
 - `services/email_sender.py`: provider-agnostic send interface.
 - `services/email_providers/resend_api.py` (primary).
@@ -78,6 +80,7 @@ This keeps v1.4 shippable while preserving easy migration to SES/SendGrid/Postma
 ### 3) Add config surface in `config.py`
 
 Minimum env/config keys:
+
 - `EMAIL_PROVIDER` (`resend_api`, `smtp`, `ses_api`, ...)
 - `DEFAULT_FROM_EMAIL`
 - `OTP_TTL_SECONDS` (default 300)
@@ -95,6 +98,7 @@ Minimum env/config keys:
 ### 4) Update tests to match production behavior
 
 Current tests are OTP-demo oriented. Add:
+
 - Unit tests for OTP issue/verify/resend and expiry.
 - Route tests for:
   - success path
@@ -124,6 +128,7 @@ Current tests are OTP-demo oriented. Add:
 | Transport | TLS required provider-side (SMTP TLS or HTTPS API) |
 
 Implementation note for this codebase:
+
 - Flask session is signed, not suitable as OTP source-of-truth. Move OTP truth to NeonDB immediately.
 - Existing `Flask-Limiter` should also be applied to `/verify-otp` and future `/resend-otp`.
 
@@ -228,6 +233,7 @@ Current registration already forces `@gmail.com`, so disposable-domain abuse is 
 | External network call per request | Prefer provider HTTP APIs for predictable behavior over per-request SMTP handshakes |
 
 Recommended send behavior on Vercel:
+
 - Synchronous send in register/resend route with strict timeout and clear error handling.
 - Store challenge before send; on send failure, mark status and allow controlled retry.
 - Use idempotency key for provider API to avoid duplicates on retries.
@@ -268,30 +274,31 @@ This gives the fastest safe path to production OTP on current Flask + Vercel arc
 
 ## Sources
 
-- https://knowledge.workspace.google.com/admin/gmail/gmail-sending-limits-in-google-workspace
-- https://knowledge.workspace.google.com/admin/gmail/send-email-from-a-printer-scanner-or-app
-- https://support.google.com/accounts/answer/185833
-- https://support.google.com/mail/answer/81126
-- https://resend.com/pricing
-- https://resend.com/pricing.md
-- https://resend.com/docs/api-reference/emails/send-email
-- https://resend.com/docs/api-reference/emails/send-batch-emails
-- https://resend.com/docs/send-with-smtp
-- https://sendgrid.com/pricing/
-- https://www.twilio.com/docs/sendgrid/api-reference/how-to-use-the-sendgrid-v3-api/rate-limits
-- https://postmarkapp.com/pricing
-- https://postmarkapp.com/developer/user-guide/send-email-with-api
-- https://www.mailgun.com/pricing/
-- https://documentation.mailgun.com/docs/mailgun/user-manual/sending-messages/send-http
-- https://aws.amazon.com/ses/pricing/
-- https://docs.aws.amazon.com/cli/latest/reference/ses/get-send-quota.html
-- https://docs.aws.amazon.com/cli/latest/reference/sesv2/get-account.html
-- https://docs.aws.amazon.com/cli/latest/reference/sesv2/put-account-details.html
-- https://mailtrap.io/email-sandbox/
-- https://ethereal.email/
-- https://mailinator.com/
+- <https://knowledge.workspace.google.com/admin/gmail/gmail-sending-limits-in-google-workspace>
+- <https://knowledge.workspace.google.com/admin/gmail/send-email-from-a-printer-scanner-or-app>
+- <https://support.google.com/accounts/answer/185833>
+- <https://support.google.com/mail/answer/81126>
+- <https://resend.com/pricing>
+- <https://resend.com/pricing.md>
+- <https://resend.com/docs/api-reference/emails/send-email>
+- <https://resend.com/docs/api-reference/emails/send-batch-emails>
+- <https://resend.com/docs/send-with-smtp>
+- <https://sendgrid.com/pricing/>
+- <https://www.twilio.com/docs/sendgrid/api-reference/how-to-use-the-sendgrid-v3-api/rate-limits>
+- <https://postmarkapp.com/pricing>
+- <https://postmarkapp.com/developer/user-guide/send-email-with-api>
+- <https://www.mailgun.com/pricing/>
+- <https://documentation.mailgun.com/docs/mailgun/user-manual/sending-messages/send-http>
+- <https://aws.amazon.com/ses/pricing/>
+- <https://docs.aws.amazon.com/cli/latest/reference/ses/get-send-quota.html>
+- <https://docs.aws.amazon.com/cli/latest/reference/sesv2/get-account.html>
+- <https://docs.aws.amazon.com/cli/latest/reference/sesv2/put-account-details.html>
+- <https://mailtrap.io/email-sandbox/>
+- <https://ethereal.email/>
+- <https://mailinator.com/>
 
 Confidence notes:
+
 - HIGH: Google limits/policies, Vercel limits, Resend pricing/API, SendGrid rate-limit behavior, Postmark/Mailgun published pricing pages.
 - MEDIUM: Relative deliverability ranking across providers (depends on sender reputation and setup quality).
 - MEDIUM: SES starter quota examples (actual quota is account/region-specific and must be queried per account).

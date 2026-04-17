@@ -27,7 +27,7 @@
 
 - [x] **SMTPQ-01**: Unit tests cover SMTP configuration validation and normalized send-result mapping.
 - [x] **SMTPQ-02**: Route/integration tests cover register/resend SMTP success and failure branches without weakening OTP security behavior.
-- [ ] **SMTPQ-03**: Production cutover evidence proves the SMTP OTP path works on Vercel with a real mailbox account.
+- [x] **SMTPQ-03**: Production cutover evidence proves the SMTP OTP path works on Vercel with a real mailbox account.
 
 ## v2 Requirements (Deferred)
 
@@ -60,7 +60,7 @@
 | SMTPO-02 | Phase 26 | Complete |
 | SMTPQ-01 | Phase 25 | Complete |
 | SMTPQ-02 | Phase 26 | Complete |
-| SMTPQ-03 | Phase 27 | Pending |
+| SMTPQ-03 | Phase 27 | Complete |
 
 **Coverage:**
 
@@ -70,4 +70,4 @@
 
 ---
 *Requirements defined: 2026-04-17*
-*Last updated: 2026-04-17 after Phase 26 completed SMTP auth-flow compatibility, operator diagnostics, and route regression coverage*
+*Last updated: 2026-04-17 after Phase 27 completed protected Vercel production smoke, schema repairs, and SMTP cutover evidence capture*

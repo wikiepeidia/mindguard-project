@@ -43,10 +43,12 @@ Người dùng có thể học, kiểm tra nhận thức và gửi báo cáo l�
 - ✓ Register/resend auth flow giờ chạy đúng qua `EMAIL_PROVIDER=smtp` mà không làm đổi UX, session contract, hay guardrails OTP.
 - ✓ Repo đã có runbook Gmail App Password / generic SMTP miễn phí trong `TODO.mD` cho operator.
 - ✓ Route/integration test giờ khóa các nhánh SMTP success/failure cho register và resend.
+- ✓ Protected Vercel production smoke giờ chứng minh `POST /register` đi tới `/verify-otp`, resend giữ cooldown đúng, và resend gửi lại thành công sau cooldown với mailbox Gmail thật.
+- ✓ Production Neon schema đã được đồng bộ với contract OTP hiện tại qua `otp_challenges` migration và widening anti-spam `account_id` columns cho OTP abuse actor IDs.
 
 ### Active
 
-- [ ] Thu thập production smoke evidence trên Vercel với mailbox thật để hoàn tất go-live SMTP.
+- Không còn hạng mục mở trong milestone v1.5; production SMTP cutover evidence đã hoàn tất.
 
 ### Out of Scope
 
@@ -57,7 +59,7 @@ Người dùng có thể học, kiểm tra nhận thức và gửi báo cáo l�
 
 ## Context
 
-Dự án đã hoàn thành v1.0 (core platform), v1.1 (PostgreSQL + Vercel), v1.2 (Beta hardening), v1.3 (tài liệu kỹ thuật/SOP), và v1.4 (OTP reliability + QA). App đang live trên Vercel với NeonDB PostgreSQL. Sau khi kiểm tra production, team xác nhận Resend yêu cầu custom sending domain và `*.vercel.app` không đủ để verify domain gửi mail, nên milestone v1.5 tập trung pivot OTP delivery sang generic SMTP/Gmail App Password để tiếp tục dùng Vercel mà không cần mua domain mới trước mắt.
+Dự án đã hoàn thành v1.0 (core platform), v1.1 (PostgreSQL + Vercel), v1.2 (Beta hardening), v1.3 (tài liệu kỹ thuật/SOP), và v1.4 (OTP reliability + QA). App đang live trên Vercel với NeonDB PostgreSQL. Sau khi kiểm tra production, team xác nhận Resend yêu cầu custom sending domain và `*.vercel.app` không đủ để verify domain gửi mail, nên milestone v1.5 tập trung pivot OTP delivery sang generic SMTP/Gmail App Password để tiếp tục dùng Vercel mà không cần mua domain mới trước mắt. Phase 27 hoàn tất milestone bằng protected production smoke, đồng thời sửa hai drift schema lộ ra trong live traffic: thiếu `otp_challenges` và anti-spam `account_id` quá hẹp cho OTP actor ID.
 
 ## Constraints
 
@@ -99,4 +101,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-17 after Phase 26 completed the SMTP auth-flow cutover, route diagnostics, and operator runbook for the v1.5 pivot.*
+*Last updated: 2026-04-17 after Phase 27 completed protected production smoke and final SMTP cutover evidence for the v1.5 pivot.*

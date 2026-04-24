@@ -36,6 +36,7 @@
           </div>
 
           <form class="quiz-form" method="post" action="{{ url_for('quiz.quiz_step', idx=current_index) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
             <article class="quiz-question-card mb-4">
               <p class="quiz-question-text mb-3">

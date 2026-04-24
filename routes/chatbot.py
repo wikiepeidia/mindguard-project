@@ -8,25 +8,45 @@ from datetime import datetime
 chatbot_bp = Blueprint('chatbot', __name__, url_prefix='/chatbot')
 
 # 1. Trang Chat Full (Load lịch sử từ DB)
-@chatbot_bp.route("/", methods=["GET"])
+@chatbot_bp.route("/", methods=["GET", "POST"])
+@csrf.exempt
 @login_required
 def chatbot_page():
     user = Registration.query.filter_by(email=session.get("registration_email")).first()
     if not user:
         return redirect(url_for('auth.login'))
-        
+
+    if request.method == "POST":
+        message = request.form.get("message", "").strip()
+        session_id = request.form.get("session_id")
+        if message:
+            chat_session = None
+            if session_id:
+                chat_session = AiChatSession.query.filter_by(id=session_id, user_id=user.id).first()
+            if not chat_session:
+                chat_session = AiChatSession(user_id=user.id, title=message[:30])
+                db.session.add(chat_session)
+                db.session.commit()
+            db.session.add(AiChatMessage(session_id=chat_session.id, sender='user', content=message))
+            ai_reply = query_ai_model(message) or simple_bot_reply(message)
+            db.session.add(AiChatMessage(session_id=chat_session.id, sender='bot', content=ai_reply))
+            chat_session.updated_at = datetime.utcnow()
+            db.session.commit()
+            return redirect(url_for('chatbot.chatbot_page', session_id=chat_session.id))
+        return redirect(url_for('chatbot.chatbot_page'))
+
     # Lấy danh sách session cũ
     sessions = AiChatSession.query.filter_by(user_id=user.id).order_by(AiChatSession.updated_at.desc()).all()
-    
+
     current_session_id = request.args.get('session_id')
     active_session = None
     messages = []
-    
+
     if current_session_id:
         active_session = AiChatSession.query.filter_by(id=current_session_id, user_id=user.id).first()
         if active_session:
             messages = active_session.messages
-            
+
     return render_template("chatbot.html", sessions=sessions, active_session=active_session, messages=messages, current_session_id=current_session_id)
 
 @chatbot_bp.route("/new", methods=["GET"])
